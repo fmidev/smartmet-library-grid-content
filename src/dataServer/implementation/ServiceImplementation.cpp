@@ -6410,10 +6410,10 @@ void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
           if (source_fsize != target_fsize)
           {
             Fmi::Exception exception(BCP,"File copying to the local cache failed!",nullptr);
-            exception.addParameter("- source-file",sourceFile);
-            exception.addParameter("- source-file-size",std::to_string(source_fsize));
-            exception.addParameter("- target-file",cacheFile);
-            exception.addParameter("- target-file-size",std::to_string(target_fsize));
+            exception.addParameter("source-file",sourceFile);
+            exception.addParameter("source-file-size",std::to_string(source_fsize));
+            exception.addParameter("target-file",cacheFile);
+            exception.addParameter("target-file-size",std::to_string(target_fsize));
             exception.printError();
           }
         }

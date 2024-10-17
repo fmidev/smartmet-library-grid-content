@@ -2725,6 +2725,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
       {
         Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
+        exception.addParameter("maxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
         throw exception;
       }
 
@@ -3065,6 +3066,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
       {
         Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
+        exception.addParameter("maxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
         throw exception;
       }
 
@@ -4127,7 +4129,9 @@ bool ServiceImplementation::getSpecialValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVectorByPoint");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -4223,8 +4227,10 @@ bool ServiceImplementation::getSpecialValues(
         if (result1 != 0)
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueBlockByPoint");
-          exception.addParameter("Message", DataServer::getResultString(result1));
+          exception.addParameter("Service", "getGridValueVectorByPoint");
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -4235,7 +4241,9 @@ bool ServiceImplementation::getSpecialValues(
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByPoint");
-          exception.addParameter("Message", DataServer::getResultString(result2));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
+          exception.addParameter("FileId", std::to_string(contentInfo2->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo2->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -4508,7 +4516,9 @@ bool ServiceImplementation::getValueVectors(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVector");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -4617,7 +4627,9 @@ bool ServiceImplementation::getValueVectors(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueVectorByTimeAndGeometry");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -4869,7 +4881,13 @@ bool ServiceImplementation::getGridFiles(
     {
       Fmi::Exception exception(BCP, "ContentServer returns an error!");
       exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-      exception.addParameter("Message", ContentServer::getResultString(result));
+      exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+      exception.addParameter("producerId", std::to_string(producerInfo.mProducerId));
+      exception.addParameter("parameter", pInfo.mParameterKey);
+      exception.addParameter("levelId", std::to_string(paramLevelId));
+      exception.addParameter("level", std::to_string(paramLevel));
+      exception.addParameter("geometryId", std::to_string(producerGeometryId));
+      exception.addParameter("forecastTime", utcTimeFromTimeT(forecastTime));
       throw exception;
     }
 
@@ -4913,7 +4931,9 @@ bool ServiceImplementation::getGridFiles(
     {
       Fmi::Exception exception(BCP, "DataServer returns an error!");
       exception.addParameter("Service", "getGridProperties");
-      exception.addParameter("Message", DataServer::getResultString(result));
+      exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+      exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+      exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
       std::string errorMsg = exception.getStackTrace();
       PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
       return false;
@@ -5447,7 +5467,9 @@ bool ServiceImplementation::getGridFiles(
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-          exception.addParameter("Message", DataServer::getResultString(result));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -5511,7 +5533,9 @@ bool ServiceImplementation::getGridFiles(
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByTimeAndCoordinateList");
-          exception.addParameter("Message", DataServer::getResultString(result));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -5558,7 +5582,9 @@ bool ServiceImplementation::getGridFiles(
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByLevelAndCoordinateList");
-          exception.addParameter("Message", DataServer::getResultString(result));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -5608,7 +5634,9 @@ bool ServiceImplementation::getGridFiles(
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByTimeLevelAndCoordinateList");
-          exception.addParameter("Message", DataServer::getResultString(result));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
@@ -5689,7 +5717,10 @@ time_t ServiceImplementation::getContentList(
       {
         Fmi::Exception exception(BCP, "ContentServer returns an error!");
         exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-        exception.addParameter("Message", ContentServer::getResultString(result));
+        exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+        exception.addParameter("generationId", std::to_string(generationId));
+        exception.addParameter("parameter", pInfo.mParameterKey);
+        exception.addParameter("geometryId", std::to_string(producerGeometryId));
         throw exception;
       }
 
@@ -5739,7 +5770,13 @@ time_t ServiceImplementation::getContentList(
       {
         Fmi::Exception exception(BCP, "ContentServer returns an error!");
         exception.addParameter("Service", "getContentListByParameterGenerationIdAndForecastTime");
-        exception.addParameter("Message", ContentServer::getResultString(result));
+        exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+        exception.addParameter("producerId", std::to_string(producerInfo.mProducerId));
+        exception.addParameter("parameter", pInfo.mParameterKey);
+        exception.addParameter("levelId", std::to_string(paramLevelId));
+        exception.addParameter("level", std::to_string(paramLevel));
+        exception.addParameter("geometryId", std::to_string(producerGeometryId));
+        exception.addParameter("forecastTime", utcTimeFromTimeT(fTime));
         throw exception;
       }
     }
@@ -5931,7 +5968,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -5943,7 +5982,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -5988,7 +6029,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1_1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_1));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6000,7 +6043,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1_2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_2));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_2->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_2->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6012,7 +6057,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2_1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_1));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6024,7 +6071,9 @@ bool ServiceImplementation::getPointValuesByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2_2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_2));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_2->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_2->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6177,7 +6226,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
       {
         Fmi::Exception exception(BCP, "DataServer returns an error!");
         exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("Message", DataServer::getResultString(result1));
+        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+        exception.addParameter("FileId", std::to_string(contentInfo->mFileId));
+        exception.addParameter("MessageIndex", std::to_string(contentInfo->mMessageIndex));
         std::string errorMsg = exception.getStackTrace();
         PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
         return false;
@@ -6259,7 +6310,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
       {
         Fmi::Exception exception(BCP, "DataServer returns an error!");
         exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("Message", DataServer::getResultString(result1));
+        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+        exception.addParameter("FileId", std::to_string(contentInfo->mFileId));
+        exception.addParameter("MessageIndex", std::to_string(contentInfo->mMessageIndex));
         std::string errorMsg = exception.getStackTrace();
         PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
         return false;
@@ -6486,7 +6539,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6498,7 +6553,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6542,7 +6599,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1_1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_1));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6554,7 +6613,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result1_2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_2));
+                  exception.addParameter("FileId", std::to_string(contentInfo1_2->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_2->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6566,7 +6627,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2_1));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_1));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6578,7 +6641,9 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 {
                   Fmi::Exception exception(BCP, "DataServer returns an error!");
                   exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("Message", DataServer::getResultString(result2_2));
+                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_2));
+                  exception.addParameter("FileId", std::to_string(contentInfo2_2->mFileId));
+                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_2->mMessageIndex));
                   std::string errorMsg = exception.getStackTrace();
                   PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
                   return false;
@@ -6779,7 +6844,9 @@ bool ServiceImplementation::getPointValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByPointList");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -6833,7 +6900,11 @@ bool ServiceImplementation::getPointValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPointList");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -6865,7 +6936,11 @@ bool ServiceImplementation::getPointValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndPointList");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -6909,7 +6984,15 @@ bool ServiceImplementation::getPointValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPointList");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7052,7 +7135,9 @@ bool ServiceImplementation::getCircleValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByCircle");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -7106,7 +7191,9 @@ bool ServiceImplementation::getCircleValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndCircle");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7139,7 +7226,11 @@ bool ServiceImplementation::getCircleValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndCircle");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7183,7 +7274,15 @@ bool ServiceImplementation::getCircleValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeLevelAndCircle");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7437,7 +7536,9 @@ bool ServiceImplementation::getPolygonValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByPolygonPath");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -7489,7 +7590,11 @@ bool ServiceImplementation::getPolygonValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeAndPolygonPath");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7523,7 +7628,11 @@ bool ServiceImplementation::getPolygonValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByLevelAndPolygonPath");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7567,7 +7676,15 @@ bool ServiceImplementation::getPolygonValues(
           {
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridValueListByTimeLevelAndPolygonPath");
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             return false;
@@ -7721,7 +7838,9 @@ bool ServiceImplementation::getStreamlineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridStreamlinesByGeometry / getGridStreamlinesByGrid / getGridStreamlines");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -7786,7 +7905,11 @@ bool ServiceImplementation::getStreamlineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -7833,7 +7956,11 @@ bool ServiceImplementation::getStreamlineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -7887,7 +8014,15 @@ bool ServiceImplementation::getStreamlineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8058,7 +8193,9 @@ bool ServiceImplementation::getIsolineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByGeometry / getGridIsolinesByGrid / getGridIsolines");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8123,7 +8260,11 @@ bool ServiceImplementation::getIsolineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8170,7 +8311,11 @@ bool ServiceImplementation::getIsolineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8224,7 +8369,15 @@ bool ServiceImplementation::getIsolineValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8399,7 +8552,9 @@ bool ServiceImplementation::getIsobandValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByGeometry / getGridIsobandsByGrid / getGridIsobands");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8464,7 +8619,11 @@ bool ServiceImplementation::getIsobandValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8512,7 +8671,11 @@ bool ServiceImplementation::getIsobandValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8566,7 +8729,15 @@ bool ServiceImplementation::getIsobandValues(
             Fmi::Exception exception(BCP, "DataServer returns an error!");
             exception.addParameter("Service", "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel");
             exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("Message", DataServer::getResultString(result));
+            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
+            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
+            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
+            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
             std::string errorMsg = exception.getStackTrace();
             PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
             // throw exception;
@@ -8637,6 +8808,7 @@ void ServiceImplementation::getGridValues(
     if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
     {
       Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
+      exception.addParameter("mMaxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
       throw exception;
     }
 
@@ -9343,6 +9515,7 @@ void ServiceImplementation::getGridValues(
     if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
     {
       Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
+      exception.addParameter("mMaxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
       throw exception;
     }
 
@@ -9482,7 +9655,12 @@ void ServiceImplementation::getGridValues(
                     {
                       Fmi::Exception exception(BCP, "ContentServer returns an error!");
                       exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-                      exception.addParameter("Message", ContentServer::getResultString(result));
+                      exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+                      exception.addParameter("generationId", std::to_string(generationInfo->mGenerationId));
+                      exception.addParameter("parameter", pInfo->mParameterKey);
+                      exception.addParameter("levelId", std::to_string(pInfo->mParameterLevelId));
+                      exception.addParameter("level", std::to_string(pInfo->mParameterLevel));
+                      exception.addParameter("geometryId", std::to_string(producerGeometryId));
                       throw exception;
                     }
                   }
@@ -9498,7 +9676,12 @@ void ServiceImplementation::getGridValues(
                   {
                     Fmi::Exception exception(BCP, "ContentServer returns an error!");
                     exception.addParameter("Service", "getContentListByParameterAndProducerId");
-                    exception.addParameter("Message", ContentServer::getResultString(result));
+                    exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+                    exception.addParameter("producerId", std::to_string(producerInfo.mProducerId));
+                    exception.addParameter("parameter", pInfo->mParameterKey);
+                    exception.addParameter("levelId", std::to_string(pInfo->mParameterLevelId));
+                    exception.addParameter("level", std::to_string(pInfo->mParameterLevel));
+                    exception.addParameter("geometryId", std::to_string(producerGeometryId));
                     throw exception;
                   }
                 }
@@ -10763,7 +10946,9 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
       {
         Fmi::Exception exception(BCP, "DataServer returns an error!");
         exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("Message", DataServer::getResultString(result1));
+        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+        exception.addParameter("FileId", std::to_string(first->mFileId));
+        exception.addParameter("MessageIndex", std::to_string(first->mMessageIndex));
         std::string errorMsg = exception.getStackTrace();
         PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
         return false;
@@ -10788,7 +10973,9 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
       {
         Fmi::Exception exception(BCP, "DataServer returns an error!");
         exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("Message", DataServer::getResultString(result1));
+        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+        exception.addParameter("FileId", std::to_string(last->mFileId));
+        exception.addParameter("MessageIndex", std::to_string(last->mMessageIndex));
         std::string errorMsg = exception.getStackTrace();
         PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
         return false;
@@ -10824,7 +11011,9 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
         {
           Fmi::Exception exception(BCP, "DataServer returns an error!");
           exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-          exception.addParameter("Message", DataServer::getResultString(result1));
+          exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+          exception.addParameter("FileId", std::to_string(mid->mFileId));
+          exception.addParameter("MessageIndex", std::to_string(mid->mMessageIndex));
           std::string errorMsg = exception.getStackTrace();
           PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
           return false;
