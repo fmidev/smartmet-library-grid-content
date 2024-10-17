@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.10.16
+Version: 24.10.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Oct 17 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.17-1.fmi
+- Improved error messages
 * Wed Oct 16 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.16-1.fmi
 - Added a possiblity to cache grid files locally. Startup-cache was removed.
 - Added and updated functions that are used in data requests
