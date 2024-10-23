@@ -197,6 +197,34 @@ void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
 
 
 
+bool CacheImplementation::isReady()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mContentSwapEnabled)
+    {
+      if (mContentSwapCounter > 0)
+        return true;
+      else
+        return false;
+    }
+
+    if (mStartTime > 0)
+      return true;
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void CacheImplementation::setRequestForwardEnabled(bool enabled)
 {
   FUNCTION_TRACE

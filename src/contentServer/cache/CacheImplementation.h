@@ -42,6 +42,7 @@ class CacheImplementation : public ServiceInterface
     virtual         ~CacheImplementation();
 
     virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ServiceInterface *contentStorage);
+    virtual bool    isReady();
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
     virtual void    setRequestForwardEnabled(bool enabled);

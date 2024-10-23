@@ -59,6 +59,7 @@ class ServiceInterface
      virtual time_t getContentChangeTime();
 
      virtual void   setEnabled(bool enabled);
+     virtual bool   isReady();
      virtual bool   isEnabled();
 
      virtual std::string&   getSourceInfo();

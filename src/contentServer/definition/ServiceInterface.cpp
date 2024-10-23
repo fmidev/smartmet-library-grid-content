@@ -84,6 +84,23 @@ bool ServiceInterface::isEnabled()
 
 
 
+bool ServiceInterface::isReady()
+{
+  FUNCTION_TRACE
+  try
+  {
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   FUNCTION_TRACE
