@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.10.17
+Version: 24.10.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,7 +29,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.8.7
-BuildRequires: smartmet-library-grid-files-devel >= 24.10.16
+BuildRequires: smartmet-library-grid-files-devel >= 24.10.23
 BuildRequires: smartmet-library-macgyver-devel >= 24.10.15
 BuildRequires: smartmet-library-spine-devel >= 24.10.15
 BuildRequires: postgresql15-devel
@@ -40,7 +40,7 @@ Requires: omniORB
 Requires: gdal38
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.8.7
-Requires: smartmet-library-grid-files >= 24.10.16
+Requires: smartmet-library-grid-files >= 24.10.23
 Requires: smartmet-library-macgyver >= 24.10.15
 Requires: smartmet-library-spine >= 24.10.15
 
@@ -79,7 +79,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 24.10.15
 Requires: smartmet-library-gis-devel >= 24.8.7
 Requires: smartmet-library-spine-devel >= 24.10.15
-Requires: smartmet-library-grid-files-devel >= 24.10.16
+Requires: smartmet-library-grid-files-devel >= 24.10.23
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Oct 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.23-1.fmi
+- Added a method for checking that the content server is ready for receiving requests
 * Thu Oct 17 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.17-1.fmi
 - Improved error messages
 * Wed Oct 16 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.16-1.fmi
