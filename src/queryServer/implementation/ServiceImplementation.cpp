@@ -3238,19 +3238,44 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                   auto vec = mProducerConcatMap.find(prodName);
                   if (vec != mProducerConcatMap.end()  &&  vec->second.size() > 0)
                   {
-                    //printf("  -- CONCAT SEARCH %ld\n",vec->second.size());
-                    prodName = vec->second[0].first + ":" + std::to_string(vec->second[0].second);
+                    int gid = 0;
+                    const char *gidStr = strstr(prodName.c_str(),":");
+                    if (gidStr)
+                      gid = toInt32(gidStr+1);
+
                     tmpGeomIdList.clear();
-                    for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
-                      tmpGeomIdList.insert(gg->second);
+                    prodName = vec->second[0].first + ":" + std::to_string(vec->second[0].second);
 
-                    producersPtr = &(vec->second);
-                    geomIdListPtr = &tmpGeomIdList;
-                    std::string maxAnalysisTime;
-                    getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                        queryFlags, *fTime, false, *valueList, producerStr);
+                    bool prodOk = true;
+                    if (qParam->mLocationType == QueryParameter::LocationType::Polygon || qParam->mLocationType == QueryParameter::LocationType::Circle || qParam->mLocationType == QueryParameter::LocationType::Path)
+                    {
+                      prodOk = false;
+                      for (auto gg = vec->second.begin(); gg != vec->second.end() && !prodOk; ++gg)
+                      {
+                        if (gid == gg->second)
+                        {
+                          prodOk = true;
+                          tmpGeomIdList.insert(gid);
+                        }
+                      }
+                    }
+                    else
+                    {
+                      for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
+                        tmpGeomIdList.insert(gg->second);
+                    }
 
-                    concat = true;
+
+                    if (prodOk)
+                    {
+                      producersPtr = &(vec->second);
+                      geomIdListPtr = &tmpGeomIdList;
+                      std::string maxAnalysisTime;
+                      getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
+                          queryFlags, *fTime, false, *valueList, producerStr);
+
+                      concat = true;
+                    }
                   }
                   else
                     prodName = "";
