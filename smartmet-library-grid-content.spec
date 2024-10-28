@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 24.10.26
+Version: 24.10.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,7 +29,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.8.7
-BuildRequires: smartmet-library-grid-files-devel >= 24.10.26
+BuildRequires: smartmet-library-grid-files-devel >= 24.10.28
 BuildRequires: smartmet-library-macgyver-devel >= 24.10.15
 BuildRequires: smartmet-library-spine-devel >= 24.10.15
 BuildRequires: postgresql15-devel
@@ -40,7 +40,7 @@ Requires: omniORB
 Requires: gdal38
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.8.7
-Requires: smartmet-library-grid-files >= 24.10.26
+Requires: smartmet-library-grid-files >= 24.10.28
 Requires: smartmet-library-macgyver >= 24.10.15
 Requires: smartmet-library-spine >= 24.10.15
 
@@ -79,7 +79,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 24.10.15
 Requires: smartmet-library-gis-devel >= 24.8.7
 Requires: smartmet-library-spine-devel >= 24.10.15
-Requires: smartmet-library-grid-files-devel >= 24.10.26
+Requires: smartmet-library-grid-files-devel >= 24.10.28
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 28 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.28-1.fmi
+- Added safety checks for shared pointers
 * Sat Oct 26 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.26-1.fmi
 - Disabling a possibility to concat area queries over different geometries
 * Wed Oct 23 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.23-1.fmi
