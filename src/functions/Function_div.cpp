@@ -64,10 +64,16 @@ float Function_div::executeFunctionCall1(std::vector<float>& parameters)
       return 0;
 
     float value = parameters[0];
+    if (value == ParamValueMissing)
+      return ParamValueMissing;
+
     for (uint t=1; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing  &&  val != 0)
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      if (val != 0)
         value = value / val;
     }
     return value;
@@ -91,10 +97,16 @@ double Function_div::executeFunctionCall1(std::vector<double>& parameters)
       return 0;
 
     double value = parameters[0];
+    if (value == ParamValueMissing)
+      return ParamValueMissing;
+
     for (uint t=1; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing &&  val != 0)
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      if (val != 0)
         value = value / val;
     }
     return value;
@@ -122,29 +134,58 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b * extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
     {
       float value = ParamValueMissing;
       if (s < inParameters[0].size())
-        value = inParameters[0][s];
-
-      if (value != ParamValueMissing)
       {
-        for (uint t=1; t<len; t++)
+        value = inParameters[0][s];
+        if (value != ParamValueMissing)
         {
-          if (s < inParameters[t].size())
+          for (uint t=1; t<len; t++)
           {
-            float val = inParameters[t][s];
-            if (val != ParamValueMissing && val != 0)
-              value = value / val;
+            if (s < inParameters[t].size())
+            {
+              double val = inParameters[t][s];
+              if (val == ParamValueMissing)
+              {
+                value = ParamValueMissing;
+                t = len;
+              }
+              else
+              {
+                // If the divisor is zero then we ignore the division. Should we return ParamValueMissing instead?
+                if (val != 0)
+                  value = value / val;
+              }
+            }
+            else
+            {
+              value = ParamValueMissing;
+              t = len;
+            }
           }
         }
-        if (b != 1)
+        if (b == ParamValueMissing)
+          value = ParamValueMissing;
+
+        if (b != 1  &&  b != 0  &&  value != ParamValueMissing)
           value = value / b;
       }
+
       outParameters.emplace_back(value);
     }
   }
@@ -171,27 +212,55 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b * extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
     {
       double value = ParamValueMissing;
       if (s < inParameters[0].size())
-        value = inParameters[0][s];
-
-      if (value != ParamValueMissing)
       {
-        for (uint t=1; t<len; t++)
+        value = inParameters[0][s];
+        if (value != ParamValueMissing)
         {
-          if (s < inParameters[t].size())
+          for (uint t=1; t<len; t++)
           {
-            double val = inParameters[t][s];
-            if (val != ParamValueMissing && val != 0)
-              value = value / val;
+            if (s < inParameters[t].size())
+            {
+              double val = inParameters[t][s];
+              if (val == ParamValueMissing)
+              {
+                value = ParamValueMissing;
+                t = len;
+              }
+              else
+              {
+                // If the divisor is zero then we ignore the division. Should we return ParamValueMissing instead?
+                if (val != 0)
+                  value = value / val;
+              }
+            }
+            else
+            {
+              value = ParamValueMissing;
+              t = len;
+            }
           }
         }
-        if (b != 1)
+        if (b == ParamValueMissing)
+          value = ParamValueMissing;
+
+        if (b != 1  &&  b != 0  &&  value != ParamValueMissing)
           value = value / b;
       }
       outParameters.emplace_back(value);

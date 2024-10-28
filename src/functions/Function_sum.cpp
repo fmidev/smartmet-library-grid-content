@@ -64,8 +64,10 @@ float Function_sum::executeFunctionCall1(std::vector<float>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing)
-        sum += val;
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      sum += val;
     }
     return sum;
   }
@@ -88,8 +90,10 @@ double Function_sum::executeFunctionCall1(std::vector<double>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing)
-        sum += val;
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      sum += val;
     }
     return sum;
   }
@@ -109,28 +113,58 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   {
     uint sz = columns*rows;
     uint len = inParameters.size();
+    uint elen = extParameters.size();
     outParameters.reserve(sz);
 
-    double b = 0;
-    if (extParameters.size() > 0)
+
+    float b = 0;
+    if (elen > 0)
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (uint t=0; t<elen; t++)
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b + extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
     {
-      double sum = 0;
+      float sum = 0;
       for (uint t=0; t<len; t++)
       {
         if (s < inParameters[t].size())
         {
           double val = inParameters[t][s];
-          if (val != ParamValueMissing)
+          if (val == ParamValueMissing)
+          {
+            sum = ParamValueMissing;
+            t = len;
+          }
+          else
+          {
             sum += val;
+          }
+        }
+        else
+        {
+          sum = ParamValueMissing;
+          t = len;
         }
       }
-      sum += b;
+
+      if (b == ParamValueMissing)
+        sum = ParamValueMissing;
+      else
+      if (sum != ParamValueMissing)
+        sum += b;
+
       outParameters.emplace_back(sum);
     }
   }
@@ -150,13 +184,24 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
   {
     uint sz = columns*rows;
     uint len = inParameters.size();
+    uint elen = extParameters.size();
     outParameters.reserve(sz);
 
     double b = 0;
-    if (extParameters.size() > 0)
+    if (elen > 0)
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (uint t=0; t<elen; t++)
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b + extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
@@ -167,11 +212,29 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           double val = inParameters[t][s];
-          if (val != ParamValueMissing)
+          if (val == ParamValueMissing)
+          {
+            sum = ParamValueMissing;
+            t = len;
+          }
+          else
+          {
             sum += val;
+          }
+        }
+        else
+        {
+          sum = ParamValueMissing;
+          t = len;
         }
       }
-      sum += b;
+
+      if (b == ParamValueMissing)
+        sum = ParamValueMissing;
+      else
+      if (sum != ParamValueMissing)
+        sum += b;
+
       outParameters.emplace_back(sum);
     }
   }

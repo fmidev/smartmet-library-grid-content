@@ -67,8 +67,10 @@ float Function_mul::executeFunctionCall1(std::vector<float>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing)
-        value = value * val;
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      value = value * val;
     }
     return value;
   }
@@ -94,8 +96,10 @@ double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
     for (uint t=0; t<len; t++)
     {
       auto val = parameters[t];
-      if (val != ParamValueMissing)
-        value = value * val;
+      if (val == ParamValueMissing)
+        return ParamValueMissing;
+
+      value = value * val;
     }
     return value;
   }
@@ -122,7 +126,17 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b * extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
@@ -133,11 +147,27 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
         if (s < inParameters[t].size())
         {
           float val = inParameters[t][s];
-          if (val != ParamValueMissing)
+          if (val == ParamValueMissing)
+          {
+            value = ParamValueMissing;
+            t = len;
+          }
+          else
+          {
             value = value * val;
+          }
+        }
+        else
+        {
+          value = ParamValueMissing;
+          t = len;
         }
       }
-      if (b != 1)
+
+      if (b == ParamValueMissing)
+        value = ParamValueMissing;
+
+      if (b != 1  &&  value != ParamValueMissing)
         value = value * b;
 
       outParameters.emplace_back(value);
@@ -166,22 +196,48 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     if (elen > 0)
     {
       for (uint t=0; t<elen; t++)
-        b = b * extParameters[t];
+      {
+        if (extParameters[t] == ParamValueMissing)
+        {
+          b = ParamValueMissing;
+          t = elen;
+        }
+        else
+        {
+          b = b * extParameters[t];
+        }
+      }
     }
 
     for (uint s=0; s<sz; s++)
     {
-      double value = 1;
+      float value = 1;
       for (uint t=0; t<len; t++)
       {
         if (s < inParameters[t].size())
         {
           double val = inParameters[t][s];
-          if (val != ParamValueMissing)
+          if (val == ParamValueMissing)
+          {
+            value = ParamValueMissing;
+            t = len;
+          }
+          else
+          {
             value = value * val;
+          }
+        }
+        else
+        {
+          value = ParamValueMissing;
+          t = len;
         }
       }
-      if (b != 1)
+
+      if (b == ParamValueMissing)
+        value = ParamValueMissing;
+
+      if (b != 1  &&  value != ParamValueMissing)
         value = value * b;
 
       outParameters.emplace_back(value);
