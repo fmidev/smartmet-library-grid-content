@@ -4373,6 +4373,7 @@ bool ServiceImplementation::getValueVectors(
               analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
 
           //if (((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0))
+          if (sCoordinates)
             coordinates = *sCoordinates;
 
           return res;
@@ -4507,7 +4508,8 @@ bool ServiceImplementation::getValueVectors(
                   {
                     Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
                   }
-                  coordinates = *sCoordinates;
+                  if (sCoordinates)
+                    coordinates = *sCoordinates;
                 }
               }
               break;
@@ -4618,7 +4620,8 @@ bool ServiceImplementation::getValueVectors(
                   {
                     Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
                   }
-                  coordinates = *sCoordinates;
+                  if (sCoordinates)
+                    coordinates = *sCoordinates;
                 }
               }
               break;
@@ -4711,7 +4714,8 @@ bool ServiceImplementation::getValueVectors(
                   {
                     Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
                   }
-                  coordinates = *sCoordinates;
+                  if (sCoordinates)
+                    coordinates = *sCoordinates;
                 }
               }
               break;
@@ -4796,7 +4800,8 @@ bool ServiceImplementation::getValueVectors(
                   {
                     Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
                   }
-                  coordinates = *sCoordinates;
+                  if (sCoordinates)
+                    coordinates = *sCoordinates;
                 }
               }
               break;
