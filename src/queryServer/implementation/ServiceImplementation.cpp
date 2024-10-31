@@ -4369,14 +4369,20 @@ bool ServiceImplementation::getValueVectors(
 
           Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
 
-          bool res = getValueVectorsByHeight(query,query.mCoordinateType,*sCoordinates,qParam,producerInfo,producerGeometryId,generationId,
+          if (sCoordinates)
+          {
+            bool res = getValueVectorsByHeight(query,query.mCoordinateType,*sCoordinates,qParam,producerInfo,producerGeometryId,generationId,
               analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
 
           //if (((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0))
-          if (sCoordinates)
             coordinates = *sCoordinates;
 
-          return res;
+            return res;
+          }
+          else
+          {
+            return false;
+          }
         }
         break;
 

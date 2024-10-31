@@ -6384,7 +6384,6 @@ void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
   FUNCTION_TRACE
   try
   {
-    char cacheFile[1000];
     for (auto it = filenames.begin(); it != filenames.end(); ++it)
     {
       if (mShutdownRequested)
