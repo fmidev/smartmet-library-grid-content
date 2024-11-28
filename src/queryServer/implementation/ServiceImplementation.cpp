@@ -1910,11 +1910,6 @@ void ServiceImplementation::postProcessQuery(Query& query)
   FUNCTION_TRACE
   try
   {
-    short areaInterpolationMethod = T::AreaInterpolationMethod::Linear;
-    const char *areaInterpolationMethodStr = query.mAttributeList.getAttributeValue("grid.areaInterpolationMethod");
-    if (areaInterpolationMethodStr != nullptr)
-      areaInterpolationMethod = toInt16(areaInterpolationMethodStr);
-
     int gridWidth = 0;
     const char *gridWidthStr = query.mAttributeList.getAttributeValue("grid.width");
     if (gridWidthStr != nullptr)
@@ -1924,6 +1919,11 @@ void ServiceImplementation::postProcessQuery(Query& query)
     const char *gridHeightStr = query.mAttributeList.getAttributeValue("grid.height");
     if (gridHeightStr != nullptr)
       gridHeight = toInt32(gridHeightStr);
+
+    short interpolationType = 0;
+    const char *interpolationTypeStr = query.mAttributeList.getAttributeValue("contour.interpolation.type");
+    if (interpolationTypeStr != nullptr)
+      interpolationType = toInt16(interpolationTypeStr);
 
     size_t smoothSize = 0;
     const char *smoothSizeStr = query.mAttributeList.getAttributeValue("contour.smooth.size");
@@ -1954,7 +1954,7 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     gridWidth,
                     gridHeight,
                     qParam->mContourLowValues,
-                    areaInterpolationMethod,
+                    interpolationType,
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData);
@@ -1976,7 +1976,7 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     gridHeight,
                     qParam->mContourLowValues,
                     qParam->mContourHighValues,
-                    areaInterpolationMethod,
+                    interpolationType,
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData);
