@@ -38,6 +38,11 @@ struct CorbaContentInfo
   long               geometryId;
   long long          modificationTime;
   long long          deletionTime;
+  long               aggregationId;
+  long               aggregationPeriod;
+  long               processingTypeId;
+  float              processingTypeValue1;
+  float              processingTypeValue2;
 };
 
 typedef sequence<CorbaContentInfo> CorbaContentInfoList;

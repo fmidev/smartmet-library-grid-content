@@ -57,19 +57,18 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.forecastNumber = source.mForecastNumber;
     target.fmiParameterId = source.mFmiParameterId;
     target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName());
-    //target.gribParameterId = source.mGribParameterId;
-    //target.newbaseParameterId = source.mNewbaseParameterId;
-    //target.newbaseParameterName = CORBA::string_dup(source.getNewbaseParameterName());
-    //target.netCdfParameterName = CORBA::string_dup(source.getNetCdfParameterName());
     target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    //target.grib1ParameterLevelId = source.mGrib1ParameterLevelId;
-    //target.grib2ParameterLevelId = source.mGrib2ParameterLevelId;
     target.parameterLevel = source.mParameterLevel;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
     target.modificationTime = source.mModificationTime;
     target.deletionTime = source.mDeletionTime;
+    target.aggregationId = source.mAggregationId;
+    target.aggregationPeriod = source.mAggregationPeriod;
+    target.processingTypeId = source.mProcessingTypeId;
+    target.processingTypeValue1 = source.mProcessingTypeValue1;
+    target.processingTypeValue2 = source.mProcessingTypeValue2;
   }
   catch (...)
   {
@@ -97,19 +96,18 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.mForecastNumber = source.forecastNumber;
     target.mFmiParameterId = source.fmiParameterId;
     target.setFmiParameterName(source.fmiParameterName);
-    //target.mGribParameterId = source.gribParameterId;
-    //target.mNewbaseParameterId = source.newbaseParameterId;
-    //target.setNewbaseParameterName(source.newbaseParameterName);
-    //target.setNetCdfParameterName(source.netCdfParameterName);
     target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    //target.mGrib1ParameterLevelId = source.grib1ParameterLevelId;
-    //target.mGrib2ParameterLevelId = source.grib2ParameterLevelId;
     target.mParameterLevel = source.parameterLevel;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
     target.mModificationTime = source.modificationTime;
     target.mDeletionTime = source.deletionTime;
+    target.mAggregationId = source.aggregationId;
+    target.mAggregationPeriod = source.aggregationPeriod;
+    target.mProcessingTypeId = source.processingTypeId;
+    target.mProcessingTypeValue1 = source.processingTypeValue1;
+    target.mProcessingTypeValue2 = source.processingTypeValue2;
   }
   catch (...)
   {

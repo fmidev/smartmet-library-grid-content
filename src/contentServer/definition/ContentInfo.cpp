@@ -36,6 +36,11 @@ ContentInfo::ContentInfo()
     mDeletionTime = 0;
     mFmiParameterName = 0;
     mForecastTime = 0;
+    mAggregationId = 0;
+    mAggregationPeriod = 0;
+    mProcessingTypeId = 0;
+    mProcessingTypeValue1 = 0;
+    mProcessingTypeValue2 = 0;
   }
   catch (...)
   {
@@ -72,6 +77,11 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mDeletionTime = contentInfo.mDeletionTime;
     mFmiParameterName = contentInfo.mFmiParameterName;
     mForecastTime = contentInfo.mForecastTime;
+    mAggregationId = contentInfo.mAggregationId;
+    mAggregationPeriod = contentInfo.mAggregationPeriod;
+    mProcessingTypeId = contentInfo.mProcessingTypeId;
+    mProcessingTypeValue1 = contentInfo.mProcessingTypeValue1;
+    mProcessingTypeValue2 = contentInfo.mProcessingTypeValue2;
   }
   catch (...)
   {
@@ -107,6 +117,11 @@ ContentInfo::ContentInfo(const char *csv)
     mForecastTimeUTC = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
+    mAggregationId = 0;
+    mAggregationPeriod = 0;
+    mProcessingTypeId = 0;
+    mProcessingTypeValue1 = 0;
+    mProcessingTypeValue2 = 0;
     setCsv(csv);
   }
   catch (...)
@@ -162,6 +177,11 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mDeletionTime = contentInfo.mDeletionTime;
     mForecastTime = contentInfo.mForecastTime;
     mFmiParameterName = contentInfo.mFmiParameterName;
+    mAggregationId = contentInfo.mAggregationId;
+    mAggregationPeriod = contentInfo.mAggregationPeriod;
+    mProcessingTypeId = contentInfo.mProcessingTypeId;
+    mProcessingTypeValue1 = contentInfo.mProcessingTypeValue1;
+    mProcessingTypeValue2 = contentInfo.mProcessingTypeValue2;
 
     return *this;
   }
@@ -301,7 +321,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;;;;;;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
         mFileId,
         mMessageIndex,
         mFileType,
@@ -313,11 +333,11 @@ std::string ContentInfo::getCsv()
         getForecastTime(),
         mFmiParameterId,
         getFmiParameterName(),
-        //mGribParameterId,
-        //getNetCdfParameterName(),
-        //mCdmParameterName.c_str(),
-        //mNewbaseParameterId,
-        //getNewbaseParameterName(),
+        mAggregationId,
+        mAggregationPeriod,
+        mProcessingTypeId,
+        mProcessingTypeValue1,
+        mProcessingTypeValue2,
         mFmiParameterLevelId,
         //mGrib1ParameterLevelId,
         //mGrib2ParameterLevelId,
@@ -350,7 +370,7 @@ std::string ContentInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;;startTime;fmiParameterId;fmiParameterName;gribParameterId;netCdfParameterName;;newbaseParameterId;newbaseParameterName;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;;;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
+    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;;startTime;fmiParameterId;fmiParameterName;aggregationId;aggregationPeriod;processingTypeId;processingTypeValue1;processingTypeValue2;fmiParameterLevelId;grib1ParameterLevelId;grib2ParameterLevelId;parameterLevel;;;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
     return header;
   }
   catch (...)
@@ -412,11 +432,11 @@ void ContentInfo::setCsv(const char *csv)
 
       mFmiParameterId = toUInt32(field[9]);
       setFmiParameterName(field[10]);
-      //mGribParameterId = toUInt32(field[11]);
-      //setNetCdfParameterName(field[12]);
-      //mCdmParameterName = field[13];
-      //mNewbaseParameterId = toUInt32(field[14]);
-      //setNewbaseParameterName(field[15]);
+      mAggregationId = toInt32(field[11]);
+      mAggregationPeriod = toInt32(field[12]);
+      mProcessingTypeId = toInt32(field[13]);
+      mProcessingTypeValue1 = toFloat(field[14]);
+      mProcessingTypeValue2 = toFloat(field[15]);
       mFmiParameterLevelId = toUInt8(field[16]);
       //mGrib1ParameterLevelId = toUInt8(field[17]);
       //mGrib2ParameterLevelId = toUInt8(field[18]);
@@ -444,45 +464,6 @@ void ContentInfo::setCsv(const char *csv)
 
 
 
-#if 0 // New
-std::string ContentInfo::getCsv()
-{
-  try
-  {
-    char st[1000];
-    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;%s;%u;%s;%u;%d;%d;%d;%u;%u;%u;%ld;%ld",
-        mFileId,
-        mMessageIndex,
-        mFileType,
-        mFilePosition,
-        mMessageSize,
-        mProducerId,
-        mGenerationId,
-        getForecastTime(),
-        mFmiParameterId,
-        getFmiParameterName(),
-        mFmiParameterLevelId,
-        mParameterLevel,
-        mForecastType,
-        mForecastNumber,
-        mFlags,
-        mSourceId,
-        mGeometryId,
-        mModificationTime,
-        mDeletionTime
-        );
-
-    return std::string(st);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-#endif
-
-
-
 
 ulonglong ContentInfo::getRequestCounterKey()
 {
@@ -506,88 +487,6 @@ ulonglong ContentInfo::getRequestCounterKey()
   }
 }
 
-
-
-
-
-#if 0 // New
-std::string ContentInfo::getCsvHeader()
-{
-  try
-  {
-    std::string header = "fileId;messageIndex;fileType;filePosition;messageSize;producerId;generationId;startTime;fmiParameterId;fmiParameterName;fmiParameterLevelId;parameterLevel;mForecastType;mForecastNumber;serverFlags;flags;sourceId;geometryId;modificationTimeT;deletionTimeT";
-    return header;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-void ContentInfo::setCsv(const char *csv)
-{
-  try
-  {
-    char empty = '\0';
-    char *field[100] = {&empty};
-    char st[1000];
-    strcpy(st,csv);
-
-    uint c = 0;
-    field[0] = st;
-    char *p = st;
-    while (*p != '\0'  &&  c < 100)
-    {
-      if (*p == ';'  ||  *p == '\n')
-      {
-        *p = '\0';
-        p++;
-        c++;
-        field[c] = p;
-      }
-      else
-      {
-        p++;
-      }
-    }
-
-
-    if (c >= 16)
-    {
-      mFileId = toUInt32(field[0]);
-      mMessageIndex = toUInt32(field[1]);
-      mFileType = toUInt8(field[2]);
-      mFilePosition = toUInt64(field[3]);
-      mMessageSize = toUInt32(field[4]);
-      mProducerId = toUInt32(field[5]);
-      mGenerationId = toUInt32(field[6]);
-      setForecastTime(field[7]);
-      mForecastTimeUTC = utcTimeToTimeT(getForecastTime());
-      mFmiParameterId = toUInt32(field[8]);
-      setFmiParameterName(field[9]);
-      mFmiParameterLevelId = toUInt8(field[10]);
-      mParameterLevel = toInt32(field[11]);
-      mForecastType = toInt16(field[12]);
-      mForecastNumber = toInt16(field[13]);
-      mFlags = toUInt32(field[14]);
-      mSourceId = toUInt32(field[15]);
-      mGeometryId = toInt32(field[16]);
-      if (c >= 17)
-        mModificationTime = toInt64(field[17]);
-      if (c >= 18)
-        mDeletionTime = toInt64(field[18]);
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-#endif
 
 
 
@@ -952,6 +851,11 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGeometryId             = " << mGeometryId << "\n";
     stream << space(level) << "- mModificationTime       = " << utcTimeFromTimeT(mModificationTime) << "\n";
     stream << space(level) << "- mDeletionTime           = " << utcTimeFromTimeT(mDeletionTime) << "\n";
+    stream << space(level) << "- mAggregationId          = " << mAggregationId << "\n";
+    stream << space(level) << "- mAggregationPeriod      = " << mAggregationPeriod << "\n";
+    stream << space(level) << "- mProcessingTypeId       = " << mProcessingTypeId << "\n";
+    stream << space(level) << "- mProcessingTypeValue1   = " << mProcessingTypeValue1 << "\n";
+    stream << space(level) << "- mProcessingTypeValue2   = " << mProcessingTypeValue2 << "\n";
   }
   catch (...)
   {

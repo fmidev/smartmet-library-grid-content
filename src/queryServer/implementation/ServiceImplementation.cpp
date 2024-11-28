@@ -40,6 +40,7 @@
 #include "../../functions/Function_sdevDir.h"
 #include "../../functions/Function_sequence.h"
 #include "../../functions/Function_sin.h"
+#include "../../functions/Function_smedian.h"
 #include "../../functions/Function_sub.h"
 #include "../../functions/Function_sum.h"
 #include "../../functions/Function_tan.h"
@@ -262,6 +263,7 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
     mFunctionCollection.addFunction("SDEV_DIR",new Functions::Function_sdevDir());
     mFunctionCollection.addFunction("SIN",new Functions::Function_sin());
+    mFunctionCollection.addFunction("SMEDIAN",new Functions::Function_smedian());
     mFunctionCollection.addFunction("COS",new Functions::Function_cos());
     mFunctionCollection.addFunction("TAN",new Functions::Function_tan());
     mFunctionCollection.addFunction("VARIANCE",new Functions::Function_variance());
