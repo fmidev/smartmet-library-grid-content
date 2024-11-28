@@ -11,6 +11,7 @@
 #include <macgyver/TimeParser.h>
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
+#include <macgyver/NumericCast.h>
 #include <boost/functional/hash.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <unordered_set>
@@ -10517,7 +10518,7 @@ void ServiceImplementation::getAdditionalValues(
 
         Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
         auto seconds = st.daylength().total_seconds();
-        auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+        auto minutes = Fmi::numeric_cast<long>(round(seconds / 60.0));
         val.mValue = minutes;
         values.mValueList.addGridValue(val);
       }
@@ -10608,7 +10609,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
     {
       Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, x,y);
       auto seconds = st.daylength().total_seconds();
-      auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+      auto minutes = Fmi::numeric_cast<long>(round(seconds / 60.0));
       return (double)minutes;
     }
 
