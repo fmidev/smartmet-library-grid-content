@@ -8203,7 +8203,10 @@ int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex
     p += sprintf(p,"  processingTypeValue1,\n");
     p += sprintf(p,"  processingTypeValue2,\n");
     p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
+    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
+    p += sprintf(p,"  modificationTime,\n");
+    p += sprintf(p,"  deletionTime,\n");
+    p += sprintf(p,"  forecastTime\n");
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
@@ -8248,16 +8251,16 @@ int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -8431,16 +8434,16 @@ int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint st
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -8554,16 +8557,16 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& gener
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -8692,16 +8695,16 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -8842,16 +8845,16 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -8992,16 +8995,16 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generati
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -9141,16 +9144,16 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(uint producerId
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -9249,16 +9252,16 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(uint generati
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -9384,16 +9387,16 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
         contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
         contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
         contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-        contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-        contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-        contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-        contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-        contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+        contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+        contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+        contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+        contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+        contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-        std::string modificationTime = PQgetvalue(res, 0, 22);
+        std::string modificationTime = PQgetvalue(res, i, 22);
         contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-        std::string deletionTime = PQgetvalue(res, 0, 23);
+        std::string deletionTime = PQgetvalue(res, i, 23);
         contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
         contentInfoList.addContentInfo(contentInfo);
@@ -9496,16 +9499,16 @@ int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startF
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -9607,16 +9610,16 @@ int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileI
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
@@ -9716,16 +9719,16 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
       contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
       contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
       contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, 0, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
 
-      std::string modificationTime = PQgetvalue(res, 0, 22);
+      std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, 0, 23);
+      std::string deletionTime = PQgetvalue(res, i, 23);
       contentInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
       contentInfoList.addContentInfo(contentInfo);
