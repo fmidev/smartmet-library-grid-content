@@ -6508,11 +6508,19 @@ void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    T::ProducerInfo producerInfo;
+    if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) != Result::OK)
+      return;
 
-    T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(eventInfo.mId1);
-    if (info == nullptr)
-      return; // No such producer
+    {
+      AutoWriteLock lock(&mModificationLock);
+      T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(eventInfo.mId1);
+      if (info)
+      {
+        *info = producerInfo;
+        return;
+      }
+    }
 
     if (!mContentSwapEnabled)
     {
@@ -6520,16 +6528,13 @@ void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
-        info = ssp->mProducerInfoList.getProducerInfoById(eventInfo.mId1);
-        if (info == nullptr)
-          return; // No such producer
+        T::ProducerInfo *info = ssp->mProducerInfoList.getProducerInfoById(eventInfo.mId1);
+        if (info)
+        {
+          *info = producerInfo;
+          return;
+        }
       }
-    }
-
-    T::ProducerInfo producerInfo;
-    if (mContentStorage->getProducerInfoById(mSessionId,eventInfo.mId1,producerInfo) == Result::OK)
-    {
-      *info = producerInfo;
     }
   }
   catch (...)
@@ -6664,11 +6669,16 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    T::GenerationInfo generationInfo;
+    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) != Result::OK)
+      return;
 
-    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
-    if (info == nullptr)
-      return; // No such generation
+    {
+      AutoWriteLock lock(&mModificationLock);
+      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
+      if (info)
+        *info = generationInfo;
+    }
 
     if (!mContentSwapEnabled)
     {
@@ -6676,16 +6686,10 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
-        info = ssp->mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
-        if (info == nullptr)
-          return; // No such generation
+        T::GenerationInfo *info = ssp->mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
+        if (info)
+          *info = generationInfo;
       }
-    }
-
-    T::GenerationInfo generationInfo;
-    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) == Result::OK)
-    {
-      *info = generationInfo;
     }
   }
   catch (...)
@@ -6880,9 +6884,15 @@ void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
-    if (info != nullptr)
-      info->mStatus = eventInfo.mFlags;
+    {
+      AutoWriteLock lock(&mModificationLock);
+      T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+      if (info)
+      {
+        info->mStatus = eventInfo.mFlags;
+        return;
+      }
+    }
 
     if (!mContentSwapEnabled)
     {
@@ -6910,11 +6920,19 @@ void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    AutoWriteLock lock(&mModificationLock);
+    T::GeometryInfo geometryInfo;
+    if (mContentStorage->getGeometryInfoById(mSessionId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,geometryInfo) != Result::OK)
+      return;
 
-    T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
-    if (info == nullptr)
-      return; // No such generation
+    {
+      AutoWriteLock lock(&mModificationLock);
+      T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+      if (info)
+      {
+        *info = geometryInfo;
+        return;
+      }
+    }
 
     if (!mContentSwapEnabled)
     {
@@ -6922,16 +6940,10 @@ void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
-        info = ssp->mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
-        if (info == nullptr)
-          return; // No such generation
+        T::GeometryInfo *info = ssp->mGeometryInfoList.getGeometryInfoById(eventInfo.mId1,eventInfo.mId2,eventInfo.mId3);
+        if (info)
+          *info = geometryInfo;
       }
-    }
-
-    T::GeometryInfo geometryInfo;
-    if (mContentStorage->getGeometryInfoById(mSessionId,eventInfo.mId1,eventInfo.mId2,eventInfo.mId3,geometryInfo) == Result::OK)
-    {
-      *info = geometryInfo;
     }
   }
   catch (...)
@@ -8174,16 +8186,9 @@ void CacheImplementation::updateContent()
         ssp->mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::fileName);
         ssp->mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
         ssp->mContentInfoList[1].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-/*
-        ssp->mContentInfoList[2].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-        ssp->mContentInfoList[3].setComparisonMethod(T::ContentInfo::ComparisonMethod::gribId_producer_generation_level_time);
-        ssp->mContentInfoList[4].setComparisonMethod(T::ContentInfo::ComparisonMethod::newbaseId_producer_generation_level_time);
-        ssp->mContentInfoList[5].setComparisonMethod(T::ContentInfo::ComparisonMethod::newbaseName_producer_generation_level_time);
-        */
 
         mSearchStructurePtr[0] = ssp;
       }
-
 
       AutoWriteLock lock(&mModificationLock);
       AutoWriteLock writeLock(&mSearchModificationLock);
@@ -8361,6 +8366,7 @@ void CacheImplementation::updateContent()
 
 
       // ### Updating generation time ranges
+
 
       PRINT_DATA(mDebugLog, "  -- Updating generation time ranges\n");
       uint glen = ssp->mGenerationInfoList.getLength();
