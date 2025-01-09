@@ -1652,7 +1652,6 @@ bool ServiceImplementation::parseFunction(
           queryParam.mTimestepsAfter = s2;
       }
 
-      uint pCount = 0;
       for (auto fParam = functionParams.begin(); fParam != functionParams.end(); ++fParam)
       {
         if (fParam->second != "0" && toDouble(fParam->second.c_str()) == 0)
@@ -1670,12 +1669,9 @@ bool ServiceImplementation::parseFunction(
             case QueryParameter::Type::Isoband:
             case QueryParameter::Type::StreamLine:
               newParam.mType = QueryParameter::Type::Vector;
-              if (pCount == 0)
-              {
-                newParam.mFlags = queryParam.mFlags | QueryParameter::Flags::ReturnCoordinates;
-                if (contourCoordinateType == 3)
-                  newParam.mFlags |= QueryParameter::Flags::OriginalCoordinates;
-              }
+              newParam.mFlags = queryParam.mFlags | QueryParameter::Flags::ReturnCoordinates;
+              if (contourCoordinateType == 3)
+                newParam.mFlags |= QueryParameter::Flags::OriginalCoordinates;
               break;
 
             case QueryParameter::Type::Vector:
@@ -1715,7 +1711,6 @@ bool ServiceImplementation::parseFunction(
           parseFunction(query,newParam, newParam.mParam, newParam.mFunction, newParam.mFunctionParams, recursionCounter + 2, additionalParameterList);
 
           additionalParameterList.insert(additionalParameterList.begin(), newParam);
-          pCount++;
         }
       }
       return true;
