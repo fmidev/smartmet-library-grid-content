@@ -4,9 +4,20 @@
 
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
-#include <libpq-fe.h>
 
+// To avoid dependency escalation to other modules we forward declare. However, we
+// cannot forward declare a PGconn struct, since it is a typedef:
+//
+//    typedef struct pg_conn PGconn;
+//
+// Hence we also have to change the data type from PGconn to pg_conn, and hope that future
+// changes do not break things. The only way to fix this would be to hide the PGconn object
+// behind an implementation pointer so that the libpq-fe.h header would have to be only
+// included in the cpp file and the "proper" PGconn object could be used. For now the code
+// relies on the compiler to understand the objects to be really the same, but just not in
+// this header file. Future compilers might require a reintrerpret_cast.
 
+struct pg_conn;
 
 namespace SmartMet
 {
@@ -233,7 +244,7 @@ class PostgresqlImplementation : public ServiceInterface
      time_t         mStartTime;
      time_t         mEventTruncateCheckTime;
      ThreadLock     mThreadLock;
-     PGconn*        mConnection;
+     pg_conn *      mConnection;
      std::string    mPrimaryConnectionString;
      std::string    mSecondaryConnectionString;
      T::EventInfo   mLastEvent;

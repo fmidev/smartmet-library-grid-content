@@ -6,7 +6,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <boost/functional/hash.hpp>
-
+#include <libpq-fe.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
