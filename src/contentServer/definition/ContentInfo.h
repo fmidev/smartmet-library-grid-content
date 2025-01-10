@@ -56,6 +56,11 @@ class ContentInfo
     T::GeometryId      mGeometryId;
     ushort             mFlags;
     ushort             mSourceId;
+    int                mAggregationId;
+    int                mAggregationPeriod;
+    int                mProcessingTypeId;
+    float              mProcessingTypeValue1;
+    float              mProcessingTypeValue2;
 
   protected:
 
