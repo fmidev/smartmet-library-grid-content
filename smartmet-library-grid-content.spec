@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.1.9
+Version: 25.1.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 24.11.12
-BuildRequires: smartmet-library-grid-files-devel >= 25.1.9
-BuildRequires: smartmet-library-macgyver-devel >= 24.12.4
-BuildRequires: smartmet-library-spine-devel >= 24.11.27
+BuildRequires: smartmet-library-grid-files-devel >= 25.1.30
+BuildRequires: smartmet-library-macgyver-devel >= 25.1.9
+BuildRequires: smartmet-library-spine-devel >= 25.1.17
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -40,9 +40,9 @@ Requires: omniORB
 Requires: gdal38
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 24.11.12
-Requires: smartmet-library-grid-files >= 25.1.9
-Requires: smartmet-library-macgyver >= 24.12.4
-Requires: smartmet-library-spine >= 24.11.27
+Requires: smartmet-library-grid-files >= 25.1.30
+Requires: smartmet-library-macgyver >= 25.1.9
+Requires: smartmet-library-spine >= 25.1.17
 
 Provides: %{SPECNAME}
 
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 24.12.4
+Requires: smartmet-library-macgyver-devel >= 25.1.9
 Requires: smartmet-library-gis-devel >= 24.11.12
-Requires: smartmet-library-spine-devel >= 24.11.27
-Requires: smartmet-library-grid-files-devel >= 25.1.9
+Requires: smartmet-library-spine-devel >= 25.1.17
+Requires: smartmet-library-grid-files-devel >= 25.1.30
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jan 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.1.30-1.fmi
+- Fixed time and level interpolation used with lower resolution contours
 * Thu Jan  9 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.1.9-1.fmi
 - Added content info extensions for parameter details
 - Fixed missing coordinate delivery for contour calculations
