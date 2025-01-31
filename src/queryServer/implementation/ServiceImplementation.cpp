@@ -8113,11 +8113,11 @@ bool ServiceImplementation::getIsolineValues(
     short timeInterpolationMethod = qParam.mTimeInterpolationMethod;
     if (timeInterpolationMethod == T::TimeInterpolationMethod::Undefined)
       timeInterpolationMethod = pInfo.mTimeInterpolationMethod;
-
+/*
     short levelInterpolationMethod = qParam.mLevelInterpolationMethod;
     if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
       levelInterpolationMethod = pInfo.mLevelInterpolationMethod;
-
+*/
     T::ParamValue_vec newContourValues;
 
     uint modificationOperation = 0;
@@ -8257,6 +8257,9 @@ bool ServiceImplementation::getIsolineValues(
         return false;
       }
     }
+
+    short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
+    query.mAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     if (contentLen == 2)
     {
@@ -8466,11 +8469,11 @@ bool ServiceImplementation::getIsobandValues(
     short timeInterpolationMethod = qParam.mTimeInterpolationMethod;
     if (timeInterpolationMethod == T::TimeInterpolationMethod::Undefined)
       timeInterpolationMethod = pInfo.mTimeInterpolationMethod;
-
+/*
     short levelInterpolationMethod = qParam.mLevelInterpolationMethod;
     if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
       levelInterpolationMethod = pInfo.mLevelInterpolationMethod;
-
+*/
     // ### Converting contour values if necessary:
 
     T::ParamValue_vec newContourLowValues;
@@ -8616,6 +8619,9 @@ bool ServiceImplementation::getIsobandValues(
         return false;
       }
     }
+
+    short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
+    query.mAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
     if (contentLen == 2)
     {
