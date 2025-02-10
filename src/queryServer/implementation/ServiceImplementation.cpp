@@ -671,12 +671,12 @@ void ServiceImplementation::loadProducerFile()
         uint c = 1;
         field[0] = st;
         char* p = st;
-        while (*p != '\0' && c < 100)
+        while (*p != '\0'  &&  *p != '#'  &&  c < 100)
         {
           if (*p == '"')
             ind = !ind;
 
-          if ((*p == ';' || *p == '\n') && !ind)
+          if ((*p == ';' || *p == '\n' || *p == '#') && !ind)
           {
             *p = '\0';
             p++;
@@ -693,6 +693,22 @@ void ServiceImplementation::loadProducerFile()
         std::string key;
         for (uint t=0; t<c; t++)
         {
+          // The field should start from non-empty char
+          while (*field[t] != '\0' &&  *field[t] <= ' ')
+            field[t]++;
+
+          // There should be no empty chars in the field
+
+          char *f = field[t];
+          while (*f != '\0')
+          {
+            if (*f <= ' ')
+              *f = '\0';
+            else
+              f++;
+          }
+
+          //printf("FIELD [%u][%s]\n",t,field[t]);
           if (field[t][0] != '\0')
           {
             std::vector<std::string> parts;
