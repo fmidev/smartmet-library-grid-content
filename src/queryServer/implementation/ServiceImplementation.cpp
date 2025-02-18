@@ -11376,6 +11376,15 @@ void ServiceImplementation::checkProducerMapUpdates()
   FUNCTION_TRACE
   try
   {
+    time_t changeTime = 0;
+    if (mContentServerPtr->getContentChangeTime(0,changeTime) == 0)
+    {
+      // Force updata if the content information is changed
+      if (changeTime >  mProducerMap_updateTime)
+        mProducerMap_updateTime = 0;
+    }
+
+
     time_t currentTime = time(nullptr);
     if ((currentTime - mProducerMap_updateTime) < mProducerMap_checkInterval)
       return;
