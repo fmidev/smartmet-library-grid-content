@@ -5809,7 +5809,11 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    mGridFileManager.deleteFileById(eventInfo.mId1);
+    auto storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
+    if (storageFile)
+      storageFile->setDeletionTime(time(0) + 300);
+
+    // mGridFileManager.deleteFileById(eventInfo.mId1);
   }
   catch (...)
   {
