@@ -2894,7 +2894,7 @@ int RedisImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
     if (getFileById(fileInfo.mFileId,fInfo) != Result::OK)
       return Result::UNKNOWN_FILE_ID;
 
-    uint fileId = getFileId(fileInfo.mName);
+    uint fileId = getFileId(fInfo.mName);
     if (fileId > 0)
     {
       if (fileId != fileInfo.mFileId)
