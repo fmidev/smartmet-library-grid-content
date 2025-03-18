@@ -506,6 +506,59 @@ bool RedisImplementation::isConnectionValid()
 
 
 
+void RedisImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    auto connection = parent->addAttribute("Connection");
+    connection->addAttribute("Type","Redis");
+    connection->addAttribute("Table Prefix",mTablePrefix);
+    connection->addAttribute("Current Source",mSourceInfo);
+
+    auto primary = parent->addAttribute("Primary");
+    primary->addAttribute("Address",mRedisAddress);
+    primary->addAttribute("Port",mRedisPort);
+    auto secondary = parent->addAttribute("Secondary");
+    secondary->addAttribute("Address",mRedisSecondaryAddress);
+    secondary->addAttribute("Port",mRedisSecondaryPort);
+
+    auto records = parent->addAttribute("Data Records");
+
+    uint pCount = 0;
+    _getProducerInfoCount(0,pCount);
+    records->addAttribute("Producer",pCount);
+
+    uint gCount = 0;
+    _getGenerationInfoCount(0,gCount);
+    records->addAttribute("Generation",gCount);
+
+    uint gmCount = 0;
+    _getGeometryInfoCount(0,gmCount);
+    records->addAttribute("Geometry",gmCount);
+
+    uint fCount = 0;
+    _getFileInfoCount(0,fCount);
+    records->addAttribute("File",fCount);
+
+    uint cCount = 0;
+    _getContentCount(0,cCount);
+    records->addAttribute("Content",cCount);
+
+    auto events = parent->addAttribute("Events");
+    events->addAttribute("Last event id",mLastEvent.mEventId);
+
+    ServiceInterface::getStateAttributes(parent);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int RedisImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
   FUNCTION_TRACE

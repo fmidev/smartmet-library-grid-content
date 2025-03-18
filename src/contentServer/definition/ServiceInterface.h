@@ -18,6 +18,7 @@
 #include "RequestFlags.h"
 
 #include <grid-files/common/Log.h>
+#include <grid-files/common/AttributeNode.h>
 #include <grid-files/grid/Typedefs.h>
 #include <macgyver/CacheStats.h>
 #include <set>
@@ -57,6 +58,7 @@ class ServiceInterface
      virtual void   shutdown();
      virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
      virtual time_t getContentChangeTime();
+     virtual void   getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isReady();

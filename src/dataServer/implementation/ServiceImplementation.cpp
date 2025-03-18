@@ -81,6 +81,7 @@ ServiceImplementation::ServiceImplementation()
     mDeletedFileCleanup_time = 0;
     mContentChangeTime = 0;
     mFileCache_enabled = false;
+    mFileCache_fileCount = 0;
 
     mStartTime = time(0);
   }
@@ -130,6 +131,43 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
     mFullUpdateRequired = true;
 
     mGridFileManager.init(mServerSessionId,contentServer);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    auto storage = parent->addAttribute("Storage");
+    storage->addAttribute("Directory",mDataDir);
+
+    auto fileCache = parent->addAttribute("File Cache");
+    if (mFileCache_enabled)
+    {
+      fileCache->addAttribute("Enabled","True");
+      fileCache->addAttribute("Directory",mFileCache_directory);
+      fileCache->addAttribute("Files",mFileCache_fileCount);
+    }
+    else
+      fileCache->addAttribute("Enabled","False");
+
+
+    auto fManager = parent->addAttribute("File Manager");
+    mGridFileManager.getStateAttributes(fManager);
+
+    auto gridCache = parent->addAttribute("Grid Cache");
+    SmartMet::GRID::valueCache.getStateAttributes(gridCache);
+
+    ServiceInterface::getStateAttributes(parent);
   }
   catch (...)
   {
@@ -6472,6 +6510,7 @@ void ServiceImplementation::removeOldCacheFiles(std::map<uint,std::string>& cach
 
     getFileList(mFileCache_directory.c_str(),filePatterns,false,dirList,fileList);
 
+    mFileCache_fileCount = fileList.size();
 
     // ### Removing files that should not be in the cache directory:
 
@@ -6486,6 +6525,7 @@ void ServiceImplementation::removeOldCacheFiles(std::map<uint,std::string>& cach
         sprintf(buf,"%s/%s",mFileCache_directory.c_str(),it->second.c_str());
         PRINT_DATA(mDebugLog,"Removing cached file: %s\n",buf);
         remove(buf);
+        mFileCache_fileCount--;
       }
     }
   }

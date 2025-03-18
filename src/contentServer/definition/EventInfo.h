@@ -16,6 +16,8 @@ class EventType
     static const uint UNKNOWN                                 = 0;
     static const uint CLEAR                                   = 1;
     static const uint CONTENT_SERVER_RELOAD                   = 2;
+    static const uint UPDATE_LOOP_START                       = 3;
+    static const uint UPDATE_LOOP_END                         = 4;
 
     static const uint PRODUCER_ADDED                          = 10;
     static const uint PRODUCER_DELETED                        = 11;

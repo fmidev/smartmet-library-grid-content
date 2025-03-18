@@ -53,6 +53,7 @@ class CacheImplementation : public ServiceInterface
     std::string&    getSourceInfo();
 
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+    virtual void    getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
 
     virtual void    eventProcessingThread();
 
@@ -211,6 +212,8 @@ class CacheImplementation : public ServiceInterface
     virtual void    readGeometryList();
 
     virtual void    event_clear(T::EventInfo& eventInfo);
+    virtual void    event_updateLoopStart(T::EventInfo& eventInfo);
+    virtual void    event_updateLoopEnd(T::EventInfo& eventInfo);
     virtual void    event_contentServerReload(T::EventInfo& eventInfo);
 
     virtual void    event_producerAdded(T::EventInfo& eventInfo);

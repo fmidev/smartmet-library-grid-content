@@ -129,6 +129,7 @@ class ServiceImplementation : public ServiceInterface
                        bool dataServerMethodsEnabled);
 
      void           getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+     void           getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
      void           initContentCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
      void           initContentSearchCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
 
@@ -701,11 +702,13 @@ class ServiceImplementation : public ServiceInterface
      long long                         mContentSearchCache_misses;
      long long                         mContentSearchCache_inserts;
 
+     long                              mRequestsPerSecond;
+     long long                         mRequestCounter;
 
      std::map<std::string,uint>        mOperationNames;
      Functions::FunctionCollection     mFunctionCollection;
-     std::shared_ptr<Fmi::LandCover> mLandCover;
-     std::shared_ptr<Fmi::DEM>       mDem;
+     std::shared_ptr<Fmi::LandCover>   mLandCover;
+     std::shared_ptr<Fmi::DEM>         mDem;
 };
 
 
