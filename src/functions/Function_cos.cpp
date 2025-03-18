@@ -117,7 +117,10 @@ void Function_cos::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       for (uint s=0; s<sz; s++)
       {
-        float val = inParameters[0][s];
+        float val = ParamValueMissing;
+        if (s < inParameters[0].size())
+          val = inParameters[0][s];
+
         if (val != ParamValueMissing)
           val = cos(val*degreesToRadiansMultiplier);
 
@@ -146,7 +149,10 @@ void Function_cos::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       for (uint s=0; s<sz; s++)
       {
-        float val = inParameters[0][s];
+        float val = ParamValueMissing;
+        if (s < inParameters[0].size())
+          val = inParameters[0][s];
+
         if (val != ParamValueMissing)
           val = cos(val*degreesToRadiansMultiplier);
 

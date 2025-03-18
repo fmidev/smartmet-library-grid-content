@@ -1,4 +1,4 @@
-#include "Function_tan.h"
+#include "Function_not.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -9,7 +9,7 @@ namespace Functions
 
 
 
-Function_tan::Function_tan()
+Function_not::Function_not()
 {
   try
   {
@@ -24,7 +24,7 @@ Function_tan::Function_tan()
 
 
 
-Function_tan::Function_tan(const Function_tan& function)
+Function_not::Function_not(const Function_not& function)
 :Function(function)
 {
   try
@@ -40,7 +40,7 @@ Function_tan::Function_tan(const Function_tan& function)
 
 
 
-Function_tan::~Function_tan()
+Function_not::~Function_not()
 {
   try
   {
@@ -56,14 +56,19 @@ Function_tan::~Function_tan()
 
 
 
-float Function_tan::executeFunctionCall1(std::vector<float>& parameters)
+float Function_not::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return tan(parameters[0]*degreesToRadiansMultiplier);
+      {
+        if (parameters[0] == 0)
+          return 1.0;
+        else
+          return 0;
+      }
       else
         return ParamValueMissing;
     }
@@ -80,14 +85,19 @@ float Function_tan::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
-double Function_tan::executeFunctionCall1(std::vector<double>& parameters)
+double Function_not::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return tan(parameters[0]*degreesToRadiansMultiplier);
+      {
+        if (parameters[0] == 0)
+          return 1.0;
+        else
+          return 0;
+      }
       else
         return ParamValueMissing;
     }
@@ -106,7 +116,7 @@ double Function_tan::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -118,11 +128,17 @@ void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       for (uint s=0; s<sz; s++)
       {
         float val = ParamValueMissing;
+        float val1 = ParamValueMissing;
         if (s < inParameters[0].size())
-          val = inParameters[0][s];
+          val1 = inParameters[0][s];
 
-        if (val != ParamValueMissing)
-          val = tan(val*degreesToRadiansMultiplier);
+        if (val1 != ParamValueMissing)
+        {
+          if (val1 == 0)
+            val = 1;
+          else
+            val = 0;
+        }
 
         outParameters.emplace_back(val);
       }
@@ -138,7 +154,7 @@ void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
-void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -150,11 +166,17 @@ void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       for (uint s=0; s<sz; s++)
       {
         float val = ParamValueMissing;
+        float val1 = ParamValueMissing;
         if (s < inParameters[0].size())
-          val = inParameters[0][s];
+          val1 = inParameters[0][s];
 
-        if (val != ParamValueMissing)
-          val = tan(val*degreesToRadiansMultiplier);
+        if (val1 != ParamValueMissing)
+        {
+          if (val1 == 0)
+            val = 1;
+          else
+            val = 0;
+        }
 
         outParameters.emplace_back(val);
       }
@@ -169,11 +191,11 @@ void Function_tan::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
-Function* Function_tan::duplicate()
+Function* Function_not::duplicate()
 {
   try
   {
-    return (Function*)new Function_tan(*this);
+    return (Function*)new Function_not(*this);
   }
   catch (...)
   {
