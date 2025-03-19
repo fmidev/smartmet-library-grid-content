@@ -48,6 +48,7 @@
 #include "../../functions/Function_out.h"
 #include "../../functions/Function_outCount.h"
 #include "../../functions/Function_outPrcnt.h"
+#include "../../functions/Function_round.h"
 #include "../../functions/Function_sdev.h"
 #include "../../functions/Function_sdevDir.h"
 #include "../../functions/Function_sequence.h"
@@ -287,6 +288,7 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("NOT",new Functions::Function_not());
     mFunctionCollection.addFunction("OR",new Functions::Function_or());
     mFunctionCollection.addFunction("OUT",new Functions::Function_out());
+    mFunctionCollection.addFunction("ROUND",new Functions::Function_round());
     mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
     mFunctionCollection.addFunction("SDEV_DIR",new Functions::Function_sdevDir());
     mFunctionCollection.addFunction("SIN",new Functions::Function_sin());

@@ -64,7 +64,7 @@ float Function_out::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
-        if (parameters[0] < parameters[1]  &&  parameters[0] > parameters[2])
+        if (parameters[0] < parameters[1]  ||  parameters[0] > parameters[2])
           return 1.0;
 
         return 0.0;
@@ -93,7 +93,7 @@ double Function_out::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
-        if (parameters[0] < parameters[1]  &&  parameters[0] > parameters[2])
+        if (parameters[0] < parameters[1]  ||  parameters[0] > parameters[2])
           return 1.0;
 
         return 0.0;
