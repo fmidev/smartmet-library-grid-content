@@ -117,6 +117,41 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
 
 
 
+void ServiceInterface::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mProcessingLog || mDebugLog)
+    {
+      auto cLogs = parent->addAttribute("Logs");
+      if (mProcessingLog)
+      {
+        if (mProcessingLog->isEnabled())
+          cLogs->addAttribute("Processing Log",mProcessingLog->getFileName());
+        else
+          cLogs->addAttribute("Processing Log","Disabled");
+      }
+
+      if (mDebugLog)
+      {
+        if (mDebugLog->isEnabled())
+          cLogs->addAttribute("Debug Log",mDebugLog->getFileName());
+        else
+          cLogs->addAttribute("Debug Log","Disabled");
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 time_t ServiceInterface::getContentChangeTime()
 {
   FUNCTION_TRACE

@@ -9,6 +9,7 @@
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/common/AttributeList.h>
 #include <grid-files/common/Log.h>
+#include <grid-files/common/AttributeNode.h>
 #include <grid-files/grid/GridValueList.h>
 #include <macgyver/CacheStats.h>
 #include <gis/DEM.h>
@@ -32,6 +33,7 @@ class ServiceInterface
      virtual void   setDebugLog(Log *debugLog);
      virtual void   setProcessingLog(Log *processingLog);
      virtual void   getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
+     virtual void   getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
 
      virtual void   setEnabled(bool enabled);
      virtual bool   isEnabled();

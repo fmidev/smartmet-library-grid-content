@@ -52,6 +52,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   setCleanup(time_t age,time_t checkInterval);
      virtual void   setDem(std::shared_ptr<Fmi::DEM> dem);
      virtual void   setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
+     virtual void   getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
 
      virtual void   eventProcessingThread();
      virtual void   cacheProcessingThread();
@@ -209,6 +210,7 @@ class ServiceImplementation : public ServiceInterface
      time_t               mContentChangeTime;
      std::string          mFileCache_directory;
      bool                 mFileCache_enabled;
+     uint                 mFileCache_fileCount;
      time_t               mStartTime;
 
 

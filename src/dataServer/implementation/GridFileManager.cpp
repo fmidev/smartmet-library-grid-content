@@ -523,6 +523,49 @@ std::size_t GridFileManager::getFileCount()
 
 
 
+void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(&mModificationLock);
+    uint mmapCount = 0;
+    uint cacheExpectedCount = 0;
+    uint cachedCount = 0;
+    time_t deletionTime = time(0) + 180;
+
+    for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+    {
+      GRID::GridFile_sptr gridFile = it->second;
+      if (gridFile->isMemoryMapped())
+        mmapCount++;
+
+      if (!gridFile->isNetworkFile()  &&  (gridFile->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&
+          (gridFile->getDeletionTime() == 0 || gridFile->getDeletionTime() > deletionTime))
+      {
+        cacheExpectedCount++;
+
+        if ((gridFile->getFlags() &  GRID::GridFile::Flags::LocalCacheReady) != 0)
+          cachedCount++;
+      }
+    }
+
+    auto files = parent->addAttribute("Files");
+    files->addAttribute("Total",mFileList.size());
+    files->addAttribute("Memory mapped",mmapCount);
+    files->addAttribute("Local caching expected",cacheExpectedCount);
+    files->addAttribute("Local caching ready",cachedCount);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 {
   FUNCTION_TRACE

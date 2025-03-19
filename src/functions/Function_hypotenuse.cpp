@@ -116,8 +116,15 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      double a = inParameters[0][t];
-      double b = inParameters[1][t];
+      float a = ParamValueMissing;
+      float b = ParamValueMissing;
+
+      if (t < inParameters[0].size())
+        a = inParameters[0][t];
+
+      if (t < inParameters[1].size())
+        b = inParameters[1][t];
+
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {
@@ -151,8 +158,14 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
     outParameters.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      double a = inParameters[0][t];
-      double b = inParameters[1][t];
+      double a = ParamValueMissing;
+      double b = ParamValueMissing;
+
+      if (t < inParameters[0].size())
+        a = inParameters[0][t];
+
+      if (t < inParameters[1].size())
+        b = inParameters[1][t];
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {

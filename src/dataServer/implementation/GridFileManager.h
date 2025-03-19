@@ -4,6 +4,7 @@
 
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/common/ModificationLock.h>
+#include <grid-files/common/AttributeNode.h>
 #include <vector>
 #include <unordered_map>
 
@@ -38,6 +39,7 @@ class GridFileManager
     void                getFilesToBeCached(std::map<uint,std::string>& filenames);
     void                getFilesInCache(std::map<uint,std::string>& filenames);
     void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
+    void                getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
     void                resetRequestCounters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 

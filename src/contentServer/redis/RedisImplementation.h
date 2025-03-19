@@ -22,6 +22,7 @@ class RedisImplementation : public ServiceInterface
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired);
      virtual void   shutdown();
      virtual void   syncFilenames();
+     virtual void   getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
 
      virtual void   lock(const char *function,uint line,ulonglong& key,uint waitTimeInSec,bool resetLock);
      virtual void   unlock(ulonglong key);

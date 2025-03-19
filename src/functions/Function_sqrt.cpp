@@ -116,7 +116,10 @@ void Function_sqrt::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
       for (uint s=0; s<sz; s++)
       {
-        float val = inParameters[0][s];
+        float val = ParamValueMissing;
+        if (s < inParameters[0].size())
+          val = inParameters[0][s];
+
         if (val != ParamValueMissing)
           val = sqrt(val);
 
@@ -145,7 +148,10 @@ void Function_sqrt::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
       for (uint s=0; s<sz; s++)
       {
-        float val = inParameters[0][s];
+        float val = ParamValueMissing;
+        if (s < inParameters[0].size())
+          val = inParameters[0][s];
+
         if (val != ParamValueMissing)
           val = sqrt(val);
 

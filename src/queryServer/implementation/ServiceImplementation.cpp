@@ -18,6 +18,7 @@
 #include <deque>
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_acos.h"
+#include "../../functions/Function_and.h"
 #include "../../functions/Function_asin.h"
 #include "../../functions/Function_atan.h"
 #include "../../functions/Function_avg.h"
@@ -25,18 +26,29 @@
 #include "../../functions/Function_cos.h"
 #include "../../functions/Function_div.h"
 #include "../../functions/Function_diff.h"
+#include "../../functions/Function_eq.h"
+#include "../../functions/Function_gt.h"
+#include "../../functions/Function_gte.h"
 #include "../../functions/Function_hypotenuse.h"
+#include "../../functions/Function_if.h"
+#include "../../functions/Function_in.h"
 #include "../../functions/Function_inCount.h"
 #include "../../functions/Function_inPrcnt.h"
 #include "../../functions/Function_limit.h"
+#include "../../functions/Function_lt.h"
+#include "../../functions/Function_lte.h"
 #include "../../functions/Function_median.h"
-#include "../../functions/Function_outCount.h"
-#include "../../functions/Function_outPrcnt.h"
 #include "../../functions/Function_min.h"
 #include "../../functions/Function_max.h"
 #include "../../functions/Function_mode.h"
 #include "../../functions/Function_mul.h"
 #include "../../functions/Function_multiply.h"
+#include "../../functions/Function_not.h"
+#include "../../functions/Function_or.h"
+#include "../../functions/Function_out.h"
+#include "../../functions/Function_outCount.h"
+#include "../../functions/Function_outPrcnt.h"
+#include "../../functions/Function_round.h"
 #include "../../functions/Function_sdev.h"
 #include "../../functions/Function_sdevDir.h"
 #include "../../functions/Function_sequence.h"
@@ -45,6 +57,7 @@
 #include "../../functions/Function_sub.h"
 #include "../../functions/Function_sum.h"
 #include "../../functions/Function_tan.h"
+#include "../../functions/Function_valid.h"
 #include "../../functions/Function_variance.h"
 #include "../../functions/Function_windDir.h"
 #include "../../functions/Function_vectorU.h"
@@ -171,6 +184,9 @@ ServiceImplementation::ServiceImplementation()
     mLevelRangeCache.resize(10000);
     mLevelContentCache.resize(10000);
 
+    mRequestCounter = 0;
+    mRequestsPerSecond = 0;
+
     GRID::Operation::getOperatorNames(mOperationNames);
   }
   catch (...)
@@ -246,6 +262,7 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("K2F",k2f);
 
     mFunctionCollection.addFunction("ADD",new Functions::Function_add());       // add const
+    mFunctionCollection.addFunction("AND",new Functions::Function_and());
     mFunctionCollection.addFunction("ASIN",new Functions::Function_asin());
     mFunctionCollection.addFunction("ACOS",new Functions::Function_acos());
     mFunctionCollection.addFunction("ATAN",new Functions::Function_atan());
@@ -253,14 +270,25 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("CHANGE",new Functions::Function_change());
     mFunctionCollection.addFunction("DIFF",new Functions::Function_diff());
     mFunctionCollection.addFunction("DIV",new Functions::Function_div());
+    mFunctionCollection.addFunction("EQ",new Functions::Function_eq());
+    mFunctionCollection.addFunction("GT",new Functions::Function_gt());
+    mFunctionCollection.addFunction("GTE",new Functions::Function_gte());
+    mFunctionCollection.addFunction("IF",new Functions::Function_if());
+    mFunctionCollection.addFunction("IN",new Functions::Function_in());
     mFunctionCollection.addFunction("IN_COUNT",new Functions::Function_inCount());
     mFunctionCollection.addFunction("IN_PRCNT",new Functions::Function_inPrcnt());
     mFunctionCollection.addFunction("LIMIT",new Functions::Function_limit());
+    mFunctionCollection.addFunction("LT",new Functions::Function_lt());
+    mFunctionCollection.addFunction("LTE",new Functions::Function_lte());
     mFunctionCollection.addFunction("MAX",new Functions::Function_max());
     mFunctionCollection.addFunction("MEDIAN",new Functions::Function_median());
     mFunctionCollection.addFunction("MIN",new Functions::Function_min());
     mFunctionCollection.addFunction("MODE",new Functions::Function_mode());
     mFunctionCollection.addFunction("MUL",new Functions::Function_mul());
+    mFunctionCollection.addFunction("NOT",new Functions::Function_not());
+    mFunctionCollection.addFunction("OR",new Functions::Function_or());
+    mFunctionCollection.addFunction("OUT",new Functions::Function_out());
+    mFunctionCollection.addFunction("ROUND",new Functions::Function_round());
     mFunctionCollection.addFunction("SDEV",new Functions::Function_sdev());
     mFunctionCollection.addFunction("SDEV_DIR",new Functions::Function_sdevDir());
     mFunctionCollection.addFunction("SIN",new Functions::Function_sin());
@@ -275,6 +303,7 @@ void ServiceImplementation::init(
 
     mFunctionCollection.addFunction("SUM",new Functions::Function_sum());
     mFunctionCollection.addFunction("SUB",new Functions::Function_sub());
+    mFunctionCollection.addFunction("VALID",new Functions::Function_valid());
 
 
     mFunctionCollection.addFunction("FEELS_LIKE",new Functions::Function_feelsLike());
@@ -339,6 +368,46 @@ void ServiceImplementation::initContentSearchCache(std::size_t maxRecordsPerThre
   {
     mContentSearchCache_maxRecordsPerThread = maxRecordsPerThread;
     mContentSearchCache_clearInterval = clearIntervalInSeconds;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+    throw exception;
+  }
+}
+
+
+
+
+
+void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  try
+  {
+    auto processing = parent->addAttribute("Procesing Statistics");
+    processing->addAttribute("Request Counter",mRequestCounter);
+    processing->addAttribute("Requests/Second",mRequestsPerSecond);
+
+    auto cache = parent->addAttribute("Cache Hit Percent");
+
+    char tmp[30];
+
+    double hitPercent1 = 0;
+    double hitPercent2 = 0;
+
+    if ((mContentCache_hits + mContentCache_misses))
+      hitPercent1 = (double)(100 * mContentCache_hits) / (double)(mContentCache_hits + mContentCache_misses);
+
+    if ((mContentSearchCache_hits + mContentSearchCache_misses))
+      hitPercent2 = (double)(100 * mContentSearchCache_hits) / (double)(mContentSearchCache_hits + mContentSearchCache_misses);
+
+    sprintf(tmp,"%.1f",hitPercent1);
+    cache->addAttribute("Content cache",tmp);
+
+    sprintf(tmp,"%.1f",hitPercent2);
+    cache->addAttribute("Content search cache",tmp);
+
+    ServiceInterface::getStateAttributes(parent);
   }
   catch (...)
   {
@@ -562,6 +631,8 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
     // query.print(std::cout,0,0);
 
     query.mProcessingStartTime = time(nullptr);
+
+    mRequestCounter++;
 
     if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
     {
@@ -11516,6 +11587,10 @@ void ServiceImplementation::updateProcessing()
   try
   {
     mUpdateProcessingActive = true;
+
+    time_t prevTime = time(nullptr);
+    long long prevCounter = mRequestCounter;
+
     while (!mShutdownRequested)
     {
 
@@ -11613,11 +11688,21 @@ void ServiceImplementation::updateProcessing()
       try
       {
         time_t currentTime = time(nullptr);
+
+        time_t dt = currentTime - prevTime;
+        if (dt >= 10)
+        {
+          mRequestsPerSecond = (mRequestCounter - prevCounter) / dt;
+          prevCounter = mRequestCounter;
+          prevTime = currentTime;
+        }
+
         if ((currentTime - mHeightConversionsFile_checkTime) > 60)
         {
           loadHeightConversionFile();
           mHeightConversionsFile_checkTime = currentTime;
         }
+
       }
       catch (...)
       {

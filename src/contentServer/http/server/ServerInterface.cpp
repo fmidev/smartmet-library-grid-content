@@ -149,6 +149,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getProducerInfoListByParameter") == 0)
+    {
+      getProducerInfoListByParameter(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getProducerInfoListBySourceId") == 0)
     {
       getProducerInfoListBySourceId(request,response);

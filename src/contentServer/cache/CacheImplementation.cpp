@@ -259,6 +259,51 @@ void CacheImplementation::setContentUpdateInterval(uint intervalInSec)
 
 
 
+void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+{
+  FUNCTION_TRACE
+  try
+  {
+    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    if (!ssp)
+      return;
+
+    AutoReadLock readLock(&mSearchModificationLock);
+    auto records = parent->addAttribute("Data Records");
+    records->addAttribute("Producer",ssp->mProducerInfoList.getLength());
+    records->addAttribute("Generation",ssp->mGenerationInfoList.getLength());
+    records->addAttribute("Geometry",ssp->mGeometryInfoList.getLength());
+    records->addAttribute("File",ssp->mFileInfoList.getLength());
+    records->addAttribute("Content",ssp->mContentInfoList[0].getLength());
+
+    auto events = parent->addAttribute("Events");
+    events->addAttribute("Last event id",mLastProcessedEventId);
+
+    auto swap = parent->addAttribute("Content Swap");
+    if (!mContentSwapEnabled)
+    {
+      swap->addAttribute("Enabled","False");
+    }
+    else
+    {
+      swap->addAttribute("Enabled","True");
+      long diff = time(nullptr) - mContentUpdateTime;
+      swap->addAttribute("Last Swap (seconds ago)",diff);
+      swap->addAttribute("Swap Interval (seconds)",mContentUpdateInterval);
+    }
+
+    ServiceInterface::getStateAttributes(parent);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void CacheImplementation::setContentSwap(bool enabled,uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime)
 {
   FUNCTION_TRACE
@@ -847,7 +892,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
     if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
-    ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,0,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
+    ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,-1,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
 
     std::set<uint> producerIdList;
     uint len = contentInfoList.getLength();
@@ -6427,6 +6472,42 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 
 
+void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+  }
+  catch (...)
+  {
+    mUpdateInProgress = false;
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // Content will be swapped if it has changed
+    mContentUpdateTime = time(0) - mContentUpdateInterval;
+  }
+  catch (...)
+  {
+    mUpdateInProgress = false;
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7635,6 +7716,14 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
         event_clear(eventInfo);
         break;
 
+      case EventType::UPDATE_LOOP_START:
+        event_updateLoopStart(eventInfo);
+        break;
+
+      case EventType::UPDATE_LOOP_END:
+        event_updateLoopEnd(eventInfo);
+        break;
+
       case EventType::CONTENT_SERVER_RELOAD:
         event_contentServerReload(eventInfo);
         break;
@@ -7990,6 +8079,15 @@ void CacheImplementation::updateContent()
 
       if (ssp)
       {
+        if (mDebugLog &&  mDebugLog->isEnabled())
+        {
+          PRINT_DATA(mDebugLog,"\nproducers  %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
+          PRINT_DATA(mDebugLog,"generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
+          PRINT_DATA(mDebugLog,"geometries  %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
+          PRINT_DATA(mDebugLog,"files  %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
+          PRINT_DATA(mDebugLog,"content  %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
+        }
+
         if (mCachedFiles_totalWaitTime == 0 &&
             ssp->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
             ssp->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
