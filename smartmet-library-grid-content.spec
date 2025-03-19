@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.2.20
+Version: 25.3.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 25.2.18
-BuildRequires: smartmet-library-grid-files-devel >= 25.2.18
+BuildRequires: smartmet-library-grid-files-devel >= 25.3.19
 BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
-BuildRequires: smartmet-library-spine-devel >= 25.2.18
+BuildRequires: smartmet-library-spine-devel >= 25.3.3
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -40,9 +40,9 @@ Requires: omniORB
 Requires: gdal310
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.2.18
-Requires: smartmet-library-grid-files >= 25.2.18
+Requires: smartmet-library-grid-files >= 25.3.19
 Requires: smartmet-library-macgyver >= 25.2.18
-Requires: smartmet-library-spine >= 25.2.18
+Requires: smartmet-library-spine >= 25.3.3
 
 Provides: %{SPECNAME}
 
@@ -78,8 +78,8 @@ Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 25.2.18
 Requires: smartmet-library-gis-devel >= 25.2.18
-Requires: smartmet-library-spine-devel >= 25.2.18
-Requires: smartmet-library-grid-files-devel >= 25.2.18
+Requires: smartmet-library-spine-devel >= 25.3.3
+Requires: smartmet-library-grid-files-devel >= 25.3.19
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,9 +89,11 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Mar 19 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.3.19-1.fmi
+- Ported more functions from Lua to C++
+- Added possibility to request state information
 * Thu Feb 20 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.2.20-1.fmi
 - Update to gdal-3.10, geos-3.13 and proj-9.5
-
 * Mon Feb 10 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.2.10-1.fmi
 - Trim config file rows
 * Thu Jan 30 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.1.30-1.fmi
