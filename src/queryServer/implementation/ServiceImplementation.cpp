@@ -224,6 +224,8 @@ void ServiceImplementation::init(
     const std::string& gridConfigFile,
     const std::string& heightConversionFile,
     string_vec& parameterMappingFiles,
+    const std::string& unitConversionFile,
+    string_vec& parameterMappingAliasFiles,
     string_vec& aliasFiles,
     const std::string& producerFile,
     string_vec& producerAliasFiles,
@@ -320,6 +322,10 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
 
 
+    mUnitConversionFile = unitConversionFile;
+    if (!mUnitConversionFile.empty())
+      loadUnitConversionFile();
+
     mParameterMappingFiles = parameterMappingFiles;
 
     for (auto it = mParameterMappingFiles.begin(); it != mParameterMappingFiles.end(); ++it)
@@ -331,6 +337,19 @@ void ServiceImplementation::init(
     for (auto it = mParameterMappings.begin(); it != mParameterMappings.end(); ++it)
     {
       it->init();
+
+      for (auto itm = parameterMappingAliasFiles.begin(); itm != parameterMappingAliasFiles.end(); ++itm)
+      {
+        if (*itm == it->getFilename())
+        {
+          ParameterMapping_vec aliasMappings;
+          it->getAliasMappings(aliasMappings,mUnitConversions);
+
+          ParameterMappingFile mapping;
+          mapping.setParameterMappings(aliasMappings);
+          mParameterAliasMappings.emplace_back(mapping);
+        }
+      }
     }
 
     startUpdateProcessing();
@@ -821,6 +840,84 @@ void ServiceImplementation::loadProducerFile()
 
 
 
+
+void ServiceImplementation::loadUnitConversionFile()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mShutdownRequested)
+      return;
+
+    FILE* file = fopen(mUnitConversionFile.c_str(), "re");
+    if (file == nullptr)
+    {
+      Fmi::Exception exception(BCP, "Cannot open the unit conversion file!");
+      exception.addParameter("Filename", mUnitConversionFile);
+      throw exception;
+    }
+
+    mUnitConversions.clear();
+
+    char st[1000];
+
+    while (!feof(file))
+    {
+      if (fgets(st, 1000, file) != nullptr && st[0] != '#')
+      {
+        bool ind = false;
+        char* field[100];
+        uint c = 1;
+        field[0] = st;
+        char* p = st;
+        while (*p != '\0' && c < 100)
+        {
+          if (*p == '"')
+            ind = !ind;
+
+          if ((*p == ';' || *p == '\n') && !ind)
+          {
+            *p = '\0';
+            p++;
+            field[c] = p;
+            c++;
+          }
+          else
+          {
+            p++;
+          }
+        }
+        c--;
+
+        if (c >= 4)
+        {
+          UnitConversion rec;
+
+          rec.mSourceUnit = field[0];
+          rec.mTargetUnit = field[1];
+          rec.mConversionFunction = field[2];
+          rec.mReverseConversionFunction = field[3];
+
+          //rec.print(std::cout,0,0);
+
+          mUnitConversions.push_back(rec);
+        }
+      }
+    }
+    fclose(file);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+
+
 void ServiceImplementation::loadHeightConversionFile()
 {
   FUNCTION_TRACE
@@ -838,7 +935,7 @@ void ServiceImplementation::loadHeightConversionFile()
     if (file == nullptr)
     {
       Fmi::Exception exception(BCP, "Cannot open the height conversion file!");
-      exception.addParameter("Filename", mProducerFile);
+      exception.addParameter("Filename", mHeightConversionsFile);
       throw exception;
     }
 
@@ -1322,6 +1419,11 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
       {
         m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, *mappings);
       }
+
+      for (auto m = mParameterAliasMappings.begin(); m != mParameterAliasMappings.end(); ++m)
+      {
+        m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, *mappings);
+      }
     }
 
     //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
@@ -1387,7 +1489,11 @@ void ServiceImplementation::getParameterMappings(
 
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
-        //m->getMappings(producerName, parameterName, geometryId, onlySearchEnabled, mappings);
+        m->getMappings(producerName, parameterName, geometryId, levelId, level, onlySearchEnabled, *mappings);
+      }
+
+      for (auto m = mParameterAliasMappings.begin(); m != mParameterAliasMappings.end(); ++m)
+      {
         m->getMappings(producerName, parameterName, geometryId, levelId, level, onlySearchEnabled, *mappings);
       }
     }

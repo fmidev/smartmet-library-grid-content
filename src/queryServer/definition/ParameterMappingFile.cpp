@@ -10,6 +10,20 @@ namespace QueryServer
 {
 
 
+ParameterMappingFile::ParameterMappingFile()
+{
+  try
+  {
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 ParameterMappingFile::ParameterMappingFile(const std::string& filename)
 {
   try
@@ -21,24 +35,6 @@ ParameterMappingFile::ParameterMappingFile(const std::string& filename)
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
-
-
-
-
-/*
-ParameterMappingFile::ParameterMappingFile(const ParameterMappingFile& mappingFile)
-{
-  try
-  {
-    mFilename = mappingFile.mFilename;
-    mMappingSearch = mappingFile.mMappingSearch;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-*/
 
 
 
@@ -80,10 +76,12 @@ bool ParameterMappingFile::checkUpdates()
   try
   {
     time_t tt = getFileModificationTime(mFilename.c_str());
-    if (tt == mLastModified  ||  (tt+3) >= time(nullptr))
+    long fs = getFileSize(mFilename.c_str());
+
+    if (tt == mLastModified  ||  (tt+10) >= time(nullptr) || fs < 10)
       return false;
 
-    if (tt != mLastModified  &&  (tt+3) < time(nullptr))
+    if (tt != mLastModified  &&  (tt+10) < time(nullptr))
     {
       loadFile();
       return true;
@@ -313,6 +311,59 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitConversion_vec& unitConversions)
+{
+  try
+  {
+    if (!mMappingSearch)
+      return;
+
+    AutoReadLock lock(&mModificationLock);
+
+    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
+    {
+      for (auto m = it->second.begin(); m != it->second.end(); ++m)
+      {
+        std::vector<std::string> partList;
+        splitString(m->mParameterName,'-',partList);
+
+        uint sz = partList.size();
+        if (sz > 0)
+        {
+          const char *unit = partList[sz-1].c_str();
+
+          for (auto uIt = unitConversions.begin(); uIt != unitConversions.end(); ++uIt)
+          {
+            if (strcasecmp(unit,uIt->mSourceUnit.c_str()) == 0)
+            {
+              ParameterMapping newMapping = *m;
+              partList[sz-1] = uIt->mTargetUnit;
+              char newName[100];
+              char *p = newName;
+              p += sprintf(p,"%s",partList[0].c_str());
+              for (uint t=1; t<sz; t++)
+              {
+                p += sprintf(p,"-%s",partList[t].c_str());
+              }
+              newMapping.mParameterName = newName;
+              newMapping.mConversionFunction = uIt->mConversionFunction;
+              newMapping.mReverseConversionFunction = uIt->mReverseConversionFunction;
+              mappings.push_back(newMapping);
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
@@ -406,6 +457,58 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
     throw Fmi::Exception(BCP, "Operation failed!", nullptr);
   }
 }
+
+
+
+
+
+void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
+{
+  try
+  {
+    MappingSearch *msearch = new MappingSearch();
+    MappingSearch *mreverseSearch = new MappingSearch();
+
+    for (auto it = mappings.begin(); it != mappings.end(); ++it)
+    {
+      std::string key = toLowerString(it->mProducerName + ":" + it->mParameterName + ":" + Fmi::to_string(it->mGeometryId));
+
+      auto s = msearch->find(key);
+      if (s != msearch->end())
+      {
+        s->second.emplace_back(*it);
+      }
+      else
+      {
+        ParameterMapping_vec vec;
+        vec.push_back(*it);
+        msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
+      }
+
+      std::string rkey = toLowerString(it->mProducerName + ":" + it->mParameterKey);
+      auto ss = mreverseSearch->find(rkey);
+      if (ss != mreverseSearch->end())
+      {
+        ss->second.emplace_back(*it);
+      }
+      else
+      {
+        ParameterMapping_vec vec;
+        vec.push_back(*it);
+        mreverseSearch->insert(std::pair<std::string,ParameterMapping_vec>(rkey,vec));
+      }
+    }
+
+    AutoWriteLock lock(&mModificationLock);
+    mMappingSearch.reset(msearch);
+    mMappingReverseSearch.reset(mreverseSearch);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
 
 
 
