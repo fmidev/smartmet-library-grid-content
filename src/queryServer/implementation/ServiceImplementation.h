@@ -2,6 +2,7 @@
 
 #include "../definition/ServiceInterface.h"
 #include "../definition/AliasFileCollection.h"
+#include "../definition/UnitConversion.h"
 #include "../definition/ParameterMappingFile.h"
 #include "../../dataServer/definition/ServiceInterface.h"
 #include "../../contentServer/definition/ServiceInterface.h"
@@ -121,6 +122,8 @@ class ServiceImplementation : public ServiceInterface
                        const std::string& gridConfigFile,
                        const std::string& heightConversionFile,
                        string_vec& parameterMappingFiles,
+                       const std::string& unitConversionFile,
+                       string_vec& parameterMappingAliasFiles,
                        string_vec& aliasFiles,
                        const std::string& producerFile,
                        string_vec& producerAliasFiles,
@@ -295,6 +298,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           loadProducerFile();
      void           loadHeightConversionFile();
+     void           loadUnitConversionFile();
 
 
      bool           parseFunction(
@@ -665,6 +669,9 @@ class ServiceImplementation : public ServiceInterface
      HeightVecCache             mHeightVecCache;
 
      ParamMappingFile_vec       mParameterMappings;
+     ParamMappingFile_vec       mParameterAliasMappings;
+     std::string                mUnitConversionFile;
+     UnitConversion_vec         mUnitConversions;
      time_t                     mParameterMapping_checkTime;
      uint                       mParameterMapping_checkInterval;
      std::size_t                mContentCache_maxRecords;
