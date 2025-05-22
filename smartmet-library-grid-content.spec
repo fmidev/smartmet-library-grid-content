@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.4.8
+Version: 25.5.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -29,9 +29,9 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 25.2.18
-BuildRequires: smartmet-library-grid-files-devel >= 25.4.8
-BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
-BuildRequires: smartmet-library-spine-devel >= 25.3.24
+BuildRequires: smartmet-library-grid-files-devel >= 25.5.22
+BuildRequires: smartmet-library-macgyver-devel >= 25.5.22
+BuildRequires: smartmet-library-spine-devel >= 25.5.13
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -40,9 +40,9 @@ Requires: omniORB
 Requires: gdal310
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.2.18
-Requires: smartmet-library-grid-files >= 25.4.8
-Requires: smartmet-library-macgyver >= 25.2.18
-Requires: smartmet-library-spine >= 25.3.24
+Requires: smartmet-library-grid-files >= 25.5.22
+Requires: smartmet-library-macgyver >= 25.5.22
+Requires: smartmet-library-spine >= 25.5.13
 
 Provides: %{SPECNAME}
 
@@ -76,10 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 25.2.18
+Requires: smartmet-library-macgyver-devel >= 25.5.22
 Requires: smartmet-library-gis-devel >= 25.2.18
-Requires: smartmet-library-spine-devel >= 25.3.24
-Requires: smartmet-library-grid-files-devel >= 25.4.8
+Requires: smartmet-library-spine-devel >= 25.5.13
+Requires: smartmet-library-grid-files-devel >= 25.5.22
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -89,6 +89,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
+- Repackaged to hide dark() implementation details
 * Tue Apr  8 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.4.8-1.fmi
 - Improved parameter auto-mappings and added build-in parameter unit conversions
 * Wed Mar 19 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.3.19-1.fmi
