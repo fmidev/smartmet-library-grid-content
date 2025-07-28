@@ -1,6 +1,6 @@
 #include "QueryParameter.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 
 namespace SmartMet
@@ -115,51 +115,51 @@ std::size_t QueryParameter::getHash()
   try
   {
     std::size_t hash = 0;
-    boost::hash_combine(hash,mId);
-    boost::hash_combine(hash,mAlternativeParamId);
-    boost::hash_combine(hash,mType);
-    boost::hash_combine(hash,mLocationType);
-    boost::hash_combine(hash,mParam);
-    boost::hash_combine(hash,mOrigParam);
-    boost::hash_combine(hash,mSymbolicName);
-    boost::hash_combine(hash,mParameterKeyType);
-    boost::hash_combine(hash,mParameterKey);
-    boost::hash_combine(hash,mProducerName);
-    boost::hash_combine(hash,mGeometryId);
-    boost::hash_combine(hash,mParameterLevelId);
-    boost::hash_combine(hash,mParameterLevel);
-    boost::hash_combine(hash,mForecastType );
-    boost::hash_combine(hash,mForecastNumber);
-    boost::hash_combine(hash,mAreaInterpolationMethod);
-    boost::hash_combine(hash,mTimeInterpolationMethod);
-    boost::hash_combine(hash,mLevelInterpolationMethod);
+    Fmi::hash_merge(hash,mId);
+    Fmi::hash_merge(hash,mAlternativeParamId);
+    Fmi::hash_merge(hash,mType);
+    Fmi::hash_merge(hash,mLocationType);
+    Fmi::hash_merge(hash,mParam);
+    Fmi::hash_merge(hash,mOrigParam);
+    Fmi::hash_merge(hash,mSymbolicName);
+    Fmi::hash_merge(hash,mParameterKeyType);
+    Fmi::hash_merge(hash,mParameterKey);
+    Fmi::hash_merge(hash,mProducerName);
+    Fmi::hash_merge(hash,mGeometryId);
+    Fmi::hash_merge(hash,mParameterLevelId);
+    Fmi::hash_merge(hash,mParameterLevel);
+    Fmi::hash_merge(hash,mForecastType );
+    Fmi::hash_merge(hash,mForecastNumber);
+    Fmi::hash_merge(hash,mAreaInterpolationMethod);
+    Fmi::hash_merge(hash,mTimeInterpolationMethod);
+    Fmi::hash_merge(hash,mLevelInterpolationMethod);
 
     for (auto it = mContourLowValues.begin(); it != mContourLowValues.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
     for (auto it = mContourHighValues.begin(); it != mContourHighValues.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
     for (auto it = mContourColors.begin(); it != mContourColors.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
-    boost::hash_combine(hash,mProducerId);
-    boost::hash_combine(hash,mGenerationFlags);
-    boost::hash_combine(hash,mTimestepsBefore);
-    boost::hash_combine(hash,mTimestepsAfter);
-    boost::hash_combine(hash,mTimestepSizeInMinutes);
+    Fmi::hash_merge(hash,mProducerId);
+    Fmi::hash_merge(hash,mGenerationFlags);
+    Fmi::hash_merge(hash,mTimestepsBefore);
+    Fmi::hash_merge(hash,mTimestepsAfter);
+    Fmi::hash_merge(hash,mTimestepSizeInMinutes);
 
     //mValueList = queryParameter.mValueList;
 
-    boost::hash_combine(hash,mPrecision);
-    //boost::hash_combine(hash,mTemporary);
-    //boost::hash_combine(hash,mFunction);
+    Fmi::hash_merge(hash,mPrecision);
+    //Fmi::hash_merge(hash,mTemporary);
+    //Fmi::hash_merge(hash,mFunction);
     //mFunctionParams = queryParameter.mFunctionParams;
-    //boost::hash_combine(hash,mFlags);
+    //Fmi::hash_merge(hash,mFlags);
 
     //mCoordinates = queryParameter.mCoordinates;
 
-    boost::hash_combine(hash,mAttributeList.getHash());
+    Fmi::hash_merge(hash,mAttributeList.getHash());
 
     return hash;
   }

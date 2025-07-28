@@ -5,7 +5,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -1045,15 +1045,15 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
       if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
       {
         std::size_t seed = 0;
-        boost::hash_combine(seed,contentInfo->mProducerId);
-        boost::hash_combine(seed,sourceParamKey);
-        boost::hash_combine(seed,targetParameterKeyType);
-        boost::hash_combine(seed,targetParamKey);
-        boost::hash_combine(seed,contentInfo->mGeometryId);
-        boost::hash_combine(seed,paramLevelId);
-        boost::hash_combine(seed,contentInfo->mParameterLevel);
-        boost::hash_combine(seed,contentInfo->mForecastType);
-        boost::hash_combine(seed,contentInfo->mForecastNumber);
+        Fmi::hash_merge(seed,contentInfo->mProducerId);
+        Fmi::hash_merge(seed,sourceParamKey);
+        Fmi::hash_merge(seed,targetParameterKeyType);
+        Fmi::hash_merge(seed,targetParamKey);
+        Fmi::hash_merge(seed,contentInfo->mGeometryId);
+        Fmi::hash_merge(seed,paramLevelId);
+        Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+        Fmi::hash_merge(seed,contentInfo->mForecastType);
+        Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
 
         if (tmpList.find(seed) == tmpList.end())
@@ -1226,15 +1226,15 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
           std::size_t seed = 0;
-          boost::hash_combine(seed,contentInfo->mProducerId);
-          boost::hash_combine(seed,sourceParamKey);
-          boost::hash_combine(seed,targetParameterKeyType);
-          boost::hash_combine(seed,targetParamKey);
-          boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelId);
-          boost::hash_combine(seed,contentInfo->mParameterLevel);
-          boost::hash_combine(seed,contentInfo->mForecastType);
-          boost::hash_combine(seed,contentInfo->mForecastNumber);
+          Fmi::hash_merge(seed,contentInfo->mProducerId);
+          Fmi::hash_merge(seed,sourceParamKey);
+          Fmi::hash_merge(seed,targetParameterKeyType);
+          Fmi::hash_merge(seed,targetParamKey);
+          Fmi::hash_merge(seed,contentInfo->mGeometryId);
+          Fmi::hash_merge(seed,paramLevelId);
+          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+          Fmi::hash_merge(seed,contentInfo->mForecastType);
+          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
 
           if (tmpList.find(seed) == tmpList.end())
@@ -5310,10 +5310,10 @@ ulonglong MemoryImplementation::updateProducerHashNoLock(uint producerId)
     std::size_t contentHash = mContentInfoList[0].getHashByProducerId(producerId);
 
     std::size_t h = 0;
-    boost::hash_combine(h,generationHash);
-    boost::hash_combine(h,geometryHash);
-    boost::hash_combine(h,fileHash);
-    boost::hash_combine(h,contentHash);
+    Fmi::hash_merge(h,generationHash);
+    Fmi::hash_merge(h,geometryHash);
+    Fmi::hash_merge(h,fileHash);
+    Fmi::hash_merge(h,contentHash);
 
     producerInfo->mHash = h;
     return h;

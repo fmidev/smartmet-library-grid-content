@@ -3,7 +3,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -423,12 +423,12 @@ std::size_t ProducerInfoList::getHash()
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
       if (info != nullptr)
       {
-        boost::hash_combine(hash,info->mProducerId);
-        boost::hash_combine(hash,info->mName);
-        boost::hash_combine(hash,info->mTitle);
-        boost::hash_combine(hash,info->mDescription);
-        boost::hash_combine(hash,info->mFlags);
-        boost::hash_combine(hash,info->mSourceId);
+        Fmi::hash_merge(hash,info->mProducerId);
+        Fmi::hash_merge(hash,info->mName);
+        Fmi::hash_merge(hash,info->mTitle);
+        Fmi::hash_merge(hash,info->mDescription);
+        Fmi::hash_merge(hash,info->mFlags);
+        Fmi::hash_merge(hash,info->mSourceId);
       }
     }
     return hash;

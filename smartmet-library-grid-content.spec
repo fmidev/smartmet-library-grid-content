@@ -33,7 +33,7 @@ BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 25.2.18
 BuildRequires: smartmet-library-grid-files-devel >= 25.5.22
-BuildRequires: smartmet-library-macgyver-devel >= 25.5.22
+BuildRequires: smartmet-library-macgyver-devel >= 25.7.28
 BuildRequires: smartmet-library-spine-devel >= 25.5.13
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
@@ -44,7 +44,7 @@ Requires: gdal310
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.2.18
 Requires: smartmet-library-grid-files >= 25.5.22
-Requires: smartmet-library-macgyver >= 25.5.22
+Requires: smartmet-library-macgyver >= 25.7.28
 Requires: smartmet-library-spine >= 25.5.13
 
 Provides: %{SPECNAME}

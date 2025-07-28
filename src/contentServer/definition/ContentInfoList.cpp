@@ -8,7 +8,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/ShowFunction.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -1368,12 +1368,12 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         std::size_t seed = 0;
-        boost::hash_combine(seed,info->mProducerId);
-        boost::hash_combine(seed,info->getFmiParameterName());
-        boost::hash_combine(seed,info->mFmiParameterLevelId);
-        //boost::hash_combine(seed,info->mGrib1ParameterLevelId);
-        //boost::hash_combine(seed,info->mGrib2ParameterLevelId);
-        boost::hash_combine(seed,info->mParameterLevel);
+        Fmi::hash_merge(seed,info->mProducerId);
+        Fmi::hash_merge(seed,info->getFmiParameterName());
+        Fmi::hash_merge(seed,info->mFmiParameterLevelId);
+        //Fmi::hash_merge(seed,info->mGrib1ParameterLevelId);
+        //Fmi::hash_merge(seed,info->mGrib2ParameterLevelId);
+        Fmi::hash_merge(seed,info->mParameterLevel);
 
         if (list.find(seed) == list.end())
         {
@@ -5453,8 +5453,8 @@ std::size_t ContentInfoList::getHash()
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
-        boost::hash_combine(hash,info->mFileId);
-        boost::hash_combine(hash,info->mMessageIndex);
+        Fmi::hash_merge(hash,info->mFileId);
+        Fmi::hash_merge(hash,info->mMessageIndex);
       }
     }
     return hash;
@@ -5489,8 +5489,8 @@ std::size_t ContentInfoList::getHashByProducerId(uint producerId)
         ContentInfo *info = mArray[t];
         if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
         {
-          boost::hash_combine(hash,info->mFileId);
-          boost::hash_combine(hash,info->mMessageIndex);
+          Fmi::hash_merge(hash,info->mFileId);
+          Fmi::hash_merge(hash,info->mMessageIndex);
         }
       }
       return hash;
@@ -5511,8 +5511,8 @@ std::size_t ContentInfoList::getHashByProducerId(uint producerId)
       {
         if (info->mProducerId == producerId)
         {
-          boost::hash_combine(hash,info->mFileId);
-          boost::hash_combine(hash,info->mMessageIndex);
+          Fmi::hash_merge(hash,info->mFileId);
+          Fmi::hash_merge(hash,info->mMessageIndex);
         }
         else
         {
@@ -6199,8 +6199,8 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint ge
         {
           if (info->mGenerationId == generationId)
           {
-            boost::hash_combine(hash,info->mFileId);
-            boost::hash_combine(hash,info->mMessageIndex);
+            Fmi::hash_merge(hash,info->mFileId);
+            Fmi::hash_merge(hash,info->mMessageIndex);
 
             if (startTime == 0 || info->mForecastTimeUTC < startTime)
               startTime = info->mForecastTimeUTC;

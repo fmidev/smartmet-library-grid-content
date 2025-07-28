@@ -1,7 +1,7 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <time.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 
 namespace SmartMet
@@ -95,45 +95,45 @@ std::size_t Query::getHash()
   try
   {
     std::size_t hash = 0;
-    boost::hash_combine(hash,mSearchType);
+    Fmi::hash_merge(hash,mSearchType);
 
     for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
     for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
-    boost::hash_combine(hash,mAttributeList.getHash());
-    boost::hash_combine(hash,mCoordinateType);
+    Fmi::hash_merge(hash,mAttributeList.getHash());
+    Fmi::hash_merge(hash,mCoordinateType);
 
     for (auto coordinates = mAreaCoordinates.begin(); coordinates != mAreaCoordinates.end(); ++coordinates)
     {
       for (auto it = coordinates->begin(); it != coordinates->end(); ++it)
       {
-        boost::hash_combine(hash,it->x());
-        boost::hash_combine(hash,it->y());
+        Fmi::hash_merge(hash,it->x());
+        Fmi::hash_merge(hash,it->y());
       }
     }
 
-    boost::hash_combine(hash,mRadius);
+    Fmi::hash_merge(hash,mRadius);
 
     for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
-      boost::hash_combine(hash,it->getHash());
+      Fmi::hash_merge(hash,it->getHash());
 
-    boost::hash_combine(hash,mTimezone);
-    boost::hash_combine(hash,mStartTime);
-    boost::hash_combine(hash,mEndTime);
-    boost::hash_combine(hash,mTimesteps);
-    boost::hash_combine(hash,mTimestepSizeInMinutes);
-    boost::hash_combine(hash,mAnalysisTime);
+    Fmi::hash_merge(hash,mTimezone);
+    Fmi::hash_merge(hash,mStartTime);
+    Fmi::hash_merge(hash,mEndTime);
+    Fmi::hash_merge(hash,mTimesteps);
+    Fmi::hash_merge(hash,mTimestepSizeInMinutes);
+    Fmi::hash_merge(hash,mAnalysisTime);
 
     for (auto it = mGeometryIdList.begin(); it != mGeometryIdList.end(); ++it)
-      boost::hash_combine(hash,*it);
+      Fmi::hash_merge(hash,*it);
 
-    boost::hash_combine(hash,mLanguage);
-    boost::hash_combine(hash,mGenerationFlags);
-    boost::hash_combine(hash,mFlags);
-    boost::hash_combine(hash,mMaxParameterValues);
+    Fmi::hash_merge(hash,mLanguage);
+    Fmi::hash_merge(hash,mGenerationFlags);
+    Fmi::hash_merge(hash,mFlags);
+    Fmi::hash_merge(hash,mMaxParameterValues);
 
     return hash;
   }

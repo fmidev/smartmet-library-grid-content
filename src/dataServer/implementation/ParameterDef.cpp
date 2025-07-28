@@ -1,6 +1,6 @@
 #include "ParameterDef.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 
 namespace SmartMet

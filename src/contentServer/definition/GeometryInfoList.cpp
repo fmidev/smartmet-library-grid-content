@@ -5,7 +5,7 @@
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/ShowFunction.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -1209,10 +1209,10 @@ std::size_t GeometryInfoList::getHash()
       GeometryInfo *info = mArray[t];
       if (info != nullptr && (info->mFlags & T::GeometryInfo::Flags::DeletedGeometry) == 0)
       {
-        boost::hash_combine(hash,info->mGenerationId);
-        boost::hash_combine(hash,info->mGeometryId);
-        boost::hash_combine(hash,info->mLevelId);
-        boost::hash_combine(hash,info->mStatus);
+        Fmi::hash_merge(hash,info->mGenerationId);
+        Fmi::hash_merge(hash,info->mGeometryId);
+        Fmi::hash_merge(hash,info->mLevelId);
+        Fmi::hash_merge(hash,info->mStatus);
       }
     }
     return hash;
@@ -1259,10 +1259,10 @@ std::size_t GeometryInfoList::getHashByProducerId(uint producerId)
       {
         if (info->mProducerId == producerId && (info->mFlags & T::GeometryInfo::Flags::DeletedGeometry) == 0)
         {
-          boost::hash_combine(hash,info->mGenerationId);
-          boost::hash_combine(hash,info->mGeometryId);
-          boost::hash_combine(hash,info->mLevelId);
-          boost::hash_combine(hash,info->mStatus);
+          Fmi::hash_merge(hash,info->mGenerationId);
+          Fmi::hash_merge(hash,info->mGeometryId);
+          Fmi::hash_merge(hash,info->mLevelId);
+          Fmi::hash_merge(hash,info->mStatus);
         }
         else
         {

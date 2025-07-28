@@ -4,7 +4,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/permissions.hpp>
@@ -1369,15 +1369,15 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
         if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
         {
           std::size_t seed = 0;
-          boost::hash_combine(seed,producerInfo->mName);
-          boost::hash_combine(seed,sourceParamKey);
-          boost::hash_combine(seed,targetParameterKeyType);
-          boost::hash_combine(seed,targetParamKey);
-          boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelId);
-          boost::hash_combine(seed,contentInfo->mParameterLevel);
-          boost::hash_combine(seed,contentInfo->mForecastType);
-          boost::hash_combine(seed,contentInfo->mForecastNumber);
+          Fmi::hash_merge(seed,producerInfo->mName);
+          Fmi::hash_merge(seed,sourceParamKey);
+          Fmi::hash_merge(seed,targetParameterKeyType);
+          Fmi::hash_merge(seed,targetParamKey);
+          Fmi::hash_merge(seed,contentInfo->mGeometryId);
+          Fmi::hash_merge(seed,paramLevelId);
+          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+          Fmi::hash_merge(seed,contentInfo->mForecastType);
+          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
 
           if (tmpList.find(seed) == tmpList.end())
@@ -1552,15 +1552,15 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
           std::size_t seed = 0;
-          boost::hash_combine(seed,contentInfo->mProducerId);
-          boost::hash_combine(seed,sourceParamKey);
-          boost::hash_combine(seed,targetParameterKeyType);
-          boost::hash_combine(seed,targetParamKey);
-          boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelId);
-          boost::hash_combine(seed,contentInfo->mParameterLevel);
-          boost::hash_combine(seed,contentInfo->mForecastType);
-          boost::hash_combine(seed,contentInfo->mForecastNumber);
+          Fmi::hash_merge(seed,contentInfo->mProducerId);
+          Fmi::hash_merge(seed,sourceParamKey);
+          Fmi::hash_merge(seed,targetParameterKeyType);
+          Fmi::hash_merge(seed,targetParamKey);
+          Fmi::hash_merge(seed,contentInfo->mGeometryId);
+          Fmi::hash_merge(seed,paramLevelId);
+          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+          Fmi::hash_merge(seed,contentInfo->mForecastType);
+          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
 
           if (tmpList.find(seed) == tmpList.end())
@@ -5984,10 +5984,10 @@ int RedisImplementation::_getHashByProducerId(T::SessionId sessionId,uint produc
     std::size_t contentHash = contentInfoList.getHashByProducerId(producerId);
 
     std::size_t h = 0;
-    boost::hash_combine(h,generationHash);
-    boost::hash_combine(h,geometryHash);
-    boost::hash_combine(h,fileHash);
-    boost::hash_combine(h,contentHash);
+    Fmi::hash_merge(h,generationHash);
+    Fmi::hash_merge(h,geometryHash);
+    Fmi::hash_merge(h,fileHash);
+    Fmi::hash_merge(h,contentHash);
 
     hash = h;
     return Result::OK;

@@ -5,7 +5,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 #include <libpq-fe.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -1114,15 +1114,15 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
         if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
         {
           std::size_t seed = 0;
-          boost::hash_combine(seed,producerInfo->mName);
-          boost::hash_combine(seed,sourceParamKey);
-          boost::hash_combine(seed,targetParameterKeyType);
-          boost::hash_combine(seed,targetParamKey);
-          boost::hash_combine(seed,contentInfo->mGeometryId);
-          boost::hash_combine(seed,paramLevelId);
-          boost::hash_combine(seed,contentInfo->mParameterLevel);
-          boost::hash_combine(seed,contentInfo->mForecastType);
-          boost::hash_combine(seed,contentInfo->mForecastNumber);
+          Fmi::hash_merge(seed,producerInfo->mName);
+          Fmi::hash_merge(seed,sourceParamKey);
+          Fmi::hash_merge(seed,targetParameterKeyType);
+          Fmi::hash_merge(seed,targetParamKey);
+          Fmi::hash_merge(seed,contentInfo->mGeometryId);
+          Fmi::hash_merge(seed,paramLevelId);
+          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+          Fmi::hash_merge(seed,contentInfo->mForecastType);
+          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
 
           if (tmpList.find(seed) == tmpList.end())

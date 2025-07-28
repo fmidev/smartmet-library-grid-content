@@ -1,6 +1,6 @@
 #include "ParameterMapping.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 
 namespace SmartMet
@@ -90,23 +90,23 @@ std::size_t ParameterMapping::getHash()
   try
   {
     std::size_t seed = 0;
-    boost::hash_combine(seed,mProducerName);
-    boost::hash_combine(seed,mParameterName);
-    boost::hash_combine(seed,C_INT(mParameterKeyType));
-    boost::hash_combine(seed,mParameterKey);
-    boost::hash_combine(seed,mGeometryId);
-    //boost::hash_combine(seed,C_INT(mParameterLevelIdType));
-    boost::hash_combine(seed,C_INT(mParameterLevelId));
-    boost::hash_combine(seed,mParameterLevel);
-    boost::hash_combine(seed,mAreaInterpolationMethod);
-    boost::hash_combine(seed,mTimeInterpolationMethod);
-    boost::hash_combine(seed,mLevelInterpolationMethod);
-    boost::hash_combine(seed,mGroupFlags);
-    boost::hash_combine(seed,mSearchEnabled);
-    boost::hash_combine(seed,mIgnore);
-    boost::hash_combine(seed,mConversionFunction);
-    boost::hash_combine(seed,mReverseConversionFunction);
-    boost::hash_combine(seed,mDefaultPrecision);
+    Fmi::hash_merge(seed,mProducerName);
+    Fmi::hash_merge(seed,mParameterName);
+    Fmi::hash_merge(seed,C_INT(mParameterKeyType));
+    Fmi::hash_merge(seed,mParameterKey);
+    Fmi::hash_merge(seed,mGeometryId);
+    //Fmi::hash_merge(seed,C_INT(mParameterLevelIdType));
+    Fmi::hash_merge(seed,C_INT(mParameterLevelId));
+    Fmi::hash_merge(seed,mParameterLevel);
+    Fmi::hash_merge(seed,mAreaInterpolationMethod);
+    Fmi::hash_merge(seed,mTimeInterpolationMethod);
+    Fmi::hash_merge(seed,mLevelInterpolationMethod);
+    Fmi::hash_merge(seed,mGroupFlags);
+    Fmi::hash_merge(seed,mSearchEnabled);
+    Fmi::hash_merge(seed,mIgnore);
+    Fmi::hash_merge(seed,mConversionFunction);
+    Fmi::hash_merge(seed,mReverseConversionFunction);
+    Fmi::hash_merge(seed,mDefaultPrecision);
     return seed;
   }
   catch (...)
@@ -125,8 +125,8 @@ std::size_t ParameterMapping::getKeyHash()
     if (mParameterKeyHash != 0)
       return mParameterKeyHash;
 
-    boost::hash_combine(mParameterKeyHash,C_INT(mParameterKeyType));
-    boost::hash_combine(mParameterKeyHash,mParameterKey);
+    Fmi::hash_merge(mParameterKeyHash,C_INT(mParameterKeyType));
+    Fmi::hash_merge(mParameterKeyHash,mParameterKey);
 
     return mParameterKeyHash;
   }

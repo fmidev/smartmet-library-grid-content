@@ -7,7 +7,7 @@
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <iostream>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -1114,7 +1114,7 @@ std::size_t FileInfoList::getHash()
       FileInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
       {
-        boost::hash_combine(hash,info->mFileId);
+        Fmi::hash_merge(hash,info->mFileId);
       }
     }
     return hash;
@@ -1147,7 +1147,7 @@ std::size_t FileInfoList::getHashByProducerId(uint producerId)
       FileInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
       {
-        boost::hash_combine(hash,info->mFileId);
+        Fmi::hash_merge(hash,info->mFileId);
       }
     }
     return hash;
@@ -1180,7 +1180,7 @@ std::size_t FileInfoList::getHashByGenerationId(uint generationId)
       FileInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
       {
-        boost::hash_combine(hash,info->mFileId);
+        Fmi::hash_merge(hash,info->mFileId);
       }
     }
     return hash;

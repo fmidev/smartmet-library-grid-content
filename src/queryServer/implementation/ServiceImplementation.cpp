@@ -12,7 +12,7 @@
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
 #include <macgyver/NumericCast.h>
-#include <boost/functional/hash.hpp>
+#include <macgyver/Hash.h>
 #include <boost/numeric/conversion/cast.hpp>
 #include <unordered_set>
 #include <deque>
@@ -991,8 +991,8 @@ void ServiceImplementation::loadHeightConversionFile()
             rec.heightProducerId = p2.mProducerId;
 
             std::size_t hash = 0;
-            boost::hash_combine(hash,rec.producerId);
-            boost::hash_combine(hash,rec.levelId);
+            Fmi::hash_merge(hash,rec.producerId);
+            Fmi::hash_merge(hash,rec.levelId);
 
             mHeightConversions.insert(std::pair<std::size_t,HeightConversion>(hash,rec));
           }
@@ -1385,17 +1385,17 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
     std::size_t hash = 0;
 
     if (producerId != 0)
-      boost::hash_combine(hash,producerId);
+      Fmi::hash_merge(hash,producerId);
     else
-      boost::hash_combine(hash,producerName);
+      Fmi::hash_merge(hash,producerName);
 
     if (parameterHash != 0)
-      boost::hash_combine(hash,parameterHash);
+      Fmi::hash_merge(hash,parameterHash);
     else
-      boost::hash_combine(hash,parameterName);
+      Fmi::hash_merge(hash,parameterName);
 
-    boost::hash_combine(hash,geometryId);
-    boost::hash_combine(hash,onlySearchEnabled);
+    Fmi::hash_merge(hash,geometryId);
+    Fmi::hash_merge(hash,onlySearchEnabled);
 
     if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
     {
@@ -1456,19 +1456,19 @@ void ServiceImplementation::getParameterMappings(
     std::size_t hash = 0;
 
     if (producerId != 0)
-      boost::hash_combine(hash,producerId);
+      Fmi::hash_merge(hash,producerId);
     else
-      boost::hash_combine(hash,producerName);
+      Fmi::hash_merge(hash,producerName);
 
     if (parameterHash != 0)
-      boost::hash_combine(hash,parameterHash);
+      Fmi::hash_merge(hash,parameterHash);
     else
-      boost::hash_combine(hash,parameterName);
+      Fmi::hash_merge(hash,parameterName);
 
-    boost::hash_combine(hash,geometryId);
-    boost::hash_combine(hash,levelId);
-    boost::hash_combine(hash,level);
-    boost::hash_combine(hash,onlySearchEnabled);
+    Fmi::hash_merge(hash,geometryId);
+    Fmi::hash_merge(hash,levelId);
+    Fmi::hash_merge(hash,level);
+    Fmi::hash_merge(hash,onlySearchEnabled);
 
     if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
     {
@@ -2948,7 +2948,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
         try
         {
           std::size_t paramHash = 0;
-          boost::hash_combine(paramHash,paramName);
+          Fmi::hash_merge(paramHash,paramName);
 
           if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isGeometryValid(geometryId,query.mAreaCoordinates))
           {
@@ -3287,7 +3287,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           paramName = paramName.c_str()+1;
 
         std::size_t paramHash = 0;
-        boost::hash_combine(paramHash,paramName);
+        Fmi::hash_merge(paramHash,paramName);
 
         if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isGeometryValid(geometryId,query.mAreaCoordinates))
         {
@@ -4002,21 +4002,21 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       mContentSearchCache_clearRequiredTime = currentTime;
 
     std::size_t hash = 0;
-    boost::hash_combine(hash,producerId);
-    boost::hash_combine(hash,generationId);
-//    boost::hash_combine(hash,parameterKeyType);
-    //boost::hash_combine(hash,parameterKey);
-    boost::hash_combine(hash,parameterKeyHash);
-    boost::hash_combine(hash,parameterLevelId);
-    boost::hash_combine(hash,forecastType);
-    boost::hash_combine(hash,forecastNumber);
-    boost::hash_combine(hash,geometryId);
+    Fmi::hash_merge(hash,producerId);
+    Fmi::hash_merge(hash,generationId);
+//    Fmi::hash_merge(hash,parameterKeyType);
+    //Fmi::hash_merge(hash,parameterKey);
+    Fmi::hash_merge(hash,parameterKeyHash);
+    Fmi::hash_merge(hash,parameterLevelId);
+    Fmi::hash_merge(hash,forecastType);
+    Fmi::hash_merge(hash,forecastNumber);
+    Fmi::hash_merge(hash,geometryId);
     std::size_t hash3 = hash;
-    boost::hash_combine(hash,level);
-    boost::hash_combine(hash3,999999999);
+    Fmi::hash_merge(hash,level);
+    Fmi::hash_merge(hash3,999999999);
 
     std::size_t hash2 = hash;
-    boost::hash_combine(hash2,forecastTime);
+    Fmi::hash_merge(hash2,forecastTime);
     if (producerHash == 0)
     {
       //producerHash = getProducerHash(producerId);
@@ -10833,8 +10833,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     std::string heightParameter;
 
     std::size_t hash = 0;
-    boost::hash_combine(hash,producerId);
-    boost::hash_combine(hash,paramLevelId);
+    Fmi::hash_merge(hash,producerId);
+    Fmi::hash_merge(hash,paramLevelId);
     //std::size_t hashConversion = hash;
     uint heightGenerationId = generationId;
 
@@ -10850,17 +10850,17 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     }
 
 
-    boost::hash_combine(hash,generationId);
-    boost::hash_combine(hash,geometryId);
-    boost::hash_combine(hash,forecastType);
-    boost::hash_combine(hash,forecastNumber);
-    boost::hash_combine(hash,forecastTime);
-    boost::hash_combine(hash,coordinateType);
+    Fmi::hash_merge(hash,generationId);
+    Fmi::hash_merge(hash,geometryId);
+    Fmi::hash_merge(hash,forecastType);
+    Fmi::hash_merge(hash,forecastNumber);
+    Fmi::hash_merge(hash,forecastTime);
+    Fmi::hash_merge(hash,coordinateType);
     std::size_t levelContentHash = hash;
 
-    boost::hash_combine(hash,height);
-    boost::hash_combine(hash,x);
-    boost::hash_combine(hash,y);
+    Fmi::hash_merge(hash,height);
+    Fmi::hash_merge(hash,x);
+    Fmi::hash_merge(hash,y);
 
     T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
 
@@ -10889,10 +10889,10 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     }
 
     std::size_t levelHash = 0;
-    boost::hash_combine(levelHash,heightGenerationId);
-    boost::hash_combine(levelHash,geometryId);
-    boost::hash_combine(levelHash,paramLevelId);
-    boost::hash_combine(levelHash,heightProducerId);
+    Fmi::hash_merge(levelHash,heightGenerationId);
+    Fmi::hash_merge(levelHash,geometryId);
+    Fmi::hash_merge(levelHash,paramLevelId);
+    Fmi::hash_merge(levelHash,heightProducerId);
 
 
     uint firstLevel = 0xFFFFFFFF;
@@ -11339,8 +11339,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     std::string heightParameter;
 
     std::size_t hash = 0;
-    boost::hash_combine(hash,producerId);
-    boost::hash_combine(hash,paramLevelId);
+    Fmi::hash_merge(hash,producerId);
+    Fmi::hash_merge(hash,paramLevelId);
     std::size_t hashConversion = hash;
     uint heightGenerationId = generationId;
 
@@ -11359,12 +11359,12 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     }
 
 
-    boost::hash_combine(hash,generationId);
-    boost::hash_combine(hash,geometryId);
-    boost::hash_combine(hash,forecastType);
-    boost::hash_combine(hash,forecastNumber);
-    boost::hash_combine(hash,forecastTime);
-    boost::hash_combine(hash,coordinateType);
+    Fmi::hash_merge(hash,generationId);
+    Fmi::hash_merge(hash,geometryId);
+    Fmi::hash_merge(hash,forecastType);
+    Fmi::hash_merge(hash,forecastNumber);
+    Fmi::hash_merge(hash,forecastTime);
+    Fmi::hash_merge(hash,coordinateType);
     std::size_t levelContentHash = hash;
 
 
@@ -11373,9 +11373,9 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     uint clen = coordinates.size();
     for (uint t=0; t<clen; t = t + 100)
     {
-      boost::hash_combine(coordinateHash,clen);
-      boost::hash_combine(coordinateHash,coordinates[t].x());
-      boost::hash_combine(coordinateHash,coordinates[t].y());
+      Fmi::hash_merge(coordinateHash,clen);
+      Fmi::hash_merge(coordinateHash,coordinates[t].x());
+      Fmi::hash_merge(coordinateHash,coordinates[t].y());
     }
 
     T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
@@ -11397,10 +11397,10 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     }
 
     std::size_t levelHash = 0;
-    boost::hash_combine(levelHash,heightGenerationId);
-    boost::hash_combine(levelHash,geometryId);
-    boost::hash_combine(levelHash,paramLevelId);
-    boost::hash_combine(levelHash,heightProducerId);
+    Fmi::hash_merge(levelHash,heightGenerationId);
+    Fmi::hash_merge(levelHash,geometryId);
+    Fmi::hash_merge(levelHash,paramLevelId);
+    Fmi::hash_merge(levelHash,heightProducerId);
 
     uint firstLevel = 0xFFFFFFFF;
     uint lastLevel = 0xFFFFFFFF;
