@@ -74,7 +74,7 @@ float Function_replace::executeFunctionCall1(std::vector<float>& parameters)
           return parameters[t+1];
       }
     }
-    return ParamValueMissing;
+    return val;
   }
   catch (...)
   {
@@ -104,7 +104,7 @@ double Function_replace::executeFunctionCall1(std::vector<double>& parameters)
           return parameters[t+1];
       }
     }
-    return ParamValueMissing;
+    return val;
   }
   catch (...)
   {
@@ -129,10 +129,10 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
     for (uint s=0; s<sz; s++)
     {
       float val = ParamValueMissing;
-      float newVal = ParamValueMissing;
       if (s < inParameters[0].size())
         val = inParameters[0][s];
 
+      float newVal = val;
       for (uint t=0; t<esz; t = t + 2)
       {
         if ((t + 2) < esz)
@@ -171,9 +171,10 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
     for (uint s=0; s<sz; s++)
     {
       float val = ParamValueMissing;
-      float newVal = ParamValueMissing;
       if (s < inParameters[0].size())
         val = inParameters[0][s];
+
+      float newVal = val;
 
       for (uint t=0; t<esz; t = t + 2)
       {
