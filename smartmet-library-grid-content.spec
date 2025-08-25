@@ -32,7 +32,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 25.2.18
-BuildRequires: smartmet-library-grid-files-devel >= 25.5.22
+BuildRequires: smartmet-library-grid-files-devel >= 25.8.22
 BuildRequires: smartmet-library-macgyver-devel >= 25.7.28
 BuildRequires: smartmet-library-spine-devel >= 25.5.13
 BuildRequires: postgresql15-devel
@@ -43,7 +43,7 @@ Requires: omniORB
 Requires: gdal310
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.2.18
-Requires: smartmet-library-grid-files >= 25.5.22
+Requires: smartmet-library-grid-files >= 25.8.22
 Requires: smartmet-library-macgyver >= 25.7.28
 Requires: smartmet-library-spine >= 25.5.13
 
@@ -92,7 +92,7 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Mon Aug 25 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.8.25-1.fmi
+* Mon Aug 25 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.8.25-2.fmi
 - Added support for Transverse Mercator projektion (grib2 only)
 
 * Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
