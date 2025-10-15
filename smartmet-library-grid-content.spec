@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.8.25
-Release: 2%{?dist}.fmi
+Version: 25.10.15
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 25.2.18
-BuildRequires: smartmet-library-grid-files-devel >= 25.8.22
-BuildRequires: smartmet-library-macgyver-devel >= 25.7.28
-BuildRequires: smartmet-library-spine-devel >= 25.5.13
+BuildRequires: smartmet-library-gis-devel >= 25.9.15
+BuildRequires: smartmet-library-grid-files-devel >= 25.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 25.9.30
+BuildRequires: smartmet-library-spine-devel >= 25.9.16
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -42,10 +42,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal310
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 25.2.18
-Requires: smartmet-library-grid-files >= 25.8.22
-Requires: smartmet-library-macgyver >= 25.7.28
-Requires: smartmet-library-spine >= 25.5.13
+Requires: smartmet-library-gis >= 25.9.15
+Requires: smartmet-library-grid-files >= 25.10.15
+Requires: smartmet-library-macgyver >= 25.9.30
+Requires: smartmet-library-spine >= 25.9.16
 
 Provides: %{SPECNAME}
 
@@ -79,10 +79,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 25.5.22
-Requires: smartmet-library-gis-devel >= 25.2.18
-Requires: smartmet-library-spine-devel >= 25.5.13
-Requires: smartmet-library-grid-files-devel >= 25.5.22
+Requires: smartmet-library-macgyver-devel >= 25.9.30
+Requires: smartmet-library-gis-devel >= 25.9.15
+Requires: smartmet-library-spine-devel >= 25.9.16
+Requires: smartmet-library-grid-files-devel >= 25.10.15
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -92,9 +92,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Oct 15 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.10.15-1.fmi
+- Repackaged due to grid-files API changes
 * Mon Aug 25 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.8.25-2.fmi
 - Added support for Transverse Mercator projektion (grib2 only)
-
 * Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
 - Repackaged to hide dark() implementation details
 * Tue Apr  8 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.4.8-1.fmi
