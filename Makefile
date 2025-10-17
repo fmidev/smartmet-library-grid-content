@@ -349,7 +349,7 @@ endif
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
 
 test:
-	+cd test && make test
+	+if test -f test/Makefile; then $(MAKE) -C test $@; fi
 
 objdir:
 	@mkdir -p obj
