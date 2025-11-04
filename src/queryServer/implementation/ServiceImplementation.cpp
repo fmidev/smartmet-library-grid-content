@@ -60,8 +60,11 @@
 #include "../../functions/Function_valid.h"
 #include "../../functions/Function_variance.h"
 #include "../../functions/Function_windDir.h"
-#include "../../functions/Function_vectorU.h"
-#include "../../functions/Function_vectorV.h"
+#include "../../functions/Function_windU.h"
+#include "../../functions/Function_windV.h"
+#include "../../functions/Function_streamU.h"
+#include "../../functions/Function_streamV.h"
+#include "../../functions/Function_streamDir.h"
 #include "../../functions/Function_feelsLike.h"
 #include "../../functions/Function_replace.h"
 
@@ -318,9 +321,13 @@ void ServiceImplementation::init(
 
     mFunctionCollection.addFunction("WIND_SPEED",new Functions::Function_hypotenuse());
     mFunctionCollection.addFunction("WIND_DIR",new Functions::Function_windDir());
-    mFunctionCollection.addFunction("WIND_V",new Functions::Function_vectorV());
-    mFunctionCollection.addFunction("WIND_U",new Functions::Function_vectorU());
+    mFunctionCollection.addFunction("WIND_V",new Functions::Function_windV());
+    mFunctionCollection.addFunction("WIND_U",new Functions::Function_windU());
 
+    mFunctionCollection.addFunction("STREAM_SPEED",new Functions::Function_hypotenuse());
+    mFunctionCollection.addFunction("STREAM_DIR",new Functions::Function_streamDir());
+    mFunctionCollection.addFunction("STREAM_V",new Functions::Function_streamV());
+    mFunctionCollection.addFunction("STREAM_U",new Functions::Function_streamU());
 
     mUnitConversionFile = unitConversionFile;
     if (!mUnitConversionFile.empty())
@@ -11558,7 +11565,10 @@ void ServiceImplementation::checkProducerMapUpdates()
     {
       // Force updata if the content information is changed
       if (changeTime >  mProducerMap_updateTime)
+      {
         mProducerMap_updateTime = 0;
+        mGenerationInfoList_checkTime = 0;
+      }
     }
 
 

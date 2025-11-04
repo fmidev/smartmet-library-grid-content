@@ -1,4 +1,4 @@
-#include "Function_windDir.h"
+#include "Function_streamDir.h"
 #include <grid-files/common/GeneralFunctions.h>
 
 
@@ -8,7 +8,7 @@ namespace Functions
 {
 
 
-Function_windDir::Function_windDir()
+Function_streamDir::Function_streamDir()
 {
   try
   {
@@ -23,7 +23,7 @@ Function_windDir::Function_windDir()
 
 
 
-Function_windDir::Function_windDir(const Function_windDir& function)
+Function_streamDir::Function_streamDir(const Function_streamDir& function)
 :Function(function)
 {
   try
@@ -38,7 +38,7 @@ Function_windDir::Function_windDir(const Function_windDir& function)
 
 
 
-Function_windDir::~Function_windDir()
+Function_streamDir::~Function_streamDir()
 {
   try
   {
@@ -52,7 +52,7 @@ Function_windDir::~Function_windDir()
 
 
 
-float Function_windDir::executeFunctionCall1(std::vector<float>& parameters)
+float Function_streamDir::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
@@ -64,7 +64,7 @@ float Function_windDir::executeFunctionCall1(std::vector<float>& parameters)
 
     if (u != ParamValueMissing and v != ParamValueMissing)
     {
-      double angle_rad = atan2(-u, -v);
+      double angle_rad = atan2(v,u);
       double angle_deg = angle_rad * 180.0 / M_PI;
 
       if (angle_deg < 0)
@@ -85,7 +85,7 @@ float Function_windDir::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
-double Function_windDir::executeFunctionCall1(std::vector<double>& parameters)
+double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
@@ -97,7 +97,7 @@ double Function_windDir::executeFunctionCall1(std::vector<double>& parameters)
 
     if (u != ParamValueMissing and v != ParamValueMissing)
     {
-      double angle_rad = atan2(-u, -v);
+      double angle_rad = atan2(v,u);
       double angle_deg = angle_rad * 180.0 / M_PI;
 
       if (angle_deg < 0)
@@ -119,7 +119,7 @@ double Function_windDir::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
-void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -142,7 +142,7 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
       if (u != ParamValueMissing and v != ParamValueMissing)
       {
-        double angle_rad = atan2(-u, -v);
+        double angle_rad = atan2(v,u);
         double angle_deg = angle_rad * 180.0 / M_PI;
 
         if (angle_deg < 0)
@@ -166,7 +166,7 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
-void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -188,7 +188,7 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
       if (u != ParamValueMissing and v != ParamValueMissing)
       {
-        double angle_rad = atan2(-u, -v);
+        double angle_rad = atan2(v,u);
         double angle_deg = angle_rad * 180.0 / M_PI;
 
         if (angle_deg < 0)
@@ -211,7 +211,7 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
-Function* Function_windDir::duplicate()
+Function* Function_streamDir::duplicate()
 {
   try
   {
@@ -226,11 +226,11 @@ Function* Function_windDir::duplicate()
 
 
 
-void Function_windDir::print(std::ostream& stream,uint level,uint optionFlags)
+void Function_streamDir::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    stream << space(level) << "Function_windDir\n";
+    stream << space(level) << "Function_streamDir\n";
   }
   catch (...)
   {

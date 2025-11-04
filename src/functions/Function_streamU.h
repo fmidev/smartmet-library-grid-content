@@ -9,12 +9,12 @@ namespace Functions
 {
 
 
-class Function_windDir : public Function
+class Function_streamU : public Function
 {
   public:
-                      Function_windDir();
-                      Function_windDir(const Function_windDir& function);
-    virtual           ~Function_windDir();
+                      Function_streamU();
+                      Function_streamU(const Function_streamU& function);
+    virtual           ~Function_streamU();
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);
