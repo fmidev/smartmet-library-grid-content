@@ -64,7 +64,7 @@ float Function_streamDir::executeFunctionCall1(std::vector<float>& parameters)
 
     if (u != ParamValueMissing and v != ParamValueMissing)
     {
-      double angle_rad = atan2(v,u);
+      double angle_rad = atan2(u,v);
       double angle_deg = angle_rad * 180.0 / M_PI;
 
       if (angle_deg < 0)
@@ -97,7 +97,7 @@ double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
 
     if (u != ParamValueMissing and v != ParamValueMissing)
     {
-      double angle_rad = atan2(v,u);
+      double angle_rad = atan2(u,v);
       double angle_deg = angle_rad * 180.0 / M_PI;
 
       if (angle_deg < 0)
@@ -142,7 +142,7 @@ void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector
 
       if (u != ParamValueMissing and v != ParamValueMissing)
       {
-        double angle_rad = atan2(v,u);
+        double angle_rad = atan2(u,v);
         double angle_deg = angle_rad * 180.0 / M_PI;
 
         if (angle_deg < 0)
@@ -188,7 +188,7 @@ void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector
 
       if (u != ParamValueMissing and v != ParamValueMissing)
       {
-        double angle_rad = atan2(v,u);
+        double angle_rad = atan2(u,v);
         double angle_deg = angle_rad * 180.0 / M_PI;
 
         if (angle_deg < 0)
