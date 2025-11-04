@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 25.11.4
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -92,6 +92,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Nov  4 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.11.4-2.fmi
+- Fixed stream direction functions
 * Tue Nov  4 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.11.4-1.fmi
 - Added new functions for calculating wind/stream direction from U/V components
 * Wed Oct 15 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.10.15-1.fmi
