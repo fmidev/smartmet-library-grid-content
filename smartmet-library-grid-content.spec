@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.10.15
+Version: 25.11.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -33,8 +33,8 @@ BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 25.9.15
 BuildRequires: smartmet-library-grid-files-devel >= 25.10.15
-BuildRequires: smartmet-library-macgyver-devel >= 25.9.30
-BuildRequires: smartmet-library-spine-devel >= 25.9.16
+BuildRequires: smartmet-library-macgyver-devel >= 25.10.30
+BuildRequires: smartmet-library-spine-devel >= 25.10.27
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -44,8 +44,8 @@ Requires: gdal310
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.9.15
 Requires: smartmet-library-grid-files >= 25.10.15
-Requires: smartmet-library-macgyver >= 25.9.30
-Requires: smartmet-library-spine >= 25.9.16
+Requires: smartmet-library-macgyver >= 25.10.30
+Requires: smartmet-library-spine >= 25.10.27
 
 Provides: %{SPECNAME}
 
@@ -79,9 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 25.9.30
+Requires: smartmet-library-macgyver-devel >= 25.10.30
 Requires: smartmet-library-gis-devel >= 25.9.15
-Requires: smartmet-library-spine-devel >= 25.9.16
+Requires: smartmet-library-spine-devel >= 25.10.27
 Requires: smartmet-library-grid-files-devel >= 25.10.15
 
 %description -n %{SPECNAME}-devel
@@ -92,6 +92,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Nov  4 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.11.4-1.fmi
+- Added new functions for calculating wind/stream direction from U/V components
 * Wed Oct 15 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.10.15-1.fmi
 - Repackaged due to grid-files API changes
 * Mon Aug 25 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.8.25-2.fmi
