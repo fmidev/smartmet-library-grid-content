@@ -9,6 +9,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <macgyver/Hash.h>
 #include <boost/make_shared.hpp>
+#include <boost/thread/thread.hpp>
 #include <atomic>
 
 
@@ -368,11 +369,11 @@ void CacheImplementation::synchronize()
     T::EventInfo eventInfo;
     mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
     while (mLastProcessedEventId < eventInfo.mEventId)
-      sleep(1);
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
 /*
     while (mFileDeleteCount > 0 || mContentDeleteCount > 0)
     {
-      sleep(1);
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
     }
 */
   }
@@ -7996,7 +7997,7 @@ void CacheImplementation::eventProcessingThread()
       if (!mShutdownRequested)
       {
         saveData();
-        sleep(1);
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
       }
     }
   }

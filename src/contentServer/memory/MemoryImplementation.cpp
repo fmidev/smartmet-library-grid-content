@@ -6,6 +6,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <boost/thread/thread.hpp>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -284,13 +285,13 @@ void MemoryImplementation::syncProcessingThread()
                          mFileStorage_modificationTime != t4 ||
                          mContentStorage_modificationTime != t5))
         {
-          while (!syncProducerList()) sleep(10);
-          while (!syncGenerationList()) sleep(10);
-          while (!syncGeometryList()) sleep(10);
-          while (!syncFileList()) sleep(10);
-          while (!syncContentList()) sleep(10);
+          while (!syncProducerList())  boost::this_thread::sleep(boost::posix_time::seconds(10));
+          while (!syncGenerationList()) boost::this_thread::sleep(boost::posix_time::seconds(10));
+          while (!syncGeometryList()) boost::this_thread::sleep(boost::posix_time::seconds(10));
+          while (!syncFileList()) boost::this_thread::sleep(boost::posix_time::seconds(10));
+          while (!syncContentList()) boost::this_thread::sleep(boost::posix_time::seconds(10));
         }
-        sleep(10);
+        boost::this_thread::sleep(boost::posix_time::seconds(10));
       }
       catch (...)
       {

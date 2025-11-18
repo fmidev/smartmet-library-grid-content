@@ -11,6 +11,7 @@
 #include <macgyver/StringConversion.h>
 
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/thread/thread.hpp>
 #include <signal.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -6373,7 +6374,7 @@ void ServiceImplementation::eventProcessingThread()
       }
 
       if (!mShutdownRequested)
-        sleep(1);
+        boost::this_thread::sleep(boost::posix_time::seconds(1));
     }
 
     mEventProcessingActive = false;
@@ -6551,7 +6552,7 @@ void ServiceImplementation::cacheProcessingThread()
         for (uint t=0;t<20; t++)
         {
           if (!mShutdownRequested)
-            sleep(1);
+            boost::this_thread::sleep(boost::posix_time::seconds(1));
         }
 
         if (mShutdownRequested)

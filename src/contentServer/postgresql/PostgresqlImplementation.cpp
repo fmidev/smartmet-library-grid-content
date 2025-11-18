@@ -6,6 +6,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <boost/thread/thread.hpp>
 #include <libpq-fe.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -9805,7 +9806,7 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,u
     {
       truncateEvents();
       mEventTruncateCheckTime = ct;
-      sleep(1);
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
     }
 
     return Result::OK;
@@ -9901,7 +9902,7 @@ int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
     {
       truncateEvents();
       mEventTruncateCheckTime = ct;
-      sleep(1);
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
     }
 
     return Result::OK;

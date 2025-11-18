@@ -9,6 +9,7 @@
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/permissions.hpp>
 #include <boost/thread/thread_time.hpp>
+#include <boost/thread/thread.hpp>
 #include <fstream>
 #include <iostream>
 #include <cstdio>
@@ -185,7 +186,7 @@ void RedisImplementation::lock(const char *function,uint line,ulonglong& key,uin
         return;
       }
 
-      time_usleep(0,100);
+      boost::this_thread::sleep(boost::posix_time::microseconds(100));
 
       time_t currentTime = time(nullptr);
       if ((currentTime-startTime) >= waitTimeInSec || lockReleaseCounter >= lockRequestCounter)
@@ -416,7 +417,7 @@ int RedisImplementation::openConnection()
         }
         freeReplyObject(reply);
       }
-      sleep(1);
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
     }
 
     return Result::PERMANENT_STORAGE_ERROR;
