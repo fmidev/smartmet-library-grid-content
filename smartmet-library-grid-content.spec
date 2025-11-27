@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 25.11.4
-Release: 2%{?dist}.fmi
+Version: 25.11.27
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -92,6 +92,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Nov 27 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.27-1.fmi
+- Update due to smartmet-library-grid-files changes and some other small changes
+
 * Tue Nov  4 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.11.4-2.fmi
 - Fixed stream direction functions
 * Tue Nov  4 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.11.4-1.fmi
