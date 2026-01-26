@@ -22,7 +22,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal310-devel
+BuildRequires: gdal312-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
 BuildRequires: libicu-devel
@@ -40,7 +40,7 @@ Requires: hiredis-devel
 Requires: libcurl
 Requires: luajit-devel
 Requires: omniORB
-Requires: gdal310
+Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 25.12.29
 Requires: smartmet-library-grid-files >= 25.12.29
