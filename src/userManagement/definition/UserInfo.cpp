@@ -504,7 +504,7 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
-bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,long long & attributeValue)
+bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,Int64  & attributeValue)
 {
   try
   {
@@ -531,7 +531,7 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
-bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,unsigned long long& attributeValue)
+bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,UInt64 & attributeValue)
 {
   try
   {
@@ -741,7 +741,7 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
-void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,long long attributeValue)
+void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue)
 {
   try
   {

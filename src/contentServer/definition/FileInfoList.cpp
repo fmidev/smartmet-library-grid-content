@@ -470,7 +470,7 @@ void FileInfoList::increaseSizeNoLock(uint newSize)
 
 
 
-FileInfo* FileInfoList::getFileInfoById(uint fileId)
+FileInfo* FileInfoList::getFileInfoById(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -502,7 +502,7 @@ FileInfo* FileInfoList::getFileInfoById(uint fileId)
 
 
 
-bool FileInfoList::getFileInfoById(uint fileId,FileInfo& fileInfo)
+bool FileInfoList::getFileInfoById(T::FileId fileId,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -537,7 +537,7 @@ bool FileInfoList::getFileInfoById(uint fileId,FileInfo& fileInfo)
 
 
 
-FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
+FileInfo* FileInfoList::getFileInfoByIdNoLock(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -567,7 +567,7 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(uint fileId)
 
 
 
-uint FileInfoList::markDeletedById(uint fileId)
+uint FileInfoList::markDeletedById(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -623,7 +623,7 @@ uint FileInfoList::markDeleted()
 
 
 
-uint FileInfoList::markDeletedByProducerId(uint producerId)
+uint FileInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -657,7 +657,7 @@ uint FileInfoList::markDeletedByProducerId(uint producerId)
 
 
 
-uint FileInfoList::markDeletedByGenerationId(uint generationId)
+uint FileInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -690,7 +690,7 @@ uint FileInfoList::markDeletedByGenerationId(uint generationId)
 
 
 
-uint FileInfoList::markDeletedBySourceId(uint sourceId)
+uint FileInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -706,6 +706,40 @@ uint FileInfoList::markDeletedBySourceId(uint sourceId)
       if (info != nullptr)
       {
         if (info->mSourceId == sourceId)
+        {
+          info->mFlags |= T::FileInfo::Flags::DeletedFile;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::markDeletedByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    uint cnt = 0;
+    AutoWriteLock lock(mModificationLockPtr);
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
         {
           info->mFlags |= T::FileInfo::Flags::DeletedFile;
           cnt++;
@@ -913,7 +947,7 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 
 
 
-void FileInfoList::getFileInfoList(uint startFileId,int maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoList(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -987,7 +1021,7 @@ void FileInfoList::getFileInfoList(uint startFileId,int maxRecords,FileInfoList&
 
 
 
-void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1022,7 +1056,7 @@ void FileInfoList::getFileInfoListByProducerId(uint producerId,FileInfoList& fil
 
 
 
-void FileInfoList::getFileInfoListByProducerId(uint producerId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1129,7 +1163,7 @@ std::size_t FileInfoList::getHash()
 
 
 
-std::size_t FileInfoList::getHashByProducerId(uint producerId)
+std::size_t FileInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1162,7 +1196,7 @@ std::size_t FileInfoList::getHashByProducerId(uint producerId)
 
 
 
-std::size_t FileInfoList::getHashByGenerationId(uint generationId)
+std::size_t FileInfoList::getHashByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1195,7 +1229,7 @@ std::size_t FileInfoList::getHashByGenerationId(uint generationId)
 
 
 
-void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1230,7 +1264,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,FileInfoList&
 
 
 
-void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1305,7 +1339,7 @@ void FileInfoList::getFileInfoListByGenerationId(uint generationId,uint startFil
 
 
 
-void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1340,7 +1374,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,FileInfoList& fileInf
 
 
 
-void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,int maxRecords,FileInfoList& fileInfoList)
+void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1414,7 +1448,7 @@ void FileInfoList::getFileInfoListBySourceId(uint sourceId,uint startFileId,int 
 
 
 
-uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
+uint FileInfoList::getFileInfoCountByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1445,7 +1479,7 @@ uint FileInfoList::getFileInfoCountByProducerId(uint producerId)
 
 
 
-uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
+uint FileInfoList::getFileInfoCountByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1476,7 +1510,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(uint generationId)
 
 
 
-uint FileInfoList::getFileInfoCountBySourceId(uint sourceId)
+uint FileInfoList::getFileInfoCountBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1540,7 +1574,7 @@ uint FileInfoList::getLength()
 
 
 
-bool FileInfoList::deleteFileInfoById(uint fileId)
+bool FileInfoList::deleteFileInfoById(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -1623,7 +1657,7 @@ bool FileInfoList::deleteFileInfoByName(const std::string& filename)
 
 
 
-uint FileInfoList::deleteFileInfoByProducerId(uint producerId)
+uint FileInfoList::deleteFileInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1710,7 +1744,7 @@ uint FileInfoList::deleteMarkedFiles()
 
 
 
-uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
+uint FileInfoList::deleteFileInfoByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1753,7 +1787,7 @@ uint FileInfoList::deleteFileInfoByGenerationId(uint generationId)
 
 
 
-uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<uint>& generationIdList)
+uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -1833,7 +1867,7 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 
 
 
-uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
+uint FileInfoList::deleteFileInfoBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1877,7 +1911,51 @@ uint FileInfoList::deleteFileInfoBySourceId(uint sourceId)
 
 
 
-uint FileInfoList::deleteFileInfoByFileIdList(std::set<uint>& fileIdList)
+uint FileInfoList::deleteFileInfoByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint count = 0;
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
+        {
+          mArray[t] = nullptr;
+          if (mReleaseObjects)
+            delete info;
+          count++;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint FileInfoList::deleteFileInfoByFileIdList(std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
   try
@@ -2095,7 +2173,7 @@ void FileInfoList::sort(uint comparisonMethod)
 
 
 
-time_t FileInfoList::getLastFileDeletionTimeByGenerationId(uint generationId)
+time_t FileInfoList::getLastFileDeletionTimeByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try

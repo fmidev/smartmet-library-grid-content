@@ -92,7 +92,7 @@ std::string ForecastTime::getCsv()
   try
   {
     char buf[200];
-    sprintf(buf,"%d;%d;%d;%d;%d;%s;%s",
+    sprintf(buf,"%u;%lu;%d;%d;%d;%s;%s",
         mSourceId,
         mGenerationId,
         mGeometryId,
@@ -123,7 +123,7 @@ void ForecastTime::setCsv(const char *csv)
     if (partList.size() >= 7)
     {
       mSourceId = toUInt32(partList[0].c_str());
-      mGenerationId = toUInt32(partList[1].c_str());
+      mGenerationId = toUInt64(partList[1].c_str());
       mGeometryId = toInt32(partList[2].c_str());
       mForecastType = toInt16(partList[3].c_str());
       mForecastNumber = toInt16(partList[4].c_str());

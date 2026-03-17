@@ -50,6 +50,9 @@ class ServiceInterface
      virtual int    getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList);
      virtual int    getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values);
 
+     virtual int    getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList);
+     virtual int    getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList);
+
      virtual int    getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
 
   protected:
@@ -61,6 +64,9 @@ class ServiceInterface
      virtual int    _getParameterValueByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value);
      virtual int    _getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList);
      virtual int    _getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values);
+
+     virtual int    _getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList);
+     virtual int    _getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList);
 
      virtual int    _getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
 

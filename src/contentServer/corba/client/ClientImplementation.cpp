@@ -286,7 +286,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
+    C::ProducerInfo_var corbaProducerInfo = new C::ProducerInfo();
     ContentServer::Corba::Converter::convert(producerInfo, corbaProducerInfo);
 
     int result = mService->addProducerInfo(sessionId, corbaProducerInfo);
@@ -304,7 +304,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
 
 
 
-int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, uint producerId)
+int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, T::ProducerId producerId)
 {
   try
   {
@@ -342,7 +342,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
 
 
 
-int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -361,14 +361,14 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
 
 
-int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, uint producerId, T::ProducerInfo& producerInfo)
+int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, T::ProducerId producerId, T::ProducerInfo& producerInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo;
+    C::ProducerInfo_var corbaProducerInfo;
 
     int result = mService->getProducerInfoById(sessionId, producerId, corbaProducerInfo);
 
@@ -392,7 +392,7 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, const s
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo;
+    C::ProducerInfo_var corbaProducerInfo;
 
     int result = mService->getProducerInfoByName(sessionId, producerName.c_str(), corbaProducerInfo);
 
@@ -416,7 +416,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
+    C::ProducerInfoList_var corbaProducerInfoList;
 
     int result = mService->getProducerInfoList(sessionId, corbaProducerInfoList);
 
@@ -440,7 +440,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
+    C::ProducerInfoList_var corbaProducerInfoList;
 
     int result = mService->getProducerInfoListByParameter(sessionId,(CORBA::Octet)parameterKeyType,parameterKey.c_str(),corbaProducerInfoList);
 
@@ -457,14 +457,14 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfoList_var corbaProducerInfoList;
+    C::ProducerInfoList_var corbaProducerInfoList;
 
     int result = mService->getProducerInfoListBySourceId(sessionId,sourceId,corbaProducerInfoList);
 
@@ -512,7 +512,7 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaList;
+    C::StringList_var corbaList;
 
     int result = mService->getProducerNameAndGeometryList(sessionId,corbaList);
 
@@ -536,7 +536,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaList;
+    C::StringList_var corbaList;
 
     int result = mService->getProducerParameterList(sessionId,(CORBA::Octet)sourceParameterKeyType,(CORBA::Octet)targetParameterKeyType,corbaList);
 
@@ -553,14 +553,14 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
-int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaList;
+    C::StringList_var corbaList;
 
     int result = mService->getProducerParameterListByProducerId(sessionId,producerId,(CORBA::Octet)sourceParameterKeyType,(CORBA::Octet)targetParameterKeyType,corbaList);
 
@@ -584,7 +584,7 @@ int ClientImplementation::_setProducerInfo(T::SessionId sessionId, T::ProducerIn
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaProducerInfo_var corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
+    C::ProducerInfo_var corbaProducerInfo = new C::ProducerInfo();
     ContentServer::Corba::Converter::convert(producerInfo, corbaProducerInfo);
 
     int result = mService->setProducerInfo(sessionId, corbaProducerInfo);
@@ -606,7 +606,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo_var corbaGenerationInfo = new C::GenerationInfo();
     ContentServer::Corba::Converter::convert(generationInfo, corbaGenerationInfo);
 
     int result = mService->addGenerationInfo(sessionId, corbaGenerationInfo);
@@ -624,7 +624,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
 
 
 
-int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, uint generationId)
+int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, T::GenerationId generationId)
 {
   try
   {
@@ -662,14 +662,14 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
 
 
 
-int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaULongList_var corbaGenerationIdList = new ContentServer::Corba::CorbaULongList();
+    C::GenerationIdList_var corbaGenerationIdList = new C::GenerationIdList();
     ContentServer::Corba::Converter::convert(generationIdList, corbaGenerationIdList);
 
     int result = mService->deleteGenerationInfoListByIdList(sessionId, corbaGenerationIdList);
@@ -684,7 +684,7 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
 
 
-int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -722,7 +722,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
-int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -748,7 +748,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaList;
+    C::StringList_var corbaList;
 
     int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,corbaList);
 
@@ -764,14 +764,14 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
 
 
 
-int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, uint generationId, T::GenerationInfo& generationInfo)
+int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, T::GenerationId generationId, T::GenerationInfo& generationInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
+    C::GenerationInfo_var corbaGenerationInfo;
 
     int result = mService->getGenerationInfoById(sessionId, generationId, corbaGenerationInfo);
 
@@ -795,7 +795,7 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,const 
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
+    C::GenerationInfo_var corbaGenerationInfo;
 
     int result = mService->getGenerationInfoByName(sessionId, generationName.c_str(), corbaGenerationInfo);
 
@@ -819,7 +819,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+    C::GenerationInfoList_var corbaGenerationInfoList;
 
     int result = mService->getGenerationInfoList(sessionId, corbaGenerationInfoList);
 
@@ -843,7 +843,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+    C::GenerationInfoList_var corbaGenerationInfoList;
 
     int result = mService->getGenerationInfoListByGeometryId(sessionId, geometryId, corbaGenerationInfoList);
 
@@ -860,14 +860,14 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId, uint producerId, T::GenerationInfoList& generationInfoList)
+int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::GenerationInfoList& generationInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+    C::GenerationInfoList_var corbaGenerationInfoList;
 
     int result = mService->getGenerationInfoListByProducerId(sessionId, producerId, corbaGenerationInfoList);
 
@@ -891,7 +891,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+    C::GenerationInfoList_var corbaGenerationInfoList;
 
     int result = mService->getGenerationInfoListByProducerName(sessionId, producerName.c_str(), corbaGenerationInfoList);
 
@@ -908,14 +908,14 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
 
 
-int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId, uint sourceId, T::GenerationInfoList& generationInfoList)
+int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::GenerationInfoList& generationInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfoList_var corbaGenerationInfoList;
+    C::GenerationInfoList_var corbaGenerationInfoList;
 
     int result = mService->getGenerationInfoListBySourceId(sessionId, sourceId, corbaGenerationInfoList);
 
@@ -932,14 +932,14 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
+    C::GenerationInfo_var corbaGenerationInfo;
 
     int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId, producerId, generationStatus, corbaGenerationInfo);
 
@@ -963,7 +963,7 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo;
+    C::GenerationInfo_var corbaGenerationInfo;
 
     int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId, producerName.c_str(), generationStatus, corbaGenerationInfo);
 
@@ -1011,7 +1011,7 @@ int ClientImplementation::_setGenerationInfo(T::SessionId sessionId, T::Generati
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGenerationInfo_var corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo_var corbaGenerationInfo = new C::GenerationInfo();
     ContentServer::Corba::Converter::convert(generationInfo, corbaGenerationInfo);
 
     int result = mService->setGenerationInfo(sessionId, corbaGenerationInfo);
@@ -1026,7 +1026,7 @@ int ClientImplementation::_setGenerationInfo(T::SessionId sessionId, T::Generati
 
 
 
-int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
+int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   try
   {
@@ -1071,7 +1071,7 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+    C::GeometryInfo_var corbaGeometryInfo = new C::GeometryInfo();
     ContentServer::Corba::Converter::convert(geometryInfo, corbaGeometryInfo);
 
     int result = mService->addGeometryInfo(sessionId, corbaGeometryInfo);
@@ -1089,7 +1089,7 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   try
   {
@@ -1108,7 +1108,7 @@ int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint ge
 
 
 
-int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   try
   {
@@ -1127,7 +1127,7 @@ int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId ses
 
 
 
-int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -1146,7 +1146,7 @@ int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessi
 
 
 
-int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -1165,14 +1165,14 @@ int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 
 
-int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo;
+    C::GeometryInfo_var corbaGeometryInfo;
 
     int result = mService->getGeometryInfoById(sessionId, generationId, geometryId, levelId, corbaGeometryInfo);
 
@@ -1196,7 +1196,7 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+    C::GeometryInfoList_var corbaGeometryInfoList;
 
     int result = mService->getGeometryInfoList(sessionId,corbaGeometryInfoList);
 
@@ -1213,14 +1213,14 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
 
 
 
-int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+    C::GeometryInfoList_var corbaGeometryInfoList;
 
     int result = mService->getGeometryInfoListByGenerationId(sessionId,generationId,corbaGeometryInfoList);
 
@@ -1237,14 +1237,14 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+    C::GeometryInfoList_var corbaGeometryInfoList;
 
     int result = mService->getGeometryInfoListByProducerId(sessionId,producerId,corbaGeometryInfoList);
 
@@ -1261,14 +1261,14 @@ int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfoList_var corbaGeometryInfoList;
+    C::GeometryInfoList_var corbaGeometryInfoList;
 
     int result = mService->getGeometryInfoListBySourceId(sessionId,sourceId,corbaGeometryInfoList);
 
@@ -1320,7 +1320,7 @@ int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaGeometryInfo_var corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+    C::GeometryInfo_var corbaGeometryInfo = new C::GeometryInfo();
     ContentServer::Corba::Converter::convert(geometryInfo, corbaGeometryInfo);
 
     int result = mService->setGeometryInfo(sessionId, corbaGeometryInfo);
@@ -1335,7 +1335,7 @@ int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   try
   {
@@ -1361,7 +1361,7 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
+    C::FileInfo_var corbaFileInfo = new C::FileInfo();
     ContentServer::Corba::Converter::convert(fileInfo, corbaFileInfo);
 
     int result = mService->addFileInfo(sessionId, corbaFileInfo);
@@ -1386,8 +1386,8 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::FileInfo_var corbaFileInfo = new C::FileInfo();
+    C::ContentInfoList_var corbaContentInfoList = new C::ContentInfoList();
 
     ContentServer::Corba::Converter::convert(fileInfo, corbaFileInfo);
     ContentServer::Corba::Converter::convert(contentInfoList, corbaContentInfoList);
@@ -1417,7 +1417,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileContentList_var corbaFileContentList = new ContentServer::Corba::CorbaFileContentList();
+    C::FileContentList_var corbaFileContentList = new C::FileContentList();
 
     ContentServer::Corba::Converter::convert(fileAndContentList, corbaFileContentList);
 
@@ -1438,7 +1438,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, uint fileId)
+int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, T::FileId fileId)
 {
   try
   {
@@ -1476,7 +1476,7 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std
 
 
 
-int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId, uint producerId)
+int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId)
 {
   try
   {
@@ -1514,7 +1514,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
 
 
-int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId, uint generationId)
+int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId, T::GenerationId generationId)
 {
   try
   {
@@ -1533,7 +1533,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
-int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
+int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   try
   {
@@ -1559,7 +1559,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaForecastTimeList_var corbaForecastTimeList = new ContentServer::Corba::CorbaForecastTimeList();
+    C::ForecastTimeInfoList_var corbaForecastTimeList = new C::ForecastTimeInfoList();
 
     ContentServer::Corba::Converter::convert(forecastTimeList, corbaForecastTimeList);
 
@@ -1594,7 +1594,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
-int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, uint sourceId)
+int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId)
 {
   try
   {
@@ -1613,14 +1613,14 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
 
 
 
-int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    C::FileIdList_var corbaFileIdList = new C::FileIdList();
     ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId, corbaFileIdList);
@@ -1634,14 +1634,14 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getFileInfoById(T::SessionId sessionId, uint fileId, T::FileInfo& fileInfo)
+int ClientImplementation::_getFileInfoById(T::SessionId sessionId, T::FileId fileId, T::FileInfo& fileInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo;
+    C::FileInfo_var corbaFileInfo;
 
     int result = mService->getFileInfoById(sessionId, fileId, corbaFileInfo);
 
@@ -1665,7 +1665,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo;
+    C::FileInfo_var corbaFileInfo;
 
     int result = mService->getFileInfoByName(sessionId, filename.c_str(), corbaFileInfo);
 
@@ -1682,14 +1682,14 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
-int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoList(T::SessionId sessionId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoList(sessionId, startFileId, maxRecords, corbaFileInfoList);
 
@@ -1706,15 +1706,15 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, uint startFil
 
 
 
-int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
-    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    C::FileInfoList_var corbaFileInfoList;
+    C::FileIdList_var corbaFileIdList = new C::FileIdList();
     ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
 
     int result = mService->getFileInfoListByFileIdList(sessionId, corbaFileIdList, corbaFileInfoList);
@@ -1732,14 +1732,14 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
-int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoListByProducerId(sessionId, producerId, startFileId, maxRecords, corbaFileInfoList);
 
@@ -1756,14 +1756,14 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, u
 
 
 
-int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoListByProducerName(sessionId, producerName.c_str(), startFileId, maxRecords, corbaFileInfoList);
 
@@ -1780,14 +1780,14 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId, uint generationId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId, T::GenerationId generationId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoListByGenerationId(sessionId, generationId, startFileId, maxRecords, corbaFileInfoList);
 
@@ -1804,14 +1804,14 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoListByGenerationName(sessionId, generationName.c_str(), startFileId, maxRecords, corbaFileInfoList);
 
@@ -1828,14 +1828,14 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, int maxRecords, T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfoList_var corbaFileInfoList;
+    C::FileInfoList_var corbaFileInfoList;
 
     int result = mService->getFileInfoListBySourceId(sessionId, sourceId, startFileId, maxRecords, corbaFileInfoList);
 
@@ -1876,7 +1876,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
-int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   try
   {
@@ -1900,7 +1900,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   try
   {
@@ -1924,7 +1924,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   try
   {
@@ -1955,7 +1955,7 @@ int ClientImplementation::_setFileInfo(T::SessionId sessionId, T::FileInfo& file
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaFileInfo_var corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
+    C::FileInfo_var corbaFileInfo = new C::FileInfo();
     ContentServer::Corba::Converter::convert(fileInfo, corbaFileInfo);
 
     int result = mService->setFileInfo(sessionId, corbaFileInfo);
@@ -1977,7 +1977,7 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaEventInfo_var corbaEventInfo = new ContentServer::Corba::CorbaEventInfo();
+    C::EventInfo_var corbaEventInfo = new C::EventInfo();
     ContentServer::Corba::Converter::convert(eventInfo, corbaEventInfo);
 
     int result = mService->addEventInfo(sessionId,corbaEventInfo);
@@ -2008,7 +2008,7 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
       init(mServiceIor);
     }
 
-    ContentServer::Corba::CorbaEventInfo_var corbaEventInfo;
+    C::EventInfo_var corbaEventInfo;
 
     int result = mService->getLastEventInfo(sessionId, requestingServerId, corbaEventInfo);
 
@@ -2038,7 +2038,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
       init(mServiceIor);
     }
 
-    ContentServer::Corba::CorbaEventInfoList_var corbaEventInfoList;
+    C::EventInfoList_var corbaEventInfoList;
 
     int result = mService->getEventInfoList(sessionId, requestingServerId, startEventId, maxRecords, corbaEventInfoList);
 
@@ -2086,7 +2086,7 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfo_var corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
+    C::ContentInfo_var corbaContentInfo = new C::ContentInfo();
     ContentServer::Corba::Converter::convert(contentInfo, corbaContentInfo);
 
     int result = mService->addContentInfo(sessionId, corbaContentInfo);
@@ -2111,7 +2111,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList_var corbaContentInfoList = new C::ContentInfoList();
     ContentServer::Corba::Converter::convert(contentInfoList, corbaContentInfoList);
 
     int result = mService->addContentList(sessionId, corbaContentInfoList);
@@ -2129,7 +2129,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
 
 
 
-int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
+int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   try
   {
@@ -2148,7 +2148,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
 
 
 
-int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint fileId)
+int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   try
   {
@@ -2186,7 +2186,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
-int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId, uint producerId)
+int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId, T::ProducerId producerId)
 {
   try
   {
@@ -2223,7 +2223,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionId, uint generationId)
+int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionId, T::GenerationId generationId)
 {
   try
   {
@@ -2261,7 +2261,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
 
 
-int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, uint sourceId)
+int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, T::SourceId sourceId)
 {
   try
   {
@@ -2280,14 +2280,14 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, u
 
 
 
-int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
+int ClientImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfo_var corbaContentInfo;
+    C::ContentInfo_var corbaContentInfo;
 
     int result = mService->getContentInfo(sessionId,fileId,messageIndex, corbaContentInfo);
 
@@ -2304,14 +2304,14 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentList(T::SessionId sessionId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentList(sessionId, startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
 
@@ -2328,14 +2328,14 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, uint startFile
 
 
 
-int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint fileId, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, T::FileId fileId, T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByFileId(sessionId, fileId, corbaContentInfoList);
 
@@ -2352,15 +2352,15 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, uint f
 
 
 
-int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
-    ContentServer::Corba::CorbaULongList_var corbaFileIdList = new ContentServer::Corba::CorbaULongList();
+    C::ContentInfoList_var corbaContentInfoList;
+    C::FileIdList_var corbaFileIdList = new C::FileIdList();
     ContentServer::Corba::Converter::convert(fileIdList, corbaFileIdList);
 
     int result = mService->getContentListByFileIdList(sessionId, corbaFileIdList, corbaContentInfoList);
@@ -2385,7 +2385,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByFileName(sessionId, filename.c_str(), corbaContentInfoList);
 
@@ -2401,14 +2401,14 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
-int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, uint producerId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByProducerId(sessionId, producerId, startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
 
@@ -2425,14 +2425,14 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, ui
 
 
 
-int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByProducerName(sessionId, producerName.c_str(), startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
 
@@ -2452,14 +2452,14 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
-int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByGenerationId(sessionId, generationId, startFileId, startMessageIndex, maxRecords, requestFlags,corbaContentInfoList);
 
@@ -2476,14 +2476,14 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByGenerationName(sessionId, generationName.c_str(), startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
 
@@ -2500,14 +2500,14 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByGenerationIdAndTimeRange(sessionId, generationId, startTime, endTime, corbaContentInfoList);
 
@@ -2531,7 +2531,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByGenerationNameAndTimeRange(sessionId, generationName.c_str(), startTime, endTime, corbaContentInfoList);
 
@@ -2548,14 +2548,14 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
-int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, uint sourceId, uint startFileId, uint startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListBySourceId(sessionId, sourceId, startFileId, startMessageIndex, maxRecords, corbaContentInfoList);
 
@@ -2579,7 +2579,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameter(sessionId, (CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags,corbaContentInfoList);
 
@@ -2596,14 +2596,14 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,minLevel,maxLevel, forecastType, forecastNumber, geometryId, startTime, endTime, requestFlags, corbaContentInfoList);
 
@@ -2627,7 +2627,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
 
@@ -2643,14 +2643,14 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
 
@@ -2674,7 +2674,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameterAndProducerName(sessionId,producerName.c_str(),(CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime, endTime, requestFlags, corbaContentInfoList);
 
@@ -2691,14 +2691,14 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,(CORBA::Octet)parameterKeyType, parameterKey.c_str(),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,corbaContentInfoList);
 
@@ -2722,7 +2722,7 @@ int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList;
+    C::ContentInfoList_var corbaContentInfoList;
 
     int result = mService->getContentListOfInvalidIntegrity(sessionId,corbaContentInfoList);
 
@@ -2739,14 +2739,14 @@ int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
 
 
 
-int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
+int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaLongList_var corbaGeometryIdList;
+    C::GeometryIdList_var corbaGeometryIdList;
 
     int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,corbaGeometryIdList);
 
@@ -2762,14 +2762,14 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
 
 
-int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentParamList;
+    C::ContentInfoList_var corbaContentParamList;
 
     int result = mService->getContentParamListByGenerationId(sessionId,generationId,corbaContentParamList);
 
@@ -2786,14 +2786,14 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+    C::StringList_var corbaParamKeyList;
 
     int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,(unsigned char)parameterKeyType,corbaParamKeyList);
 
@@ -2810,14 +2810,14 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+    C::StringList_var corbaParamKeyList;
 
     int result = mService->getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,(unsigned char)parameterKeyType,corbaParamKeyList);
 
@@ -2834,14 +2834,14 @@ int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaParamKeyList;
+    C::StringList_var corbaParamKeyList;
 
     int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,(unsigned char)parameterKeyType,corbaParamKeyList);
 
@@ -2858,14 +2858,14 @@ int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+    C::TimeStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByGenerationId(sessionId,generationId,corbaContentTimeList);
 
@@ -2881,15 +2881,15 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
-int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ::CORBA::LongLong corbaStartTime = 0;
-    ::CORBA::LongLong corbaEndTime = 0;
+    C::Timestamp corbaStartTime = 0;
+    C::Timestamp corbaEndTime = 0;
 
     int result = mService->getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,corbaStartTime,corbaEndTime);
 
@@ -2908,15 +2908,15 @@ int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
 
 
 
-int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
+int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ::CORBA::LongLong corbaStartTime = 0;
-    ::CORBA::LongLong corbaEndTime = 0;
+    C::Timestamp corbaStartTime = 0;
+    C::Timestamp corbaEndTime = 0;
 
     int result = mService->getContentTimeRangeByGenerationId(sessionId,generationId,corbaStartTime,corbaEndTime);
 
@@ -2935,14 +2935,14 @@ int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+    C::TimeStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,corbaContentTimeList);
 
@@ -2959,14 +2959,14 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
-int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaLongList_var corbaLevelList;
+    C::LevelList_var corbaLevelList;
 
     int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,corbaLevelList);
 
@@ -2983,14 +2983,38 @@ int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+    C::LevelList_var corbaLevelList;
+
+    int result = mService->getContentLevelListByParameterGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterKey.c_str(),levelId,corbaLevelList);
+
+    if (result == 0)
+      ContentServer::Corba::Converter::convert(corbaLevelList,contentLevelList);
+
+    mLastAccessTime = time(nullptr);
+    return result;
+  }
+  CATCH_EXCEPTION
+}
+
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+{
+  try
+  {
+    if (!mInitialized)
+      throw Fmi::Exception(BCP, "The client is not initialized!");
+
+    C::TimeStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,corbaContentTimeList);
 
@@ -3007,14 +3031,14 @@ int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::S
 
 
 
-int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaStringList_var corbaContentTimeList;
+    C::TimeStringList_var corbaContentTimeList;
 
     int result = mService->getContentTimeListByProducerId(sessionId,producerId,corbaContentTimeList);
 
@@ -3038,7 +3062,7 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ::CORBA::ULong corbaCount = 0;
+    C::UInt32 corbaCount = 0;
 
     int result = mService->getContentCount(sessionId, corbaCount);
 
@@ -3062,7 +3086,7 @@ int ClientImplementation::_setContentInfo(T::SessionId sessionId, T::ContentInfo
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaContentInfo_var corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
+    C::ContentInfo_var corbaContentInfo = new C::ContentInfo();
     ContentServer::Corba::Converter::convert(contentInfo, corbaContentInfo);
 
     int result = mService->setContentInfo(sessionId, corbaContentInfo);
@@ -3077,14 +3101,14 @@ int ClientImplementation::_setContentInfo(T::SessionId sessionId, T::ContentInfo
 
 
 
-int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
   try
   {
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ::CORBA::ULongLong corbaHash = 0;
+    C::Hash corbaHash = 0;
 
     int result = mService->getHashByProducerId(sessionId,producerId,corbaHash);
 
@@ -3108,7 +3132,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    ContentServer::Corba::CorbaLevelInfoList_var corbaLevelInfoList;
+    C::LevelInfoList_var corbaLevelInfoList;
 
     int result = mService->getLevelInfoList(sessionId,corbaLevelInfoList);
 

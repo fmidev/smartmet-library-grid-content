@@ -18,6 +18,7 @@ GeometryInfo::GeometryInfo()
     mGenerationId = 0;
     mLevelId = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mStatus = 0;
     mModificationTime = 0;
@@ -42,6 +43,7 @@ GeometryInfo::GeometryInfo(const GeometryInfo& geometryInfo)
     mProducerId = geometryInfo.mProducerId;
     mLevelId = geometryInfo.mLevelId;
     mFlags = geometryInfo.mFlags;
+    mStorageId = geometryInfo.mStorageId;
     mSourceId = geometryInfo.mSourceId;
     mStatus = geometryInfo.mStatus;
     mModificationTime = geometryInfo.mModificationTime;
@@ -66,6 +68,7 @@ GeometryInfo::GeometryInfo(const char *csv)
     mGenerationId = 0;
     mLevelId = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mStatus = 0;
     mModificationTime = 0;
@@ -110,6 +113,7 @@ GeometryInfo& GeometryInfo::operator=(const GeometryInfo& geometryInfo)
     mGenerationId = geometryInfo.mGenerationId;
     mLevelId = geometryInfo.mLevelId;
     mFlags = geometryInfo.mFlags;
+    mStorageId = geometryInfo.mStorageId;
     mSourceId = geometryInfo.mSourceId;
     mStatus = geometryInfo.mStatus;
     mModificationTime = geometryInfo.mModificationTime;
@@ -131,7 +135,7 @@ std::string GeometryInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%d;%d;%u;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%lu;%d;%d;%u;%u;%u;%u;%ld;%ld;%u",
         mGenerationId,
         mGeometryId,
         mLevelId,
@@ -140,7 +144,8 @@ std::string GeometryInfo::getCsv()
         mFlags,
         (uint)mStatus,
         mModificationTime,
-        mDeletionTime);
+        mDeletionTime,
+        mStorageId);
 
     return std::string(st);
   }
@@ -158,7 +163,7 @@ std::string GeometryInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "generationId;geometryId;mLevelId;producerId;sourceId;flags;status;modificationTimeT;deletionTimeT";
+    std::string header = "generationId;geometryId;mLevelId;producerId;sourceId;flags;status;modificationTimeT;deletionTimeT;mStorageId";
     return header;
   }
   catch (...)
@@ -199,7 +204,7 @@ void GeometryInfo::setCsv(const char *csv)
 
     if (c >= 8)
     {
-      mGenerationId = toUInt32(field[0]);
+      mGenerationId = toUInt64(field[0]);
       mGeometryId = toInt32(field[1]);
       mLevelId = toInt32(field[2]);
       mProducerId = toUInt32(field[3]);
@@ -209,6 +214,9 @@ void GeometryInfo::setCsv(const char *csv)
       mModificationTime = toInt64(field[7]);
       mDeletionTime = toInt64(field[8]);
     }
+
+    if (c >= 9)
+      mStorageId = toUInt32(field[9]);
   }
   catch (...)
   {
@@ -301,6 +309,7 @@ void GeometryInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGeometryId       = " << mGeometryId << "\n";
     stream << space(level) << "- mLevelId          = " << mLevelId << "\n";
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
+    stream << space(level) << "- mStorageId        = " << mStorageId << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
     stream << space(level) << "- mStatus           = " << (uint)mStatus << "\n";

@@ -157,7 +157,7 @@ void LuaFile::init(const std::string& filename)
 
 
 
-void* LuaFile::getLuaState(ulonglong& key)
+void* LuaFile::getLuaState(UInt64 & key)
 {
   try
   {
@@ -187,7 +187,7 @@ void* LuaFile::getLuaState(ulonglong& key)
 
 
 
-void LuaFile::releaseLuaState(ulonglong key)
+void LuaFile::releaseLuaState(UInt64 key)
 {
   try
   {

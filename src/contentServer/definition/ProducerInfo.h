@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
 
 
 
@@ -29,15 +29,16 @@ class ProducerInfo
     ProducerInfo*   duplicate();
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint            mProducerId;
+    T::ProducerId   mProducerId;
     std::string     mName;
     std::string     mTitle;
     std::string     mDescription;
     uint            mFlags;
-    uint            mSourceId;
+    T::StorageId    mStorageId;
+    T::SourceId     mSourceId;
     uchar           mStatus;
 
-    ulonglong       mHash;
+    UInt64          mHash;
 
   public:
 

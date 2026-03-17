@@ -261,7 +261,7 @@ void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 
 
 
-int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+int ServiceInterface::getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
   try
@@ -269,11 +269,11 @@ int ServiceInterface::getGridCoordinates(T::SessionId sessionId,uint fileId,uint
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridCoordinates(sessionId,fileId,messageIndex,coordinateType,coordinates);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -295,11 +295,11 @@ int ServiceInterface::getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridLatlonCoordinatesByGeometry(sessionId,attributeList,coordinates);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,GridCoordinates);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,GridCoordinates);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -313,7 +313,7 @@ int ServiceInterface::getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,
 
 
 
-int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
+int ServiceInterface::getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
 {
   FUNCTION_TRACE
   try
@@ -321,11 +321,11 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridData(sessionId,fileId,messageIndex,data);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%lu);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,data.mValues.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,data.mValues.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -338,7 +338,7 @@ int ServiceInterface::getGridData(T::SessionId sessionId,uint fileId,uint messag
 
 
 
-int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+int ServiceInterface::getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -346,11 +346,11 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridAttributeList(sessionId,fileId,messageIndex,attributeList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,Attribute[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,Attribute[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -363,7 +363,7 @@ int ServiceInterface::getGridAttributeList(T::SessionId sessionId,uint fileId,ui
 
 
 
-int ServiceInterface::getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+int ServiceInterface::getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
 {
   FUNCTION_TRACE
   try
@@ -371,11 +371,11 @@ int ServiceInterface::getGridProperties(T::SessionId sessionId,uint fileId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridProperties(sessionId,fileId,messageIndex,propertyList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,PropertySetting[%ld]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,propertyList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,PropertySetting[%ld]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,propertyList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -396,11 +396,11 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridFileCount(sessionId,count);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u);result %d;time %f;",__FUNCTION__,sessionId,count,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -413,7 +413,7 @@ int ServiceInterface::getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
-int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
   FUNCTION_TRACE
   try
@@ -421,11 +421,11 @@ int ServiceInterface::getGridMessageBytes(T::SessionId sessionId,uint fileId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridMessageBytes(sessionId,fileId,messageIndex,messageBytes,messageSections);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,byte[%lu],section[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,messageBytes.size(),messageSections.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,byte[%lu],section[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,messageBytes.size(),messageSections.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -446,11 +446,11 @@ int ServiceInterface::getPropertyValuesByCoordinates(T::SessionId sessionId,cons
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getPropertyValuesByCoordinates(sessionId,propertyName,latlonCoordinates,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,Coordinates[%ld],Values[%ld]);result %d;time %f;",__FUNCTION__,sessionId,propertyName,latlonCoordinates.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,Coordinates[%ld],Values[%ld]);result %d;time %f;",__FUNCTION__,sessionId,propertyName,latlonCoordinates.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -463,7 +463,7 @@ int ServiceInterface::getPropertyValuesByCoordinates(T::SessionId sessionId,cons
 
 
 
-int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -471,11 +471,11 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%f,%f,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -488,18 +488,18 @@ int ServiceInterface::getGridValueByPoint(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%u,%u,%d,%f,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,%lu,%u,%d,%f,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,newLevel,coordinateType,x,y,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -512,7 +512,7 @@ int ServiceInterface::getGridValueByLevelAndPoint(T::SessionId sessionId,uint fi
 
 
 
-int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -520,11 +520,11 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -537,7 +537,7 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -545,11 +545,11 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByTimeAndPoint(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%f,%f,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -562,7 +562,7 @@ int ServiceInterface::getGridValueByTimeAndPoint(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -570,11 +570,11 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%u,%u,%d,%u,%u,%d,%u,%u,%d,%s,%f,%u,%f,%f,%u,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime.c_str(),newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,%lu,%u,%d,%lu,%u,%d,%lu,%u,%d,%s,%f,%u,%f,%f,%u,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime.c_str(),newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -587,7 +587,7 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -595,11 +595,11 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueByTimeLevelAndPoint(sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%d,%u,%u,%d,%u,%u,%d,%u,%u,%d,%lu,%f,%u,%f,%f,%u,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,%lu,%u,%d,%lu,%u,%d,%lu,%u,%d,%lu,%f,%u,%f,%f,%u,%u,%u,%u,double[%ld],%f);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,level1,fileId2,messageIndex2,level2,fileId3,messageIndex3,level3,fileId4,messageIndex4,level4,newTime,newLevel,coordinateType,x,y,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -612,7 +612,7 @@ int ServiceInterface::getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -620,11 +620,11 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByCircle(sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%f,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%f,%f,%f,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,origoX,origoY,radius,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -637,7 +637,7 @@ int ServiceInterface::getGridValueListByCircle(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -645,11 +645,11 @@ int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,origoX,origoY,radius,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -662,7 +662,7 @@ int ServiceInterface::getGridValueListByLevelAndCircle(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -670,11 +670,11 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -687,7 +687,7 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -695,11 +695,11 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%f,%f,%f,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,origoX,origoY,radius,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -712,7 +712,7 @@ int ServiceInterface::getGridValueListByTimeAndCircle(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -720,11 +720,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%u,%f,%f,%f,%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%u,%f,%f,%f,%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -737,7 +737,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -745,11 +745,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndCircle(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%u,%f,%f,%f,%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%u,%f,%f,%f,%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,origoX,origoY,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -762,7 +762,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndCircle(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -770,11 +770,11 @@ int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fi
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByPointList(sessionId,fileId,messageIndex,coordinateType,pointList,areaInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Point[%lu],%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,pointList.size(),areaInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,Point[%lu],%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,pointList.size(),areaInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -787,7 +787,7 @@ int ServiceInterface::getGridValueListByPointList(T::SessionId sessionId,uint fi
 
 
 
-int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -795,11 +795,11 @@ int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,pointList,areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,pointList.size(),areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,pointList.size(),areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -812,7 +812,7 @@ int ServiceInterface::getGridValueListByLevelAndPointList(T::SessionId sessionId
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -820,11 +820,11 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -837,7 +837,7 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -845,11 +845,11 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,Point[%lu],%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -862,7 +862,7 @@ int ServiceInterface::getGridValueListByTimeAndPointList(T::SessionId sessionId,
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -870,11 +870,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%u,Point[%lu],%u,%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%u,Point[%lu],%u,%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -887,7 +887,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -895,11 +895,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPointList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%u,Point[%lu],%u,%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%u,Point[%lu],%u,%u,%u,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,pointList.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -912,7 +912,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPointList(T::SessionId sessi
 
 
 
-int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -920,11 +920,11 @@ int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByPolygon(sessionId,fileId,messageIndex,coordinateType,polygonPoints,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Point[%lu],%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,polygonPoints.size(),modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,Point[%lu],%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,polygonPoints.size(),modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -937,7 +937,7 @@ int ServiceInterface::getGridValueListByPolygon(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -945,11 +945,11 @@ int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPoints,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPoints.size(),levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPoints.size(),levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -962,7 +962,7 @@ int ServiceInterface::getGridValueListByLevelAndPolygon(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -970,11 +970,11 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,polygonPoints.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,polygonPoints.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -987,7 +987,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -995,11 +995,11 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,Point[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPoints.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1012,7 +1012,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygon(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1020,11 +1020,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%u,Point[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,polygonPoints.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%u,Point[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,polygonPoints.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1037,7 +1037,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1045,11 +1045,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygon(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%u,Point[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%u,Point[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPoints.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1062,7 +1062,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygon(T::SessionId session
 
 
 
-int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1070,11 +1070,11 @@ int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByPolygonPath(sessionId,fileId,messageIndex,coordinateType,polygonPath,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Polygon[%lu],%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,polygonPath.size(),modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,Polygon[%lu],%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,polygonPath.size(),modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1087,7 +1087,7 @@ int ServiceInterface::getGridValueListByPolygonPath(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1095,11 +1095,11 @@ int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPath,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPath.size(),levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,polygonPath.size(),levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1112,7 +1112,7 @@ int ServiceInterface::getGridValueListByLevelAndPolygonPath(T::SessionId session
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1120,11 +1120,11 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,polygonPath.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,polygonPath.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1137,7 +1137,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1145,11 +1145,11 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath,timeInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,Polygon[%lu],%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,polygonPath.size(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1162,7 +1162,7 @@ int ServiceInterface::getGridValueListByTimeAndPolygonPath(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1170,11 +1170,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%u,Polygon[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,polygonPath.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%u,Polygon[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,polygonPath.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1187,7 +1187,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
 
 
 
-int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1195,11 +1195,11 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByTimeLevelAndPolygonPath(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%u,Polygon[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%u,Polygon[%lu],%d,%d,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,polygonPath.size(),timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1212,7 +1212,7 @@ int ServiceInterface::getGridValueListByTimeLevelAndPolygonPath(T::SessionId ses
 
 
 
-int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1220,11 +1220,11 @@ int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fi
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueListByRectangle(sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,modificationParameters,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%f,%f,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%f,%f,%f,%f,%u,double[%ld],GridValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x1,y1,x2,y2,modificationOperation,modificationParameters.size(),valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1237,7 +1237,7 @@ int ServiceInterface::getGridValueListByRectangle(T::SessionId sessionId,uint fi
 
 
 
-int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1245,11 +1245,11 @@ int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVector(sessionId,fileId,messageIndex,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1262,7 +1262,7 @@ int ServiceInterface::getGridValueVector(T::SessionId sessionId,uint fileId,uint
 
 
 
-int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1270,11 +1270,11 @@ int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1287,7 +1287,7 @@ int ServiceInterface::getGridValueVectorByLevel(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1295,11 +1295,11 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),timeInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1312,7 +1312,7 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1320,11 +1320,11 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,timeInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1337,7 +1337,7 @@ int ServiceInterface::getGridValueVectorByTime(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1345,11 +1345,11 @@ int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByCoordinateList(sessionId,fileId,messageIndex,coordinateType,coordinates,areaInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,Coordinates[%lu],%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,coordinates.size(),areaInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,Coordinates[%lu],%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,coordinates.size(),areaInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1362,7 +1362,7 @@ int ServiceInterface::getGridValueVectorByCoordinateList(T::SessionId sessionId,
 
 
 
-int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1370,11 +1370,11 @@ int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId se
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1387,7 +1387,7 @@ int ServiceInterface::getGridValueVectorByLevelAndCoordinateList(T::SessionId se
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1395,11 +1395,11 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1413,7 +1413,7 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1421,11 +1421,11 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,Coordinates[%lu],Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1439,7 +1439,7 @@ int ServiceInterface::getGridValueVectorByTimeAndCoordinateList(T::SessionId ses
 
 
 
-int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1447,11 +1447,11 @@ int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByGeometry(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,Attribute[%u],%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1464,7 +1464,7 @@ int ServiceInterface::getGridValueVectorByGeometry(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1472,11 +1472,11 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByRectangle(sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,areaInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%f,%f,%f,%f,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,areaInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%u,%u,%f,%f,%f,%f,%u,%u,double[%ld],ParamValue[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,columns,rows,x,y,xStep,yStep,areaInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1489,7 +1489,7 @@ int ServiceInterface::getGridValueVectorByRectangle(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
+int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
   FUNCTION_TRACE
   try
@@ -1497,11 +1497,11 @@ int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByPoint(sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,modificationParameters,valueVector);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%f,%f,%u,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,modificationParameters.size(),valueVector.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%f,%f,%u,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,coordinateType,x,y,vectorType,modificationOperation,modificationParameters.size(),valueVector.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1514,7 +1514,7 @@ int ServiceInterface::getGridValueVectorByPoint(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1522,11 +1522,11 @@ int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1539,7 +1539,7 @@ int ServiceInterface::getGridValueVectorByLevelAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1547,11 +1547,11 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1564,7 +1564,7 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1572,11 +1572,11 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1589,7 +1589,7 @@ int ServiceInterface::getGridValueVectorByTimeAndGeometry(T::SessionId sessionId
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1597,11 +1597,11 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%d,%d,%d,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%d,%d,%d,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1614,7 +1614,7 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1622,11 +1622,11 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%d,%d,%d,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%d,%d,%d,%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1639,7 +1639,7 @@ int ServiceInterface::getGridValueVectorByTimeAndLevel(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1647,11 +1647,11 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1664,7 +1664,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
 
 
 
-int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1672,11 +1672,11 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1689,7 +1689,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndGeometry(T::SessionId sess
 
 
 
-int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1697,11 +1697,11 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%d,Coordinate[%lu],Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%d,Coordinate[%lu],Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1714,7 +1714,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
 
 
 
-int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1722,11 +1722,11 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridValueVectorByTimeLevelAndCoordinateList(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates,attributeList,modificationOperation,modificationParameters,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,%d,Coordinate[%lu],Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,%d,Coordinate[%lu],Attribute[%u],%u,double[%ld],value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,coordinateType,coordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1739,7 +1739,7 @@ int ServiceInterface::getGridValueVectorByTimeLevelAndCoordinateList(T::SessionI
 
 
 
-int ServiceInterface::getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1747,11 +1747,11 @@ int ServiceInterface::getGridIsobands(T::SessionId sessionId,uint fileId,uint me
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobands(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1764,7 +1764,7 @@ int ServiceInterface::getGridIsobands(T::SessionId sessionId,uint fileId,uint me
 
 
 
-int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1772,11 +1772,11 @@ int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByGeometry(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1789,7 +1789,7 @@ int ServiceInterface::getGridIsobandsByGeometry(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1797,11 +1797,11 @@ int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByGrid(sessionId,fileId,messageIndex,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1814,7 +1814,7 @@ int ServiceInterface::getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,u
 
 
 
-int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1822,11 +1822,11 @@ int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1839,7 +1839,7 @@ int ServiceInterface::getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1847,11 +1847,11 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1864,7 +1864,7 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
 
 
 
-int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1872,11 +1872,11 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1889,7 +1889,7 @@ int ServiceInterface::getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1897,11 +1897,11 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1914,7 +1914,7 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1922,11 +1922,11 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1939,7 +1939,7 @@ int ServiceInterface::getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1947,11 +1947,11 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1964,7 +1964,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1972,11 +1972,11 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -1989,7 +1989,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -1997,11 +1997,11 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2014,7 +2014,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2022,11 +2022,11 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2039,7 +2039,7 @@ int ServiceInterface::getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2047,11 +2047,11 @@ int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2064,7 +2064,7 @@ int ServiceInterface::getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2072,11 +2072,11 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2089,7 +2089,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2097,11 +2097,11 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2114,7 +2114,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2122,11 +2122,11 @@ int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2139,7 +2139,7 @@ int ServiceInterface::getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2147,11 +2147,11 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2163,7 +2163,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2171,11 +2171,11 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsobandsByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues,contourHighValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourLowValue[%lu],ContourHighValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourLowValues.size(),contourHighValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2187,7 +2187,7 @@ int ServiceInterface::getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2195,11 +2195,11 @@ int ServiceInterface::getGridIsolines(T::SessionId sessionId,uint fileId,uint me
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolines(sessionId,fileId,messageIndex,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2212,7 +2212,7 @@ int ServiceInterface::getGridIsolines(T::SessionId sessionId,uint fileId,uint me
 
 
 
-int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2220,11 +2220,11 @@ int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByGeometry(sessionId,fileId,messageIndex,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2237,7 +2237,7 @@ int ServiceInterface::getGridIsolinesByGeometry(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2245,11 +2245,11 @@ int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByGrid(sessionId,fileId,messageIndex,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2262,7 +2262,7 @@ int ServiceInterface::getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,u
 
 
 
-int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2270,11 +2270,11 @@ int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2287,7 +2287,7 @@ int ServiceInterface::getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2295,11 +2295,11 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2312,7 +2312,7 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
 
 
 
-int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2320,11 +2320,11 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2337,7 +2337,7 @@ int ServiceInterface::getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,
 
 
 
-int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2345,11 +2345,11 @@ int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2362,7 +2362,7 @@ int ServiceInterface::getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2370,11 +2370,11 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2387,7 +2387,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2395,11 +2395,11 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2412,7 +2412,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2420,11 +2420,11 @@ int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2437,7 +2437,7 @@ int ServiceInterface::getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2445,11 +2445,11 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2462,7 +2462,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2470,11 +2470,11 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%lu,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2487,7 +2487,7 @@ int ServiceInterface::getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2495,11 +2495,11 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2512,7 +2512,7 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2520,11 +2520,11 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2537,7 +2537,7 @@ int ServiceInterface::getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2545,11 +2545,11 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2562,7 +2562,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2570,11 +2570,11 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourValue[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2587,7 +2587,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2595,11 +2595,11 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2612,7 +2612,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -2620,11 +2620,11 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridIsolinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,contours);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%lu,%f,ContourValue[%lu],%u,%u,Coordinate[%lu],Attribute[%u],%u,double[%ld],ByteData[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,contourValues.size(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),contours.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2636,7 +2636,7 @@ int ServiceInterface::getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::getGridStreamlines(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2644,11 +2644,11 @@ int ServiceInterface::getGridStreamlines(T::SessionId sessionId,uint fileId,uint
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlines(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2661,7 +2661,7 @@ int ServiceInterface::getGridStreamlines(T::SessionId sessionId,uint fileId,uint
 
 
 
-int ServiceInterface::getGridStreamlinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2669,11 +2669,11 @@ int ServiceInterface::getGridStreamlinesByGeometry(T::SessionId sessionId,uint f
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByGeometry(sessionId,fileId,messageIndex,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2686,7 +2686,7 @@ int ServiceInterface::getGridStreamlinesByGeometry(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::getGridStreamlinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2694,11 +2694,11 @@ int ServiceInterface::getGridStreamlinesByGrid(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByGrid(sessionId,fileId,messageIndex,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId,messageIndex,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2711,7 +2711,7 @@ int ServiceInterface::getGridStreamlinesByGrid(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridStreamlinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2719,11 +2719,11 @@ int ServiceInterface::getGridStreamlinesByLevel(T::SessionId sessionId,uint file
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2735,7 +2735,7 @@ int ServiceInterface::getGridStreamlinesByLevel(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2743,11 +2743,11 @@ int ServiceInterface::getGridStreamlinesByLevelAndGeometry(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2759,7 +2759,7 @@ int ServiceInterface::getGridStreamlinesByLevelAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2767,11 +2767,11 @@ int ServiceInterface::getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%f,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%f,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2783,7 +2783,7 @@ int ServiceInterface::getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2791,11 +2791,11 @@ int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2808,7 +2808,7 @@ int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2816,11 +2816,11 @@ int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTime(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2833,7 +2833,7 @@ int ServiceInterface::getGridStreamlinesByTime(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2841,11 +2841,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2858,7 +2858,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2866,11 +2866,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2883,7 +2883,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2891,11 +2891,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%s,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%s,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime.c_str(),gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2907,7 +2907,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2915,11 +2915,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uin
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%ld,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%ld,%u,%u,%ld,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,newTime,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2932,7 +2932,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uin
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2940,11 +2940,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2956,7 +2956,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2964,11 +2964,11 @@ int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,ui
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeAndLevel(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%ld,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2981,7 +2981,7 @@ int ServiceInterface::getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -2989,11 +2989,11 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3006,7 +3006,7 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sess
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -3014,11 +3014,11 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeLevelAndGeometry(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%ld,%f,Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3031,7 +3031,7 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sess
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -3039,11 +3039,11 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%s,%f,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%s,%f,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime.c_str(),newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3056,7 +3056,7 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionI
 
 
 
-int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -3064,11 +3064,11 @@ int ServiceInterface::getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getGridStreamlinesByTimeLevelAndGrid(sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates,attributeList,modificationOperation,modificationParameters,streamlines);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%f,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%lu,%u,%lu,%u,%lu,%u,%ld,%f,%u,%u,Coordinate[%ld],Attribute[%u],%u,double[%ld],streamline[%lu]);result %d;time %f;",__FUNCTION__,sessionId,fileId1,messageIndex1,fileId2,messageIndex2,fileId3,messageIndex3,fileId4,messageIndex4,newTime,newLevel,gridWidth,gridHeight,gridLatLonCoordinates.size(),attributeList.getLength(),modificationOperation,modificationParameters.size(),streamlines.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3089,11 +3089,11 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,uint modifica
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getMultipleGridValues(sessionId,modificationOperation,modificationParameters,valueRecordList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,double[%ld],ValueRecord[%u]);result %d;time %f;",__FUNCTION__,sessionId,modificationOperation,modificationParameters.size(),valueRecordList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,double[%ld],ValueRecord[%u]);result %d;time %f;",__FUNCTION__,sessionId,modificationOperation,modificationParameters.size(),valueRecordList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3113,7 +3113,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,uint modifica
 //    T::Coordinate_vec oridinalCoordinates = def->getGridCoordinates();
 //    T::Coordinate_vec latLonCoordinates = def->getGridLatLonCoordinates();
 
-int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3131,7 +3131,7 @@ int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId
 
 
 
-int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
+int ServiceInterface::_getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3140,7 +3140,7 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,uint fileId,uint messa
 
 
 
-int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3149,7 +3149,7 @@ int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,uint fileId,u
 
 
 
-int ServiceInterface::_getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+int ServiceInterface::_getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3167,7 +3167,7 @@ int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
-int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3184,7 +3184,7 @@ int ServiceInterface::_getPropertyValuesByCoordinates(T::SessionId sessionId,con
 
 
 
-int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3193,7 +3193,7 @@ int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,uint fileId,ui
 
 
 
-int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3202,7 +3202,7 @@ int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -3219,7 +3219,7 @@ int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fi
 
 
 
-int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3228,7 +3228,7 @@ int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fi
 
 
 
-int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
   {
@@ -3245,7 +3245,7 @@ int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3254,7 +3254,7 @@ int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3263,7 +3263,7 @@ int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3280,7 +3280,7 @@ int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3289,7 +3289,7 @@ int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3298,7 +3298,7 @@ int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3315,7 +3315,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId session
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3324,7 +3324,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId session
 
 
 
-int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3333,7 +3333,7 @@ int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,uint f
 
 
 
-int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3342,7 +3342,7 @@ int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionI
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3359,7 +3359,7 @@ int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3368,7 +3368,7 @@ int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3385,7 +3385,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sess
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3394,7 +3394,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sess
 
 
 
-int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3403,7 +3403,7 @@ int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3412,7 +3412,7 @@ int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3429,7 +3429,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3438,7 +3438,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3455,7 +3455,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3464,7 +3464,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3473,7 +3473,7 @@ int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3482,7 +3482,7 @@ int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3499,7 +3499,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId session
 
 
 
-int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3508,7 +3508,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId session
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
   {
@@ -3524,7 +3524,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId se
 
 
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3532,16 +3532,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId se
 
 
 
-int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3550,7 +3541,7 @@ int ServiceInterface::_getGridValueVector(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3559,7 +3550,16 @@ int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3576,7 +3576,7 @@ int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3585,7 +3585,7 @@ int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3594,7 +3594,7 @@ int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId s
 
 
 
-int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3603,7 +3603,7 @@ int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3620,7 +3620,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3629,7 +3629,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3646,7 +3646,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId ses
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3655,7 +3655,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId ses
 
 
 
-int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3664,7 +3664,7 @@ int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3680,7 +3680,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId se
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3688,16 +3688,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId se
 
 
 
-int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
-{
-  throw Fmi::Exception(BCP,"Implementation required!");
-}
-
-
-
-
-
-int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3706,7 +3697,16 @@ int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+{
+  throw Fmi::Exception(BCP,"Implementation required!");
+}
+
+
+
+
+
+int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3723,7 +3723,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3732,7 +3732,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
   {
@@ -3749,7 +3749,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::Session
 
 
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3758,7 +3758,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::Session
 
 
 
-int ServiceInterface::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3767,7 +3767,7 @@ int ServiceInterface::_getGridIsobands(T::SessionId sessionId,uint fileId,uint m
 
 
 
-int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3776,7 +3776,7 @@ int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3785,7 +3785,7 @@ int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,
 
 
 
-int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3794,7 +3794,7 @@ int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId
 
 
 
-int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3803,7 +3803,7 @@ int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3820,7 +3820,7 @@ int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3829,7 +3829,7 @@ int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3846,7 +3846,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3855,7 +3855,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3864,7 +3864,7 @@ int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3881,7 +3881,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3890,7 +3890,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3907,7 +3907,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3916,7 +3916,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3933,7 +3933,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3942,7 +3942,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -3959,7 +3959,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3968,7 +3968,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3977,7 +3977,7 @@ int ServiceInterface::_getGridIsolines(T::SessionId sessionId,uint fileId,uint m
 
 
 
-int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3986,7 +3986,7 @@ int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3995,7 +3995,7 @@ int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,
 
 
 
-int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4004,7 +4004,7 @@ int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId
 
 
 
-int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4021,7 +4021,7 @@ int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4030,7 +4030,7 @@ int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1
 
 
 
-int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4039,7 +4039,7 @@ int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4056,7 +4056,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4065,7 +4065,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4074,7 +4074,7 @@ int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4091,7 +4091,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4100,7 +4100,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4117,7 +4117,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4126,7 +4126,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4143,7 +4143,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4152,7 +4152,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessio
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4169,7 +4169,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4178,7 +4178,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceInterface::_getGridStreamlines(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4187,7 +4187,7 @@ int ServiceInterface::_getGridStreamlines(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4196,7 +4196,7 @@ int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId sessionId,uint 
 
 
 
-int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4204,7 +4204,7 @@ int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4212,7 +4212,7 @@ int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId sessionId,uint fil
 
 
 
-int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4220,7 +4220,7 @@ int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId session
 
 
 
-int ServiceInterface::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4228,7 +4228,7 @@ int ServiceInterface::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4244,7 +4244,7 @@ int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4252,7 +4252,7 @@ int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,uint file
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4268,7 +4268,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4276,7 +4276,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionI
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,const std::string& newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,const std::string& newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4292,7 +4292,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4300,7 +4300,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,ui
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4316,7 +4316,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4324,7 +4324,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,u
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4340,7 +4340,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId ses
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4348,7 +4348,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId ses
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,const std::string& newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,const std::string& newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4364,7 +4364,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId session
 
 
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4382,7 +4382,7 @@ int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,uint modific
 
 
 
-int ServiceInterface::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
+int ServiceInterface::_getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

@@ -22,7 +22,7 @@ class Query
     QueryParameter*     getQueryParameterPtr(uint id);
     uint                getValuesPerTimeStep();
     std::size_t         getHash();
-    void                getResultProducerIdList(std::set<uint>& producerIdList);
+    void                getResultProducerIdList(std::set<T::ProducerId>& producerIdList);
     void                removeAggregationValues();
     void                removeInternalAggregationValues();
 
@@ -48,7 +48,7 @@ class Query
     std::string         mAnalysisTime;
     T::GeometryId_set   mGeometryIdList;
     std::string         mLanguage;
-    ulonglong           mGenerationFlags;
+    UInt64              mGenerationFlags;
     uint                mFlags;
     uint                mMaxParameterValues;
     std::set<time_t>    mAggregationTimes;

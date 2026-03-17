@@ -21,7 +21,7 @@ class ContentInfo
 
     std::string        getCsv();
     std::string        getCsvHeader();
-    ulonglong          getRequestCounterKey();
+    //UInt64             getRequestCounterKey();
 
     char*              getForecastTime();
     void               setForecastTime(time_t ftime);
@@ -38,12 +38,12 @@ class ContentInfo
     ContentInfo*       duplicate();
     void               print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint               mFileId;
-    uint               mMessageIndex;
-    ulonglong          mFilePosition;
+    T::FileId          mFileId;
+    T::MessageIndex    mMessageIndex;
+    T::FilePosition    mFilePosition;
     uint               mMessageSize;
-    uint               mProducerId;
-    uint               mGenerationId;
+    T::ProducerId      mProducerId;
+    T::GenerationId    mGenerationId;
     T::FmiParamId      mFmiParameterId;
     uchar              mFileType;
     T::ParamLevelId    mFmiParameterLevelId;
@@ -55,7 +55,8 @@ class ContentInfo
     T::ForecastNumber  mForecastNumber;
     T::GeometryId      mGeometryId;
     ushort             mFlags;
-    ushort             mSourceId;
+    T::StorageId       mStorageId;
+    T::SourceId        mSourceId;
     int                mAggregationId;
     int                mAggregationPeriod;
     int                mProcessingTypeId;
@@ -64,8 +65,8 @@ class ContentInfo
 
   protected:
 
-    uint              mFmiParameterName;
-    uint              mForecastTime;
+    uint               mFmiParameterName;
+    uint               mForecastTime;
 
   public:
 

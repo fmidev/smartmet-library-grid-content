@@ -345,7 +345,7 @@ uint EventInfoList::getMaxLength()
 
 
 
-EventInfo* EventInfoList::getEventInfo(unsigned long long eventId)
+EventInfo* EventInfoList::getEventInfo(T::EventId  eventId)
 {
   FUNCTION_TRACE
   try

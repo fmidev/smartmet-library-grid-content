@@ -50,15 +50,15 @@ class UserInfo
     bool                getAttribute(const char *attributeGroup,const char *attributeName,std::string& attributeValue);
     bool                getAttribute(const char *attributeGroup,const char *attributeName,int& attributeValue);
     bool                getAttribute(const char *attributeGroup,const char *attributeName,uint& attributeValue);
-    bool                getAttribute(const char *attributeGroup,const char *attributeName,long long & attributeValue);
-    bool                getAttribute(const char *attributeGroup,const char *attributeName,unsigned long long& attributeValue);
+    bool                getAttribute(const char *attributeGroup,const char *attributeName,Int64  & attributeValue);
+    bool                getAttribute(const char *attributeGroup,const char *attributeName,UInt64 & attributeValue);
     bool                getAttribute(const char *attributeGroup,const char *attributeName,float& attributeValue);
     bool                getAttribute(const char *attributeGroup,const char *attributeName,double& attributeValue);
     void                getAttributes(const char *attributeGroup,AttributeList& attributeList);
     void                setAttribute(const char *attributeGroup,const char *attributeName,const char *attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,int attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,uint attributeValue);
-    void                setAttribute(const char *attributeGroup,const char *attributeName,long long attributeValue);
+    void                setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue);
     void                setAttributes(const char *attributeGroup,AttributeList& attributeList);
     void                deleteAttribute(const char *attributeGroup,const char *attributeName);

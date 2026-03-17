@@ -17,9 +17,9 @@ ProducerInfo::ProducerInfo()
   {
     mProducerId = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mStatus = 0;
-
     mHash = 0;
   }
   catch (...)
@@ -42,6 +42,7 @@ ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mStorageId = producerInfo.mStorageId;
     mStatus = producerInfo.mStatus;
 
     mHash = producerInfo.mHash;
@@ -63,6 +64,7 @@ ProducerInfo::ProducerInfo(const char *csv)
     mProducerId = 0;
     mFlags = 0;
     mSourceId = 0;
+    mStorageId = 0;
     mStatus = 0;
     mHash = 0;
     setCsv(csv);
@@ -105,6 +107,7 @@ ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
     mDescription = producerInfo.mDescription;
     mFlags = producerInfo.mFlags;
     mSourceId = producerInfo.mSourceId;
+    mStorageId = producerInfo.mStorageId;
     mStatus = producerInfo.mStatus;
 
     mHash = producerInfo.mHash;
@@ -126,14 +129,15 @@ std::string ProducerInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%s;%s;%s;%u;%u;%u",
+    sprintf(st,"%u;%s;%s;%s;%u;%u;%u;%u",
         mProducerId,
         mName.c_str(),
         mTitle.c_str(),
         mDescription.c_str(),
         mFlags,
         mSourceId,
-        (uint)mStatus);
+        (uint)mStatus,
+        mStorageId);
 
     return std::string(st);
   }
@@ -151,7 +155,7 @@ std::string ProducerInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "producerId;name;title;description;flags;sourceId;status";
+    std::string header = "producerId;name;title;description;flags;sourceId;status;storageId";
     return header;
   }
   catch (...)
@@ -202,6 +206,9 @@ void ProducerInfo::setCsv(const char *csv)
 
     if (c >= 6)
       mStatus = toInt64(field[6]);
+
+    if (c >= 7)
+      mStorageId = toUInt32(field[7]);
   }
   catch (...)
   {
@@ -255,6 +262,7 @@ void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mTitle       = " << mTitle << "\n";
     stream << space(level) << "- mDescription = " << mDescription << "\n";
     stream << space(level) << "- mFlags       = " << mFlags << "\n";
+    stream << space(level) << "- mStorageId   = " << mStorageId << "\n";
     stream << space(level) << "- mSourceId    = " << mSourceId << "\n";
     stream << space(level) << "- mStatus      = " << (uint)mStatus << "\n";
     stream << space(level) << "- mHash        = " << mHash << "\n";

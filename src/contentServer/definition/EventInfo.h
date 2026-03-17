@@ -18,6 +18,7 @@ class EventType
     static const uint CONTENT_SERVER_RELOAD                   = 2;
     static const uint UPDATE_LOOP_START                       = 3;
     static const uint UPDATE_LOOP_END                         = 4;
+    static const uint STORAGE_CLEAR                           = 5;
 
     static const uint PRODUCER_ADDED                          = 10;
     static const uint PRODUCER_DELETED                        = 11;
@@ -66,15 +67,12 @@ class EventType
 namespace T
 {
 
-typedef unsigned long long EventId;
-
-
 class EventInfo
 {
   public:
                    EventInfo();
                    EventInfo(const EventInfo& dataEventInfo);
-                   EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData);
+                   EventInfo(time_t serverTime,EventId eventId,uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags,const char *eventData);
                    EventInfo(const char *csv);
     virtual        ~EventInfo();
 
@@ -91,10 +89,10 @@ class EventInfo
     time_t         mEventTime;
     time_t         mServerTime;
     uint           mType;
-    uint           mId1;
-    uint           mId2;
-    uint           mId3;
-    ulonglong      mFlags;
+    UInt64         mId1;
+    UInt64         mId2;
+    UInt64         mId3;
+    UInt64         mFlags;
     std::string    mEventData;
 
     EventInfo*     nextItem;

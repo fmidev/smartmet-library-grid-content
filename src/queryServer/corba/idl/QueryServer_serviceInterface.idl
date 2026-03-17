@@ -17,9 +17,9 @@ module Corba
 
 interface ServiceInterface
 {
-  long  executeQuery(in long long sessionId,inout CorbaQuery query);
-  long  getProducerList(in long long sessionId,out CorbaStringList producerList);
-  long  getValuesByGridPoint(in long long sessionId,in ContentServer::Corba::CorbaContentInfoList contentInfoList,in octet coordinateType,in double x,in double y,in short interpolationMethod,out CorbaGridPointValueList valueList);
+  C::Result  executeQuery(in C::SessionId sessionId,inout C::Query query);
+  C::Result  getProducerList(in C::SessionId sessionId,out C::StringList producerList);
+  C::Result  getValuesByGridPoint(in C::SessionId sessionId,in C::ContentInfoList contentInfoList,in C::UInt8 coordinateType,in C::Float64 x,in C::Float64 y,in C::Int16 interpolationMethod,out C::GridPointValueList valueList);
 };  
 
 

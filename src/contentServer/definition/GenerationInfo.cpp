@@ -18,6 +18,7 @@ GenerationInfo::GenerationInfo()
     mProducerId = 0;
     mStatus = Status::Disabled;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mDeletionTime = 0;
     mModificationTime = 0;
@@ -47,6 +48,7 @@ GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
     mAnalysisTime = generationInfo.mAnalysisTime;
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
+    mStorageId = generationInfo.mStorageId;
     mSourceId = generationInfo.mSourceId;
     mDeletionTime = generationInfo.mDeletionTime;
     mModificationTime = generationInfo.mModificationTime;
@@ -73,6 +75,7 @@ GenerationInfo::GenerationInfo(const char *csv)
     mProducerId = 0;
     mStatus = Status::Disabled;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mDeletionTime = 0;
     mModificationTime = 0;
@@ -122,6 +125,7 @@ GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
     mAnalysisTime = generationInfo.mAnalysisTime;
     mStatus = generationInfo.mStatus;
     mFlags = generationInfo.mFlags;
+    mStorageId = generationInfo.mStorageId;
     mSourceId = generationInfo.mSourceId;
     mDeletionTime = generationInfo.mDeletionTime;
     mModificationTime = generationInfo.mModificationTime;
@@ -146,7 +150,7 @@ std::string GenerationInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%ld",
+    sprintf(st,"%lu;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%ld;%u",
         mGenerationId,
         mGenerationType,
         mProducerId,
@@ -160,7 +164,8 @@ std::string GenerationInfo::getCsv()
         mModificationTime,
         mContentStartTime,
         mContentEndTime,
-        mContentHash
+        mContentHash,
+        mStorageId
     );
 
     return std::string(st);
@@ -179,7 +184,7 @@ std::string GenerationInfo::getCsvHeader()
 {
   try
   {
-    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId;deletionTimeT;mModificationTimeT;contentStartTime;contentEndTime;contentHash";
+    std::string header = "generationId;generationType;producerId;name;description;analysisTime;status;flags;sourceId;deletionTimeT;mModificationTimeT;contentStartTime;contentEndTime;contentHash;mStorageId";
     return header;
   }
   catch (...)
@@ -220,7 +225,7 @@ void GenerationInfo::setCsv(const char *csv)
 
     if (c >= 8)
     {
-      mGenerationId = toUInt32(field[0]);
+      mGenerationId = toUInt64(field[0]);
       mGenerationType = toUInt32(field[1]);
       mProducerId = toUInt32(field[2]);
       mName = field[3];
@@ -239,7 +244,10 @@ void GenerationInfo::setCsv(const char *csv)
         mContentEndTime = toInt64(field[12]);
       if (c >= 13)
         mContentHash = toInt64(field[13]);
+      if (c >= 14)
+        mStorageId = toUInt64(field[14]);
     }
+
   }
   catch (...)
   {
@@ -343,12 +351,14 @@ void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mAnalysisTime     = " << mAnalysisTime << "\n";
     stream << space(level) << "- mStatus           = " << C_INT(mStatus) << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
+    stream << space(level) << "- mStorageId        = " << mStorageId << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mDeletionTime     = " << utcTimeFromTimeT(mDeletionTime) << "\n";
     stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
     stream << space(level) << "- mContentStartTime = " << utcTimeFromTimeT(mContentStartTime) << "\n";
     stream << space(level) << "- mContentEndTime   = " << utcTimeFromTimeT(mContentEndTime) << "\n";
     stream << space(level) << "- mContentHash      = " << mContentHash << "\n";
+
   }
   catch (...)
   {

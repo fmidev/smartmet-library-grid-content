@@ -22,12 +22,12 @@ class ParameterValues
 
     //std::string             mForecastTime;
     time_t                  mForecastTimeUTC;
-    uint                    mProducerId;
-    uint                    mGenerationId;
-    ulonglong               mGenerationFlags;
-    uint                    mGeometryId;
-    uint                    mFileId[4];
-    uint                    mMessageIndex[4];
+    T::ProducerId           mProducerId;
+    T::GenerationId         mGenerationId;
+    UInt64                  mGenerationFlags;
+    T::GeometryId           mGeometryId;
+    T::FileId               mFileId[4];
+    T::MessageIndex         mMessageIndex[4];
     std::string             mAnalysisTime;
     time_t                  mModificationTime;
 

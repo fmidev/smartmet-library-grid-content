@@ -236,7 +236,7 @@ QueryParameter* Query::getQueryParameterPtr(uint id)
 
 
 
-void Query::getResultProducerIdList(std::set<uint>& producerIdList)
+void Query::getResultProducerIdList(std::set<T::ProducerId>& producerIdList)
 {
   try
   {

@@ -737,6 +737,12 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
+    if (strcasecmp(method,"getContentLevelListByParameterGenerationGeometryAndLevelId") == 0)
+    {
+      getContentLevelListByParameterGenerationGeometryAndLevelId(request,response);
+      return;
+    }
+
     if (strcasecmp(method,"getContentParamListByGenerationId") == 0)
     {
       getContentParamListByGenerationId(request,response);
@@ -978,7 +984,7 @@ void ServerInterface::deleteProducerInfoById(T::RequestMessage& request,T::Respo
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1054,7 +1060,7 @@ void ServerInterface::deleteProducerInfoListBySourceId(T::RequestMessage& reques
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1092,7 +1098,7 @@ void ServerInterface::getProducerInfoById(T::RequestMessage& request,T::Response
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1286,7 +1292,7 @@ void ServerInterface::getProducerInfoListBySourceId(T::RequestMessage& request,T
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1470,7 +1476,7 @@ void ServerInterface::getProducerParameterListByProducerId(T::RequestMessage& re
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1619,7 +1625,7 @@ void ServerInterface::deleteGenerationInfoById(T::RequestMessage& request,T::Res
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1704,7 +1710,7 @@ void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& reques
       return;
     }
 
-    std::set<uint> generationIdList;
+    std::set<T::GenerationId> generationIdList;
 
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
@@ -1737,7 +1743,7 @@ void ServerInterface::deleteGenerationInfoListByProducerId(T::RequestMessage& re
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1813,7 +1819,7 @@ void ServerInterface::deleteGenerationInfoListBySourceId(T::RequestMessage& requ
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -1890,7 +1896,7 @@ void ServerInterface::getGenerationInfoById(T::RequestMessage& request,T::Respon
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2078,7 +2084,7 @@ void ServerInterface::getGenerationInfoListByProducerId(T::RequestMessage& reque
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2182,7 +2188,7 @@ void ServerInterface::getGenerationInfoListBySourceId(T::RequestMessage& request
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2234,7 +2240,7 @@ void ServerInterface::getLastGenerationInfoByProducerIdAndStatus(T::RequestMessa
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2416,7 +2422,7 @@ void ServerInterface::setGenerationInfoStatusById(T::RequestMessage& request,T::
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2552,7 +2558,7 @@ void ServerInterface::deleteGeometryInfoById(T::RequestMessage& request,T::Respo
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2605,7 +2611,7 @@ void ServerInterface::deleteGeometryInfoListByGenerationId(T::RequestMessage& re
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2643,7 +2649,7 @@ void ServerInterface::deleteGeometryInfoListByProducerId(T::RequestMessage& requ
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2680,7 +2686,7 @@ void ServerInterface::deleteGeometryInfoListBySourceId(T::RequestMessage& reques
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2716,7 +2722,7 @@ void ServerInterface::getGeometryInfoById(T::RequestMessage& request,T::Response
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2821,7 +2827,7 @@ void ServerInterface::getGeometryInfoListByGenerationId(T::RequestMessage& reque
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2872,7 +2878,7 @@ void ServerInterface::getGeometryInfoListByProducerId(T::RequestMessage& request
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -2923,7 +2929,7 @@ void ServerInterface::getGeometryInfoListBySourceId(T::RequestMessage& request,T
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3048,7 +3054,7 @@ void ServerInterface::setGeometryInfoStatusById(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3312,7 +3318,7 @@ void ServerInterface::deleteFileInfoById(T::RequestMessage& request,T::ResponseM
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3428,7 +3434,7 @@ void ServerInterface::deleteFileInfoListByProducerId(T::RequestMessage& request,
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3504,7 +3510,7 @@ void ServerInterface::deleteFileInfoListByGenerationId(T::RequestMessage& reques
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3542,7 +3548,7 @@ void ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Request
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3650,7 +3656,7 @@ void ServerInterface::deleteFileInfoListBySourceId(T::RequestMessage& request,T:
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3688,7 +3694,7 @@ void ServerInterface::getFileInfoById(T::RequestMessage& request,T::ResponseMess
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3780,7 +3786,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3848,7 +3854,7 @@ void ServerInterface::getFileInfoListByFileIdList(T::RequestMessage& request,T::
       return;
     }
 
-    std::vector<uint> fileIdList;
+    std::vector<T::FileId> fileIdList;
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
       fileIdList.emplace_back(toInt64(it->c_str()));
@@ -3898,7 +3904,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3906,7 +3912,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -3974,7 +3980,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4034,7 +4040,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4042,7 +4048,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4110,7 +4116,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4170,7 +4176,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4178,7 +4184,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4246,7 +4252,7 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
       return;
     }
 
-    std::set<uint> fileIdList;
+    std::set<T::FileId> fileIdList;
 
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
@@ -4316,7 +4322,7 @@ void ServerInterface::getFileInfoCountByProducerId(T::RequestMessage& request,T:
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4361,7 +4367,7 @@ void ServerInterface::getFileInfoCountByGenerationId(T::RequestMessage& request,
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4406,7 +4412,7 @@ void ServerInterface::getFileInfoCountBySourceId(T::RequestMessage& request,T::R
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4772,7 +4778,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4780,7 +4786,7 @@ void ServerInterface::deleteContentInfo(T::RequestMessage& request,T::ResponseMe
       return;
     }
 
-    uint messageIndex = 0;
+    T::MessageIndex messageIndex = 0;
     if (!request.getLineByKey("messageIndex",messageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4818,7 +4824,7 @@ void ServerInterface::deleteContentListByFileId(T::RequestMessage& request,T::Re
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4894,7 +4900,7 @@ void ServerInterface::deleteContentListByProducerId(T::RequestMessage& request,T
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -4970,7 +4976,7 @@ void ServerInterface::deleteContentListByGenerationId(T::RequestMessage& request
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5046,7 +5052,7 @@ void ServerInterface::deleteContentListBySourceId(T::RequestMessage& request,T::
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5084,7 +5090,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5092,7 +5098,7 @@ void ServerInterface::getContentInfo(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    uint messageIndex = 0;
+    T::MessageIndex messageIndex = 0;
     if (!request.getLineByKey("messageIndex",messageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5138,7 +5144,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5146,7 +5152,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5214,7 +5220,7 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
       return;
     }
 
-    std::vector<uint> fileIdList;
+    std::vector<T::FileId> fileIdList;
     for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
     {
       fileIdList.emplace_back(toInt64(it->c_str()));
@@ -5265,7 +5271,7 @@ void ServerInterface::getContentListByFileIdList(T::RequestMessage& request,T::R
       return;
     }
 
-    uint fileId = 0;
+    T::FileId fileId = 0;
     if (!request.getLineByKey("fileId",fileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5367,7 +5373,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5375,7 +5381,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5383,7 +5389,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5450,7 +5456,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5458,7 +5464,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5518,7 +5524,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5526,7 +5532,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5534,7 +5540,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5610,7 +5616,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5618,7 +5624,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5678,7 +5684,7 @@ void ServerInterface::getContentListByGenerationIdAndTimeRange(T::RequestMessage
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5814,7 +5820,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
       return;
     }
 
-    uint sourceId = 0;
+    T::SourceId sourceId = 0;
     if (!request.getLineByKey("sourceId",sourceId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5822,7 +5828,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
       return;
     }
 
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     if (!request.getLineByKey("startFileId",startFileId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -5830,7 +5836,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
       return;
     }
 
-    uint startMessageIndex = 0;
+    T::MessageIndex startMessageIndex = 0;
     if (!request.getLineByKey("startMessageIndex",startMessageIndex))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6023,7 +6029,7 @@ void ServerInterface::getContentListByParameterAndGenerationId(T::RequestMessage
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6307,7 +6313,7 @@ void ServerInterface::getContentListByParameterAndProducerId(T::RequestMessage& 
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6590,7 +6596,7 @@ void ServerInterface::getContentListByParameterGenerationIdAndForecastTime(T::Re
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6708,7 +6714,7 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6756,7 +6762,7 @@ void ServerInterface::getContentParamListByGenerationId(T::RequestMessage& reque
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6808,7 +6814,7 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6864,7 +6870,7 @@ void ServerInterface::getContentParamKeyListByGenerationAndGeometryId(T::Request
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -6928,7 +6934,7 @@ void ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::Re
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7000,7 +7006,7 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7049,7 +7055,7 @@ void ServerInterface::getContentTimeRangeByProducerAndGenerationId(T::RequestMes
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7058,7 +7064,7 @@ void ServerInterface::getContentTimeRangeByProducerAndGenerationId(T::RequestMes
     }
 
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7105,7 +7111,7 @@ void ServerInterface::getContentTimeRangeByGenerationId(T::RequestMessage& reque
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7153,7 +7159,7 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7209,7 +7215,7 @@ void ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(T::Reques
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7273,7 +7279,7 @@ void ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(T::Reque
       return;
     }
 
-    uint generationId = 0;
+    T::GenerationId generationId = 0;
     if (!request.getLineByKey("generationId",generationId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7324,6 +7330,78 @@ void ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(T::Reque
 
 
 
+void ServerInterface::getContentLevelListByParameterGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::SessionId sessionId = 0;
+    if (!request.getLineByKey("sessionId",sessionId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: sessionId");
+      return;
+    }
+
+    T::GenerationId generationId = 0;
+    if (!request.getLineByKey("generationId",generationId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: generationId");
+      return;
+    }
+
+    T::GeometryId geometryId = 0;
+    if (!request.getLineByKey("geometryId",geometryId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: geometryId");
+      return;
+    }
+
+    std::string parameterKey;
+    if (!request.getLineByKey("parameterKey",parameterKey))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: parameterKey");
+      return;
+    }
+
+    T::ParamLevelId levelId = 0;
+    if (!request.getLineByKey("levelId",levelId))
+    {
+      response.addLine("result",Result::MISSING_PARAMETER);
+      response.addLine("resultString","Missing parameter: levelId");
+      return;
+    }
+
+    std::set<T::ParamLevel> contentLevelList;
+
+    int result = mService->getContentLevelListByParameterGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterKey,levelId,contentLevelList);
+
+    response.addLine("result",result);
+    if (result == Result::OK)
+    {
+      for (auto it=contentLevelList.begin(); it!=contentLevelList.end(); ++it)
+      {
+        response.addLine("level",*it);
+      }
+    }
+    else
+    {
+      response.addLine("resultString",getResultString(result));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,T::ResponseMessage& response)
 {
   FUNCTION_TRACE
@@ -7337,7 +7415,7 @@ void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7463,7 +7541,7 @@ void ServerInterface::getHashByProducerId(T::RequestMessage& request,T::Response
       return;
     }
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     if (!request.getLineByKey("producerId",producerId))
     {
       response.addLine("result",Result::MISSING_PARAMETER);
@@ -7471,7 +7549,7 @@ void ServerInterface::getHashByProducerId(T::RequestMessage& request,T::Response
       return;
     }
 
-    ulonglong hash = 0;
+    UInt64  hash = 0;
 
     int result = mService->getHashByProducerId(sessionId,producerId,hash);
 

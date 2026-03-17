@@ -20,6 +20,7 @@ FileInfo::FileInfo()
     mProducerId = 0;
     mGenerationId = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
@@ -49,6 +50,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
     mProducerId = fileInfo.mProducerId;
     mGenerationId = fileInfo.mGenerationId;
     mFlags = fileInfo.mFlags;
+    mStorageId = fileInfo.mStorageId;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
@@ -65,7 +67,7 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
 
 
 
-FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::string& filename,uint sourceId)
+FileInfo::FileInfo(T::ProducerId producerId,T::GenerationId generationId,uchar type,const std::string& filename,T::SourceId sourceId)
 {
   try
   {
@@ -77,6 +79,7 @@ FileInfo::FileInfo(uint producerId,uint generationId,uchar type,const std::strin
     mFileType = type;
     mName = filename;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = sourceId;
     mModificationTime = 0;
     mDeletionTime = 0;
@@ -104,6 +107,7 @@ FileInfo::FileInfo(const char *csv)
     mProducerId = 0;
     mGenerationId = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mModificationTime = 0;
     mDeletionTime = 0;
@@ -153,6 +157,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
     mProducerId = fileInfo.mProducerId;
     mGenerationId = fileInfo.mGenerationId;
     mFlags = fileInfo.mFlags;
+    mStorageId = fileInfo.mStorageId;
     mSourceId = fileInfo.mSourceId;
     mModificationTime = fileInfo.mModificationTime;
     mDeletionTime = fileInfo.mDeletionTime;
@@ -175,7 +180,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%s;%u;%u;%u;%u;%u;%ld;%ld;%s;%llu;%u;%u",
+    sprintf(st,"%lu;%u;%s;%u;%lu;%u;%u;%u;%ld;%ld;%s;%lu;%u;%u;%u",
         mFileId,
         mFileType,
         mName.c_str(),
@@ -189,7 +194,8 @@ std::string FileInfo::getCsv()
         mServer.c_str(),
         mSize,
         mServerType,
-        mStatus);
+        mStatus,
+        mStorageId);
 
     return std::string(st);
   }
@@ -248,11 +254,11 @@ void FileInfo::setCsv(const char *csv)
 
     if (c >= 7)
     {
-      mFileId = toUInt32(field[0]);
+      mFileId = toUInt64(field[0]);
       mFileType = toUInt8(field[1]);
       mName = field[2];
       mProducerId = toUInt32(field[3]);
-      mGenerationId = toUInt32(field[4]);
+      mGenerationId = toUInt64(field[4]);
       mProtocol = toUInt32(field[5]);
       mFlags = toUInt32(field[6]);
       mSourceId = toUInt32(field[7]);
@@ -268,6 +274,8 @@ void FileInfo::setCsv(const char *csv)
         mServerType = toUInt32(field[12]);
       if (c >= 13)
         mStatus = toUInt8(field[13]);
+      if (c >= 14)
+        mStorageId = toUInt32(field[7]);
     }
   }
   catch (...)
@@ -349,7 +357,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "FileInfo\n";
     stream << space(level) << "- mFileId           = " << mFileId << "\n";
     stream << space(level) << "- mProtocol         = " << C_INT(mProtocol) << "\n";
-    stream << space(level) << "- mServerType      = " << C_INT(mServerType) << "\n";
+    stream << space(level) << "- mServerType       = " << C_INT(mServerType) << "\n";
     stream << space(level) << "- mServer           = " << mServer << "\n";
     stream << space(level) << "- mFileType         = " << C_INT(mFileType) << "\n";
     stream << space(level) << "- mName             = " << mName << "\n";
@@ -357,6 +365,7 @@ void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProducerId       = " << mProducerId << "\n";
     stream << space(level) << "- mGenerationId     = " << mGenerationId << "\n";
     stream << space(level) << "- mFlags            = " << mFlags << "\n";
+    stream << space(level) << "- mStorageId        = " << mStorageId << "\n";
     stream << space(level) << "- mSourceId         = " << mSourceId << "\n";
     stream << space(level) << "- mModificationTime = " << utcTimeFromTimeT(mModificationTime) << "\n";
     stream << space(level) << "- mDeletionTime     = " << utcTimeFromTimeT(mDeletionTime) << "\n";

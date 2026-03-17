@@ -183,7 +183,7 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
 
 
 
-int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -239,7 +239,7 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
 
 
 
-int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -267,7 +267,7 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
 
 
-int ClientImplementation::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
+int ClientImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   try
   {
@@ -405,7 +405,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   try
   {
@@ -549,7 +549,7 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
-int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   try
   {
@@ -646,7 +646,7 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
-int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
+int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   try
   {
@@ -702,7 +702,7 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
 
 
 
-int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   try
   {
@@ -733,7 +733,7 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
 
 
-int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -789,7 +789,7 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
-int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -853,7 +853,7 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
 
 
 
-int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -990,7 +990,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
+int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   try
   {
@@ -1068,7 +1068,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
 
 
-int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   try
   {
@@ -1107,7 +1107,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
   {
@@ -1228,7 +1228,7 @@ int ClientImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
-int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
+int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   try
   {
@@ -1316,7 +1316,7 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   try
   {
@@ -1344,7 +1344,7 @@ int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint ge
 
 
 
-int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   try
   {
@@ -1371,7 +1371,7 @@ int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId ses
 
 
 
-int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -1398,7 +1398,7 @@ int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessi
 
 
 
-int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -1425,7 +1425,7 @@ int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 
 
-int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   try
   {
@@ -1492,7 +1492,7 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
 
 
 
-int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
@@ -1530,7 +1530,7 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
@@ -1568,7 +1568,7 @@ int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
 
 
 
-int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
@@ -1663,7 +1663,7 @@ int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   try
   {
@@ -1826,7 +1826,7 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
+int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   try
   {
@@ -1914,7 +1914,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
 
 
-int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -1970,7 +1970,7 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
 
 
-int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   try
   {
@@ -1998,7 +1998,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
-int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
+int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   try
   {
@@ -2058,7 +2058,7 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
-int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -2086,7 +2086,7 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   try
   {
@@ -2117,7 +2117,7 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
+int ClientImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
   try
   {
@@ -2177,7 +2177,7 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
-int ClientImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2217,7 +2217,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
 
 
 
-int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2256,7 +2256,7 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
-int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2297,7 +2297,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2338,7 +2338,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2379,7 +2379,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
-int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2451,7 +2451,7 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
-int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   try
   {
@@ -2483,7 +2483,7 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   try
   {
@@ -2515,7 +2515,7 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   try
   {
@@ -2547,7 +2547,7 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   try
   {
@@ -2811,7 +2811,7 @@ int ClientImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
 
 
 
-int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
+int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   try
   {
@@ -2840,7 +2840,7 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
 
 
 
-int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint fileId)
+int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   try
   {
@@ -2896,7 +2896,7 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
-int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
+int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
   {
@@ -2952,7 +2952,7 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
 
 
-int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,uint generationId)
+int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   try
   {
@@ -3008,7 +3008,7 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
 
 
-int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
   {
@@ -3036,7 +3036,7 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
 
 
 
-int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
+int ClientImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   try
   {
@@ -3067,7 +3067,7 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
 
 
-int ClientImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3108,7 +3108,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId,uint startFileI
 
 
 
-int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3147,7 +3147,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
 
 
 
-int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3227,7 +3227,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
-int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3269,7 +3269,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
 
 
 
-int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3311,7 +3311,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
-int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3354,7 +3354,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
 
 
-int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3396,7 +3396,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
-int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3478,7 +3478,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
-int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3568,7 +3568,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3664,7 +3664,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3761,7 +3761,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
-int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3805,7 +3805,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 }
 
 
-int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
+int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   try
   {
@@ -3842,7 +3842,7 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
 
 
-int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
   try
   {
@@ -3881,7 +3881,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
@@ -3919,7 +3919,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
@@ -3958,7 +3958,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
-int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
   {
@@ -3998,7 +3998,7 @@ int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try
   {
@@ -4036,7 +4036,7 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
   try
   {
@@ -4075,7 +4075,7 @@ int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::S
 
 
 
-int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   try
   {
@@ -4114,7 +4114,46 @@ int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::
 
 
 
-int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  try
+  {
+    T::RequestMessage request;
+
+    request.addLine("method","getContentLevelListByParameterGenerationGeometryAndLevelId");
+    request.addLine("sessionId",sessionId);
+    request.addLine("generationId",generationId);
+    request.addLine("geometryId",geometryId);
+    request.addLine("parameterKey",parameterKey);
+    request.addLine("levelId",levelId);
+
+    T::ResponseMessage response;
+
+    sendRequest(request,response);
+
+    int result = response.getLineValueByKey("result");
+    if (result == Result::OK)
+    {
+      string_vec lines;
+      uint len = response.getLinesByKey("level",lines);
+      for (uint t=0; t<len; t++)
+      {
+        contentLevelList.insert(toInt32(lines[t]));
+      }
+    }
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
   try
   {
@@ -4151,7 +4190,7 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
-int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
   {
@@ -4185,7 +4224,7 @@ int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
 
 
 
-int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
+int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
   {
@@ -4216,7 +4255,7 @@ int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessio
 
 
 
-int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   try
   {
@@ -4312,7 +4351,7 @@ int ClientImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo&
 
 
 
-int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
   try
   {

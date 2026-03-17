@@ -25,19 +25,20 @@ class GridFileManager
     void                addFile(GRID::GridFile *gridFile);
     void                clear();
     void                deleteFile(GRID::GridFile *gridFile);
-    void                deleteFileById(uint fileId);
+    void                deleteFileById(T::FileId fileId);
     void                deleteFileByIndex(std::size_t fileIndex);
-    void                deleteFilesByProducerId(uint producerId);
-    void                deleteFilesByGenerationId(uint generationId);
-    void                deleteFilesBySourceId(uint sourceId);
+    void                deleteFilesByProducerId(T::ProducerId producerId);
+    void                deleteFilesByGenerationId(T::GenerationId generationId);
+    void                deleteFilesBySourceId(T::SourceId sourceId);
+    void                deleteFilesByStorageId(T::StorageId storageId);
     void                deleteFilesByAccessTime(time_t accessTime);
     void                deleteFilesByCheckTime(time_t checkTime);
     void                deleteFilesByDeletionTime(time_t deletionTime);
-    GRID::GridFile_sptr getFileById(uint fileId);
-    GRID::GridFile_sptr getFileByIdNoMapping(uint fileId);
+    GRID::GridFile_sptr getFileById(T::FileId fileId);
+    GRID::GridFile_sptr getFileByIdNoMapping(T::FileId fileId);
     std::size_t         getFileCount();
-    void                getFilesToBeCached(std::map<uint,std::string>& filenames);
-    void                getFilesInCache(std::map<uint,std::string>& filenames);
+    void                getFilesToBeCached(std::map<T::FileId,std::string>& filenames);
+    void                getFilesInCache(std::map<T::FileId,std::string>& filenames);
     void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
     void                getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
     void                resetRequestCounters();
@@ -45,16 +46,16 @@ class GridFileManager
 
   protected:
 
-    void                deleteFileNoLock(uint fileId,bool sentMessageToContentServer);
-    void                deleteFilesNoLock(std::vector<uint>& fileIdList,bool sentMessageToContentServer);
-    void                deleteFilesNoLock(std::set<uint>& fileIdList,bool sentMessageToContentServer);
+    void                deleteFileNoLock(T::FileId fileId,bool sentMessageToContentServer);
+    void                deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool sentMessageToContentServer);
+    void                deleteFilesNoLock(std::set<T::FileId>& fileIdList,bool sentMessageToContentServer);
 
   private:
 
-    ModificationLock                             mModificationLock;
-    std::unordered_map<uint,GRID::GridFile_sptr> mFileList;
-    ContentServer::ServiceInterface*             mContentServer;
-    T::SessionId                                 mServerSessionId;
+    ModificationLock                                  mModificationLock;
+    std::unordered_map<T::FileId,GRID::GridFile_sptr> mFileList;
+    ContentServer::ServiceInterface*                  mContentServer;
+    T::SessionId                                      mServerSessionId;
 };
 
 

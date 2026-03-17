@@ -118,6 +118,7 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"  title VARCHAR (50) NOT NULL,\n");
     p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
     p += sprintf(p,"  flags INTEGER NOT NULL, \n");
+    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
     p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
     p += sprintf(p,"  status SMALLINT NOT NULL\n");
     p += sprintf(p,");\n");
@@ -144,6 +145,7 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
     p += sprintf(p,"  analysisTime TIMESTAMP NOT NULL,\n");
     p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
     p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
     p += sprintf(p,"  modificationTime TIMESTAMP,\n");
     p += sprintf(p,"  deletionTime TIMESTAMP,\n");
@@ -168,13 +170,14 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"CREATE TABLE IF NOT EXISTS file (\n");
     p += sprintf(p,"  fileId serial PRIMARY KEY,\n");
     p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
     p += sprintf(p,"  protocol SMALLINT NOT NULL,\n");
     p += sprintf(p,"  serverType SMALLINT NOT NULL,\n");
     p += sprintf(p,"  server VARCHAR (50) NOT NULL,\n");
     p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
     p += sprintf(p,"  fileName VARCHAR (200) UNIQUE NOT NULL,\n");
     p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
     p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
     p += sprintf(p,"  modificationTime TIMESTAMP,\n");
     p += sprintf(p,"  deletionTime TIMESTAMP,\n");
@@ -200,10 +203,11 @@ void PostgresqlImplementation::createTables()
     p = sql;
     p += sprintf(p,"CREATE TABLE IF NOT EXISTS generationGeometry (\n");
     p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
     p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
     p += sprintf(p,"  levelId SMALLINT NOT NULL,\n");
     p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
     p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
     p += sprintf(p,"  modificationTime TIMESTAMP,\n");
     p += sprintf(p,"  deletionTime TIMESTAMP,\n");
@@ -229,13 +233,13 @@ void PostgresqlImplementation::createTables()
 
     p = sql;
     p += sprintf(p,"CREATE TABLE IF NOT EXISTS content (\n");
-    p += sprintf(p,"  fileId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  fileId BIGINT NOT NULL,\n");
     p += sprintf(p,"  messageIndex INTEGER NOT NULL,\n");
     p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
     p += sprintf(p,"  filePosition BIGINT NOT NULL,\n");
     p += sprintf(p,"  messageSize INTEGER NOT NULL,\n");
     p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId INTEGER NOT NULL,\n");
+    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
     p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
     p += sprintf(p,"  parameterId INTEGER NOT NULL,\n");
     p += sprintf(p,"  parameterName VARCHAR (50) NOT NULL,\n");
@@ -245,6 +249,7 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"  forecastType SMALLINT,\n");
     p += sprintf(p,"  foracastNumber INTEGER,\n");
     p += sprintf(p,"  flags INTEGER NOT NULL,\n");
+    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
     p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
     p += sprintf(p,"  modificationTime TIMESTAMP,\n");
     p += sprintf(p,"  deletionTime TIMESTAMP,\n");
@@ -258,12 +263,6 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
     p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
     p += sprintf(p,");\n");
-
-    int                mAggregationId;
-    int                mAggregationPeriod;
-    int                mProcessingTypeId;
-    float              mProcessingTypeValue1;
-    float              mProcessingTypeValue2;
 
     res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -283,10 +282,10 @@ void PostgresqlImplementation::createTables()
     p += sprintf(p,"  eventId serial PRIMARY KEY,\n");
     p += sprintf(p,"  eventTime TIMESTAMP,\n");
     p += sprintf(p,"  eventType SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  id1 INTEGER,\n");
-    p += sprintf(p,"  id2 INTEGER,\n");
-    p += sprintf(p,"  id3 INTEGER,\n");
-    p += sprintf(p,"  flags INTEGER,\n");
+    p += sprintf(p,"  id1 BIGINT,\n");
+    p += sprintf(p,"  id2 BIGINT,\n");
+    p += sprintf(p,"  id3 BIGINT,\n");
+    p += sprintf(p,"  flags BIGINT,\n");
     p += sprintf(p,"  eventData VARCHAR (300)\n");
     p += sprintf(p,");\n");
 
@@ -576,6 +575,7 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
     p += sprintf(p,"  title,\n");
     p += sprintf(p,"  description,\n");
     p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  storageId,\n");
     p += sprintf(p,"  sourceId,\n");
     p += sprintf(p,"  status\n");
     p += sprintf(p,")\n");
@@ -586,6 +586,7 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
     p += sprintf(p,"  '%s',\n",producerInfo.mTitle.c_str());
     p += sprintf(p,"  '%s',\n",producerInfo.mDescription.c_str());
     p += sprintf(p,"  %u,\n",producerInfo.mFlags);
+    p += sprintf(p,"  %u,\n",producerInfo.mStorageId);
     p += sprintf(p,"  %u,\n",producerInfo.mSourceId);
     p += sprintf(p,"  %u\n",(uint)producerInfo.mStatus);
     p += sprintf(p,");\n");
@@ -621,7 +622,7 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
 
 
 
-int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
+int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -690,7 +691,7 @@ int PostgresqlImplementation::_deleteProducerInfoByName(T::SessionId sessionId,c
 
 
 
-int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -720,7 +721,7 @@ int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
+int PostgresqlImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -838,7 +839,7 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
     T::ContentInfoList contentInfoList;
     getContentByParameterId(parameterKeyType,parameterKey,contentInfoList);
 
-    std::set<uint> producerIdList;
+    std::set<T::ProducerId> producerIdList;
     uint len = contentInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -864,7 +865,7 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
 
 
 
-int PostgresqlImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+int PostgresqlImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
   try
@@ -941,7 +942,7 @@ int PostgresqlImplementation::_getProducerNameAndGeometryList(T::SessionId sessi
     {
       T::ProducerInfo *producerInfo = producerInfoList.getProducerInfoByIndex(p);
 
-      std::set<uint> geometryIdList;
+      std::set<T::GeometryId> geometryIdList;
 
       T::ContentInfoList contentInfoList;
       getContentByProducerId(producerInfo->mProducerId,0,0,10000000,contentInfoList);
@@ -990,7 +991,7 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
 
     std::set<std::size_t> tmpList;
 
-    uint producerId = 0;
+    T::ProducerId producerId = 0;
     T::ProducerInfo *producerInfo = nullptr;
     T::ProducerInfo pInfo;
 
@@ -1189,6 +1190,7 @@ int PostgresqlImplementation::_setProducerInfo(T::SessionId sessionId,T::Produce
     p += sprintf(p,"  title = '%s',\n",producerInfo.mTitle.c_str());
     p += sprintf(p,"  description = '%s',\n",producerInfo.mDescription.c_str());
     p += sprintf(p,"  flags = %u,\n",producerInfo.mFlags);
+    p += sprintf(p,"  storageId = %u,\n",producerInfo.mStorageId);
     p += sprintf(p,"  sourceId = %u,\n",producerInfo.mSourceId);
     p += sprintf(p,"  status = %u\n",producerInfo.mStatus);
     p += sprintf(p,"WHERE \n");
@@ -1256,6 +1258,7 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
     p += sprintf(p,"  description,\n");
     p += sprintf(p,"  analysisTime,\n");
     p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  storageId,\n");
     p += sprintf(p,"  sourceId,\n");
     p += sprintf(p,"  modificationTime,\n");
     p += sprintf(p,"  deletionTime,\n");
@@ -1270,6 +1273,7 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
     p += sprintf(p,"  '%s',\n",generationInfo.mDescription.c_str());
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",generationInfo.mAnalysisTime.c_str());
     p += sprintf(p,"  %u,\n",generationInfo.mFlags);
+    p += sprintf(p,"  %u,\n",generationInfo.mStorageId);
     p += sprintf(p,"  %u,\n",generationInfo.mSourceId);
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
@@ -1307,7 +1311,7 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
 
 
 
-int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
+int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1376,7 +1380,7 @@ int PostgresqlImplementation::_deleteGenerationInfoByName(T::SessionId sessionId
 
 
 
-int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -1408,7 +1412,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1476,7 +1480,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerName(T::Session
 
 
 
-int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1507,7 +1511,7 @@ int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId s
 
 
 
-int PostgresqlImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
+int PostgresqlImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1611,7 +1615,7 @@ int PostgresqlImplementation::_getGenerationInfoListByGeometryId(T::SessionId se
 
 
 
-int PostgresqlImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
+int PostgresqlImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1673,7 +1677,7 @@ int PostgresqlImplementation::_getGenerationInfoListByProducerName(T::SessionId 
 
 
 
-int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1700,7 +1704,7 @@ int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sess
 
 
 
-int PostgresqlImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+int PostgresqlImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1801,7 +1805,7 @@ int PostgresqlImplementation::_getGenerationInfoCount(T::SessionId sessionId,uin
 
 
 
-int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
+int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -1825,7 +1829,7 @@ int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionI
     p += sprintf(p,"SET\n");
     p += sprintf(p,"  status = %u\n",status);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %u;\n",generationInfo.mGenerationId);
+    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -1878,7 +1882,7 @@ int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessio
     p += sprintf(p,"SET\n");
     p += sprintf(p,"  status = %u\n",status);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %u;\n",generationInfo.mGenerationId);
+    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -1939,12 +1943,13 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
     p += sprintf(p,"  description = '%s',\n",generationInfo.mDescription.c_str());
     p += sprintf(p,"  analysisTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",generationInfo.mAnalysisTime.c_str());
     p += sprintf(p,"  flags = %u,\n",generationInfo.mFlags);
+    p += sprintf(p,"  storageId = %u,\n",generationInfo.mStorageId);
     p += sprintf(p,"  sourceId = %u,\n",generationInfo.mSourceId);
     p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
     p += sprintf(p,"  status = %u\n",generationInfo.mStatus);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %u;\n",generationInfo.mGenerationId);
+    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -2003,6 +2008,7 @@ int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::Geometr
     p += sprintf(p,"  geometryId,\n");
     p += sprintf(p,"  levelId,\n");
     p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  storageId,\n");
     p += sprintf(p,"  sourceId,\n");
     p += sprintf(p,"  modificationTime,\n");
     p += sprintf(p,"  deletionTime,\n");
@@ -2011,10 +2017,11 @@ int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::Geometr
     p += sprintf(p,"VALUES \n");
     p += sprintf(p,"(\n");
     p += sprintf(p,"  %u,\n",geometryInfo.mProducerId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mGenerationId);
+    p += sprintf(p,"  %lu,\n",geometryInfo.mGenerationId);
     p += sprintf(p,"  %u,\n",geometryInfo.mGeometryId);
     p += sprintf(p,"  %u,\n",geometryInfo.mLevelId);
     p += sprintf(p,"  %u,\n",geometryInfo.mFlags);
+    p += sprintf(p,"  %u,\n",geometryInfo.mStorageId);
     p += sprintf(p,"  %u,\n",geometryInfo.mSourceId);
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
@@ -2050,7 +2057,7 @@ int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::Geometr
 
 
 
-int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -2064,7 +2071,7 @@ int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uin
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u AND geometryId=%u AND levelId=%u;",generationId,geometryId,levelId);
+    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu AND geometryId=%u AND levelId=%u;",generationId,geometryId,levelId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -2091,7 +2098,7 @@ int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uin
 
 
 
-int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -2105,7 +2112,7 @@ int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u;",generationId);
+    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu;",generationId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -2130,7 +2137,7 @@ int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId
 
 
 
-int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -2169,7 +2176,7 @@ int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId s
 
 
 
-int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -2208,7 +2215,7 @@ int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
@@ -2230,6 +2237,7 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint g
     p += sprintf(p,"  geometryId,\n");
     p += sprintf(p,"  levelId,\n");
     p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  storageId,\n");
     p += sprintf(p,"  sourceId,\n");
     p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
     p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
@@ -2237,7 +2245,7 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint g
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  generationGeometry\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -2258,19 +2266,20 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,uint g
     for (int i = 0; i < rowCount; i++)
     {
       geometryInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo.mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo.mGenerationId = atoll(PQgetvalue(res, i, 1));
       geometryInfo.mGeometryId = atoi(PQgetvalue(res, i, 2));
       geometryInfo.mLevelId = atoi(PQgetvalue(res, i, 3));
       geometryInfo.mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo.mSourceId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo.mStorageId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo.mSourceId = atoi(PQgetvalue(res, i, 6));
 
-      std::string modificationTime = PQgetvalue(res, i, 6);
+      std::string modificationTime = PQgetvalue(res, i, 7);
       geometryInfo.mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, i, 7);
+      std::string deletionTime = PQgetvalue(res, i, 8);
       geometryInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo.mStatus = atoi(PQgetvalue(res, i, 8));
+      geometryInfo.mStatus = atoi(PQgetvalue(res, i, 9));
     }
 
     PQclear(res);
@@ -2311,6 +2320,7 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
     p += sprintf(p,"  geometryId,\n");
     p += sprintf(p,"  levelId,\n");
     p += sprintf(p,"  flags,\n");
+    p += sprintf(p,"  storageId,\n");
     p += sprintf(p,"  sourceId,\n");
     p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
     p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
@@ -2337,19 +2347,20 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
       T::GeometryInfo *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
       geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
       geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
       geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo->mStorageId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 6));
 
-      std::string modificationTime = PQgetvalue(res, i, 6);
+      std::string modificationTime = PQgetvalue(res, i, 7);
       geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
 
-      std::string deletionTime = PQgetvalue(res, i, 7);
+      std::string deletionTime = PQgetvalue(res, i, 8);
       geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 9));
 
       geometryInfoList.addGeometryInfo(geometryInfo);
     }
@@ -2368,7 +2379,7 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
 
 
 
-int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2399,7 +2410,7 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  generationGeometry\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u;\n",generationId);
+    p += sprintf(p,"  generationId = %lu;\n",generationId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -2420,7 +2431,7 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
       T::GeometryInfo *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
       geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
       geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
       geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
@@ -2451,7 +2462,7 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
 
 
 
-int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2503,7 +2514,7 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
       T::GeometryInfo *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
       geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
       geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
       geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
@@ -2534,7 +2545,7 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
 
 
 
-int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2586,7 +2597,7 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
       T::GeometryInfo *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoi(PQgetvalue(res, i, 1));
+      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
       geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
       geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
       geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
@@ -2674,7 +2685,7 @@ int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::Geometr
     p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
     p += sprintf(p,"  status = %u\n",geometryInfo.mStatus);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -2703,7 +2714,7 @@ int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::Geometr
 
 
 
-int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -2723,7 +2734,7 @@ int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,
     p += sprintf(p,"SET\n");
     p += sprintf(p,"  status = %u\n",status);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId=%u AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -2891,7 +2902,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
 
 
 
-int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
+int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -2962,7 +2973,7 @@ int PostgresqlImplementation::_deleteFileInfoByName(T::SessionId sessionId,const
 
 
 
-int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -3032,7 +3043,7 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerName(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -3067,7 +3078,7 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
+int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -3085,7 +3096,7 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T
       return Result::UNKNOWN_GENERATION_ID;
 
 
-    std::set<uint> fileIdList;
+    std::set<T::FileId> fileIdList;
     T::ContentInfoList contentInfoList;
     int result = getContentByGenerationIdAndTimeRange(generationId,forecastTime,forecastTime,contentInfoList);
     uint len = contentInfoList.getLength();
@@ -3203,7 +3214,7 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationName(T::SessionId s
 
 
 
-int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -3233,7 +3244,7 @@ int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId session
 
 
 
-int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
   try
@@ -3269,7 +3280,7 @@ int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessi
 
 
 
-int PostgresqlImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
+int PostgresqlImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -3319,7 +3330,7 @@ int PostgresqlImplementation::_getFileInfoByName(T::SessionId sessionId,const st
 
 
 
-int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3346,7 +3357,7 @@ int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,uint start
 
 
 
-int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3382,7 +3393,7 @@ int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionI
 
 
 
-int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3413,7 +3424,7 @@ int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionI
 
 
 
-int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3444,7 +3455,7 @@ int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessio
 
 
 
-int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3475,7 +3486,7 @@ int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessio
 
 
 
-int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3506,7 +3517,7 @@ int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sess
 
 
 
-int PostgresqlImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3562,7 +3573,7 @@ int PostgresqlImplementation::_getFileInfoCount(T::SessionId sessionId,uint& cou
 
 
 
-int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3589,7 +3600,7 @@ int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId session
 
 
 
-int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3601,7 +3612,7 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     char sql[100];
-    sprintf(sql,"SELECT COUNT(*) FROM file WHERE generationId=%u",generationId);
+    sprintf(sql,"SELECT COUNT(*) FROM file WHERE generationId = %lu",generationId);
     count = getCount(sql);
 
     return Result::OK;
@@ -3616,7 +3627,7 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
 
 
 
-int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3665,7 +3676,7 @@ int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& f
     p += sprintf(p,"UPDATE file\n");
     p += sprintf(p,"SET\n");
     p += sprintf(p,"  producerId = %u,\n",fileInfo.mProducerId);
-    p += sprintf(p,"  generationId = %u,\n",fileInfo.mGenerationId);
+    p += sprintf(p,"  generationId = %lu,\n",fileInfo.mGenerationId);
     p += sprintf(p,"  protocol = %u,\n",(uint)fileInfo.mProtocol);
     p += sprintf(p,"  serverType = %u,\n",(uint)fileInfo.mServerType);
     p += sprintf(p,"  server = '%s',\n",fileInfo.mServer.c_str());
@@ -3675,10 +3686,10 @@ int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& f
     p += sprintf(p,"  sourceId = %u,\n",fileInfo.mSourceId);
     p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  fileSize = %llu,\n",fileInfo.mSize);
+    p += sprintf(p,"  fileSize = %lu,\n",fileInfo.mSize);
     p += sprintf(p,"  status = %u\n",fileInfo.mStatus);
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p, "  fileId = %u;\n", fileInfo.mFileId);
+    p += sprintf(p, "  fileId = %lu;\n", fileInfo.mFileId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -3792,7 +3803,7 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  event\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId=%llu;\n",eventId);
+    p += sprintf(p,"  eventId=%lu;\n",eventId);
 
     res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -3862,7 +3873,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    //printf("GET EVENT LIST %llu\n",startEventId);
+    //printf("GET EVENT LIST %lu\n",startEventId);
 
     char sql[10000];
     char *p = sql;
@@ -3879,7 +3890,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  event\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId>=%llu\n",startEventId);
+    p += sprintf(p,"  eventId>=%lu\n",startEventId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  eventId;\n");
 
@@ -3897,7 +3908,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
     int rowCount = PQntuples(res);
 
-    //printf("GET EVENT LIST %llu  => %d\n",startEventId,rowCount);
+    //printf("GET EVENT LIST %lu  => %d\n",startEventId,rowCount);
 
     if (rowCount > maxRecords)
       rowCount = maxRecords;
@@ -4013,10 +4024,10 @@ int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentI
     p += sprintf(p,"UPDATE content\n");
     p += sprintf(p,"SET\n");
     p += sprintf(p,"  fileType = %u,\n",contentInfo.mFileType);
-    p += sprintf(p,"  filePosition = %llu,\n",contentInfo.mFilePosition);
+    p += sprintf(p,"  filePosition = %lu,\n",contentInfo.mFilePosition);
     p += sprintf(p,"  messageSize = %u,\n",contentInfo.mMessageSize);
     p += sprintf(p,"  producerId = %u,\n",contentInfo.mProducerId);
-    p += sprintf(p,"  generationId = %u,\n",contentInfo.mGenerationId);
+    p += sprintf(p,"  generationId = %lu,\n",contentInfo.mGenerationId);
     p += sprintf(p,"  geometryId = %u,\n",contentInfo.mGeometryId);
     p += sprintf(p,"  parameterId = %d,\n",contentInfo.mFmiParameterId);
     p += sprintf(p,"  parameterName = '%s',\n",contentInfo.getFmiParameterName());
@@ -4035,7 +4046,7 @@ int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentI
     p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
     p += sprintf(p,"WHERE \n");
-    p += sprintf(p, "  fileId = %u AND messageIndex = %u;\n",contentInfo.mFileId,contentInfo.mMessageIndex);
+    p += sprintf(p, "  fileId = %lu AND messageIndex = %u;\n",contentInfo.mFileId,contentInfo.mMessageIndex);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -4102,7 +4113,7 @@ int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentI
 
 
 
-int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
+int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -4136,7 +4147,7 @@ int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,uint fil
 
 
 
-int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint fileId)
+int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -4206,7 +4217,7 @@ int PostgresqlImplementation::_deleteContentListByFileName(T::SessionId sessionI
 
 
 
-int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
+int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -4275,7 +4286,7 @@ int PostgresqlImplementation::_deleteContentListByProducerName(T::SessionId sess
 
 
 
-int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,uint generationId)
+int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -4345,7 +4356,7 @@ int PostgresqlImplementation::_deleteContentListByGenerationName(T::SessionId se
 
 
 
-int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -4376,7 +4387,7 @@ int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionI
 
 
 
-int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
+int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -4401,7 +4412,7 @@ int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,uint fileId
 
 
 
-int PostgresqlImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4428,7 +4439,7 @@ int PostgresqlImplementation::_getContentList(T::SessionId sessionId,uint startF
 
 
 
-int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4455,7 +4466,7 @@ int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,uin
 
 
 
-int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4520,7 +4531,7 @@ int PostgresqlImplementation::_getContentListByFileName(T::SessionId sessionId,c
 
 
 
-int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4551,7 +4562,7 @@ int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId
 
 
 
-int PostgresqlImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4582,7 +4593,7 @@ int PostgresqlImplementation::_getContentListByProducerName(T::SessionId session
 
 
 
-int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4614,7 +4625,7 @@ int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId session
 
 
 
-int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4645,7 +4656,7 @@ int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessi
 
 
 
-int PostgresqlImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4707,7 +4718,7 @@ int PostgresqlImplementation::_getContentListByGenerationNameAndTimeRange(T::Ses
 
 
 
-int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4785,7 +4796,7 @@ int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,
 
 
 
-int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4895,7 +4906,7 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::Ses
 
 
 
-int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4950,7 +4961,7 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::Session
 
 
 
-int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5082,6 +5093,74 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::Sessi
 
 
 
+int PostgresqlImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    contentLevelList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getContentLevelListByGenerationGeometryAndLevelId(generationInfo.mProducerId,generationId,geometryId,levelId,contentLevelList);
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int PostgresqlImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoThreadLock lock(&mThreadLock);
+
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    if (!isConnectionValid())
+      return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
+
+    T::GenerationInfo generationInfo;
+    if (getGenerationById(generationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    contentLevelList.clear();
+
+    T::ContentInfoList contentInfoList;
+    int res = getContentByGenerationId(generationInfo.mGenerationId,0,0,10000000,contentInfoList);
+    contentInfoList.getContentLevelListByParameterGenerationGeometryAndLevelId(generationInfo.mProducerId,generationId,geometryId,parameterKey,levelId,contentLevelList);
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5114,7 +5193,7 @@ int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId ses
         T::FileInfo *fileInfo = fileInfoList.getFileInfoById(cInfo->mFileId);
         if (fileInfo == nullptr)
         {
-          printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
+          printf("**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
@@ -5123,7 +5202,7 @@ int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId ses
           T::GenerationInfo *generationInfo = generationInfoList.getGenerationInfoById(cInfo->mGenerationId);
           if (generationInfo == nullptr)
           {
-            printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
+            printf("**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
@@ -5154,7 +5233,7 @@ int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
+int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -5189,7 +5268,7 @@ int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::Session
 
 
 
-int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
   FUNCTION_TRACE
   try
@@ -5248,7 +5327,7 @@ int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId se
 
 
 
-int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -5283,7 +5362,7 @@ int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId
 
 
 
-int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5318,7 +5397,7 @@ int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId ses
 
 
 
-int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5352,7 +5431,7 @@ int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::Se
 
 
 
-int PostgresqlImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+int PostgresqlImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5518,7 +5597,7 @@ uint PostgresqlImplementation::getCount(const char *sql)
 
 
 
-int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
+int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5622,7 +5701,7 @@ int PostgresqlImplementation::deleteProducerById(uint producerId,bool deleteGene
 
 
 
-int PostgresqlImplementation::deleteProducerListBySourceId(uint sourceId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
+int PostgresqlImplementation::deleteProducerListBySourceId(T::SourceId sourceId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -5652,7 +5731,7 @@ int PostgresqlImplementation::deleteProducerListBySourceId(uint sourceId,bool de
 
 
 
-int PostgresqlImplementation::getProducerById(uint producerId,T::ProducerInfo& producerInfo)
+int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -5849,7 +5928,7 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
 
 
 
-int PostgresqlImplementation::getProducerListBySourceId(uint sourceId,T::ProducerInfoList& producerInfoList)
+int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5917,7 +5996,7 @@ int PostgresqlImplementation::getProducerListBySourceId(uint sourceId,T::Produce
 
 
 
-int PostgresqlImplementation::getGenerationById(uint generationId,T::GenerationInfo& generationInfo)
+int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -5943,7 +6022,7 @@ int PostgresqlImplementation::getGenerationById(uint generationId,T::GenerationI
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  generation\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u;\n",generationId);
+    p += sprintf(p,"  generationId = %lu;\n",generationId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -5963,7 +6042,7 @@ int PostgresqlImplementation::getGenerationById(uint generationId,T::GenerationI
 
     for (int i = 0; i < rowCount; i++)
     {
-      generationInfo.mGenerationId = atoi(PQgetvalue(res, i, 0));
+      generationInfo.mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo.mGenerationType = atoi(PQgetvalue(res, i, 1));
       generationInfo.mProducerId = atoi(PQgetvalue(res, i, 2));
       generationInfo.mName = PQgetvalue(res, i, 3);
@@ -6041,7 +6120,7 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
 
     for (int i = 0; i < rowCount; i++)
     {
-      generationInfo.mGenerationId = atoi(PQgetvalue(res, i, 0));
+      generationInfo.mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo.mGenerationType = atoi(PQgetvalue(res, i, 1));
       generationInfo.mProducerId = atoi(PQgetvalue(res, i, 2));
       generationInfo.mName = PQgetvalue(res, i, 3);
@@ -6119,7 +6198,7 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
     {
       T::GenerationInfo *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoi(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
       generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
@@ -6172,7 +6251,7 @@ int PostgresqlImplementation::getGenerationListByGeometryId(T::GeometryId geomet
 
 
 
-int PostgresqlImplementation::getGenerationListByProducerId(uint producerId,T::GenerationInfoList& generationInfoList)
+int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6220,7 +6299,7 @@ int PostgresqlImplementation::getGenerationListByProducerId(uint producerId,T::G
     {
       T::GenerationInfo *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoi(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
       generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
@@ -6254,7 +6333,7 @@ int PostgresqlImplementation::getGenerationListByProducerId(uint producerId,T::G
 
 
 
-int PostgresqlImplementation::getGenerationListBySourceId(uint sourceId,T::GenerationInfoList& generationInfoList)
+int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6302,7 +6381,7 @@ int PostgresqlImplementation::getGenerationListBySourceId(uint sourceId,T::Gener
     {
       T::GenerationInfo *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoi(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
       generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
@@ -6336,7 +6415,7 @@ int PostgresqlImplementation::getGenerationListBySourceId(uint sourceId,T::Gener
 
 
 
-int PostgresqlImplementation::deleteGenerationById(uint generationId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
+int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6356,7 +6435,7 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
 */
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE generationId=%u;",generationId);
+      sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
       PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
@@ -6369,7 +6448,7 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
 
     if (deleteFiles)
     {
-      sprintf(sql,"DELETE FROM file WHERE generationId=%u;",generationId);
+      sprintf(sql,"DELETE FROM file WHERE generationId = %lu;",generationId);
       PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
@@ -6382,7 +6461,7 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
 
     if (deleteGenerationGeometries)
     {
-      sprintf(sql,"DELETE FROM generationGeometry WHERE generationId=%u;",generationId);
+      sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu;",generationId);
       PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
@@ -6393,7 +6472,7 @@ int PostgresqlImplementation::deleteGenerationById(uint generationId,bool delete
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM generation WHERE generationId=%u;",generationId);
+    sprintf(sql,"DELETE FROM generation WHERE generationId = %lu;",generationId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -6475,7 +6554,7 @@ int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
     p += sprintf(p,"(\n");
     p += sprintf(p,"  DEFAULT,\n");
     p += sprintf(p,"  %u,\n",fileInfo.mProducerId);
-    p += sprintf(p,"  %u,\n",fileInfo.mGenerationId);
+    p += sprintf(p,"  %lu,\n",fileInfo.mGenerationId);
     p += sprintf(p,"  %u,\n",fileInfo.mProtocol);
     p += sprintf(p,"  %u,\n",fileInfo.mServerType);
     p += sprintf(p,"  '%s',\n",fileInfo.mServer.c_str());
@@ -6485,7 +6564,7 @@ int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
     p += sprintf(p,"  %u,\n",fileInfo.mSourceId);
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  %llu,\n",fileInfo.mSize);
+    p += sprintf(p,"  %lu,\n",fileInfo.mSize);
     p += sprintf(p,"  %u\n",fileInfo.mStatus);
     p += sprintf(p,");\n");
 
@@ -6568,10 +6647,10 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
       throw exception;
     }
 
-    uint maxFileId = 0;
+    T::FileId maxFileId = 0;
     int rowCount = PQntuples(res);
     if (rowCount > 0)
-      maxFileId = atoi(PQgetvalue(res, 0, 0));
+      maxFileId = atoll(PQgetvalue(res, 0, 0)) & 0xFFFFFFFF;
 
     PQclear(res);
 
@@ -6609,9 +6688,9 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
       std::string deletionTime = utcTimeFromTimeT(fileInfo->mDeletionTime);
 
       p += sprintf(p,"(\n");
-      p += sprintf(p,"  %u,\n",fileInfo->mFileId);
+      p += sprintf(p,"  %lu,\n",fileInfo->mFileId);
       p += sprintf(p,"  %u,\n",fileInfo->mProducerId);
-      p += sprintf(p,"  %u,\n",fileInfo->mGenerationId);
+      p += sprintf(p,"  %lu,\n",fileInfo->mGenerationId);
       p += sprintf(p,"  %u,\n",fileInfo->mProtocol);
       p += sprintf(p,"  %u,\n",fileInfo->mServerType);
       p += sprintf(p,"  '%s',\n",fileInfo->mServer.c_str());
@@ -6621,7 +6700,7 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
       p += sprintf(p,"  %u,\n",fileInfo->mSourceId);
       p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
       p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-      p += sprintf(p,"  %llu,\n",fileInfo->mSize);
+      p += sprintf(p,"  %lu,\n",fileInfo->mSize);
       p += sprintf(p,"  %u\n",fileInfo->mStatus);
       p += sprintf(p,")\n");
 
@@ -6673,7 +6752,7 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
 
 
 
-int PostgresqlImplementation::deleteGenerationListByProducerId(uint producerId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
+int PostgresqlImplementation::deleteGenerationListByProducerId(T::ProducerId producerId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6703,7 +6782,7 @@ int PostgresqlImplementation::deleteGenerationListByProducerId(uint producerId,b
 
 
 
-int PostgresqlImplementation::deleteGenerationListBySourceId(uint sourceId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
+int PostgresqlImplementation::deleteGenerationListBySourceId(T::SourceId sourceId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6733,7 +6812,7 @@ int PostgresqlImplementation::deleteGenerationListBySourceId(uint sourceId,bool 
 
 
 
-int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
+int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6756,7 +6835,7 @@ int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE fileId=%u;",fileId);
+      sprintf(sql,"DELETE FROM content WHERE fileId = %lu;",fileId);
       PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
@@ -6767,7 +6846,7 @@ int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE fileId=%u;",fileId);
+    sprintf(sql,"DELETE FROM file WHERE fileId = %lu;",fileId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -6799,7 +6878,7 @@ int PostgresqlImplementation::deleteFileById(uint fileId,bool deleteContent)
 
 
 
-int PostgresqlImplementation::deleteFileListByGenerationId(uint generationId,bool deleteContent)
+int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId generationId,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6822,7 +6901,7 @@ int PostgresqlImplementation::deleteFileListByGenerationId(uint generationId,boo
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE generationId=%u;",generationId);
+      sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
       PGresult *res = PQexec(mConnection,sql);
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
@@ -6833,7 +6912,7 @@ int PostgresqlImplementation::deleteFileListByGenerationId(uint generationId,boo
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE generationId=%u;",generationId);
+    sprintf(sql,"DELETE FROM file WHERE generationId = %lu;",generationId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -6866,7 +6945,7 @@ int PostgresqlImplementation::deleteFileListByGenerationId(uint generationId,boo
 
 
 
-int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<uint>& generationIdList,bool deleteContent)
+int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6889,7 +6968,7 @@ int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<uint>& g
 
 
 
-int PostgresqlImplementation::deleteFileListByProducerId(uint producerId,bool deleteContent)
+int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerId,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -6957,7 +7036,7 @@ int PostgresqlImplementation::deleteFileListByProducerId(uint producerId,bool de
 
 
 
-int PostgresqlImplementation::deleteFileListBySourceId(uint sourceId,bool deleteContent)
+int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -7026,7 +7105,7 @@ int PostgresqlImplementation::deleteFileListBySourceId(uint sourceId,bool delete
 
 
 
-int PostgresqlImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
+int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -7053,7 +7132,7 @@ int PostgresqlImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId=%u;\n",fileId);
+    p += sprintf(p,"  fileId = %lu;\n",fileId);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -7073,9 +7152,9 @@ int PostgresqlImplementation::getFileById(uint fileId,T::FileInfo& fileInfo)
 
     for (int i = 0; i < rowCount; i++)
     {
-      fileInfo.mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo.mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo.mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo.mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo.mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo.mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo.mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo.mServer = PQgetvalue(res, i, 5);
@@ -7152,9 +7231,9 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
 
     for (int i = 0; i < rowCount; i++)
     {
-      fileInfo.mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo.mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo.mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo.mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo.mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo.mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo.mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo.mServer = PQgetvalue(res, i, 5);
@@ -7183,7 +7262,7 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
 
 
 
-int PostgresqlImplementation::getFileList(uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7212,7 +7291,7 @@ int PostgresqlImplementation::getFileList(uint startFileId,int maxRecords,T::Fil
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId >= %u\n",startFileId);
+    p += sprintf(p,"  fileId >= %lu\n",startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId\n");
     p += sprintf(p,"LIMIT\n");
@@ -7235,9 +7314,9 @@ int PostgresqlImplementation::getFileList(uint startFileId,int maxRecords,T::Fil
     for (int i = 0; i < rowCount; i++)
     {
       T::FileInfo *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
@@ -7268,7 +7347,7 @@ int PostgresqlImplementation::getFileList(uint startFileId,int maxRecords,T::Fil
 
 
 
-int PostgresqlImplementation::getFileListByGenerationId(uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7297,7 +7376,7 @@ int PostgresqlImplementation::getFileListByGenerationId(uint generationId,uint s
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u AND fileId >= %u\n",generationId,startFileId);
+    p += sprintf(p,"  generationId = %lu AND fileId >= %lu\n",generationId,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId\n");
     p += sprintf(p,"LIMIT\n");
@@ -7320,9 +7399,9 @@ int PostgresqlImplementation::getFileListByGenerationId(uint generationId,uint s
     for (int i = 0; i < rowCount; i++)
     {
       T::FileInfo *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
@@ -7353,7 +7432,7 @@ int PostgresqlImplementation::getFileListByGenerationId(uint generationId,uint s
 
 
 
-int PostgresqlImplementation::getFileListByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7430,7 +7509,7 @@ int PostgresqlImplementation::getFileListByGenerationIdList(std::set<uint>& gene
 
 
 
-int PostgresqlImplementation::getFileListByProducerId(uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7459,7 +7538,7 @@ int PostgresqlImplementation::getFileListByProducerId(uint producerId,uint start
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u AND fileId >= %u\n",producerId,startFileId);
+    p += sprintf(p,"  producerId=%u AND fileId >= %lu\n",producerId,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId\n");
     p += sprintf(p,"LIMIT\n");
@@ -7482,9 +7561,9 @@ int PostgresqlImplementation::getFileListByProducerId(uint producerId,uint start
     for (int i = 0; i < rowCount; i++)
     {
       T::FileInfo *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
@@ -7515,7 +7594,7 @@ int PostgresqlImplementation::getFileListByProducerId(uint producerId,uint start
 
 
 
-int PostgresqlImplementation::getFileListBySourceId(uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7544,7 +7623,7 @@ int PostgresqlImplementation::getFileListBySourceId(uint sourceId,uint startFile
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  file\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u AND fileId >= %u\n",sourceId,startFileId);
+    p += sprintf(p,"  sourceId=%u AND fileId >= %lu\n",sourceId,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId\n");
     p += sprintf(p,"LIMIT\n");
@@ -7567,9 +7646,9 @@ int PostgresqlImplementation::getFileListBySourceId(uint sourceId,uint startFile
     for (int i = 0; i < rowCount; i++)
     {
       T::FileInfo *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoi(PQgetvalue(res, i, 2));
+      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
       fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
       fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
@@ -7665,13 +7744,13 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
     p += sprintf(p,")\n");
     p += sprintf(p,"VALUES \n");
     p += sprintf(p,"(\n");
-    p += sprintf(p,"  %u,\n",contentInfo.mFileId);
+    p += sprintf(p,"  %lu,\n",contentInfo.mFileId);
     p += sprintf(p,"  %u,\n",contentInfo.mMessageIndex);
     p += sprintf(p,"  %u,\n",contentInfo.mFileType);
-    p += sprintf(p,"  %llu,\n",contentInfo.mFilePosition);
+    p += sprintf(p,"  %lu,\n",contentInfo.mFilePosition);
     p += sprintf(p,"  %u,\n",contentInfo.mMessageSize);
     p += sprintf(p,"  %u,\n",contentInfo.mProducerId);
-    p += sprintf(p,"  %u,\n",contentInfo.mGenerationId);
+    p += sprintf(p,"  %lu,\n",contentInfo.mGenerationId);
     p += sprintf(p,"  %u,\n",contentInfo.mGeometryId);
     p += sprintf(p,"  %d,\n",contentInfo.mFmiParameterId);
     p += sprintf(p,"  '%s',\n",contentInfo.getFmiParameterName());
@@ -7772,13 +7851,13 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
       std::string deletionTime = utcTimeFromTimeT(contentInfo->mDeletionTime);
 
       p += sprintf(p,"(\n");
-      p += sprintf(p,"  %u,\n",contentInfo->mFileId);
+      p += sprintf(p,"  %lu,\n",contentInfo->mFileId);
       p += sprintf(p,"  %u,\n",contentInfo->mMessageIndex);
       p += sprintf(p,"  %u,\n",contentInfo->mFileType);
-      p += sprintf(p,"  %llu,\n",contentInfo->mFilePosition);
+      p += sprintf(p,"  %lu,\n",contentInfo->mFilePosition);
       p += sprintf(p,"  %u,\n",contentInfo->mMessageSize);
       p += sprintf(p,"  %u,\n",contentInfo->mProducerId);
-      p += sprintf(p,"  %u,\n",contentInfo->mGenerationId);
+      p += sprintf(p,"  %lu,\n",contentInfo->mGenerationId);
       p += sprintf(p,"  %u,\n",contentInfo->mGeometryId);
       p += sprintf(p,"  %d,\n",contentInfo->mFmiParameterId);
       p += sprintf(p,"  '%s',\n",contentInfo->getFmiParameterName());
@@ -7835,7 +7914,7 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
 
 
 
-int PostgresqlImplementation::deleteContent(uint fileId,uint messageIndex)
+int PostgresqlImplementation::deleteContent(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -7845,7 +7924,7 @@ int PostgresqlImplementation::deleteContent(uint fileId,uint messageIndex)
 
     char sql[1000];
 
-    sprintf(sql,"DELETE FROM content WHERE fileId=%u AND messageIndex=%u;",fileId,messageIndex);
+    sprintf(sql,"DELETE FROM content WHERE fileId = %lu AND messageIndex=%u;",fileId,messageIndex);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -7868,7 +7947,7 @@ int PostgresqlImplementation::deleteContent(uint fileId,uint messageIndex)
 
 
 
-int PostgresqlImplementation::deleteContentByFileId(uint fileId)
+int PostgresqlImplementation::deleteContentByFileId(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -7878,7 +7957,7 @@ int PostgresqlImplementation::deleteContentByFileId(uint fileId)
 
     char sql[1000];
 
-    sprintf(sql,"DELETE FROM content WHERE fileId=%u;",fileId);
+    sprintf(sql,"DELETE FROM content WHERE fileId = %lu;",fileId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -7901,7 +7980,7 @@ int PostgresqlImplementation::deleteContentByFileId(uint fileId)
 
 
 
-int PostgresqlImplementation::deleteContentByProducerId(uint producerId)
+int PostgresqlImplementation::deleteContentByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -7934,7 +8013,7 @@ int PostgresqlImplementation::deleteContentByProducerId(uint producerId)
 
 
 
-int PostgresqlImplementation::deleteContentByGenerationId(uint generationId)
+int PostgresqlImplementation::deleteContentByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -7944,7 +8023,7 @@ int PostgresqlImplementation::deleteContentByGenerationId(uint generationId)
 
     char sql[1000];
 
-    sprintf(sql,"DELETE FROM content WHERE generationId=%u;",generationId);
+    sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
     PGresult *res = PQexec(mConnection,sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
@@ -7967,7 +8046,7 @@ int PostgresqlImplementation::deleteContentByGenerationId(uint generationId)
 
 
 
-int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<uint>& generationIdList)
+int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -7992,7 +8071,7 @@ int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<uint>& ge
 
 
 
-int PostgresqlImplementation::deleteContentBySourceId(uint sourceId)
+int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -8035,9 +8114,9 @@ int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
 
     /*
     //contentInfo.print(std::cout,0,0);
-    unsigned long long id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
+    UInt64  id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %llu %llu",mTablePrefix.c_str(),id,id));
+    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8046,7 +8125,7 @@ int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
 
     freeReplyObject(reply);
 
-    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %llu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str()));
+    reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %lu %s",mTablePrefix.c_str(),id,contentInfo.getCsv().c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8067,7 +8146,7 @@ int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
 
 
 
-int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
+int PostgresqlImplementation::getContent(T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -8106,7 +8185,7 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId=%u AND messageIndex=%u;\n",fileId,messageIndex);
+    p += sprintf(p,"  fileId = %lu AND messageIndex=%u;\n",fileId,messageIndex);
 
     PGresult *res = PQexec(mConnection, sql);
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
@@ -8124,13 +8203,13 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
     if (rowCount == 0)
       return Result::DATA_NOT_FOUND;
 
-    contentInfo.mFileId = atoi(PQgetvalue(res, 0, 0));
+    contentInfo.mFileId = atoll(PQgetvalue(res, 0, 0));
     contentInfo.mMessageIndex = atoi(PQgetvalue(res, 0, 1));
     contentInfo.mFileType = atoi(PQgetvalue(res, 0, 2));
     contentInfo.mFilePosition = atoll(PQgetvalue(res, 0, 3));
     contentInfo.mMessageSize = atoi(PQgetvalue(res, 0, 4));
     contentInfo.mProducerId = atoi(PQgetvalue(res, 0, 5));
-    contentInfo.mGenerationId = atoi(PQgetvalue(res, 0, 6));
+    contentInfo.mGenerationId = atoll(PQgetvalue(res, 0, 6));
     contentInfo.mGeometryId = atoi(PQgetvalue(res, 0, 7));
     contentInfo.mFmiParameterId = atoi(PQgetvalue(res, 0, 8));
     contentInfo.setFmiParameterName(PQgetvalue(res, 0, 9));
@@ -8167,7 +8246,7 @@ int PostgresqlImplementation::getContent(uint fileId,uint messageIndex,T::Conten
 
 
 
-int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8211,7 +8290,7 @@ int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  (fileId=%u AND messageIndex>=%u) OR fileId > %u\n",startFileId,startMessageIndex,startFileId);
+    p += sprintf(p,"  (fileId = %lu AND messageIndex>=%u) OR fileId > %lu\n",startFileId,startMessageIndex,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
     p += sprintf(p,"LIMIT\n");
@@ -8235,13 +8314,13 @@ int PostgresqlImplementation::getContent(uint startFileId,uint startMessageIndex
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -8292,16 +8371,16 @@ int PostgresqlImplementation::getGenerationTimeAndGeometryList(std::set<std::str
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     /*
-    uint startFileId = 0;
-    uint startMessageIndex = 0;
-    unsigned long long startId = getContentKey(startFileId,startMessageIndex);
-    unsigned long long prevStartId = 0xFFFFFFFFFFFFFFFF;
+    T::FileId startFileId = 0;
+    T::MessageIndex startMessageIndex = 0;
+    UInt64  startId = getContentKey(startFileId,startMessageIndex);
+    UInt64  prevStartId = 0xFFFFFFFFFFFFFFFF;
 
     while (startId != prevStartId)
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %llu %llu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -8353,7 +8432,7 @@ int PostgresqlImplementation::getGenerationTimeAndGeometryList(std::set<std::str
 
 
 
-int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8394,7 +8473,7 @@ int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint st
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",generationId,startFileId,startMessageIndex,startFileId);
+    p += sprintf(p,"  generationId = %lu AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",generationId,startFileId,startMessageIndex,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
     p += sprintf(p,"LIMIT\n");
@@ -8418,13 +8497,13 @@ int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint st
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -8464,7 +8543,7 @@ int PostgresqlImplementation::getContentByGenerationId(uint generationId,uint st
 
 
 
-int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& generationIdList,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8513,10 +8592,10 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& gener
       if (p != pp)
         p += sprintf(p,",");
 
-      p += sprintf(p,"%u",*it);
+      p += sprintf(p,"%lu",*it);
     }
 
-    p += sprintf(p,") AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",startFileId,startMessageIndex,startFileId);
+    p += sprintf(p,") AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",startFileId,startMessageIndex,startFileId);
 
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
@@ -8541,13 +8620,13 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<uint>& gener
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -8679,13 +8758,13 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -8829,13 +8908,13 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -8875,7 +8954,7 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
 
 
 
-int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8947,7 +9026,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generati
     p += sprintf(p,"WHERE\n");
     p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS') >= '%s' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '%s'\n",startTime.c_str(),endTime.c_str());
     p += sprintf(p,"AND\n");
-    p += sprintf(p,"  generationId=%u AND parameterId=%d\n",generationId,paramId);
+    p += sprintf(p,"  generationId = %lu AND parameterId=%d\n",generationId,paramId);
     p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
 
     if (geometryId > 0)
@@ -8979,13 +9058,13 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generati
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9024,7 +9103,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(uint generati
 
 
 
-int PostgresqlImplementation::getContentByParameterIdAndProducer(uint producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9128,13 +9207,13 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(uint producerId
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9173,7 +9252,7 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(uint producerId
 
 
 
-int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(uint generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9214,7 +9293,7 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(uint generati
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId=%u AND forecastTime >= TO_TIMESTAMP('%s','yyyymmddThh24MISS') AND forecastTime <= TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",generationId,startTime.c_str(),endTime.c_str());
+    p += sprintf(p,"  generationId = %lu AND forecastTime >= TO_TIMESTAMP('%s','yyyymmddThh24MISS') AND forecastTime <= TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",generationId,startTime.c_str(),endTime.c_str());
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
 
@@ -9236,13 +9315,13 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(uint generati
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9298,7 +9377,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
     char tmp[200];
     for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
     {
-      sprintf(tmp,"%d;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
+      sprintf(tmp,"%lu;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
       std::string st = tmp;
       if (searchList.find(st) == searchList.end())
         searchList.insert(st);
@@ -9343,7 +9422,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
       if (p != pp)
         p += sprintf(p,",");
 
-      p += sprintf(p,"%u",it->mGenerationId);
+      p += sprintf(p,"%lu",it->mGenerationId);
     }
 
     p += sprintf(p,")\n");
@@ -9371,13 +9450,13 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
       {
         T::ContentInfo *contentInfo = new T::ContentInfo();
 
-        contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+        contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
         contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
         contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
         contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
         contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
         contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-        contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+        contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
         contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
         contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
         contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9418,7 +9497,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
 
 
-int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9459,7 +9538,7 @@ int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startF
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",producerId,startFileId,startMessageIndex,startFileId);
+    p += sprintf(p,"  producerId=%u AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",producerId,startFileId,startMessageIndex,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
     p += sprintf(p,"LIMIT\n");
@@ -9483,13 +9562,13 @@ int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startF
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9529,7 +9608,7 @@ int PostgresqlImplementation::getContentByProducerId(uint producerId,uint startF
 
 
 
-int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9570,7 +9649,7 @@ int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileI
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u AND ((fileId=%u AND messageIndex>=%u) OR fileId > %u)\n",sourceId,startFileId,startMessageIndex,startFileId);
+    p += sprintf(p,"  sourceId=%u AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",sourceId,startFileId,startMessageIndex,startFileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
     p += sprintf(p,"LIMIT\n");
@@ -9594,13 +9673,13 @@ int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileI
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9640,7 +9719,7 @@ int PostgresqlImplementation::getContentBySourceId(uint sourceId,uint startFileI
 
 
 
-int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9681,7 +9760,7 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
     p += sprintf(p,"FROM\n");
     p += sprintf(p,"  content\n");
     p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId=%u\n",fileId);
+    p += sprintf(p,"  fileId = %lu\n",fileId);
     p += sprintf(p,"ORDER BY\n");
     p += sprintf(p,"  fileId,messageIndex\n");
 
@@ -9703,13 +9782,13 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
     {
       T::ContentInfo *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoi(PQgetvalue(res, i, 0));
+      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
       contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
       contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
       contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
       contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoi(PQgetvalue(res, i, 6));
+      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
       contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
       contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
@@ -9749,7 +9828,7 @@ int PostgresqlImplementation::getContentByFileId(uint fileId,T::ContentInfoList&
 
 
 
-T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData)
+T::EventId PostgresqlImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags,const char *eventData)
 {
   FUNCTION_TRACE
   try
@@ -9779,10 +9858,10 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,uint id1,uint id2,u
     p += sprintf(p,"  DEFAULT,\n");
     p += sprintf(p,"  %u,\n",eventType);
     p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",currentTime.c_str());
-    p += sprintf(p,"  %u,\n",id1);
-    p += sprintf(p,"  %u,\n",id2);
-    p += sprintf(p,"  %u,\n",id3);
-    p += sprintf(p,"  %llu,\n",flags);
+    p += sprintf(p,"  %lu,\n",id1);
+    p += sprintf(p,"  %lu,\n",id2);
+    p += sprintf(p,"  %lu,\n",id3);
+    p += sprintf(p,"  %lu,\n",flags);
     if (eventData[0] == '\0')
       p += sprintf(p,"  ''\n");
     else
@@ -9863,10 +9942,10 @@ int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
       p += sprintf(p,"  DEFAULT,\n");
       p += sprintf(p,"  %u,\n",event->mType);
       p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",eventTime.c_str());
-      p += sprintf(p,"  %u,\n",event->mId1);
-      p += sprintf(p,"  %u,\n",event->mId2);
-      p += sprintf(p,"  %u,\n",event->mId3);
-      p += sprintf(p,"  %llu,\n",event->mFlags);
+      p += sprintf(p,"  %lu,\n",event->mId1);
+      p += sprintf(p,"  %lu,\n",event->mId2);
+      p += sprintf(p,"  %lu,\n",event->mId3);
+      p += sprintf(p,"  %lu,\n",event->mFlags);
       if (event->mEventData.empty())
         p += sprintf(p,"  ''\n");
       else

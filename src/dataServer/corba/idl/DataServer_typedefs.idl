@@ -1,140 +1,73 @@
 #ifndef __DATA_SERVER_TYPEDEFS_IDL
 #define __DATA_SERVER_TYPEDEFS_IDL
 
+#include "Typedefs.idl"
+
 
 module SmartMet
 {
 
-module DataServer
-{
-
-module Corba
+module C
 {
 
 
-typedef unsigned long long CorbaParamId;
-typedef float CorbaParamValue;
-
-typedef sequence<unsigned long> CorbaULongList;
-typedef sequence<CorbaParamValue> CorbaParamValueList;
-typedef sequence<double> CorbaDoubleList;
-
-
-
-struct CorbaAttribute
+struct PropertySetting
 {
-  string name;
-  string value;
+  C::UInt32 propertyId;
+  string    propertyValue;
 };
 
-typedef sequence<CorbaAttribute> CorbaAttributeList;
+typedef sequence<PropertySetting> PropertySettingList;
 
 
-
-struct CorbaPropertySetting
+struct GridData
 {
-  unsigned long propertyId;
-  string propertyValue;
-};
-
-typedef sequence<CorbaPropertySetting> CorbaPropertySettingList;
-
-
-struct CorbaValueRecord
-{
-  unsigned long    fileId;
-  unsigned long    messageIndex;
-  octet            coordinateType;
-  short            areaInterpolationMethod;
-  double           x;
-  double           y;
-  CorbaParamValue  value;
-  long             result;
-};
-
-typedef sequence<CorbaValueRecord> CorbaValueRecordList;
-
-
-
-struct CorbaCoordinate
-{
-  double x;
-  double y;
-};
-
-typedef sequence<CorbaCoordinate> CorbaCoordinateList;
-typedef sequence<CorbaCoordinateList> CorbaPolygonPath;
-
-
-
-struct CorbaGridValue
-{
-  double x;
-  double y;
-  float  value;
-};
-
-typedef sequence<CorbaGridValue> CorbaGridValueList;
-
-
-
-
-struct CorbaGridData
-{
-  unsigned long       serverId;
-  unsigned long       producerId;
-  unsigned long       generationId;
-  unsigned long       fileId;
-  octet               fileType;
-  string              fileName;
-  unsigned long       messageIndex;
-  string              forecastTime;
-  short               forecastType;
-  short               forecastNumber;
-  string              gribParameterId;
-  unsigned long       grib1ParameterLevelId;
-  unsigned long       grib2ParameterLevelId;
-  string              gribParameterName;
-  string              fmiParameterId;
-  unsigned long       fmiParameterLevelId;
-  string              fmiParameterName;
-  string              newbaseParameterId;
-  string              newbaseParameterName;
-  long                parameterLevel;
-  unsigned long	      geometryId;
-  boolean             reverseXDirection;
-  boolean             reverseYDirection;
-  unsigned long       projection;
-  unsigned long       columns;
-  unsigned long       rows;  
-  CorbaAttributeList  projectionAttributes;
-  CorbaParamValueList valueList;
+  C::UInt32             serverId;
+  C::ProducerId         producerId;
+  C::GenerationId       generationId;
+  C::FileId             fileId;
+  C::FileType           fileType;
+  string                fileName;
+  C::MessageIndex       messageIndex;
+  C::TimeString         forecastTime;
+  C::ForecastType       forecastType;
+  C::ForecastNumber     forecastNumber;
+  string                gribParameterId;
+  C::UInt32             grib1LevelId;
+  C::UInt32             grib2LevelId;
+  string                gribParameterName;
+  string                parameterId;
+  C::LevelId            levelId;
+  string                parameterName;
+  string                newbaseParameterId;
+  string                newbaseParameterName;
+  C::Level              level;
+  C::GeometryId	        geometryId;
+  C::Bool               reverseXDirection;
+  C::Bool               reverseYDirection;
+  C::UInt32             projection;
+  C::UInt32             columns;
+  C::UInt32             rows;  
+  C::AttributeRecList   projectionAttributes;
+  C::ParameterValueList valueList;
 };
 
 
 
 
-struct CorbaGridCoordinates
+struct GridCoordinates
 {
-  unsigned long       projection;  
-  unsigned long       columns;
-  unsigned long       rows;  
-  boolean             reverseXDirection;
-  boolean             reverseYDirection;
-  CorbaAttributeList  projectionAttributes;
-  octet               coordinateType;  
-  CorbaCoordinateList coordinateList;
+  C::UInt32            projection;  
+  C::UInt32            columns;
+  C::UInt32            rows;  
+  C::Bool              reverseXDirection;
+  C::Bool              reverseYDirection;
+  C::AttributeRecList  projectionAttributes;
+  C::CoordinateType    coordinateType;  
+  C::CoordinateList    coordinateList;
 };
 
 
-
-typedef sequence<octet> CorbaByteData;
-typedef sequence<CorbaByteData> CorbaByteDataSequence;
-
-
-
-
-};
 };
 };
 

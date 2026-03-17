@@ -395,7 +395,7 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
-bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,long long & attributeValue)
+bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,Int64  & attributeValue)
 {
   try
   {
@@ -422,7 +422,7 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
-bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,unsigned long long& attributeValue)
+bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,UInt64 & attributeValue)
 {
   try
   {
@@ -632,7 +632,39 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
-void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,long long attributeValue)
+void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue)
+{
+  try
+  {
+    AutoWriteLock writeLock(&mModificationLock);
+
+    auto group = mAttributeGroups.find(attributeGroup);
+    if (group == mAttributeGroups.end())
+    {
+      AttributeList list;
+      list.insert(std::pair<std::string,std::string>(attributeName,std::to_string(attributeValue)));
+      mAttributeGroups.insert(std::pair<std::string,AttributeList>(attributeGroup,list));
+      return;
+    }
+
+    auto attr = group->second.find(attributeName);
+    if (attr != group->second.end())
+    {
+      attr->second = std::to_string(attributeValue);
+      return;
+    }
+    group->second.insert(std::pair<std::string,std::string>(attributeName,std::to_string(attributeValue)));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,UInt64 attributeValue)
 {
   try
   {

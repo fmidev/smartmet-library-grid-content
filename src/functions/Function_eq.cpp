@@ -78,7 +78,7 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((long long)(parameters[0]*mp+0.5) == (long long)(parameters[1]*mp+0.5))
+        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
           return 1.0;
 
         return 0.0;
@@ -121,7 +121,7 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((long long)(parameters[0]*mp+0.5) == (long long)(parameters[1]*mp+0.5))
+        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
           return 1.0;
 
         return 0.0;
@@ -186,7 +186,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            if ((long long)(mp*val1+0.5) == (long long)(mp*val2+0.5))
+            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
               val = 1.0;
             else
               val = 0.0;
@@ -238,7 +238,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 
         if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
         {
-          if ((long long)(mp*val1+0.5) == (long long)(mp*val2+0.5))
+          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
             val = 1.0;
           else
             val = 0.0;
@@ -299,7 +299,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            if ((long long)(mp*val1+0.5) == (long long)(mp*val2+0.5))
+            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
               val = 1.0;
             else
               val = 0.0;
@@ -352,7 +352,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 
         if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
         {
-          if ((long long)(mp*val1+0.5) == (long long)(mp*val2+0.5))
+          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
             val = 1.0;
           else
             val = 0.0;

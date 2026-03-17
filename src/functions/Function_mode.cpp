@@ -67,9 +67,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
     if (decimals > 0)
       mul = pow(10.0,decimals);
 
-    std::map<long long,int> valueCount;
-
-    uint count = 0;
+    std::map<Int64 ,int> valueCount;
 
     uint len = parameters.size();
     for (uint s=1; s<len; s++)
@@ -77,12 +75,12 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        long long key = (long long)(val*mul + 0.5);
+        Int64  key = (Int64 )(val*mul + 0.5);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
         else
-          valueCount.insert(std::pair<long long,int>(key,1));
+          valueCount.insert(std::pair<Int64 ,int>(key,1));
       }
     }
 
@@ -90,7 +88,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       return ParamValueMissing;
 
     int maxVal = 0;
-    long long maxKey = 0;
+    Int64  maxKey = 0;
 
     for (auto it = valueCount.begin();it != valueCount.end(); ++it)
     {
@@ -124,9 +122,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
     if (decimals > 0)
       mul = pow(10.0,decimals);
 
-    std::map<long long,int> valueCount;
-
-    uint count = 0;
+    std::map<Int64 ,int> valueCount;
 
     uint len = parameters.size();
     for (uint s=1; s<len; s++)
@@ -134,12 +130,12 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        long long key = (long long)(val*mul + 0.5);
+        Int64  key = (Int64 )(val*mul + 0.5);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
         else
-          valueCount.insert(std::pair<long long,int>(key,1));
+          valueCount.insert(std::pair<Int64 ,int>(key,1));
       }
     }
 
@@ -147,7 +143,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       return ParamValueMissing;
 
     int maxVal = 0;
-    long long maxKey = 0;
+    Int64  maxKey = 0;
 
     for (auto it = valueCount.begin();it != valueCount.end(); ++it)
     {
@@ -187,7 +183,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
     for (uint s=0; s<sz; s++)
     {
-      std::map<long long,int> valueCount;
+      std::map<Int64 ,int> valueCount;
       for (uint t=0; t<len; t++)
       {
         float val = ParamValueMissing;
@@ -195,12 +191,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          long long key = (long long)(val*mul + 0.5);
+          Int64  key = (Int64 )(val*mul + 0.5);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;
           else
-            valueCount.insert(std::pair<long long,int>(key,1));
+            valueCount.insert(std::pair<Int64 ,int>(key,1));
         }
       }
 
@@ -211,7 +207,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       else
       {
         int maxVal = 0;
-        long long maxKey = 0;
+        Int64  maxKey = 0;
 
         for (auto it = valueCount.begin();it != valueCount.end(); ++it)
         {
@@ -254,7 +250,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
     for (uint s=0; s<sz; s++)
     {
-      std::map<long long,int> valueCount;
+      std::map<Int64 ,int> valueCount;
       for (uint t=0; t<len; t++)
       {
         float val = ParamValueMissing;
@@ -262,12 +258,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          long long key = (long long)(val*mul + 0.5);
+          Int64  key = (Int64 )(val*mul + 0.5);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;
           else
-            valueCount.insert(std::pair<long long,int>(key,1));
+            valueCount.insert(std::pair<Int64 ,int>(key,1));
         }
       }
 
@@ -278,7 +274,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       else
       {
         int maxVal = 0;
-        long long maxKey = 0;
+        Int64  maxKey = 0;
 
         for (auto it = valueCount.begin();it != valueCount.end(); ++it)
         {

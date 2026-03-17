@@ -65,8 +65,8 @@ class LuaFile
     void              executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters);
     void              executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
 
-    void*             getLuaState(ulonglong& key);
-    void              releaseLuaState(ulonglong key);
+    void*             getLuaState(UInt64 & key);
+    void              releaseLuaState(UInt64 key);
 
     void              print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -78,8 +78,8 @@ class LuaFile
     std::string       mFilename;
     LuaFunction_map   mFunctions;
     void*             mLuaState[NUM_OF_LUA_HANDLES];
-    ulonglong         mStateKey[NUM_OF_LUA_HANDLES];
-    ulonglong         mStateKeyCounter;
+    UInt64            mStateKey[NUM_OF_LUA_HANDLES];
+    UInt64            mStateKeyCounter;
     time_t            mLastModified;
     ModificationLock  mModificationLock;
     ModificationLock  mStateModificationLock;
@@ -110,7 +110,7 @@ class LuaHandle
 
     LuaFile    *mLuaFile;
     void  *mState;
-    ulonglong  mKey;
+    UInt64   mKey;
 };
 
 typedef std::vector<LuaFile> LuaFile_vec;

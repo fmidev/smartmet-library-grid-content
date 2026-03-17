@@ -68,7 +68,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::clear(::CORBA::LongLong sessionId)
+SmartMet::C::Result ServerInterface::ServerInterface::clear(SmartMet::C::SessionId sessionId)
 {
   FUNCTION_TRACE
   try
@@ -90,7 +90,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::reload(::CORBA::LongLong sessionId)
+SmartMet::C::Result ServerInterface::ServerInterface::reload(SmartMet::C::SessionId sessionId)
 {
   FUNCTION_TRACE
   try
@@ -112,7 +112,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentChangeTime(::CORBA::LongLong sessionId, ::CORBA::LongLong& changeTime)
+SmartMet::C::Result ServerInterface::ServerInterface::getContentChangeTime(SmartMet::C::SessionId sessionId, SmartMet::C::Timestamp& changeTime)
 {
   FUNCTION_TRACE
   try
@@ -126,7 +126,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentChangeTime(sessionId,sTime);
 
     if (result == 0)
-      changeTime = static_cast<::CORBA::ULong>(sTime);
+      changeTime = static_cast<UInt32>(sTime);
 
     return result;
   }
@@ -141,7 +141,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addProducerInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
+SmartMet::C::Result ServerInterface::ServerInterface::addProducerInfo(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -150,11 +150,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::ProducerInfo sProducerInfo;
-    ContentServer::Corba::Converter::convert(producerInfo,sProducerInfo);
+    Converter::convert(producerInfo,sProducerInfo);
 
     int result = mService->addProducerInfo(sessionId,sProducerInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfo,producerInfo);
+      Converter::convert(sProducerInfo,producerInfo);
 
     return result;
   }
@@ -170,7 +170,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setProducerInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaProducerInfo& producerInfo)
+SmartMet::C::Result ServerInterface::setProducerInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -179,7 +179,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::ProducerInfo sProducerInfo;
-    ContentServer::Corba::Converter::convert(producerInfo,sProducerInfo);
+    Converter::convert(producerInfo,sProducerInfo);
 
     return mService->setProducerInfo(sessionId,sProducerInfo);
   }
@@ -197,7 +197,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+SmartMet::C::Result ServerInterface::ServerInterface::deleteProducerInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -219,7 +219,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteProducerInfoByName(::CORBA::LongLong sessionId, const char* producerName)
+SmartMet::C::Result ServerInterface::deleteProducerInfoByName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
   try
@@ -241,7 +241,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+SmartMet::C::Result ServerInterface::deleteProducerInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -263,13 +263,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaProducerInfo_out producerInfo)
+SmartMet::C::Result ServerInterface::getProducerInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ProducerInfo_out producerInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::ProducerInfo sProducerInfo;
-    ContentServer::Corba::CorbaProducerInfo *corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
+    C::ProducerInfo *corbaProducerInfo = new C::ProducerInfo();
     producerInfo = corbaProducerInfo;
 
     if (mService == nullptr)
@@ -278,7 +278,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoById(sessionId,producerId,sProducerInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfo,*corbaProducerInfo);
+      Converter::convert(sProducerInfo,*corbaProducerInfo);
 
     return result;
   }
@@ -294,13 +294,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoByName(::CORBA::LongLong sessionId, const char* producerName, SmartMet::ContentServer::Corba::CorbaProducerInfo_out producerInfo)
+SmartMet::C::Result ServerInterface::getProducerInfoByName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::ProducerInfo_out producerInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::ProducerInfo sProducerInfo;
-    ContentServer::Corba::CorbaProducerInfo *corbaProducerInfo = new ContentServer::Corba::CorbaProducerInfo();
+    C::ProducerInfo *corbaProducerInfo = new C::ProducerInfo();
     producerInfo = corbaProducerInfo;
 
     if (mService == nullptr)
@@ -309,7 +309,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoByName(sessionId,producerName,sProducerInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfo,*corbaProducerInfo);
+      Converter::convert(sProducerInfo,*corbaProducerInfo);
 
     return result;
   }
@@ -325,13 +325,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
+SmartMet::C::Result ServerInterface::getProducerInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
+    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -340,7 +340,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoList(sessionId,sProducerInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+      Converter::convert(sProducerInfoList,*corbaProducerInfoList);
 
     return result;
   }
@@ -356,13 +356,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
+SmartMet::C::Result ServerInterface::getProducerInfoListByParameter(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
+    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -371,7 +371,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoListByParameter(sessionId,parameterKeyType,parameterKey,sProducerInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+      Converter::convert(sProducerInfoList,*corbaProducerInfoList);
 
     return result;
   }
@@ -387,13 +387,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaProducerInfoList_out producerInfoList)
+SmartMet::C::Result ServerInterface::getProducerInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    ContentServer::Corba::CorbaProducerInfoList *corbaProducerInfoList = new ContentServer::Corba::CorbaProducerInfoList();
+    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -402,7 +402,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoListBySourceId(sessionId,sourceId,sProducerInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sProducerInfoList,*corbaProducerInfoList);
+      Converter::convert(sProducerInfoList,*corbaProducerInfoList);
 
     return result;
   }
@@ -418,7 +418,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getProducerInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -432,7 +432,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -448,13 +448,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerNameAndGeometryList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+SmartMet::C::Result ServerInterface::getProducerNameAndGeometryList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sList;
-    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -463,7 +463,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerNameAndGeometryList(sessionId,sList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sList,*corbaList);
+      Converter::convert(sList,*corbaList);
 
     return result;
   }
@@ -479,13 +479,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerParameterList(::CORBA::LongLong sessionId, ::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+SmartMet::C::Result ServerInterface::getProducerParameterList(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType sourceParameterKeyType, SmartMet::C::ParameterKeyType targetParameterKeyType, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sList;
-    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -494,7 +494,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,sList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sList,*corbaList);
+      Converter::convert(sList,*corbaList);
 
     return result;
   }
@@ -510,13 +510,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerParameterListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId,::CORBA::Octet sourceParameterKeyType, ::CORBA::Octet targetParameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+SmartMet::C::Result ServerInterface::getProducerParameterListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ParameterKeyType sourceParameterKeyType, SmartMet::C::ParameterKeyType targetParameterKeyType, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sList;
-    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -525,7 +525,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,sList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sList,*corbaList);
+      Converter::convert(sList,*corbaList);
 
     return result;
   }
@@ -540,8 +540,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::addGenerationInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
+SmartMet::C::Result ServerInterface::addGenerationInfo(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -550,11 +549,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::Converter::convert(generationInfo,sGenerationInfo);
+    Converter::convert(generationInfo,sGenerationInfo);
 
     int result = mService->addGenerationInfo(sessionId,sGenerationInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfo,generationInfo);
+      Converter::convert(sGenerationInfo,generationInfo);
 
     return result;
   }
@@ -570,7 +569,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setGenerationInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGenerationInfo& generationInfo)
+SmartMet::C::Result ServerInterface::setGenerationInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -579,7 +578,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::Converter::convert(generationInfo,sGenerationInfo);
+    Converter::convert(generationInfo,sGenerationInfo);
 
     return mService->setGenerationInfo(sessionId,sGenerationInfo);
   }
@@ -595,7 +594,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -617,7 +616,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoByName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
   try
@@ -639,7 +638,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoListByIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& generationIdList)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoListByIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::GenerationIdList& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -647,8 +646,8 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    std::set<uint> sGenerationIdList;
-    ContentServer::Corba::Converter::convert(generationIdList,sGenerationIdList);
+    std::set<T::GenerationId> sGenerationIdList;
+    Converter::convert(generationIdList,sGenerationIdList);
 
     int result = mService->deleteGenerationInfoListByIdList(sessionId,sGenerationIdList);
 
@@ -666,7 +665,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -688,7 +687,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
   try
@@ -709,7 +708,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+SmartMet::C::Result ServerInterface::deleteGenerationInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -731,13 +730,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaStringList_out list)
+SmartMet::C::Result ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sList;
-    ContentServer::Corba::CorbaStringList *corbaList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -746,7 +745,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationIdGeometryIdAndForecastTimeList(sessionId,sList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sList,*corbaList);
+      Converter::convert(sList,*corbaList);
 
     return result;
   }
@@ -761,14 +760,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::getGenerationInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
+SmartMet::C::Result ServerInterface::getGenerationInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -777,7 +775,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoById(sessionId,generationId,sGenerationInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
+      Converter::convert(sGenerationInfo,*corbaGenerationInfo);
 
     return result;
   }
@@ -793,13 +791,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoByName(::CORBA::LongLong sessionId, const char* generationName, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
+SmartMet::C::Result ServerInterface::getGenerationInfoByName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -808,7 +806,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoByName(sessionId,generationName,sGenerationInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
+      Converter::convert(sGenerationInfo,*corbaGenerationInfo);
 
     return result;
   }
@@ -824,13 +822,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+SmartMet::C::Result ServerInterface::getGenerationInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -839,7 +837,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoList(sessionId,sGenerationInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+      Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
 
     return result;
   }
@@ -855,13 +853,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoListByGeometryId(::CORBA::LongLong sessionId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+SmartMet::C::Result ServerInterface::getGenerationInfoListByGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryId geometryId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -870,7 +868,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoListByGeometryId(sessionId,geometryId,sGenerationInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+      Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
 
     return result;
   }
@@ -886,13 +884,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -901,7 +899,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoListByProducerId(sessionId,producerId,sGenerationInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+      Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
 
     return result;
   }
@@ -917,13 +915,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -932,7 +930,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoListByProducerName(sessionId,producerName,sGenerationInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+      Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
 
     return result;
   }
@@ -948,13 +946,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGenerationInfoList_out generationInfoList)
+SmartMet::C::Result ServerInterface::getGenerationInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    ContentServer::Corba::CorbaGenerationInfoList *corbaGenerationInfoList = new ContentServer::Corba::CorbaGenerationInfoList();
+    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -963,7 +961,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoListBySourceId(sessionId,sourceId,sGenerationInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
+      Converter::convert(sGenerationInfoList,*corbaGenerationInfoList);
 
     return result;
   }
@@ -979,13 +977,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getLastGenerationInfoByProducerIdAndStatus(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
+SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerIdAndStatus(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::Status generationStatus, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -994,7 +992,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getLastGenerationInfoByProducerIdAndStatus(sessionId,producerId,generationStatus,sGenerationInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
+      Converter::convert(sGenerationInfo,*corbaGenerationInfo);
 
     return result;
   }
@@ -1010,13 +1008,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getLastGenerationInfoByProducerNameAndStatus(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet generationStatus, SmartMet::ContentServer::Corba::CorbaGenerationInfo_out generationInfo)
+SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerNameAndStatus(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::Status generationStatus, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::GenerationInfo sGenerationInfo;
-    ContentServer::Corba::CorbaGenerationInfo *corbaGenerationInfo = new ContentServer::Corba::CorbaGenerationInfo();
+    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -1025,7 +1023,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getLastGenerationInfoByProducerNameAndStatus(sessionId,producerName,generationStatus,sGenerationInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGenerationInfo,*corbaGenerationInfo);
+      Converter::convert(sGenerationInfo,*corbaGenerationInfo);
 
     return result;
   }
@@ -1041,7 +1039,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGenerationInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getGenerationInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -1055,7 +1053,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGenerationInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -1070,8 +1068,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::setGenerationInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet status)
+SmartMet::C::Result ServerInterface::setGenerationInfoStatusById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
   try
@@ -1094,7 +1091,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setGenerationInfoStatusByName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet status)
+SmartMet::C::Result ServerInterface::setGenerationInfoStatusByName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
   try
@@ -1117,7 +1114,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addGeometryInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+SmartMet::C::Result ServerInterface::addGeometryInfo(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
@@ -1126,11 +1123,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::GeometryInfo sGeometryInfo;
-    ContentServer::Corba::Converter::convert(geometryInfo,sGeometryInfo);
+    Converter::convert(geometryInfo,sGeometryInfo);
 
     int result = mService->addGeometryInfo(sessionId,sGeometryInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfo,geometryInfo);
+      Converter::convert(sGeometryInfo,geometryInfo);
 
     return result;
   }
@@ -1146,7 +1143,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId)
+SmartMet::C::Result ServerInterface::deleteGeometryInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -1168,7 +1165,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
+SmartMet::C::Result ServerInterface::deleteGeometryInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1190,7 +1187,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+SmartMet::C::Result ServerInterface::deleteGeometryInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1212,7 +1209,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+SmartMet::C::Result ServerInterface::deleteGeometryInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1234,13 +1231,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+SmartMet::C::Result ServerInterface::getGeometryInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::GeometryInfo sGeometryInfo;
-//    ContentServer::Corba::CorbaGeometryInfo *corbaGeometryInfo = new ContentServer::Corba::CorbaGeometryInfo();
+//    C::GeometryInfo *corbaGeometryInfo = new C::GeometryInfo();
 //    geometryInfo = corbaGeometryInfo;
 
     if (mService == nullptr)
@@ -1249,7 +1246,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoById(sessionId,generationId,geometryId,levelId,sGeometryInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfo,geometryInfo);
+      Converter::convert(sGeometryInfo,geometryInfo);
 
     return result;
   }
@@ -1265,13 +1262,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+SmartMet::C::Result ServerInterface::getGeometryInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1280,7 +1277,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoList(sessionId,sGeometryInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+      Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
 
     return result;
   }
@@ -1296,13 +1293,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+SmartMet::C::Result ServerInterface::getGeometryInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1311,7 +1308,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoListByGenerationId(sessionId,generationId,sGeometryInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+      Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
 
     return result;
   }
@@ -1326,13 +1323,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+SmartMet::C::Result ServerInterface::getGeometryInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1341,7 +1338,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoListByProducerId(sessionId,producerId,sGeometryInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+      Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
 
     return result;
   }
@@ -1356,13 +1353,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, SmartMet::ContentServer::Corba::CorbaGeometryInfoList_out geometryInfoList)
+SmartMet::C::Result ServerInterface::getGeometryInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    ContentServer::Corba::CorbaGeometryInfoList *corbaGeometryInfoList = new ContentServer::Corba::CorbaGeometryInfoList();
+    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1371,7 +1368,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoListBySourceId(sessionId,sourceId,sGeometryInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
+      Converter::convert(sGeometryInfoList,*corbaGeometryInfoList);
 
     return result;
   }
@@ -1386,7 +1383,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGeometryInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getGeometryInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -1400,7 +1397,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getGeometryInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -1416,7 +1413,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setGeometryInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaGeometryInfo& geometryInfo)
+SmartMet::C::Result ServerInterface::setGeometryInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
@@ -1425,7 +1422,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::GeometryInfo sGeometryInfo;
-    ContentServer::Corba::Converter::convert(geometryInfo,sGeometryInfo);
+    Converter::convert(geometryInfo,sGeometryInfo);
 
     return mService->setGeometryInfo(sessionId,sGeometryInfo);
   }
@@ -1441,7 +1438,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setGeometryInfoStatusById(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short levelId, ::CORBA::Octet status)
+SmartMet::C::Result ServerInterface::setGeometryInfoStatusById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
   try
@@ -1462,8 +1459,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::addFileInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo)
+SmartMet::C::Result ServerInterface::addFileInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -1472,11 +1468,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::FileInfo sFileInfo;
-    ContentServer::Corba::Converter::convert(fileInfo,sFileInfo);
+    Converter::convert(fileInfo,sFileInfo);
 
     int result = mService->addFileInfo(sessionId,sFileInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfo,fileInfo);
+      Converter::convert(sFileInfo,fileInfo);
 
     return result;
   }
@@ -1492,7 +1488,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setFileInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo)
+SmartMet::C::Result ServerInterface::setFileInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -1501,7 +1497,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::FileInfo sFileInfo;
-    ContentServer::Corba::Converter::convert(fileInfo,sFileInfo);
+    Converter::convert(fileInfo,sFileInfo);
 
     return mService->setFileInfo(sessionId,sFileInfo);
   }
@@ -1517,7 +1513,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addFileInfoWithContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaFileInfo& fileInfo, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList)
+SmartMet::C::Result ServerInterface::addFileInfoWithContentList(SmartMet::C::SessionId sessionId, SmartMet::C::FileInfo& fileInfo, SmartMet::C::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1528,14 +1524,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     T::FileInfo sFileInfo;
     T::ContentInfoList sContentInfoList;
 
-    ContentServer::Corba::Converter::convert(fileInfo,sFileInfo);
-    ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);
+    Converter::convert(fileInfo,sFileInfo);
+    Converter::convert(contentInfoList,sContentInfoList);
 
     int result = mService->addFileInfoWithContentList(sessionId,sFileInfo,sContentInfoList);
     if (result == 0)
     {
-      ContentServer::Corba::Converter::convert(sFileInfo,fileInfo);
-      ContentServer::Corba::Converter::convert(sContentInfoList,contentInfoList);
+      Converter::convert(sFileInfo,fileInfo);
+      Converter::convert(sContentInfoList,contentInfoList);
     }
 
     return result;
@@ -1552,7 +1548,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addFileInfoListWithContent(::CORBA::LongLong sessionId, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaFileContentList& fileContentList)
+SmartMet::C::Result ServerInterface::addFileInfoListWithContent(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestFlags, SmartMet::C::FileContentList& fileContentList)
 {
   FUNCTION_TRACE
   try
@@ -1562,12 +1558,12 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     std::vector<T::FileAndContent> sFileContentList;
 
-    ContentServer::Corba::Converter::convert(fileContentList,sFileContentList);
+    Converter::convert(fileContentList,sFileContentList);
 
     int result = mService->addFileInfoListWithContent(sessionId,requestFlags,sFileContentList);
     if (result == 0)
     {
-      ContentServer::Corba::Converter::convert(sFileContentList,fileContentList);
+      Converter::convert(sFileContentList,fileContentList);
     }
 
     return result;
@@ -1584,7 +1580,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId)
+SmartMet::C::Result ServerInterface::deleteFileInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -1606,7 +1602,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoByName(::CORBA::LongLong sessionId, const char* filename)
+SmartMet::C::Result ServerInterface::deleteFileInfoByName(SmartMet::C::SessionId sessionId, const char* filename)
 {
   FUNCTION_TRACE
   try
@@ -1628,7 +1624,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1650,7 +1646,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
   try
@@ -1672,7 +1668,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByGenerationId(::CORBA::LongLong sessionId,::CORBA::ULong generationId)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1691,10 +1687,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 }
 
 
-
-
-
-::CORBA::Long ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::ULongLong forecastTime)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::Timestamp forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -1716,7 +1709,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByForecastTimeList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaForecastTimeList& forecastTimeList)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByForecastTimeList(SmartMet::C::SessionId sessionId, const SmartMet::C::ForecastTimeInfoList& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -1726,7 +1719,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
     std::vector<T::ForecastTime> sForecastTimeList;
 
-    ContentServer::Corba::Converter::convert(forecastTimeList,sForecastTimeList);
+    Converter::convert(forecastTimeList,sForecastTimeList);
 
     int result = mService->deleteFileInfoListByForecastTimeList(sessionId,sForecastTimeList);
 
@@ -1743,7 +1736,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
   try
@@ -1765,7 +1758,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+SmartMet::C::Result ServerInterface::deleteFileInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1787,7 +1780,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteFileInfoListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList)
+SmartMet::C::Result ServerInterface::deleteFileInfoListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList)
 {
   FUNCTION_TRACE
   try
@@ -1795,8 +1788,8 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    std::set<uint> sFileIdList;
-    ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
+    std::set<T::FileId> sFileIdList;
+    Converter::convert(fileIdList,sFileIdList);
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId,sFileIdList);
 
@@ -1814,13 +1807,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoById(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo)
+SmartMet::C::Result ServerInterface::getFileInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::FileInfo_out fileInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfo sFileInfo;
-    ContentServer::Corba::CorbaFileInfo *corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
+    C::FileInfo *corbaFileInfo = new C::FileInfo();
     fileInfo = corbaFileInfo;
 
     if (mService == nullptr)
@@ -1829,7 +1822,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoById(sessionId,fileId,sFileInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfo,*corbaFileInfo);
+      Converter::convert(sFileInfo,*corbaFileInfo);
 
     return result;
   }
@@ -1845,13 +1838,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoByName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaFileInfo_out fileInfo)
+SmartMet::C::Result ServerInterface::getFileInfoByName(SmartMet::C::SessionId sessionId, const char* filename, SmartMet::C::FileInfo_out fileInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfo sFileInfo;
-    ContentServer::Corba::CorbaFileInfo *corbaFileInfo = new ContentServer::Corba::CorbaFileInfo();
+    C::FileInfo *corbaFileInfo = new C::FileInfo();
     fileInfo = corbaFileInfo;
 
     if (mService == nullptr)
@@ -1860,7 +1853,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoByName(sessionId,filename,sFileInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfo,*corbaFileInfo);
+      Converter::convert(sFileInfo,*corbaFileInfo);
 
     return result;
   }
@@ -1876,13 +1869,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -1891,7 +1884,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoList(sessionId,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -1907,17 +1900,17 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
-    std::vector<uint> sFileIdList;
-    ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
+    std::vector<T::FileId> sFileIdList;
+    Converter::convert(fileIdList,sFileIdList);
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
@@ -1925,7 +1918,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListByFileIdList(sessionId,sFileIdList,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -1941,15 +1934,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-
-
-::CORBA::Long ServerInterface::getFileInfoListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -1958,7 +1949,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -1974,13 +1965,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListByProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -1989,7 +1980,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -2004,13 +1995,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId,::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2019,7 +2010,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -2035,13 +2026,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListByGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2050,7 +2041,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -2066,13 +2057,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaFileInfoList_out fileInfoList)
+SmartMet::C::Result ServerInterface::getFileInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::FileInfoList sFileInfoList;
-    ContentServer::Corba::CorbaFileInfoList *corbaFileInfoList = new ContentServer::Corba::CorbaFileInfoList();
+    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2081,7 +2072,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,sFileInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sFileInfoList,*corbaFileInfoList);
+      Converter::convert(sFileInfoList,*corbaFileInfoList);
 
     return result;
   }
@@ -2097,7 +2088,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getFileInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -2111,7 +2102,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -2127,7 +2118,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoCountByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getFileInfoCountByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -2141,7 +2132,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountByProducerId(sessionId,producerId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -2157,7 +2148,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoCountByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getFileInfoCountByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -2171,7 +2162,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountByGenerationId(sessionId,generationId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -2187,7 +2178,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getFileInfoCountBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getFileInfoCountBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -2201,7 +2192,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getFileInfoCountBySourceId(sessionId,sourceId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -2217,7 +2208,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addEventInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaEventInfo& eventInfo)
+SmartMet::C::Result ServerInterface::addEventInfo(SmartMet::C::SessionId sessionId, SmartMet::C::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -2226,11 +2217,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::EventInfo sEventInfo;
-    ContentServer::Corba::Converter::convert(eventInfo,sEventInfo);
+    Converter::convert(eventInfo,sEventInfo);
 
     int result = mService->addEventInfo(sessionId,sEventInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sEventInfo,eventInfo);
+      Converter::convert(sEventInfo,eventInfo);
 
     return result;
   }
@@ -2246,13 +2237,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getLastEventInfo(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, SmartMet::ContentServer::Corba::CorbaEventInfo_out eventInfo)
+SmartMet::C::Result ServerInterface::getLastEventInfo(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestingServerId, SmartMet::C::EventInfo_out eventInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::EventInfo sEventInfo;
-    ContentServer::Corba::CorbaEventInfo *corbaEventInfo = new ContentServer::Corba::CorbaEventInfo();
+    C::EventInfo *corbaEventInfo = new C::EventInfo();
     eventInfo = corbaEventInfo;
 
     if (mService == nullptr)
@@ -2261,7 +2252,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getLastEventInfo(sessionId,requestingServerId,sEventInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sEventInfo,*corbaEventInfo);
+      Converter::convert(sEventInfo,*corbaEventInfo);
 
     return result;
   }
@@ -2277,13 +2268,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getEventInfoList(::CORBA::LongLong sessionId, ::CORBA::ULong requestingServerId, ::CORBA::ULongLong startEventId, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaEventInfoList_out eventInfoList)
+SmartMet::C::Result ServerInterface::getEventInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestingServerId, SmartMet::C::EventId startEventId, SmartMet::C::Int32 maxRecords, SmartMet::C::EventInfoList_out eventInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::EventInfoList sEventInfoList;
-    ContentServer::Corba::CorbaEventInfoList *corbaEventInfoList = new ContentServer::Corba::CorbaEventInfoList();
+    C::EventInfoList *corbaEventInfoList = new C::EventInfoList();
     eventInfoList = corbaEventInfoList;
 
     if (mService == nullptr)
@@ -2292,7 +2283,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,sEventInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sEventInfoList,*corbaEventInfoList);
+      Converter::convert(sEventInfoList,*corbaEventInfoList);
 
     return result;
   }
@@ -2308,7 +2299,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getEventInfoCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getEventInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -2322,7 +2313,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getEventInfoCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -2338,7 +2329,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addContentInfo(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo)
+SmartMet::C::Result ServerInterface::addContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -2347,11 +2338,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::ContentInfo sContentInfo;
-    ContentServer::Corba::Converter::convert(contentInfo,sContentInfo);
+    Converter::convert(contentInfo,sContentInfo);
 
     int result = mService->addContentInfo(sessionId,sContentInfo);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfo,contentInfo);
+      Converter::convert(sContentInfo,contentInfo);
 
     return result;
   }
@@ -2367,7 +2358,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::setContentInfo(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfo& contentInfo)
+SmartMet::C::Result ServerInterface::setContentInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -2376,7 +2367,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::ContentInfo sContentInfo;
-    ContentServer::Corba::Converter::convert(contentInfo,sContentInfo);
+    Converter::convert(contentInfo,sContentInfo);
 
     return mService->setContentInfo(sessionId,sContentInfo);
   }
@@ -2392,7 +2383,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::addContentList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList)
+SmartMet::C::Result ServerInterface::addContentList(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2401,11 +2392,11 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);
+    Converter::convert(contentInfoList,sContentInfoList);
 
     int result = mService->addContentList(sessionId,sContentInfoList);
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,contentInfoList);
+      Converter::convert(sContentInfoList,contentInfoList);
 
     return result;
   }
@@ -2421,7 +2412,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentInfo(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex)
+SmartMet::C::Result ServerInterface::deleteContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -2443,7 +2434,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong fileId)
+SmartMet::C::Result ServerInterface::deleteContentListByFileId(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -2465,7 +2456,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByFileName(::CORBA::LongLong sessionId, const char* filename)
+SmartMet::C::Result ServerInterface::deleteContentListByFileName(SmartMet::C::SessionId sessionId, const char* filename)
 {
   FUNCTION_TRACE
   try
@@ -2486,7 +2477,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId)
+SmartMet::C::Result ServerInterface::deleteContentListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -2508,7 +2499,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByProducerName(::CORBA::LongLong sessionId, const char* producerName)
+SmartMet::C::Result ServerInterface::deleteContentListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
   try
@@ -2530,7 +2521,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId)
+SmartMet::C::Result ServerInterface::deleteContentListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -2552,7 +2543,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListByGenerationName(::CORBA::LongLong sessionId, const char* generationName)
+SmartMet::C::Result ServerInterface::deleteContentListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
   try
@@ -2574,7 +2565,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::deleteContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId)
+SmartMet::C::Result ServerInterface::deleteContentListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -2596,13 +2587,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentInfo(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::ContentServer::Corba::CorbaContentInfo_out contentInfo)
+SmartMet::C::Result ServerInterface::getContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::ContentInfo_out contentInfo)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfo sContentInfo;
-    ContentServer::Corba::CorbaContentInfo *corbaContentInfo = new ContentServer::Corba::CorbaContentInfo();
+    C::ContentInfo *corbaContentInfo = new C::ContentInfo();
     contentInfo = corbaContentInfo;
 
     if (mService == nullptr)
@@ -2611,7 +2602,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentInfo(sessionId,fileId,messageIndex,sContentInfo);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfo,*corbaContentInfo);
+      Converter::convert(sContentInfo,*corbaContentInfo);
 
     return result;
   }
@@ -2627,13 +2618,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentList(::CORBA::LongLong sessionId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2642,7 +2633,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentList(sessionId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2658,13 +2649,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByFileId(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByFileId(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2673,7 +2664,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByFileId(sessionId,fileId,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2689,17 +2680,17 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByFileIdList(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaULongList& fileIdList, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
-    std::vector<uint> sFileIdList;
-    ContentServer::Corba::Converter::convert(fileIdList,sFileIdList);
+    std::vector<T::FileId> sFileIdList;
+    Converter::convert(fileIdList,sFileIdList);
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
@@ -2707,7 +2698,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByFileIdList(sessionId,sFileIdList,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2723,13 +2714,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByFileName(::CORBA::LongLong sessionId, const char* filename, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByFileName(SmartMet::C::SessionId sessionId, const char* filename, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2738,7 +2729,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByFileName(sessionId,filename,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2754,13 +2745,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2769,7 +2760,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2785,13 +2776,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2800,7 +2791,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2816,13 +2807,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2831,7 +2822,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2847,13 +2838,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2862,7 +2853,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2878,13 +2869,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByGenerationIdAndTimeRange(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByGenerationIdAndTimeRange(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2893,7 +2884,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2909,13 +2900,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByGenerationNameAndTimeRange(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByGenerationNameAndTimeRange(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2924,7 +2915,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2940,13 +2931,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListBySourceId(::CORBA::LongLong sessionId, ::CORBA::ULong sourceId, ::CORBA::ULong startFileId, ::CORBA::ULong startMessageIndex, ::CORBA::Long maxRecords, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2955,7 +2946,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -2971,22 +2962,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameter(::CORBA::LongLong sessionId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameter(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameter(sessionId,parameterKeyType,parameterKey,levelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3002,22 +2993,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,levelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3033,22 +3024,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndGenerationName(::CORBA::LongLong sessionId, const char* generationName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,levelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3064,22 +3055,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,levelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3095,22 +3086,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterAndProducerName(::CORBA::LongLong sessionId, const char* producerName, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long minLevel, ::CORBA::Long maxLevel, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong startTime, ::CORBA::ULongLong endTime, ::CORBA::ULong requestFlags, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
+    int result = mService->getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,levelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3126,22 +3117,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListByParameterGenerationIdAndForecastTime(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, const char* parameterKey, ::CORBA::Short parameterLevelId, ::CORBA::Long level, ::CORBA::Short forecastType, ::CORBA::Short forecastNumber, ::CORBA::Long geometryId, ::CORBA::ULongLong forecastTime, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListByParameterGenerationIdAndForecastTime(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level level, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp forecastTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
+    int result = mService->getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,levelId,level,forecastType,forecastNumber,geometryId,forecastTime,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3157,13 +3148,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentListOfInvalidIntegrity(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentInfoList)
+SmartMet::C::Result ServerInterface::getContentListOfInvalidIntegrity(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentInfoList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3172,7 +3163,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentListOfInvalidIntegrity(sessionId,sContentInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentInfoList,*corbaContentInfoList);
+      Converter::convert(sContentInfoList,*corbaContentInfoList);
 
     return result;
   }
@@ -3188,13 +3179,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentGeometryIdListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaLongList_out geometryIdList)
+SmartMet::C::Result ServerInterface::getContentGeometryIdListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryIdList_out geometryIdList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<T::GeometryId> sGeometryIdList;
-    ContentServer::Corba::CorbaLongList *corbaGeometryIdList = new ContentServer::Corba::CorbaLongList();
+    C::GeometryIdList *corbaGeometryIdList = new C::GeometryIdList();
     geometryIdList = corbaGeometryIdList;
 
     if (mService == nullptr)
@@ -3203,7 +3194,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentGeometryIdListByGenerationId(sessionId,generationId,sGeometryIdList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sGeometryIdList,*corbaGeometryIdList);
+      Converter::convert(sGeometryIdList,*corbaGeometryIdList);
 
     return result;
   }
@@ -3219,13 +3210,14 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentParamListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaContentInfoList_out contentParamList)
+
+SmartMet::C::Result ServerInterface::getContentParamListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ContentInfoList_out contentParamList)
 {
   FUNCTION_TRACE
   try
   {
     T::ContentInfoList sContentParamList;
-    ContentServer::Corba::CorbaContentInfoList *corbaContentParamList = new ContentServer::Corba::CorbaContentInfoList();
+    C::ContentInfoList *corbaContentParamList = new C::ContentInfoList();
     contentParamList = corbaContentParamList;
 
     if (mService == nullptr)
@@ -3234,7 +3226,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentParamListByGenerationId(sessionId,generationId,sContentParamList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentParamList,*corbaContentParamList);
+      Converter::convert(sContentParamList,*corbaContentParamList);
 
     return result;
   }
@@ -3250,13 +3242,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentParamKeyListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out paramKeyList)
+SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sParamKeyList;
-    ContentServer::Corba::CorbaStringList *corbaParamKeyList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
@@ -3265,7 +3257,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentParamKeyListByGenerationId(sessionId,generationId,parameterKeyType,sParamKeyList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sParamKeyList,*corbaParamKeyList);
+      Converter::convert(sParamKeyList,*corbaParamKeyList);
 
     return result;
   }
@@ -3281,13 +3273,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentParamKeyListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out paramKeyList)
+SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationAndGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sParamKeyList;
-    ContentServer::Corba::CorbaStringList *corbaParamKeyList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
@@ -3296,7 +3288,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentParamKeyListByGenerationAndGeometryId(sessionId,generationId,geometryId,parameterKeyType,sParamKeyList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sParamKeyList,*corbaParamKeyList);
+      Converter::convert(sParamKeyList,*corbaParamKeyList);
 
     return result;
   }
@@ -3312,22 +3304,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::ULong geometryId, ::CORBA::Short parameterLevelId, ::CORBA::Octet parameterKeyType, SmartMet::ContentServer::Corba::CorbaStringList_out paramKeyList)
+SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sParamKeyList;
-    ContentServer::Corba::CorbaStringList *corbaParamKeyList = new ContentServer::Corba::CorbaStringList();
+    C::StringList *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,parameterKeyType,sParamKeyList);
+    int result = mService->getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,parameterKeyType,sParamKeyList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sParamKeyList,*corbaParamKeyList);
+      Converter::convert(sParamKeyList,*corbaParamKeyList);
 
     return result;
   }
@@ -3343,13 +3335,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+SmartMet::C::Result ServerInterface::getContentTimeListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sContentTimeList;
-    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3358,7 +3350,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentTimeListByGenerationId(sessionId,generationId,sContentTimeList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+      Converter::convert(sContentTimeList,*corbaContentTimeList);
 
     return result;
   }
@@ -3374,7 +3366,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeRangeByProducerAndGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime)
+SmartMet::C::Result ServerInterface::getContentTimeRangeByProducerAndGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp& startTime, SmartMet::C::Timestamp& endTime)
 {
   FUNCTION_TRACE
   try
@@ -3407,7 +3399,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeRangeByGenerationId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::LongLong& startTime, ::CORBA::LongLong& endTime)
+SmartMet::C::Result ServerInterface::getContentTimeRangeByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp& startTime, SmartMet::C::Timestamp& endTime)
 {
   FUNCTION_TRACE
   try
@@ -3439,13 +3431,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByGenerationAndGeometryId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+SmartMet::C::Result ServerInterface::getContentTimeListByGenerationAndGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sContentTimeList;
-    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3454,7 +3446,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,sContentTimeList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+      Converter::convert(sContentTimeList,*corbaContentTimeList);
 
     return result;
   }
@@ -3469,22 +3461,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short parameterLevelId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+SmartMet::C::Result ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sContentTimeList;
-    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,sContentTimeList);
+    int result = mService->getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,sContentTimeList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+      Converter::convert(sContentTimeList,*corbaContentTimeList);
 
     return result;
   }
@@ -3500,22 +3492,22 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(::CORBA::LongLong sessionId, ::CORBA::ULong generationId, ::CORBA::Long geometryId, ::CORBA::Short parameterLevelId, SmartMet::ContentServer::Corba::CorbaLongList_out contentLevelList)
+SmartMet::C::Result ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::LevelList_out contentLevelList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<T::ParamLevel> sContentLevelList;
-    ContentServer::Corba::CorbaLongList *corbaContentLevelList = new ContentServer::Corba::CorbaLongList();
+    C::LevelList *corbaContentLevelList = new C::LevelList();
     contentLevelList = corbaContentLevelList;
 
     if (mService == nullptr)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
-    int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterLevelId,sContentLevelList);
+    int result = mService->getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,sContentLevelList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentLevelList,*corbaContentLevelList);
+      Converter::convert(sContentLevelList,*corbaContentLevelList);
 
     return result;
   }
@@ -3530,13 +3522,45 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentTimeListByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, SmartMet::ContentServer::Corba::CorbaStringList_out contentTimeList)
+
+SmartMet::C::Result ServerInterface::getContentLevelListByParameterGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::LevelList_out contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::set<T::ParamLevel> sContentLevelList;
+    C::LevelList *corbaContentLevelList = new C::LevelList();
+    contentLevelList = corbaContentLevelList;
+
+    if (mService == nullptr)
+      throw Fmi::Exception(BCP,"Service not initialized!");
+
+    int result = mService->getContentLevelListByParameterGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterKey,levelId,sContentLevelList);
+
+    if (result == 0)
+      Converter::convert(sContentLevelList,*corbaContentLevelList);
+
+    return result;
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Service call failed!",nullptr);
+    exception.printError();
+    return Result::UNEXPECTED_EXCEPTION;
+  }
+}
+
+
+
+
+
+SmartMet::C::Result ServerInterface::getContentTimeListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
   try
   {
     std::set<std::string> sContentTimeList;
-    ContentServer::Corba::CorbaStringList *corbaContentTimeList = new ContentServer::Corba::CorbaStringList();
+    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3545,7 +3569,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentTimeListByProducerId(sessionId,producerId,sContentTimeList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sContentTimeList,*corbaContentTimeList);
+      Converter::convert(sContentTimeList,*corbaContentTimeList);
 
     return result;
   }
@@ -3561,7 +3585,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getContentCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getContentCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -3575,7 +3599,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getContentCount(sessionId,sCount);
 
     if (result == 0)
-      count = static_cast<::CORBA::ULong>(sCount);
+      count = static_cast<UInt32>(sCount);
 
     return result;
   }
@@ -3591,7 +3615,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getHashByProducerId(::CORBA::LongLong sessionId, ::CORBA::ULong producerId, ::CORBA::ULongLong& hash)
+SmartMet::C::Result ServerInterface::getHashByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::Hash& hash)
 {
   FUNCTION_TRACE
   try
@@ -3600,12 +3624,12 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
       throw Fmi::Exception(BCP,"Service not initialized!");
 
     hash = 0;
-    ulonglong sHash = 0;
+    UInt64 sHash = 0;
 
     int result = mService->getHashByProducerId(sessionId,producerId,sHash);
 
     if (result == 0)
-      hash = static_cast<::CORBA::ULongLong>(sHash);
+      hash = static_cast<UInt64>(sHash);
 
     return result;
   }
@@ -3621,13 +3645,13 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getLevelInfoList(::CORBA::LongLong sessionId, SmartMet::ContentServer::Corba::CorbaLevelInfoList_out levelInfoList)
+SmartMet::C::Result ServerInterface::getLevelInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::LevelInfoList_out levelInfoList)
 {
   FUNCTION_TRACE
   try
   {
     T::LevelInfoList sLevelInfoList;
-    ContentServer::Corba::CorbaLevelInfoList *corbaLevelInfoList = new ContentServer::Corba::CorbaLevelInfoList();
+    C::LevelInfoList *corbaLevelInfoList = new C::LevelInfoList();
     levelInfoList = corbaLevelInfoList;
 
     if (mService == nullptr)
@@ -3636,7 +3660,7 @@ void ServerInterface::init(ContentServer::ServiceInterface *service)
     int result = mService->getLevelInfoList(sessionId,sLevelInfoList);
 
     if (result == 0)
-      ContentServer::Corba::Converter::convert(sLevelInfoList,*corbaLevelInfoList);
+      Converter::convert(sLevelInfoList,*corbaLevelInfoList);
 
     return result;
   }

@@ -1,192 +1,128 @@
 #ifndef __QUERY_SERVER_TYPEDEFS_IDL
 #define __QUERY_SERVER_TYPEDEFS_IDL
 
+#include "Typedefs.idl"
+
 
 module SmartMet
 {
 
-module QueryServer
+module C
 {
 
-module Corba
+
+struct FunctionParam
 {
-
-typedef sequence<octet> CorbaByteData;
-typedef sequence<CorbaByteData> CorbaByteDataSequence;
-
-typedef float CorbaParamValue;
-typedef sequence<CorbaParamValue> CorbaParamValueList;
-
-
-typedef sequence<string> CorbaStringList;
-
-typedef sequence<long> CorbaLongList;
-typedef sequence<unsigned long long> CorbaULongLongList;
-typedef sequence<unsigned long> CorbaULongList;
-
-
-struct CorbaAttribute
-{
-  string name;
-  string value;
+  C::UInt32 id;
+  string    param;
 };
 
-typedef sequence<CorbaAttribute> CorbaAttributeList;
-
-
-
-struct CorbaCoordinate
-{
-  double x;
-  double y;
-};
-
-typedef sequence<CorbaCoordinate> CorbaCoordinateList;
-typedef sequence<CorbaCoordinateList> CorbaAreaCoordinates;
-
-
-
-
-struct CorbaGridPointValue
-{
-  unsigned long fileId;
-  unsigned long messageIndex;
-  long long     time;
-  double        value;
-  double        x;
-  double        y;
-  long          level;
-};
-
-typedef sequence<CorbaGridPointValue> CorbaGridPointValueList;
-
-
-
-
-struct CorbaGridValue
-{
-  double x;
-  double y;
-  double value;
-  string valueString;
-};
-
-typedef sequence<CorbaGridValue> CorbaGridValueList;
-
-
-
-
-struct CorbaFunctionParam
-{
-  unsigned long id;
-  string        param;
-};
-
-typedef sequence<CorbaFunctionParam> CorbaFunctionParamList;
+typedef sequence<FunctionParam> FunctionParamList;
 
 
 
 
 
-struct CorbaParameterValues
+struct ParameterValues
 {
   // string               forecastTime;
-  unsigned long long      forecastTimeUTC;
-  unsigned long           producerId;
-  unsigned long           generationId;
-  unsigned long long      generationFlags;
-  unsigned long           geometryId;
-  unsigned long           fileId[4];
-  unsigned long           messageIndex[4];
-  unsigned long long      modificationTime;
-  string                  analysisTime;
-  octet                   parameterKeyType;
-  string                  parameterKey;
-  octet                   parameterLevelId;
-  long                    parameterLevel;
-  short                   forecastType;
-  short                   forecastNumber;
-  unsigned long           flags;
-  CorbaGridValueList      valueList;
-  CorbaParamValueList     valueVector;
-  CorbaByteDataSequence   valueData;
+  C::Timestamp            forecastTimeUTC;
+  C::ProducerId           producerId;
+  C::GenerationId         generationId;
+  C::UInt64               generationFlags;
+  C::GeometryId           geometryId;
+  C::FileId               fileId[4];
+  C::MessageIndex         messageIndex[4];
+  C::Timestamp            modificationTime;
+  C::TimeString           analysisTime;
+  C::ParameterKeyType     parameterKeyType;
+  C::ParameterKey         parameterKey;
+  C::LevelId              levelId;
+  C::Level                level;
+  C::ForecastType         forecastType;
+  C::ForecastNumber       forecastNumber;
+  C::UInt32               flags;
+  C::GridValueList        valueList;
+  C::ParameterValueList   valueVector;
+  C::ByteDataSequence     valueData;
 };
 
-typedef sequence<CorbaParameterValues> CorbaParameterValuesList;
+typedef sequence<ParameterValues> ParameterValuesList;
 
 
 
-struct CorbaQueryParameter
+struct QueryParameter
 {
-  unsigned long            id;
-  unsigned long            alternativeParamId;
-  octet                    type;
-  octet                    locationType;
+  C::UInt32                id;
+  C::UInt32                alternativeParamId;
+  C::UInt8                 type;
+  C::UInt8                 locationType;
   string                   param;
   string                   origParam;
   string                   symbolicName;
   string                   producerName;
-  long                     geometryId;
-  octet                    parameterKeyType;
-  string                   parameterKey;
-  octet                    parameterLevelId;
-  long                     parameterLevel;
-  short                    forecastType;
-  short                    forecastNumber;
-  short                    areaInterpolationMethod;
-  short                    timeInterpolationMethod;
-  short                    levelInterpolationMethod;
-  CorbaParamValueList      contourLowValues;
-  CorbaParamValueList      contourHighValues;
-  CorbaULongList           contourColors;
-  unsigned long            producerId;
-  unsigned long long       generationFlags;
-  short                    precision;
-  unsigned long            timestepsBefore;
-  unsigned long            timestepsAfter;
-  unsigned long            timestepSizeInMinutes;
-  unsigned long      	     flags;
+  C::GeometryId            geometryId;
+  C::ParameterKeyType      parameterKeyType;
+  C::ParameterKey          parameterKey;
+  C::LevelId               levelId;
+  C::Level                 level;
+  C::ForecastType          forecastType;
+  C::ForecastNumber        forecastNumber;
+  C::Int16                 areaInterpolationMethod;
+  C::Int16                 timeInterpolationMethod;
+  C::Int16                 levelInterpolationMethod;
+  C::ParameterValueList    contourLowValues;
+  C::ParameterValueList    contourHighValues;
+  C::UInt32List            contourColors;
+  C::ProducerId            producerId;
+  C::UInt64                generationFlags;
+  C::Int16                 precision;
+  C::UInt32                timestepsBefore;
+  C::UInt32                timestepsAfter;
+  C::UInt32                timestepSizeInMinutes;
+  C::UInt32      	       flags;
   string                   function;
-  CorbaFunctionParamList   functionParams;
-  CorbaParameterValuesList valueList;
-  CorbaCoordinateList      coordinates;
-  CorbaAttributeList       attributeList;
+  FunctionParamList        functionParams;
+  ParameterValuesList      valueList;
+  C::LevelList             levels;
+  C::CoordinateList        coordinates;
+  AttributeRecList         attributeList;
 };
 
-typedef sequence<CorbaQueryParameter> CorbaQueryParameterList;
+typedef sequence<QueryParameter> QueryParameterList;
 
 
 
 
-struct CorbaQuery
+struct Query
 {
-  octet                    searchType;
-  CorbaStringList          producerNameList;
+  C::UInt8                 searchType;
+  C::StringList            producerNameList;
   string                   timezone;
-  unsigned long long       startTime;
-  unsigned long long       endTime;
-  unsigned long            timesteps;
-  unsigned long            timestepSizeInMinutes;
-  string                   analysisTime;
-  CorbaLongList            geometryIdList;
-  CorbaULongLongList       forecastTimeList;
-  CorbaAttributeList       attributeList;
-  octet                    coordinateType;
-  CorbaAreaCoordinates     areaCoordinates;
-  double                   radius;
-  CorbaQueryParameterList  queryParameterList;
+  C::Timestamp             startTime;
+  C::Timestamp             endTime;
+  C::UInt32                timesteps;
+  C::UInt32                timestepSizeInMinutes;
+  C::TimeString            analysisTime;
+  C::GeometryIdList        geometryIdList;
+  C::TimestampList         forecastTimeList;
+  C::AttributeRecList      attributeList;
+  C::UInt8                 coordinateType;
+  C::AreaCoordinates       areaCoordinates;
+  C::Float64               radius;
+  C::QueryParameterList    queryParameterList;
   string                   language;
-  unsigned long long       generationFlags;
-  unsigned long            flags;
-  unsigned long            maxParameterValues;
+  C::UInt64                generationFlags;
+  C::UInt32                flags;
+  C::UInt32                maxParameterValues;
 };
 
-typedef sequence<CorbaQuery> CorbaQueryList;
+typedef sequence<Query> QueryList;
 
 
 };
 };
-};
+
 
 
 #endif

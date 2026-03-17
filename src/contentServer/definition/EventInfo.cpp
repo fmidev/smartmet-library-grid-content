@@ -63,7 +63,7 @@ EventInfo::EventInfo(const EventInfo& dataEventInfo)
 
 
 
-EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,uint id1,uint id2,uint id3,unsigned long long flags,const char *eventData)
+EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags,const char *eventData)
 {
   try
   {
@@ -165,10 +165,10 @@ std::string EventInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%llu;%u;%u;%u;%u;%u;%u;%llu;%s",
+    sprintf(st,"%lu;%lu;%lu;%u;%lu;%lu;%lu;%lu;%s",
         mEventId,
-        C_UINT(mEventTime),
-        C_UINT(mServerTime),
+        mEventTime,
+        mServerTime,
         mType,
         mId1,
         mId2,
@@ -237,9 +237,9 @@ void EventInfo::setCsv(const char *csv)
       mEventTime = (time_t)toInt64(field[1]);
       mServerTime = (time_t)toInt64(field[2]);
       mType = toUInt32(field[3]);
-      mId1 = toUInt32(field[4]);
-      mId2 = toUInt32(field[5]);
-      mId3 = toUInt32(field[6]);
+      mId1 = toUInt64(field[4]);
+      mId2 = toUInt64(field[5]);
+      mId3 = toUInt64(field[6]);
       mFlags = toUInt64(field[7]);
       mEventData = field[8];
     }
@@ -292,8 +292,8 @@ void EventInfo::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "EventInfo\n";
     stream << space(level) << "- mEventId      = " << mEventId << "\n";
-    stream << space(level) << "- mEventTime    = " << C_UINT(mEventTime) << "\n";
-    stream << space(level) << "- mServerTime   = " << C_UINT(mServerTime) << "\n";
+    stream << space(level) << "- mEventTime    = " << C_INT64(mEventTime) << "\n";
+    stream << space(level) << "- mServerTime   = " << C_INT64(mServerTime) << "\n";
     stream << space(level) << "- mType         = " << mType << "\n";
     stream << space(level) << "- mId1          = " << mId1 << "\n";
     stream << space(level) << "- mId2          = " << mId2 << "\n";

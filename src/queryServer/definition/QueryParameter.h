@@ -57,8 +57,8 @@ class QueryParameter
     T::ParamValue_vec           mContourLowValues;
     T::ParamValue_vec           mContourHighValues;
     Color_vec                   mContourColors;
-    uint                        mProducerId;
-    ulonglong                   mGenerationFlags;
+    T::ProducerId               mProducerId;
+    UInt64                      mGenerationFlags;
     short                       mPrecision;
     bool                        mTemporary;
     std::string                 mFunction;
@@ -68,6 +68,7 @@ class QueryParameter
     uint                        mTimestepSizeInMinutes;
     uint                        mFlags;
     ParameterValues_sptr_vec    mValueList;
+    std::vector<T::ParamLevel>  mParameterLevels;
     T::Coordinate_vec           mCoordinates;
     T::AttributeList            mAttributeList;
 
@@ -81,6 +82,7 @@ class QueryParameter
         static const uchar Vector         = 3;
         static const uchar GridFile       = 4;
         static const uchar StreamLine     = 5;
+        static const uchar VerticalVector = 6;
     };
 
     class LocationType

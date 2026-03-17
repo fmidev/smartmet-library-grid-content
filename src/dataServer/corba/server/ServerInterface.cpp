@@ -65,14 +65,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::getGridCoordinates(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
+SmartMet::C::Result ServerInterface::getGridCoordinates(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::GridCoordinates_out coordinates)
 {
   FUNCTION_TRACE
   try
   {
     T::GridCoordinates sCoordinates;
-    DataServer::Corba::CorbaGridCoordinates *corbaGridCoordinates = new DataServer::Corba::CorbaGridCoordinates();
+    C::GridCoordinates *corbaGridCoordinates = new C::GridCoordinates();
     coordinates = corbaGridCoordinates;
 
     if (mService == nullptr)
@@ -97,14 +96,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridLatlonCoordinatesByGeometry(::CORBA::LongLong sessionId, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, SmartMet::DataServer::Corba::CorbaGridCoordinates_out coordinates)
+SmartMet::C::Result ServerInterface::getGridLatlonCoordinatesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::GridCoordinates_out coordinates)
 {
   FUNCTION_TRACE
   try
   {
     T::GridCoordinates sCoordinates;
     T::AttributeList sAttributeList;
-    DataServer::Corba::CorbaGridCoordinates *corbaGridCoordinates = new DataServer::Corba::CorbaGridCoordinates();
+    C::GridCoordinates *corbaGridCoordinates = new C::GridCoordinates();
     coordinates = corbaGridCoordinates;
 
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
@@ -134,13 +133,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridData(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaGridData_out data)
+SmartMet::C::Result ServerInterface::getGridData(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::GridData_out data)
 {
   FUNCTION_TRACE
   try
   {
     T::GridData sGridData;
-    DataServer::Corba::CorbaGridData *corbaGridData = new DataServer::Corba::CorbaGridData();
+    C::GridData *corbaGridData = new C::GridData();
     data = corbaGridData;
 
     if (mService == nullptr)
@@ -165,7 +164,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridFileCount(::CORBA::LongLong sessionId, ::CORBA::ULong& count)
+SmartMet::C::Result ServerInterface::getGridFileCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
   try
@@ -193,7 +192,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridMessageBytes(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaByteData_out messageBytes, SmartMet::DataServer::Corba::CorbaULongList_out messageSections)
+SmartMet::C::Result ServerInterface::getGridMessageBytes(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::ByteData_out messageBytes, SmartMet::C::UInt32List_out messageSections)
 {
   FUNCTION_TRACE
   try
@@ -201,10 +200,10 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     std::vector<uchar> sMessageBytes;
     std::vector<uint> sMessageSections;
 
-    DataServer::Corba::CorbaByteData *corbaMessageBytes = new DataServer::Corba::CorbaByteData();
+    C::ByteData *corbaMessageBytes = new C::ByteData();
     messageBytes = corbaMessageBytes;
 
-    DataServer::Corba::CorbaULongList *corbaMessageSections = new DataServer::Corba::CorbaULongList();
+    C::UInt32List *corbaMessageSections = new C::UInt32List();
     messageSections = corbaMessageSections;
 
     if (mService == nullptr)
@@ -232,13 +231,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridAttributeList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList_out attributeList)
+SmartMet::C::Result ServerInterface::getGridAttributeList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList_out attributeList)
 {
   FUNCTION_TRACE
   try
   {
     T::AttributeList sAttributeList;
-    DataServer::Corba::CorbaAttributeList *corbaAttributeList = new DataServer::Corba::CorbaAttributeList();
+    C::AttributeRecList *corbaAttributeList = new C::AttributeRecList();
     attributeList = corbaAttributeList;
 
     if (mService == nullptr)
@@ -263,13 +262,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridProperties(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaPropertySettingList_out propertyList)
+SmartMet::C::Result ServerInterface::getGridProperties(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::PropertySettingList_out propertyList)
 {
   FUNCTION_TRACE
   try
   {
     T::PropertySettingVec sPropertySettingList;
-    DataServer::Corba::CorbaPropertySettingList *corbaPropertySettingList = new DataServer::Corba::CorbaPropertySettingList();
+    C::PropertySettingList *corbaPropertySettingList = new C::PropertySettingList();
     propertyList = corbaPropertySettingList;
 
     if (mService == nullptr)
@@ -292,14 +291,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getPropertyValuesByCoordinates(::CORBA::LongLong sessionId, const char* propertyName, const SmartMet::DataServer::Corba::CorbaCoordinateList& latlonCoordinates, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getPropertyValuesByCoordinates(SmartMet::C::SessionId sessionId, const char* propertyName, const SmartMet::C::CoordinateList& latlonCoordinates, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     DataServer::Corba::Converter::convert(latlonCoordinates,sCoordinateList);
@@ -325,7 +324,8 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
+
+SmartMet::C::Result ServerInterface::getGridValueByPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
   try
@@ -356,7 +356,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
+SmartMet::C::Result ServerInterface::getGridValueByLevelAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::Int32 level1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Int32 level2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
   try
@@ -387,7 +387,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByTimeAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
+SmartMet::C::Result ServerInterface::getGridValueByTimeAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
   try
@@ -418,7 +418,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueByTimeLevelAndPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::Long level1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Long level2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::Long level3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::Long level4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValue& value)
+SmartMet::C::Result ServerInterface::getGridValueByTimeLevelAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::Int32 level1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Int32 level2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::Int32 level3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Int32 level4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
   try
@@ -448,13 +448,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -482,13 +482,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByLevelAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -516,13 +516,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -550,13 +550,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndCircle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, ::CORBA::Double origoX, ::CORBA::Double origoY, ::CORBA::Double radius, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -584,14 +584,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -621,14 +621,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -658,14 +658,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -695,14 +695,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPointList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& pointList, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -732,14 +732,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -769,14 +769,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -806,14 +806,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -843,14 +843,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygon(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& polygonPoints, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -880,14 +880,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -917,14 +917,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -954,14 +954,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -991,14 +991,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByTimeLevelAndPolygonPath(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaPolygonPath& polygonPath, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -1028,13 +1028,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueListByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x1, ::CORBA::Double y1, ::CORBA::Double x2, ::CORBA::Double y2, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaGridValueList_out valueList)
+SmartMet::C::Result ServerInterface::getGridValueListByRectangle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x1, SmartMet::C::Float64 y1, SmartMet::C::Float64 x2, SmartMet::C::Float64 y2, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
   try
   {
     T::GridValueList sValueList;
-    DataServer::Corba::CorbaGridValueList *corbaValueList = new DataServer::Corba::CorbaGridValueList();
+    C::GridValueList *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -1062,13 +1062,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVector(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVector(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1096,13 +1096,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1130,13 +1130,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Short timeInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1164,13 +1164,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1203,13 +1203,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1243,14 +1243,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     DataServer::Corba::Converter::convert(coordinates,sCoordinateList);
@@ -1280,14 +1280,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1322,14 +1322,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1364,13 +1364,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1404,13 +1404,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByRectangle(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::ULong columns, ::CORBA::ULong rows, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Double xStep, ::CORBA::Double yStep, ::CORBA::Short areaInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByRectangle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::UInt32 columns, SmartMet::C::UInt32 rows, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Float64 xStep, SmartMet::C::Float64 yStep, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1438,13 +1438,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByPoint(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::ULong vectorType, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaDoubleList_out valueVector)
+SmartMet::C::Result ServerInterface::getGridValueVectorByPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::UInt32 vectorType, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::Float64List_out valueVector)
 {
   FUNCTION_TRACE
   try
   {
     double_vec sValueVector;
-    DataServer::Corba::CorbaDoubleList *corbaValueVector = new DataServer::Corba::CorbaDoubleList();
+    C::Float64List *corbaValueVector = new C::Float64List();
     valueVector = corbaValueVector;
 
     if (mService == nullptr)
@@ -1472,13 +1472,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Short areaInterpolationMethod, ::CORBA::Short timeInterpolationMethod, ::CORBA::Short levelInterpolationMethod, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1508,13 +1508,13 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1548,14 +1548,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridValueVectorByTimeLevelAndCoordinateList(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::Octet coordinateType, const SmartMet::DataServer::Corba::CorbaCoordinateList& coordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaParamValueList_out values)
+SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
   try
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    DataServer::Corba::CorbaParamValueList *corbaValues = new DataServer::Corba::CorbaParamValueList();
+    C::ParameterValueList *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1590,8 +1590,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::getGridIsobands(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobands(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1602,7 +1601,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1637,7 +1636,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1647,7 +1646,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1682,7 +1681,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1693,7 +1692,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -1729,7 +1728,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1740,7 +1739,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1775,7 +1774,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1786,7 +1785,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1821,7 +1820,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1831,7 +1830,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1866,7 +1865,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1876,7 +1875,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1911,7 +1910,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1922,7 +1921,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -1957,7 +1956,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -1968,7 +1967,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2004,7 +2003,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2015,7 +2014,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -2050,7 +2049,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2061,7 +2060,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -2096,7 +2095,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsobandsByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourLowValues, const SmartMet::DataServer::Corba::CorbaParamValueList& contourHighValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2108,7 +2107,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     std::vector<T::Coordinate> sCoordinateList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2144,7 +2143,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2154,7 +2153,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2188,7 +2187,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2198,7 +2197,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
 
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2232,7 +2231,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolines(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolines(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2242,7 +2241,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2275,7 +2274,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2285,7 +2284,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2318,7 +2317,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2329,7 +2328,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2363,7 +2362,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2373,7 +2372,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2406,7 +2405,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2416,7 +2415,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2449,7 +2448,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2459,7 +2458,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2492,7 +2491,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2502,7 +2501,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2535,7 +2534,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2546,7 +2545,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2580,7 +2579,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2591,7 +2590,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2625,7 +2624,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridIsolinesByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, const SmartMet::DataServer::Corba::CorbaParamValueList& contourValues, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out contours)
+SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
   try
@@ -2635,7 +2634,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
     T::AttributeList sAttributeList;
     std::vector<T::Coordinate> sCoordinateList;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaContours = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2669,14 +2668,15 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlines(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+
+SmartMet::C::Result ServerInterface::getGridStreamlines(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2709,14 +2709,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2749,14 +2749,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId, ::CORBA::ULong messageIndex, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2792,14 +2792,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2832,14 +2832,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2872,14 +2872,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::Double newLevel, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2915,14 +2915,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTime(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2955,14 +2955,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2995,14 +2995,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULongLong newTime, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3038,14 +3038,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTimeAndLevel(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3078,14 +3078,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3118,14 +3118,14 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getGridStreamlinesByTimeLevelAndGrid(::CORBA::LongLong sessionId, ::CORBA::ULong fileId1, ::CORBA::ULong messageIndex1, ::CORBA::ULong fileId2, ::CORBA::ULong messageIndex2, ::CORBA::ULong fileId3, ::CORBA::ULong messageIndex3, ::CORBA::ULong fileId4, ::CORBA::ULong messageIndex4, ::CORBA::ULongLong newTime, ::CORBA::Double newLevel, ::CORBA::ULong gridWidth, ::CORBA::ULong gridHeight, const SmartMet::DataServer::Corba::CorbaCoordinateList& gridLatLonCoordinates, SmartMet::DataServer::Corba::CorbaAttributeList& attributeList, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaByteDataSequence_out streamlines)
+SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
   try
   {
     T::ByteData_vec sStreamLines;
 
-    DataServer::Corba::CorbaByteDataSequence *corbaStreamLines = new DataServer::Corba::CorbaByteDataSequence();
+    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3162,7 +3162,7 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getMultipleGridValues(::CORBA::LongLong sessionId, ::CORBA::ULong modificationOperation, const SmartMet::DataServer::Corba::CorbaDoubleList& modificationParameters, SmartMet::DataServer::Corba::CorbaValueRecordList& valueRecordList)
+SmartMet::C::Result ServerInterface::getMultipleGridValues(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
   try

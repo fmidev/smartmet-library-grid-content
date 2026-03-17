@@ -31,12 +31,13 @@ class GeometryInfo
     GeometryInfo*   duplicate();
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint            mProducerId;
-    uint            mGenerationId;
+    T::ProducerId   mProducerId;
+    T::GenerationId mGenerationId;
     T::GeometryId   mGeometryId;
     T::ParamLevelId mLevelId;
     uint            mFlags;
-    uint            mSourceId;
+    T::StorageId    mStorageId;
+    T::SourceId     mSourceId;
     time_t          mModificationTime;
     time_t          mDeletionTime;
     uchar           mStatus;
@@ -45,8 +46,8 @@ class GeometryInfo
     {
       public:
         static const uint none              = 0;    // No comparison
-        static const uint generationId      = 1;    // Comparison according to the generation id
-        static const uint producerId        = 2;    // Comparison according to the producer id
+        static const T::GenerationId generationId      = 1;    // Comparison according to the generation id
+        static const T::ProducerId producerId        = 2;    // Comparison according to the producer id
     };
 
     class Status

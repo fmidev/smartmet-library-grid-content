@@ -179,7 +179,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 {
   try
   {
-    uint sz = columns*rows;
+    int sz = columns*rows;
     uint len = inParameters.size();
     if (extParameters.size() != 1)
       return;
@@ -187,14 +187,14 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
     int shift = (int)extParameters[0];
     outParameters.reserve(sz);
 
-    for (uint s=0; s<sz; s++)
+    for (int s=0; s<sz; s++)
     {
       std::vector<float> values;
       values.reserve(len);
 
       for (uint t=0; t<len; t++)
       {
-        if (s < inParameters[t].size())
+        if (s < (int)inParameters[t].size())
         {
           double val = inParameters[t][s];
           if (val != ParamValueMissing)
@@ -250,7 +250,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 {
   try
   {
-    uint sz = columns*rows;
+    int sz = columns*rows;
     uint len = inParameters.size();
     if (extParameters.size() != 1)
       return;
@@ -259,14 +259,14 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
     outParameters.reserve(sz);
 
-    for (uint s=0; s<sz; s++)
+    for (int s=0; s<sz; s++)
     {
       std::vector<double> values;
       values.reserve(len);
 
       for (uint t=0; t<len; t++)
       {
-        if (s < inParameters[t].size())
+        if (s < (int)inParameters[t].size())
         {
           double val = inParameters[t][s];
           if (val != ParamValueMissing)

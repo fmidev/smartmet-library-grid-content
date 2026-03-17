@@ -867,7 +867,7 @@ bool ContentInfoList::containsSameForecastTimes()
 
 
 
-uint ContentInfoList::deleteContentInfoByFileId(uint fileId)
+uint ContentInfoList::deleteContentInfoByFileId(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -952,7 +952,7 @@ uint ContentInfoList::deleteMarkedContent()
 
 
 
-uint ContentInfoList::markDeletedByFileId(uint fileId)
+uint ContentInfoList::markDeletedByFileId(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -1019,7 +1019,7 @@ uint ContentInfoList::markDeletedByFileId(uint fileId)
 
 
 
-uint ContentInfoList::markDeletedByFileIdAndMessageIndex(uint fileId,uint messageIndex)
+uint ContentInfoList::markDeletedByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -1077,7 +1077,7 @@ uint ContentInfoList::markDeleted()
 
 
 
-uint ContentInfoList::markDeletedByGenerationId(uint generationId)
+uint ContentInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1112,7 +1112,7 @@ uint ContentInfoList::markDeletedByGenerationId(uint generationId)
 
 
 
-uint ContentInfoList::markDeletedByGenerationAndGeometryId(uint generationId,T::GeometryId geometryId)
+uint ContentInfoList::markDeletedByGenerationAndGeometryId(T::GenerationId generationId,T::GeometryId geometryId)
 {
   FUNCTION_TRACE
   try
@@ -1146,7 +1146,7 @@ uint ContentInfoList::markDeletedByGenerationAndGeometryId(uint generationId,T::
 
 
 
-uint ContentInfoList::markDeletedByProducerId(uint producerId)
+uint ContentInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1181,7 +1181,7 @@ uint ContentInfoList::markDeletedByProducerId(uint producerId)
 
 
 
-uint ContentInfoList::markDeletedBySourceId(uint sourceId)
+uint ContentInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1198,6 +1198,41 @@ uint ContentInfoList::markDeletedBySourceId(uint sourceId)
       if (info != nullptr)
       {
         if (info->mSourceId == sourceId)
+        {
+          info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::markDeletedByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
         {
           info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
           cnt++;
@@ -1267,7 +1302,7 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
 
 
 
-uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
+uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -1308,7 +1343,7 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(uint fileId,uint 
 
 
 
-uint ContentInfoList::deleteContentInfoByProducerId(uint producerId)
+uint ContentInfoList::deleteContentInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1393,7 +1428,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
+uint ContentInfoList::deleteContentInfoByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1434,7 +1469,7 @@ uint ContentInfoList::deleteContentInfoByGenerationId(uint generationId)
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& generationIdList)
+uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -1475,7 +1510,7 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<uint>& genera
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId,T::GeometryId geometryId)
+uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(T::GenerationId generationId,T::GeometryId geometryId)
 {
   FUNCTION_TRACE
   try
@@ -1516,7 +1551,7 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(uint generationId
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint generationId,T::GeometryId geometryId,const std::string& forecastTime)
+uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::GenerationId generationId,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -1534,7 +1569,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
 
 
 
-uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint generationId,T::GeometryId geometryId,time_t forecastTimeUTC)
+uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::GenerationId generationId,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
   FUNCTION_TRACE
   try
@@ -1575,7 +1610,7 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(uint 
 
 
 
-uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
+uint ContentInfoList::deleteContentInfoBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1616,7 +1651,48 @@ uint ContentInfoList::deleteContentInfoBySourceId(uint sourceId)
 
 
 
-uint ContentInfoList::deleteContentInfoByFileIdList(std::set<uint>& fileIdList)
+uint ContentInfoList::deleteContentInfoByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint p = 0;
+    uint count = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr &&  (info->mStorageId == storageId  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
+      {
+        if (mReleaseObjects)
+          delete info;
+
+        count++;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+    return count;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ContentInfoList::deleteContentInfoByFileIdList(std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
   try
@@ -1731,7 +1807,7 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
 
 
 
-void ContentInfoList::keepContentInfoByProducerId(uint producerId)
+void ContentInfoList::keepContentInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1768,7 +1844,7 @@ void ContentInfoList::keepContentInfoByProducerId(uint producerId)
 
 
 
-void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
+void ContentInfoList::keepContentInfoByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1805,7 +1881,7 @@ void ContentInfoList::keepContentInfoByGenerationId(uint generationId)
 
 
 
-void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
+void ContentInfoList::keepContentInfoBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1820,6 +1896,42 @@ void ContentInfoList::keepContentInfoBySourceId(uint sourceId)
       ContentInfo *info = mArray[t];
       mArray[t] = nullptr;
       if (info != nullptr  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mSourceId != sourceId))
+      {
+        if (mReleaseObjects)
+          delete info;
+      }
+      else
+      {
+        mArray[p] = info;
+        p++;
+      }
+    }
+    mLength = p;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void ContentInfoList::keepContentInfoByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint p = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr  &&  ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0 ||  info->mStorageId != storageId))
       {
         if (mReleaseObjects)
           delete info;
@@ -2021,7 +2133,7 @@ int ContentInfoList::getClosestIndexNoLock(uint comparisonMethod,ContentInfo& co
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex)
+ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   //FUNCTION_TRACE
   try
@@ -2054,7 +2166,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint fileId,uint messageIndex)
+ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
 {
   //FUNCTION_TRACE
   try
@@ -2086,7 +2198,7 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(uint f
 
 
 
-bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(uint fileId,uint messageIndex,ContentInfo& contentInfo)
+bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo)
 {
   //FUNCTION_TRACE
   try
@@ -2244,7 +2356,7 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
 
 
 
-void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2362,7 +2474,7 @@ void ContentInfoList::getContentInfoList(uint startFileId,uint startMessageIndex
 
 
 
-void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -2430,7 +2542,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(uint producerId,uint 
 
 
 
-void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -2500,7 +2612,7 @@ void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(uint produ
 
 
 
-void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -2569,7 +2681,7 @@ void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(uint 
 
 
 
-void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
   try
@@ -2615,7 +2727,57 @@ void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(uint pro
 
 
 
-void ContentInfoList::getContentGeometryIdListByGenerationId(uint producerId,uint generationId,std::set<T::GeometryId>& geometryIdList)
+
+void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    contentLevelList.clear();
+
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+    time_t timeLimit = time(nullptr) + 120;
+
+    ContentInfo searchInfo;
+    searchInfo.mProducerId = producerId;
+    searchInfo.mGenerationId = generationId;
+
+    int idx = 0;
+    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
+      idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
+
+    for (uint t=idx; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+          info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
+          info->mFmiParameterLevelId == levelId &&
+          strcmp(info->getFmiParameterName(),parameterKey.c_str()) == 0 &&
+          (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
+      {
+        contentLevelList.insert(info->mParameterLevel);
+      }
+      if ((mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
+          mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time) &&
+          info != nullptr && (info->mProducerId > producerId || (info->mProducerId == producerId && info->mGenerationId > generationId)))
+        return;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentGeometryIdListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -2703,7 +2865,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
 
 
 
-void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<uint>& generationIdList)
+void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -2734,7 +2896,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
 
 
 
-void ContentInfoList::getContentInfoListByFileId(uint fileId,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFileId(T::FileId fileId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2833,8 +2995,8 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
 
 
 
-
-void ContentInfoList::getContentInfoListByRequestCounterKey(ulonglong key,ContentInfoList& contentInfoList)
+/*
+void ContentInfoList::getContentInfoListByRequestCounterKey(UInt64 key,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2863,7 +3025,7 @@ void ContentInfoList::getContentInfoListByRequestCounterKey(ulonglong key,Conten
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -3055,7 +3217,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3074,7 +3236,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3197,7 +3359,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3215,7 +3377,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3502,7 +3664,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3520,7 +3682,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3822,7 +3984,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(uint pr
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::ProducerId producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3840,7 +4002,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint produ
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(uint producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::ProducerId producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4025,7 +4187,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
+ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -4043,7 +4205,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
+ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
   FUNCTION_TRACE
   try
@@ -4098,7 +4260,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(ui
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
+ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -4116,7 +4278,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(uint
 
 
 
-ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(uint producerId,uint generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
+ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
   FUNCTION_TRACE
   try
@@ -4171,7 +4333,7 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(uint
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4189,7 +4351,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4476,7 +4638,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4494,7 +4656,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4796,7 +4958,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(uint 
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4815,7 +4977,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint p
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(uint producerId,uint generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5038,7 +5200,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::G
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5057,7 +5219,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5145,7 +5307,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(uint pro
 
 
 
-void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5257,7 +5419,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,uint startF
 
 
 
-void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5324,7 +5486,7 @@ void ContentInfoList::getContentInfoListByProducerId(uint producerId,ContentInfo
 
 
 
-void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5469,7 +5631,7 @@ std::size_t ContentInfoList::getHash()
 
 
 
-std::size_t ContentInfoList::getHashByProducerId(uint producerId)
+std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -5533,7 +5695,7 @@ std::size_t ContentInfoList::getHashByProducerId(uint producerId)
 
 
 
-void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerId,uint generationId,T::GeometryId geometryId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5644,7 +5806,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(uint producerI
 
 
 
-void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,const std::string& startTime,const std::string& endTime,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5663,7 +5825,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
 
 
 
-void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5723,7 +5885,7 @@ void ContentInfoList::getContentInfoListByGenerationId(uint producerId,uint gene
 
 
 
-void ContentInfoList::getContentInfoListBySourceId(uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6029,7 +6191,7 @@ void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
 
 
 
-void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<std::string>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6087,7 +6249,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
 
 
 
-void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint generationId,std::set<time_t>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6145,7 +6307,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(uint producerId,uint gen
 
 
 
-void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
   {
@@ -6161,7 +6323,7 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint ge
 
 
 
-void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime,std::size_t& hash)
+void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime,std::size_t& hash)
 {
   FUNCTION_TRACE
   try
@@ -6226,7 +6388,7 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(uint producerId,uint ge
 
 
 
-void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6289,7 +6451,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
 
 
 
-void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(uint producerId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6352,7 +6514,7 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(uint pro
 
 
 
-void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId,uint generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6415,7 +6577,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(uint producerId
 
 
 
-void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<std::string>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
@@ -6471,7 +6633,7 @@ void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<s
 
 
 
-void ContentInfoList::getForecastTimeListByProducerId(uint producerId,std::set<time_t>& forecastTimeList)
+void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
   try
