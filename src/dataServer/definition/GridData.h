@@ -21,12 +21,12 @@ class GridData
     virtual void        print(std::ostream& stream,uint level,uint optionFlags);
 
     uint                mServerId;
-    uint                mProducerId;
-    uint                mGenerationId;
-    uint                mFileId;
-    uchar               mFileType;
+    T::ProducerId       mProducerId;
+    T::GenerationId     mGenerationId;
+    T::FileId           mFileId;
+    T::FileType         mFileType;
     std::string         mFileName;
-    uint                mMessageIndex;
+    T::MessageIndex     mMessageIndex;
     std::string         mForecastTime;
     T::ParamId          mGribParameterId;
     T::ParamLevelId     mGrib1ParameterLevelId;
@@ -38,7 +38,7 @@ class GridData
     T::ParamId          mNewbaseParameterId;
     std::string         mNewbaseParameterName;
     T::ParamLevel       mParameterLevel;
-    uint                mGeometryId;
+    T::GeometryId       mGeometryId;
     bool                mReverseXDirection;
     bool                mReverseYDirection;
     uint                mProjection;

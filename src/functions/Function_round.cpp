@@ -65,7 +65,7 @@ float Function_round::executeFunctionCall1(std::vector<float>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[1]);
-        long long nw = (long long)(parameters[0]*mp+0.5);
+        Int64  nw = (Int64 )(parameters[0]*mp+0.5);
         return (float)nw/mp;
       }
       else
@@ -93,7 +93,7 @@ double Function_round::executeFunctionCall1(std::vector<double>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[1]);
-        long long nw = (long long)(parameters[0]*mp+0.5);
+        Int64  nw = (Int64 )(parameters[0]*mp+0.5);
         return (double)nw/mp;
       }
       else
@@ -123,7 +123,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
     if (inParameters.size() == 1  &&  extParameters.size() == 1)
     {
-      float mp = (long long)pow(10,extParameters[0]);
+      float mp = (Int64 )pow(10,extParameters[0]);
 
       for (uint s=0; s<sz; s++)
       {
@@ -133,7 +133,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            long long nw = (long long)(val1*mp+0.5);
+            Int64  nw = (Int64 )(val1*mp+0.5);
             val = (float)nw/mp;
           }
         }
@@ -160,7 +160,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
     if (inParameters.size() == 1  &&  extParameters.size() == 1)
     {
-      float mp = (long long)pow(10,extParameters[0]);
+      float mp = (Int64 )pow(10,extParameters[0]);
 
       for (uint s=0; s<sz; s++)
       {
@@ -170,7 +170,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
           double val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            long long nw = (long long)(val1*mp+0.5);
+            Int64  nw = (Int64 )(val1*mp+0.5);
             val = (double)nw/mp;
           }
         }

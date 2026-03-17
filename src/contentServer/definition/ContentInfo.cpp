@@ -29,6 +29,7 @@ ContentInfo::ContentInfo()
     mForecastType = 0;
     mForecastNumber = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mGeometryId = 0;
     mForecastTimeUTC = 0;
@@ -71,6 +72,7 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
     mForecastType = contentInfo.mForecastType;
     mForecastNumber = contentInfo.mForecastNumber;
     mFlags = contentInfo.mFlags;
+    mStorageId = contentInfo.mStorageId;
     mSourceId = contentInfo.mSourceId;
     mGeometryId = contentInfo.mGeometryId;
     mModificationTime = contentInfo.mModificationTime;
@@ -111,6 +113,7 @@ ContentInfo::ContentInfo(const char *csv)
     mForecastType = 0;
     mForecastNumber = 0;
     mFlags = 0;
+    mStorageId = 0;
     mSourceId = 0;
     mGeometryId = 0;
     mForecastTime = 0;
@@ -171,6 +174,7 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
     mForecastType = contentInfo.mForecastType;
     mForecastNumber = contentInfo.mForecastNumber;
     mFlags = contentInfo.mFlags;
+    mStorageId = contentInfo.mStorageId;
     mSourceId = contentInfo.mSourceId;
     mGeometryId = contentInfo.mGeometryId;
     mModificationTime = contentInfo.mModificationTime;
@@ -321,7 +325,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;%u;%llu;%u;%u;%u;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld",
+    sprintf(st,"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld;%u",
         mFileId,
         mMessageIndex,
         mFileType,
@@ -351,7 +355,8 @@ std::string ContentInfo::getCsv()
         mSourceId,
         mGeometryId,
         mModificationTime,
-        mDeletionTime
+        mDeletionTime,
+        mStorageId
         );
 
     return std::string(st);
@@ -413,13 +418,13 @@ void ContentInfo::setCsv(const char *csv)
 
     if (c >= 27)
     {
-      mFileId = toUInt32(field[0]);
+      mFileId = toUInt64(field[0]);
       mMessageIndex = toUInt32(field[1]);
       mFileType = toUInt8(field[2]);
       mFilePosition = toUInt64(field[3]);
       mMessageSize = toUInt32(field[4]);
       mProducerId = toUInt32(field[5]);
-      mGenerationId = toUInt32(field[6]);
+      mGenerationId = toUInt64(field[6]);
       //mGroupFlags = toUInt32(field[7]);
       setForecastTime(field[8]);
       try
@@ -453,6 +458,9 @@ void ContentInfo::setCsv(const char *csv)
         mModificationTime = toInt64(field[28]);
       if (c >= 29)
         mDeletionTime = toInt64(field[29]);
+
+      if (c >= 30)
+        mStorageId = toUInt32(field[30]);
     }
   }
   catch (...)
@@ -464,18 +472,18 @@ void ContentInfo::setCsv(const char *csv)
 
 
 
-
-ulonglong ContentInfo::getRequestCounterKey()
+/*
+UInt64 ContentInfo::getRequestCounterKey()
 {
   try
   {
-    ulonglong geometryId = C_UINT64(mGeometryId);
-    ulonglong level = C_UINT64(mParameterLevel);
-    ulonglong levelId = C_UINT64(mFmiParameterLevelId);
-    ulonglong paramId = mFmiParameterId;
-    ulonglong key = (geometryId << 48) + (levelId << 40) + (level << 20) + paramId;
+    UInt64 geometryId = C_UINT64(mGeometryId);
+    UInt64 level = C_UINT64(mParameterLevel);
+    UInt64 levelId = C_UINT64(mFmiParameterLevelId);
+    UInt64 paramId = mFmiParameterId;
+    UInt64 key = (geometryId << 48) + (levelId << 40) + (level << 20) + paramId;
 
-    ulonglong producerId = C_UINT64(mProducerId);
+    UInt64 producerId = C_UINT64(mProducerId);
     if (producerId > 0)
       key = key * producerId;
 
@@ -486,7 +494,7 @@ ulonglong ContentInfo::getRequestCounterKey()
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+*/
 
 
 
@@ -847,6 +855,7 @@ void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mForecastType           = " << mForecastType << "\n";
     stream << space(level) << "- mForecastNumber         = " << mForecastNumber << "\n";
     stream << space(level) << "- mFlags                  = " << mFlags << "\n";
+    stream << space(level) << "- mStorageId              = " << mStorageId << "\n";
     stream << space(level) << "- mSourceId               = " << mSourceId << "\n";
     stream << space(level) << "- mGeometryId             = " << mGeometryId << "\n";
     stream << space(level) << "- mModificationTime       = " << utcTimeFromTimeT(mModificationTime) << "\n";

@@ -80,7 +80,7 @@ void GridFileManager::addFile(GRID::GridFile *gridFile)
     GRID::GridFile_sptr ptr;
     ptr.reset(gridFile);
 
-    mFileList.insert(std::pair<uint,GRID::GridFile_sptr>(gridFile->getFileId(),ptr));
+    mFileList.insert(std::pair<T::FileId,GRID::GridFile_sptr>(gridFile->getFileId(),ptr));
   }
   catch (...)
   {
@@ -128,7 +128,7 @@ void GridFileManager::deleteFile(GRID::GridFile *gridFile)
 
 
 
-void GridFileManager::deleteFileById(uint fileId)
+void GridFileManager::deleteFileById(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -146,12 +146,12 @@ void GridFileManager::deleteFileById(uint fileId)
 
 
 
-void GridFileManager::deleteFilesByProducerId(uint producerId)
+void GridFileManager::deleteFilesByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -177,12 +177,12 @@ void GridFileManager::deleteFilesByProducerId(uint producerId)
 
 
 
-void GridFileManager::deleteFilesByGenerationId(uint generationId)
+void GridFileManager::deleteFilesByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -208,17 +208,49 @@ void GridFileManager::deleteFilesByGenerationId(uint generationId)
 
 
 
-void GridFileManager::deleteFilesBySourceId(uint sourceId)
+void GridFileManager::deleteFilesBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
       {
         if (it->second->getSourceId() == sourceId)
+          idList.emplace_back(it->first);
+      }
+    }
+
+    if (idList.size() > 0)
+    {
+      AutoWriteLock lock(&mModificationLock);
+      deleteFilesNoLock(idList,false);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void GridFileManager::deleteFilesByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<T::FileId> idList;
+    {
+      T::FileId id = ((UInt64)storageId << 32);
+
+      AutoReadLock lock(&mModificationLock);
+      for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
+      {
+        if ((it->second->getFileId() & 0xFFFFFFFF00000000UL) == id)
           idList.emplace_back(it->first);
       }
     }
@@ -244,7 +276,7 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -277,7 +309,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -308,7 +340,7 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
   FUNCTION_TRACE
   try
   {
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
       for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -334,7 +366,7 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
 
 
 
-GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
+GRID::GridFile_sptr GridFileManager::getFileById(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -363,7 +395,7 @@ GRID::GridFile_sptr GridFileManager::getFileById(uint fileId)
 
 
 
-void GridFileManager::getFilesToBeCached(std::map<uint,std::string>& filenames)
+void GridFileManager::getFilesToBeCached(std::map<T::FileId,std::string>& filenames)
 {
   FUNCTION_TRACE
   try
@@ -371,7 +403,7 @@ void GridFileManager::getFilesToBeCached(std::map<uint,std::string>& filenames)
     T::GenerationInfoList generationInfoList;
     mContentServer->getGenerationInfoList(mServerSessionId,generationInfoList);
 
-    std::set<uint> idList;
+    std::set<T::GenerationId> idList;
     generationInfoList.getGenerationIdListByStatus(T::GenerationInfo::Status::Ready,idList);
 
     time_t deletionTime = time(0) + 180;
@@ -384,7 +416,7 @@ void GridFileManager::getFilesToBeCached(std::map<uint,std::string>& filenames)
           (it->second->getDeletionTime() == 0 || it->second->getDeletionTime() > deletionTime))
       {
         if (idList.find(it->second->getGenerationId()) != idList.end())
-          filenames.insert(std::pair<uint,std::string>(it->second->getFileId(),it->second->getFileName()));
+          filenames.insert(std::pair<T::FileId,std::string>(it->second->getFileId(),it->second->getFileName()));
       }
     }
   }
@@ -398,7 +430,7 @@ void GridFileManager::getFilesToBeCached(std::map<uint,std::string>& filenames)
 
 
 
-void GridFileManager::getFilesInCache(std::map<uint,std::string>& filenames)
+void GridFileManager::getFilesInCache(std::map<T::FileId,std::string>& filenames)
 {
   FUNCTION_TRACE
   try
@@ -409,7 +441,7 @@ void GridFileManager::getFilesInCache(std::map<uint,std::string>& filenames)
     {
       if (!it->second->isNetworkFile()  &&  (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&  (it->second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady))
       {
-        filenames.insert(std::pair<uint,std::string>(it->second->getFileId(),it->second->getFileName()));
+        filenames.insert(std::pair<T::FileId,std::string>(it->second->getFileId(),it->second->getFileName()));
       }
     }
   }
@@ -478,7 +510,7 @@ void GridFileManager::resetRequestCounters()
 
 
 
-GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(uint fileId)
+GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -589,7 +621,7 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
-void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServer)
+void GridFileManager::deleteFileNoLock(T::FileId fileId,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
   try
@@ -611,7 +643,7 @@ void GridFileManager::deleteFileNoLock(uint fileId,bool sentMessageToContentServ
 
 
 
-void GridFileManager::deleteFilesNoLock(std::vector<uint>& fileIdList,bool sentMessageToContentServer)
+void GridFileManager::deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
   try
@@ -631,7 +663,7 @@ void GridFileManager::deleteFilesNoLock(std::vector<uint>& fileIdList,bool sentM
 
 
 
-void GridFileManager::deleteFilesNoLock(std::set<uint>& fileIdList,bool sentMessageToContentServer)
+void GridFileManager::deleteFilesNoLock(std::set<T::FileId>& fileIdList,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
   try

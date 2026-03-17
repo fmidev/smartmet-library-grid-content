@@ -150,11 +150,11 @@ int ServiceInterface::addUser(T::SessionId sessionId,UserInfo& userInfo)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _addUser(sessionId,userInfo);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,userInfo.getUserId(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u);result %d;time %f;",__FUNCTION__,sessionId,userInfo.getUserId(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -173,11 +173,11 @@ int ServiceInterface::deleteUser(T::SessionId sessionId,uint userId)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _deleteUser(sessionId,userId);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,userId,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u);result %d;time %f;",__FUNCTION__,sessionId,userId,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -196,11 +196,11 @@ int ServiceInterface::updateUserInfo(T::SessionId sessionId,UserInfo& userInfo)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _updateUserInfo(sessionId,userInfo);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,userInfo.getUserId(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u);result %d;time %f;",__FUNCTION__,sessionId,userInfo.getUserId(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -219,11 +219,11 @@ int ServiceInterface::getUserAttribute(T::SessionId sessionId,uint userId,const 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getUserAttribute(sessionId,userId,attributeGroup,attributeName,attributeValue);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,attributeValue.c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,attributeValue.c_str(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -242,11 +242,11 @@ int ServiceInterface::getUserAttributes(T::SessionId sessionId,uint userId,const
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getUserAttributes(sessionId,userId,attributeGroup,attributeList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -265,11 +265,11 @@ int ServiceInterface::getUserInfo(T::SessionId sessionId,uint userId,UserInfo& u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getUserInfo(sessionId,userId,userInfo);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u);result %d;time %f;",__FUNCTION__,sessionId,userId,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u);result %d;time %f;",__FUNCTION__,sessionId,userId,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -290,11 +290,11 @@ int ServiceInterface::getUserInfoByUsername(T::SessionId sessionId,const char *u
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getUserInfoByUsername(sessionId,username,userInfo);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s);result %d;time %f;",__FUNCTION__,sessionId,username,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s);result %d;time %f;",__FUNCTION__,sessionId,username,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -314,11 +314,11 @@ int ServiceInterface::setUserAttribute(T::SessionId sessionId,uint userId,const 
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _setUserAttribute(sessionId,userId,attributeGroup,attributeName,attributeValue);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,attributeValue,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,attributeValue,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -338,11 +338,11 @@ int ServiceInterface::setUserAttributes(T::SessionId sessionId,uint userId,const
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _setUserAttributes(sessionId,userId,attributeGroup,attributeList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -361,11 +361,11 @@ int ServiceInterface::deleteUserAttribute(T::SessionId sessionId,uint userId,con
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _deleteUserAttribute(sessionId,userId,attributeGroup,attributeName);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeName,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -385,11 +385,11 @@ int ServiceInterface::deleteUserAttributeGroup(T::SessionId sessionId,uint userI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _deleteUserAttributeGroup(sessionId,userId,attributeGroup);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -409,11 +409,11 @@ int ServiceInterface::deleteUserAttributes(T::SessionId sessionId,uint userId,co
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _deleteUserAttributes(sessionId,userId,attributeGroup,attributeNameList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%u,%s,AttributeName[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,AttributeName[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

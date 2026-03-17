@@ -143,6 +143,9 @@ std::size_t QueryParameter::getHash()
     for (auto it = mContourColors.begin(); it != mContourColors.end(); ++it)
       Fmi::hash_merge(hash,*it);
 
+    for (auto it = mParameterLevels.begin(); it != mParameterLevels.end(); ++it)
+      Fmi::hash_merge(hash,*it);
+
     Fmi::hash_merge(hash,mProducerId);
     Fmi::hash_merge(hash,mGenerationFlags);
     Fmi::hash_merge(hash,mTimestepsBefore);
@@ -474,8 +477,17 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
       stream << space(level) << "   * " << hex << "\n";
     }
 
-    stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";
+    stream << space(level) << "- mParameterLevels          = (" << mParameterLevels.size() << " levels)\n";
+    for (auto it = mParameterLevels.begin();  it != mParameterLevels.end(); ++it)
+    {
+      if (it != mParameterLevels.begin())
+        stream << ", ";
 
+      stream << *it;
+    }
+    stream << "\n";
+
+    stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";
     for (auto it = mValueList.begin();  it != mValueList.end(); ++it)
     {
       (*it)->print(stream,level+2,optionFlags);

@@ -1,0 +1,154 @@
+#ifndef __TYPEDEFS_IDL
+#define __TYPEDEFS_IDL
+
+
+module SmartMet
+{
+
+module C
+{
+
+typedef char Int8;
+typedef short Int16;
+typedef long Int32;
+typedef long long Int64;
+
+typedef octet UInt8;
+typedef unsigned short UInt16;
+typedef unsigned long UInt32;
+typedef unsigned long long UInt64;
+
+typedef float Float32;
+typedef double Float64;
+typedef boolean Bool;
+
+typedef sequence<string> StringList;
+
+typedef sequence<Int8> Int8List;
+typedef sequence<Int16> Int16List;
+typedef sequence<Int32> Int32List;
+typedef sequence<Int64> Int64List;
+
+typedef sequence<UInt8> UInt8List;
+typedef sequence<UInt16> UInt16List;
+typedef sequence<UInt32> UInt32List;
+typedef sequence<UInt64> UInt64List;
+
+typedef sequence<Float32> Float32List;
+typedef sequence<Float64> Float64List;
+
+typedef UInt32 ProducerId;
+typedef UInt8  GenerationType;
+typedef UInt64 GenerationId;
+typedef UInt64 FileId;
+typedef UInt8  FileType;
+typedef UInt64 FilePosition;
+typedef UInt64 FileSize;
+typedef UInt32 MessageIndex;
+typedef UInt32 MessageSize;
+typedef UInt8  ParameterKeyType;
+typedef string ParameterKey;
+typedef UInt32 ParameterId;
+typedef string ParameterName;
+typedef float  ParameterValue;
+typedef Int32  GeometryId;
+typedef Int16  LevelId;
+typedef Int32  Level;
+typedef Int16  ForecastType;
+typedef Int16  ForecastNumber;
+typedef UInt32 SourceId;
+typedef Int64  Timestamp;
+typedef UInt64 EventId;
+typedef UInt64 Hash;
+typedef string TimeString;
+typedef Int64  SessionId;
+typedef Int32  Result;
+typedef UInt8  Status;
+typedef UInt8  CoordinateType;
+
+typedef sequence<octet> ByteData;
+typedef sequence<ByteData> ByteDataSequence;
+
+
+typedef sequence<ProducerId>   ProducerIdList;
+typedef sequence<GenerationId> GenerationIdList;
+typedef sequence<FileId>       FileIdList;
+typedef sequence<GeometryId>   GeometryIdList;
+typedef sequence<LevelId>      LevelIdList;
+typedef sequence<Level>        LevelList;
+typedef sequence<Timestamp>    TimestampList;
+typedef sequence<EventId>      EventIdList;
+typedef sequence<TimeString>   TimeStringList;
+typedef sequence<ParameterValue> ParameterValueList;
+
+
+struct AttributeRec
+{
+  string name;
+  string value;
+};
+
+typedef sequence<AttributeRec> AttributeRecList;
+
+
+struct Coordinate
+{
+  double x;
+  double y;
+};
+
+typedef sequence<Coordinate> CoordinateList;
+typedef sequence<CoordinateList> AreaCoordinates;
+typedef sequence<CoordinateList> PolygonPath;
+
+
+struct GridPointValue
+{
+  C::FileId       fileId;
+  C::MessageIndex messageIndex;
+  C::Timestamp    time;
+  double          value;
+  double          x;
+  double          y;
+  C::Level        level;
+};
+
+typedef sequence<GridPointValue> GridPointValueList;
+
+
+struct ValueRecord
+{
+  C::FileId          fileId;
+  C::MessageIndex    messageIndex;
+  C::CoordinateType  coordinateType;
+  C::Int16           areaInterpolationMethod;
+  C::Float64         x;
+  C::Float64         y;
+  C::ParameterValue  value;
+  C::Int32           result;
+};
+
+typedef sequence<ValueRecord> ValueRecordList;
+
+
+
+
+
+
+struct GridValue
+{
+  double x;
+  double y;
+  double value;
+  string valueString;
+};
+
+typedef sequence<GridValue> GridValueList;
+
+
+
+};
+};
+
+
+#endif

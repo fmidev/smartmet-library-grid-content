@@ -161,7 +161,7 @@ void ProducerInfoList::clear()
 
 
 
-bool ProducerInfoList::deleteProducerInfoById(uint producerId)
+bool ProducerInfoList::deleteProducerInfoById(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -190,7 +190,7 @@ bool ProducerInfoList::deleteProducerInfoById(uint producerId)
 
 
 
-uint ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
+uint ProducerInfoList::deleteProducerInfoListBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -198,10 +198,40 @@ uint ProducerInfoList::deleteProducerInfoListBySourceId(uint sourceId)
     AutoWriteLock lock(&mModificationLock);
     uint cnt = 0;
     int sz = getLength()-1;
-    for (int t=sz; t>0; t--)
+    for (int t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
       if (info != nullptr  &&  info->mSourceId == sourceId)
+      {
+        cnt++;
+        delete mList[t];
+        mList.erase(mList.begin() + t);
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint ProducerInfoList::deleteProducerInfoListByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint cnt = 0;
+    int sz = getLength()-1;
+    for (int t=sz; t>=0; t--)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  info->mStorageId == storageId)
       {
         cnt++;
         delete mList[t];
@@ -228,7 +258,7 @@ uint ProducerInfoList::deleteMarkedProducers()
     AutoWriteLock lock(&mModificationLock);
     uint cnt = 0;
     int sz = getLength()-1;
-    for (int t=sz; t>0; t--)
+    for (int t=sz; t>=0; t--)
     {
       ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
       if (info != nullptr  &&  (info->mFlags & T::ProducerInfo::Flags::DeletedProducer))
@@ -250,7 +280,7 @@ uint ProducerInfoList::deleteMarkedProducers()
 
 
 
-uint ProducerInfoList::markDeletedById(uint producerId)
+uint ProducerInfoList::markDeletedById(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -274,7 +304,7 @@ uint ProducerInfoList::markDeletedById(uint producerId)
 
 
 
-uint ProducerInfoList::markDeletedBySourceId(uint sourceId)
+uint ProducerInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -303,7 +333,36 @@ uint ProducerInfoList::markDeletedBySourceId(uint sourceId)
 
 
 
-ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
+uint ProducerInfoList::markDeletedByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoWriteLock lock(&mModificationLock);
+    uint cnt = 0;
+    long sz = getLength()-1;
+    for (long t=sz; t>=0; t--)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  info->mStorageId == storageId)
+      {
+        info->mFlags |= T::ProducerInfo::Flags::DeletedProducer;
+        cnt++;
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ProducerInfo* ProducerInfoList::getProducerInfoById(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -328,7 +387,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(uint producerId)
 
 
 
-bool ProducerInfoList::getProducerInfoById(uint producerId,ProducerInfo& producerInfo)
+bool ProducerInfoList::getProducerInfoById(T::ProducerId producerId,ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -479,7 +538,7 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
 
 
 
-void ProducerInfoList::getProducerInfoListBySourceId(uint sourceId,ProducerInfoList& producerInfoList)
+void ProducerInfoList::getProducerInfoListBySourceId(T::SourceId sourceId,ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
   try

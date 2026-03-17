@@ -15,70 +15,72 @@ class FileInfo
 {
   public:
 
-                  FileInfo();
-                  FileInfo(const FileInfo& fileInfo);
+                    FileInfo();
+                    FileInfo(const FileInfo& fileInfo);
 
-                  FileInfo(
-                      uint producerId,
-                      uint generationId,
+                    FileInfo(
+                      T::ProducerId producerId,
+                      T::GenerationId generationId,
                       uchar type,
                       const std::string& filename,
-                      uint sourceId);
+                      T::SourceId sourceId);
 
-                  FileInfo(const char *csv);
-    virtual       ~FileInfo();
+                    FileInfo(const char *csv);
+    virtual         ~FileInfo();
 
-    FileInfo&     operator=(const FileInfo& fileInfo);
+    FileInfo&       operator=(const FileInfo& fileInfo);
 
-    std::string   getCsv();
-    std::string   getCsvHeader();
-    void          setCsv(const char *csv);
-    void          setCsv(const std::string& csv);
+    std::string     getCsv();
+    std::string     getCsvHeader();
+    void            setCsv(const char *csv);
+    void            setCsv(const std::string& csv);
 
-    int           compare(uint comparisonMethod,FileInfo *fileInfo);
-    FileInfo*     duplicate();
-    void          print(std::ostream& stream,uint level,uint optionFlags);
+    int             compare(uint comparisonMethod,FileInfo *fileInfo);
+    FileInfo*       duplicate();
+    void            print(std::ostream& stream,uint level,uint optionFlags);
 
     /*! \brief The producer identifier. */
-    uint          mProducerId;
+    T::ProducerId   mProducerId;
 
     /*! \brief The generation identifier. */
-    uint          mGenerationId;
+    T::GenerationId mGenerationId;
 
     /*! \brief The file identifier. */
-    uint          mFileId;
+    T::FileId       mFileId;
 
     /*! \brief The file protocol. (0 = None, 1 = HTTPS, 2 = HTTP) */
-    uint          mProtocol;
+    uint            mProtocol;
 
     /*! \brief The file server type (0 = Unknow, 1= Filesys, 2 = S3, 3 = Httpd. */
-    uint          mServerType;
+    uint            mServerType;
 
     /*! \brief The file server. */
-    std::string   mServer;
+    std::string     mServer;
 
     /*! \brief The file type. */
-    uchar         mFileType;
+    uchar           mFileType;
 
     /*! \brief The file name. */
-    std::string   mName;
+    std::string     mName;
 
 
     /*! \brief The file flags are used for indicating same additional information related
      * to the current file. For example, if the bit 0 is set to '1' then the content
      * of the current file is predefined, which means that the data servers do not need
      * to open the file and register its content to the content server. */
-    uint          mFlags;
+    uint            mFlags;
 
-    uint          mSourceId;
+    T::StorageId    mStorageId;
 
-    time_t        mModificationTime;
+    T::SourceId     mSourceId;
 
-    time_t        mDeletionTime;
+    time_t          mModificationTime;
 
-    ulonglong     mSize;
+    time_t          mDeletionTime;
 
-    uchar         mStatus;
+    UInt64          mSize;
+
+    uchar           mStatus;
 
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains
@@ -97,7 +99,7 @@ class FileInfo
     {
       public:
         static const uint none              = 0;    // No comparison
-        static const uint fileId            = 1;    // Comparison according to the file id
+        static const T::FileId fileId            = 1;    // Comparison according to the file id
         static const uint fileName          = 2;    // Comparison according to the file name
     };
 

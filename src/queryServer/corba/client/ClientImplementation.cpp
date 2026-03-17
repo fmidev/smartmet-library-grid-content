@@ -121,7 +121,7 @@ int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    QueryServer::Corba::CorbaQuery_var corbaQuery = new QueryServer::Corba::CorbaQuery();
+    C::Query_var corbaQuery = new C::Query();
     QueryServer::Corba::Converter::convert(query, corbaQuery);
 
     int result = mService->executeQuery(sessionId, corbaQuery);
@@ -145,7 +145,7 @@ int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& pr
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    QueryServer::Corba::CorbaStringList_var corbaProducerList = new QueryServer::Corba::CorbaStringList();
+    C::StringList_var corbaProducerList = new C::StringList();
 
     int result = mService->getProducerList(sessionId, corbaProducerList);
 
@@ -168,8 +168,8 @@ int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::Conten
     if (!mInitialized)
       throw Fmi::Exception(BCP, "The client is not initialized!");
 
-    QueryServer::Corba::CorbaGridPointValueList_var corbaValueList = new QueryServer::Corba::CorbaGridPointValueList();
-    ContentServer::Corba::CorbaContentInfoList_var corbaContentInfoList = new ContentServer::Corba::CorbaContentInfoList();
+    C::GridPointValueList_var corbaValueList = new C::GridPointValueList();
+    C::ContentInfoList_var corbaContentInfoList = new C::ContentInfoList();
 
     ContentServer::Corba::Converter::convert(contentInfoList, corbaContentInfoList);
 

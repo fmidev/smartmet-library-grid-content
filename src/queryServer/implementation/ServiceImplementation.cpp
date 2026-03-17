@@ -95,7 +95,7 @@ thread_local static time_t mContentSearchCache_clearTime;
 thread_local static ParameterMappingCache mParameterMappingCache;
 thread_local static time_t mParameterMappingCache_clearTime;
 
-thread_local static std::set<ulonglong> mReadyGeometryList;
+thread_local static std::set<UInt64 > mReadyGeometryList;
 
 thread_local static ProducerGenarationListCache mProducerGenerationListCache;
 thread_local static time_t mProducerGenerationListCache_clearTime;
@@ -554,7 +554,7 @@ bool ServiceImplementation::getProducerInfoByName(const std::string& name,T::Pro
 
 
 
-void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
   try
@@ -573,7 +573,7 @@ void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(uint
 
 
 
-CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint producerId,ulonglong producerHash,bool acceptNotReadyGenerations)
+CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::ProducerId producerId,UInt64 producerHash,bool acceptNotReadyGenerations)
 {
   FUNCTION_TRACE
   try
@@ -584,7 +584,7 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
       mProducerGenerationListCache_clearTime = time(nullptr);
     }
 
-    uint key = producerId;
+    T::ProducerId key = producerId;
     if (acceptNotReadyGenerations)
       key = producerId | 0x80000000;
 
@@ -631,7 +631,7 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(uint pr
     cacheEntry->analysisTimes = analysisTimes;
     cacheEntry->producerHash = producerHash;
 
-    mProducerGenerationListCache.insert(std::pair<uint,CacheEntry_sptr>(key,cacheEntry));
+    mProducerGenerationListCache.insert(std::pair<T::ProducerId,CacheEntry_sptr>(key,cacheEntry));
 
     return cacheEntry;
   }
@@ -1321,8 +1321,8 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
       std::vector<T::ParamLevel> paramLevelVec;
       std::vector<T::ForecastNumber> forecastNumberVec;
       std::string producerName;
-      uint producerId = 0;
-      ulonglong generationFlags = 0;
+      T::ProducerId producerId = 0;
+      UInt64 generationFlags = 0;
       short areaInterpolationMethod = 0;
       short timeInterpolationMethod = 0;
       short levelInterpolationMethod = 0;
@@ -1357,10 +1357,10 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
           {
             char buf[200];
             if (paramLevelUnit)
-              sprintf(buf, "%s:%s:%d:%d:%c%d:%d:%d:%llu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevelUnit,
+              sprintf(buf, "%s:%s:%d:%d:%c%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevelUnit,
                   paramLevel,forecastType,*fIt,generationFlags);
             else
-              sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%llu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
+              sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
                   forecastType,*fIt,generationFlags);
 
             mFunctionParamId++;
@@ -1385,7 +1385,7 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
 
 
 
-void ServiceImplementation::getParameterMappings(const std::string& producerName,uint producerId,const std::string& parameterName,std::size_t parameterHash,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec_sptr& mappings)
+void ServiceImplementation::getParameterMappings(const std::string& producerName,T::ProducerId producerId,const std::string& parameterName,std::size_t parameterHash,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec_sptr& mappings)
 {
   try
   {
@@ -1449,7 +1449,7 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
 
 void ServiceImplementation::getParameterMappings(
     const std::string& producerName,
-    uint producerId,
+    T::ProducerId producerId,
     const std::string& parameterName,
     std::size_t parameterHash,
     T::GeometryId geometryId,
@@ -1529,8 +1529,8 @@ void ServiceImplementation::getParameterStringInfo(
     T::ForecastType& forecastType,
     T::ForecastNumber& forecastNumber,
     std::string& producerName,
-    uint& producerId,
-    ulonglong& generationFlags,
+    T::ProducerId& producerId,
+    UInt64 & generationFlags,
     short& areaInterpolationMethod,
     short& timeInterpolationMethod,
     short& levelInterpolationMethod,
@@ -1573,8 +1573,8 @@ void ServiceImplementation::getParameterStringInfo(
     T::ForecastType& forecastType,
     std::vector<T::ForecastNumber>& forecastNumberVec,
     std::string& producerName,
-    uint& producerId,
-    ulonglong& generationFlags,
+    T::ProducerId& producerId,
+    UInt64 & generationFlags,
     short& areaInterpolationMethod,
     short& timeInterpolationMethod,
     short& levelInterpolationMethod,
@@ -1758,14 +1758,14 @@ bool ServiceImplementation::isGeometryValid(int geometryId,std::vector<std::vect
 
 
 
-bool ServiceImplementation::isGeometryReady(uint generationId,int geometryId,T::ParamLevelId levelId)
+bool ServiceImplementation::isGeometryReady(T::GenerationId generationId,int geometryId,T::ParamLevelId levelId)
 {
   try
   {
     if (!mCheckGeometryStatus)
       return true;
 
-    ulonglong key = ((ulonglong)generationId << 32) + ((ulonglong)geometryId << 8) + levelId;
+    UInt64 key = ((UInt64 )generationId << 24) + ((UInt64 )geometryId << 8) + levelId;
 
     if (mReadyGeometryList.find(key) != mReadyGeometryList.end())
       return true;
@@ -2241,8 +2241,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
           std::vector<T::ParamValue_vec> inputVectors;
           std::vector<double> parameters;
 
-          uint producerId = 0;
-          uint generationId = 0;
+          T::ProducerId producerId = 0;
+          T::GenerationId generationId = 0;
           uint geometryId = 0;
           uint flags = 0;
 
@@ -2289,7 +2289,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
           else
           if (f != "@"  &&  inputVectors.size() > 0)
           {
-            //unsigned long long startTime = getTime();
+            //UInt64 startTime = getTime();
 
             auto functionPtr = mFunctionCollection.getFunction(function);
             if (functionPtr)
@@ -2311,7 +2311,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
                   break;
               }
             }
-            //unsigned long long endTime = getTime();
+            //UInt64 endTime = getTime();
             //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
           }
 
@@ -2372,7 +2372,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
           if (inputVectors.size())
           {
-            //unsigned long long startTime = getTime();
+            //UInt64 startTime = getTime();
             if (functionPtr)
             {
               functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,outputVector);
@@ -2390,7 +2390,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
                   break;
               }
             }
-            //unsigned long long endTime = getTime();
+            //UInt64 endTime = getTime();
             //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
           }
 
@@ -2485,8 +2485,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
           std::vector<double> extParameters;
 
           bool areaCnt = false;
-          uint producerId = 0;
-          uint generationId = 0;
+          T::ProducerId producerId = 0;
+          T::GenerationId generationId = 0;
           uint geometryId = 0;
           uint flags = 0;
 
@@ -2898,7 +2898,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       }
     }
 
-    std::unordered_map<std::string,uint > parameterProducers;
+    std::unordered_map<std::string,T::ProducerId> parameterProducers;
 
     // Parsing parameters and functions in the query.
 
@@ -2933,9 +2933,9 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       {
         std::string paramName = qParam->mParam;
         std::string producerName = qParam->mProducerName;
-        uint producerId = qParam->mProducerId;
+        T::ProducerId producerId = qParam->mProducerId;
         int geometryId = qParam->mGeometryId;
-        ulonglong generationFlags = qParam->mGenerationFlags;
+        UInt64 generationFlags = qParam->mGenerationFlags;
 
         if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)
           containsInternalAggregation = true;
@@ -3023,7 +3023,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             {
               if (producerId == 0 && qParam->mValueList[0]->mProducerId != 0)
               {
-                parameterProducers.insert(std::pair<std::string, uint>(paramName + ":" + producerName, qParam->mValueList[0]->mProducerId));
+                parameterProducers.insert(std::pair<std::string, T::ProducerId>(paramName + ":" + producerName, qParam->mValueList[0]->mProducerId));
               }
 
               // If there are no geometry defined, then we should not change the first geometry we'll get
@@ -3272,9 +3272,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       {
         std::string paramName = qParam->mParam;
         std::string producerName = qParam->mProducerName;
-        uint producerId = qParam->mProducerId;
+        T::ProducerId producerId = qParam->mProducerId;
         int geometryId = qParam->mGeometryId;
-        ulonglong generationFlags = qParam->mGenerationFlags;
+        UInt64 generationFlags = qParam->mGenerationFlags;
         T::ForecastType forecastType = qParam->mForecastType;
         T::ForecastNumber forecastNumber = qParam->mForecastNumber;
 
@@ -3356,7 +3356,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         // is not defined. It is possible that the newest generation do not contain
         // the requested timestep when the generation is still under construction.
 
-        ulonglong gflags = generationFlags;
+        UInt64 gflags = generationFlags;
 
         int ftLen = forecastTimeList->size();
         qParam->mValueList.reserve(ftLen);
@@ -3983,7 +3983,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
-int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint producerId,ulonglong producerHash,uint generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::ProducerId producerId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
 {
   try
   {
@@ -4252,9 +4252,9 @@ bool ServiceImplementation::getSpecialValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
@@ -4268,7 +4268,7 @@ bool ServiceImplementation::getSpecialValues(
     uchar coordinateType,
     double x,
     double y,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -4539,14 +4539,14 @@ bool ServiceImplementation::getValueVectors(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList,
     T::Coordinate_vec& coordinates)
 {
@@ -5068,14 +5068,14 @@ bool ServiceImplementation::getGridFiles(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -5173,13 +5173,13 @@ bool ServiceImplementation::getGridFiles(
       return false;
     }
 
-    std::map<uint,long long> oldProperties;
-    std::map<uint,long long> newProperties;
+    std::map<uint,Int64 > oldProperties;
+    std::map<uint,Int64 > newProperties;
 
     for (auto it = properties.begin(); it != properties.end();++it)
     {
       //std::cout << "PROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-      oldProperties.insert(std::pair<uint,long long>(it->propertyId,atoll(it->propertyValue.c_str())));
+      oldProperties.insert(std::pair<uint,Int64 >(it->propertyId,atoll(it->propertyValue.c_str())));
     }
 
     uint version = 0;
@@ -5213,8 +5213,8 @@ bool ServiceImplementation::getGridFiles(
     const char *bboxStr = query.mAttributeList.getAttributeValue("grid.bbox");
     const char *gridSizeStr = query.mAttributeList.getAttributeValue("grid.size");
 
-    long long gridWidth = 0;
-    long long gridHeight = 0;
+    Int64  gridWidth = 0;
+    Int64  gridHeight = 0;
 
     double lon1 = 0;
     double lat1 = 0;
@@ -5229,8 +5229,8 @@ bool ServiceImplementation::getGridFiles(
       splitString(gridSizeStr,',',v);
       if (v.size() == 2)
       {
-        gridWidth = (long long)v[0];
-        gridHeight = (long long)v[1];
+        gridWidth = (Int64 )v[0];
+        gridHeight = (Int64 )v[1];
       }
     }
 
@@ -5287,13 +5287,13 @@ bool ServiceImplementation::getGridFiles(
     double xStepDegrees = xDegrees / (double)gridWidth;
     double yStepDegrees = yDegrees / (double)gridHeight;
 
-    float lat_0 = ParamValueMissing;
+    //float lat_0 = ParamValueMissing;
     float lat_1 = ParamValueMissing;
     float lat_2 = ParamValueMissing;
     float laD = ParamValueMissing;
     float lon_0 = ParamValueMissing;
-    float x_0 = ParamValueMissing;
-    float y_0 = ParamValueMissing;
+    //float x_0 = ParamValueMissing;
+    //float y_0 = ParamValueMissing;
 
 
     if (!geometryIdStr  &&  crsStr  &&  gridSizeStr)
@@ -5325,8 +5325,8 @@ bool ServiceImplementation::getGridFiles(
           if (attr[0] == "+proj")
             projectionStr = attr[1];
 
-          if (attr[0] == "+lat_0")
-            lat_0 = toDouble(attr[1]);
+          //if (attr[0] == "+lat_0")
+          //  lat_0 = toDouble(attr[1]);
 
           if (attr[0] == "+lat_1")
             lat_1 = toDouble(attr[1]);
@@ -5340,11 +5340,11 @@ bool ServiceImplementation::getGridFiles(
           if (attr[0] == "+lon_0")
             lon_0 = toDouble(attr[1]);
 
-          if (attr[0] == "+x_0")
-            x_0 = toDouble(attr[1]);
+          //if (attr[0] == "+x_0")
+          //  x_0 = toDouble(attr[1]);
 
-          if (attr[0] == "+y_0")
-            y_0 = toDouble(attr[1]);
+          //if (attr[0] == "+y_0")
+          //  y_0 = toDouble(attr[1]);
         }
       }
 
@@ -5352,78 +5352,78 @@ bool ServiceImplementation::getGridFiles(
       {
         if (projectionStr == "longlat")
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::DataRepresentationType,0LL));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,0LL));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LatLon::Ni,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LatLon::Nj,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Ni,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Nj,gridHeight));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LatLon::IDirectionIncrement,(long long)(xStepDegrees*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LatLon::JDirectionIncrement,(long long)(yStepDegrees*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(xStepDegrees*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(yStepDegrees*1000)));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfFirstGridPoint,(long long)(lat1*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfFirstGridPoint,(long long)(lon1*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfLastGridPoint,(long long)(lat2*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfLastGridPoint,(long long)(lon2*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfLastGridPoint,(Int64 )(lat2*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfLastGridPoint,(Int64 )(lon2*1000)));
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
         }
 
 
         if (projectionStr == "stere"  && query.mAreaCoordinates.size() > 0  && query.mAreaCoordinates[0].size() > 0)
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::DataRepresentationType,5LL));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(long long)(lat1*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(long long)(lon1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,5LL));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Nx,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Ny,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
 
           if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(long long)(lon_0*1000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(lon_0*1000)));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::DxInMetres,(long long)xStepMetric));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::DyInMetres,(long long)yStepMetric));
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DxInMetres,(Int64 )xStepMetric));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DyInMetres,(Int64 )yStepMetric));
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
         }
 
 
         if (projectionStr == "lcc"  && query.mAreaCoordinates.size() > 0  && query.mAreaCoordinates[0].size() > 0)
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::DataRepresentationType,3LL));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,3LL));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(long long)(lat1*1000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(long long)(lon1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Nx,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Ny,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
 
           if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::LoV,(long long)(lon_0*1000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LoV,(Int64 )(lon_0*1000)));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::DxInMetres,(long long)xStepMetric));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::DyInMetres,(long long)yStepMetric));
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::ProjectionCentreFlag:
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DxInMetres,(Int64 )xStepMetric));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DyInMetres,(Int64 )yStepMetric));
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::ProjectionCentreFlag:
 
           if (lat_1 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::Latin1,(long long)(lat_1*1000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin1,(Int64 )(lat_1*1000)));
 
           if (lat_2 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::Latin2,(long long)(lat_2*1000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin2,(Int64 )(lat_2*1000)));
 
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
 
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(long long)0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
         }
       }
 
@@ -5432,84 +5432,84 @@ bool ServiceImplementation::getGridFiles(
       {
         if (projectionStr == "longlat")
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(long long)GRIB2::GridSection::Template::LatLon));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LatLon));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::Ni,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::Nj,gridHeight));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::LatitudeOfFirstGridPoint,(long long)(lat1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::LongitudeOfFirstGridPoint,(long long)(lon1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::LatitudeOfLastGridPoint,(long long)(lat2*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::Grid::LongitudeOfLastGridPoint,(long long)(lon2*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Ni,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Nj,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfLastGridPoint,(Int64 )(lat2*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfLastGridPoint,(Int64 )(lon2*1000000)));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LatLon::IDirectionIncrement,(long long)(xStepDegrees*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LatLon::JDirectionIncrement,(long long)(yStepDegrees*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(xStepDegrees*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(yStepDegrees*1000000)));
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(long long)0x0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x0));
         }
 
 
         if (projectionStr == "stere"  && query.mAreaCoordinates.size() > 0  && query.mAreaCoordinates[0].size() > 0)
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(long long)GRIB2::GridSection::Template::PolarStereographic));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::PolarStereographic));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(long long)(lat1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(long long)(lon1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::ResolutionAndComponentFlags,48));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Nx,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Ny,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ResolutionAndComponentFlags,48));
           if (laD != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,(long long)(laD*1000000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,(Int64 )(laD*1000000)));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,60000000));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,60000000));
 
           if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(long long)(lon_0*1000000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(lon_0*1000000)));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(long long)xStepMetric*1000));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(long long)yStepMetric*1000));
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(Int64 )xStepMetric*1000));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(Int64 )yStepMetric*1000));
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(long long)0x0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x0));
         }
 
 
         if (projectionStr == "lcc"  && query.mAreaCoordinates.size() > 0  && query.mAreaCoordinates[0].size() > 0)
         {
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(long long)GRIB2::GridSection::Template::LambertConformal));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LambertConformal));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(long long)(lat1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(long long)(lon1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::ResolutionAndComponentFlags,48));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Nx,gridWidth));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Ny,gridHeight));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ResolutionAndComponentFlags,48));
 
           if (laD != ParamValueMissing)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LaD,(long long)(laD*1000000)));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,(Int64 )(laD*1000000)));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
 
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(long long)(lon_0*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(long long)xStepMetric*1000));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(long long)yStepMetric*1000));
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(long long)(lat_1*1000000)));
-          newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(long long)(lat_2*1000000)));
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
-          //newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(lon_0*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )xStepMetric*1000));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )yStepMetric*1000));
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(lat_1*1000000)));
+          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(lat_2*1000000)));
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
+          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
 
           if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(long long)0x40));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x40));
           else
-            newProperties.insert(std::pair<uint,long long>((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(long long)0x0));
+            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x0));
         }
 
       }
@@ -5525,7 +5525,7 @@ bool ServiceImplementation::getGridFiles(
         GRIB1::GridDef_sptr def = Identification::gridDef.getGrib1DefinitionByGeometryId(atoi(geometryIdStr));
         if (def)
         {
-          newProperties.insert(std::pair<uint,long long>((uint)Property::GridSection::DataRepresentationType,def->getTemplateNumber()));
+          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::DataRepresentationType,def->getTemplateNumber()));
 
           T::PropertySettingVec tmpProperties;
           def->getProperties(tmpProperties);
@@ -5533,33 +5533,33 @@ bool ServiceImplementation::getGridFiles(
           for (auto it = tmpProperties.begin(); it != tmpProperties.end();++it)
           {
             //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,long long>(it->propertyId,atoll(it->propertyValue.c_str())));
+            newProperties.insert(std::pair<uint,Int64 >(it->propertyId,atoll(it->propertyValue.c_str())));
           }
         }
       }
 
       newMessage = newGridFile.newMessage(T::FileTypeValue::Grib1);
 
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::SectionFlags,128));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::Level,paramLevel));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::YearOfCentury,year % 100));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::Month,month));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::Day,day));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::Hour,hour));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::Minute,minute));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::UnitOfTimeRange,1));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::P1,0));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::P2,0));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::TimeRangeIndicator,0));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::CenturyOfReferenceTimeOfData,(year/100)+1));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::ForecastType,contentInfo1->mForecastType));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::ProductSection::ForecastNumber,contentInfo1->mForecastNumber));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::SectionFlags,128));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Level,paramLevel));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::YearOfCentury,year % 100));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Month,month));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Day,day));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Hour,hour));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Minute,minute));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::UnitOfTimeRange,1));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P1,0));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P2,0));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::TimeRangeIndicator,0));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::CenturyOfReferenceTimeOfData,(year/100)+1));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastType,contentInfo1->mForecastType));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastNumber,contentInfo1->mForecastNumber));
 
-      newProperties.insert(std::pair<uint,long long>((uint)Property::DataSection::Flags,8));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::DataSection::BinaryScaleFactor,-5));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::DataSection::ReferenceValue,0.0));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::DataSection::BitsPerValue,32));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::DataSection::PackingMethod,0));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::Flags,8));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BinaryScaleFactor,-5));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::ReferenceValue,0.0));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BitsPerValue,32));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::PackingMethod,0));
 
       // ### Setting default values for the parameters
 
@@ -5606,8 +5606,8 @@ bool ServiceImplementation::getGridFiles(
           auto rows = def->getGridRowCount();
           auto cols = def->getGridColumnCount();
 
-          newProperties.insert(std::pair<uint,long long>((uint)Property::GridSection::NumberOfGridPoints,cols*rows));
-          newProperties.insert(std::pair<uint,long long>((uint)Property::GridSection::GridDefinitionTemplateNumber,def->getTemplateNumber()));
+          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::NumberOfGridPoints,cols*rows));
+          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::GridDefinitionTemplateNumber,def->getTemplateNumber()));
 
           T::PropertySettingVec tmpProperties;
           def->getProperties(tmpProperties);
@@ -5615,25 +5615,25 @@ bool ServiceImplementation::getGridFiles(
           for (auto it = tmpProperties.begin(); it != tmpProperties.end();++it)
           {
             //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,long long>(it->propertyId,atoll(it->propertyValue.c_str())));
+            newProperties.insert(std::pair<uint,Int64 >(it->propertyId,atoll(it->propertyValue.c_str())));
           }
         }
       }
 
       newMessage = newGridFile.newMessage(T::FileTypeValue::Grib2);
 
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::SignificanceOfReferenceTime,1));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Year,year));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Month,month));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Day,day));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Hour,hour));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Minute,minute));
-      newProperties.insert(std::pair<uint,long long>((uint)Property::IdentificationSection::Second,second));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::SignificanceOfReferenceTime,1));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Year,year));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Month,month));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Day,day));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Hour,hour));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Minute,minute));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Second,second));
 
-      newProperties.insert(std::pair<uint,long long>(Property::RepresentationSection::RepresentationTemplateNumber,RepresentationSection::Template::GridDataRepresentation));
+      newProperties.insert(std::pair<uint,Int64 >(Property::RepresentationSection::RepresentationTemplateNumber,RepresentationSection::Template::GridDataRepresentation));
 
-      newProperties.insert(std::pair<uint,long long>(Property::ProductSection::ParameterSettings::ForecastTime,0));
-      newProperties.insert(std::pair<uint,long long>(Property::ProductSection::HorizontalSettings::ScaledValueOfFirstFixedSurface,paramLevel));
+      newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::ParameterSettings::ForecastTime,0));
+      newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::HorizontalSettings::ScaledValueOfFirstFixedSurface,paramLevel));
 
       // ### Setting default values for the parameters
 
@@ -5686,7 +5686,7 @@ bool ServiceImplementation::getGridFiles(
     uint height = d.ny();
     uint numOfValues = width*height;
     uint numOfBytes = 4*numOfValues;
-    ulonglong sz = 2 * numOfBytes;
+    UInt64 sz = 2 * numOfBytes;
 
 
     if (contentLen == 1)
@@ -5727,11 +5727,11 @@ bool ServiceImplementation::getGridFiles(
         uchar *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
-        ulonglong fsize = memoryWriter.getMaxWritePosition();
+        UInt64 fsize = memoryWriter.getMaxWritePosition();
 
         std::vector<uchar> dataFile;
         dataFile.reserve(fsize);
-        for (ulonglong i=0; i <fsize; i++)
+        for (UInt64 i=0; i <fsize; i++)
           dataFile.emplace_back(data[i]);
 
         valueList.mValueData.emplace_back(dataFile);
@@ -5791,11 +5791,11 @@ bool ServiceImplementation::getGridFiles(
         uchar *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
-        ulonglong fsize = memoryWriter.getMaxWritePosition();
+        UInt64 fsize = memoryWriter.getMaxWritePosition();
 
         std::vector<uchar> dataFile;
         dataFile.reserve(fsize);
-        for (ulonglong i=0; i <fsize; i++)
+        for (UInt64 i=0; i <fsize; i++)
           dataFile.emplace_back(data[i]);
 
         valueList.mValueData.emplace_back(dataFile);
@@ -5842,11 +5842,11 @@ bool ServiceImplementation::getGridFiles(
         uchar *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
-        ulonglong fsize = memoryWriter.getMaxWritePosition();
+        UInt64 fsize = memoryWriter.getMaxWritePosition();
 
         std::vector<uchar> dataFile;
         dataFile.reserve(fsize);
-        for (ulonglong i=0; i <fsize; i++)
+        for (UInt64 i=0; i <fsize; i++)
           dataFile.emplace_back(data[i]);
 
         valueList.mValueData.emplace_back(dataFile);
@@ -5894,11 +5894,11 @@ bool ServiceImplementation::getGridFiles(
         uchar *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
-        ulonglong fsize = memoryWriter.getMaxWritePosition();
+        UInt64 fsize = memoryWriter.getMaxWritePosition();
 
         std::vector<uchar> dataFile;
         dataFile.reserve(fsize);
-        for (ulonglong i=0; i <fsize; i++)
+        for (UInt64 i=0; i <fsize; i++)
           dataFile.emplace_back(data[i]);
 
         valueList.mValueData.emplace_back(dataFile);
@@ -5924,7 +5924,7 @@ bool ServiceImplementation::getGridFiles(
 time_t ServiceImplementation::getContentList(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
@@ -6033,14 +6033,14 @@ bool ServiceImplementation::getPointValuesByHeight(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -6352,14 +6352,14 @@ bool ServiceImplementation::getValueVectorsByHeight(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -6379,7 +6379,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
     if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
       levelInterpolationMethod = pInfo.mLevelInterpolationMethod;
 
-    uint modificationOperation = 0;
+    //uint modificationOperation = 0;
     double_vec modificationParameters;
     std::string function;
     std::vector<std::string> functionParams;
@@ -6391,7 +6391,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
       auto p = mOperationNames.find(f);
       if (p != mOperationNames.end())
       {
-        modificationOperation = p->second;
+        //modificationOperation = p->second;
         for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
         {
           if (*it != "$")
@@ -6594,14 +6594,14 @@ bool ServiceImplementation::getValueVectorsByHeight(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -6966,14 +6966,14 @@ bool ServiceImplementation::getPointValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -7259,9 +7259,9 @@ bool ServiceImplementation::getCircleValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
@@ -7270,7 +7270,7 @@ bool ServiceImplementation::getCircleValues(
     double x,
     double y,
     double radius,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -7549,14 +7549,14 @@ bool ServiceImplementation::getPolygonValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -7952,9 +7952,9 @@ bool ServiceImplementation::getStreamlineValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
@@ -7963,7 +7963,7 @@ bool ServiceImplementation::getStreamlineValues(
     //uchar coordinateType,
     //T::Coordinate_vec& gridCoordinates,
     //T::AttributeList& queryAttributeList,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -8289,14 +8289,14 @@ bool ServiceImplementation::getIsolineValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -8647,14 +8647,14 @@ bool ServiceImplementation::getIsobandValues(
     QueryParameter& qParam,
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
-    uint generationId,
+    T::GenerationId generationId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     ParameterMapping& pInfo,
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    uint& newProducerId,
+    T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -9005,15 +9005,267 @@ bool ServiceImplementation::getIsobandValues(
 
 
 
+
+
+bool ServiceImplementation::getVerticalValueVectors(
+    Query& query,
+    QueryParameter& qParam,
+    T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    const std::string& analysisTime,
+    UInt64 generationFlags,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId paramLevelId,
+    std::vector<T::ParamLevel>& parameterLevels,
+    T::ProducerId& newProducerId,
+    ParameterValues& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    PRINT_DATA(mDebugLog, "getVerticalValueVectors()\n");
+
+    short areaInterpolationMethod = qParam.mAreaInterpolationMethod;
+    if (areaInterpolationMethod == T::AreaInterpolationMethod::Undefined)
+      areaInterpolationMethod = pInfo.mAreaInterpolationMethod;
+
+    short timeInterpolationMethod = qParam.mTimeInterpolationMethod;
+    if (timeInterpolationMethod == T::TimeInterpolationMethod::Undefined)
+      timeInterpolationMethod = pInfo.mTimeInterpolationMethod;
+
+    uint modificationOperation = 0;
+    double_vec modificationParameters;
+    std::string function;
+    std::vector<std::string> functionParams;
+    bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
+
+    if (conversionByFunction && mDataServerMethodsEnabled)
+    {
+      std::string f = toUpperString(function);
+      auto p = mOperationNames.find(f);
+      if (p != mOperationNames.end())
+      {
+        modificationOperation = p->second;
+        for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
+        {
+          if (*it != "$")
+            modificationParameters.push_back(atof(it->c_str()));
+        }
+        conversionByFunction = false;
+      }
+    }
+
+
+    if (parameterLevels.size() == 0)
+    {
+      std::set<T::ParamLevel> levels;
+      if (mContentServerPtr->getContentLevelListByParameterGenerationGeometryAndLevelId(producerInfo.mProducerId,generationId,producerGeometryId,pInfo.mParameterKey,paramLevelId,levels) != 0)
+      {
+        return false; // Error
+      }
+
+      for (auto level = levels.begin(); level != levels.end(); level++)
+      {
+        parameterLevels.push_back(*level);
+        std::cout << "LEVEL " << *level << "\n";
+      }
+    }
+
+    if (parameterLevels.size() == 0)
+    {
+      return false; // No Levels
+    }
+
+
+    for (auto level = parameterLevels.begin(); level != parameterLevels.end(); ++level)
+    {
+      std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
+      time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
+          paramLevelId,*level,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
+
+      PRINT_DATA(mDebugLog, "         + Found %u content records on level %d (fTime = %ld)\n", contentList->getLength(),*level,fTime);
+
+      //if (fTime == 0)
+      //  return false;
+
+      if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+      {
+        std::stringstream stream;
+        contentList->print(stream, 0, 4);
+        PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
+      }
+
+      uint contentLen = contentList->getLength();
+      //if (contentLen == 0)
+      //  return false;
+
+      T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
+      T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
+
+      if (contentLen > 0)
+      {
+        valueList.mParameterKeyType = pInfo.mParameterKeyType;
+        valueList.mParameterKey = pInfo.mParameterKey;
+        valueList.mParameterLevelId = paramLevelId;
+        valueList.mForecastTimeUTC = forecastTime;
+        valueList.mProducerId = contentInfo1->mProducerId;
+        valueList.mGenerationId = contentInfo1->mGenerationId;
+        valueList.mGenerationFlags = generationFlags;
+        valueList.mGeometryId = contentInfo1->mGeometryId;
+        valueList.mFileId[0] = contentInfo1->mFileId;
+        valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
+        valueList.mModificationTime = contentInfo1->mModificationTime;
+        valueList.mAnalysisTime = analysisTime;
+        valueList.mForecastType = contentInfo1->mForecastType;
+        valueList.mForecastNumber = contentInfo1->mForecastNumber;
+        valueList.mParameterLevel = *level;
+        valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
+      }
+
+      if (contentLen == 1)
+      {
+        if (contentInfo1->mForecastTimeUTC == fTime)
+        {
+          // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
+          valueList.mFlags = ParameterValues::Flags::DataAvailable;
+
+          T::GridValueList valList;
+          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
+          {
+            int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList);
+            if (result != 0)
+            {
+              Fmi::Exception exception(BCP, "DataServer returns an error!");
+              exception.addParameter("Service", "getGridValueListByPointList");
+              exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+              exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
+              exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
+              std::string errorMsg = exception.getStackTrace();
+              PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+              return false;
+            }
+
+            if (conversionByFunction)
+              executeConversion(function, functionParams, forecastTime, valList);
+          }
+
+          uint len = valList.getLength();
+          for (uint t=0; t<len; t++)
+          {
+            T::GridValue *rec = valList.getGridValuePtrByIndex(t);
+            if (rec)
+            {
+              valueList.mValueVector.push_back(rec->mValue);
+            }
+            else
+            {
+              valueList.mValueVector.push_back(ParamValueMissing);
+            }
+          }
+
+          if (qParam.mPrecision < 0)
+            qParam.mPrecision = pInfo.mDefaultPrecision;
+
+          //return true;
+        }
+        else
+        {
+          // There is one content record in place, but its time does not match to
+          // the requested forecast time. This is used for indicating that there
+          // are content records available, but not for the requested time.
+          // So, we should use this producer.
+
+          newProducerId = producerInfo.mProducerId;
+          valueList.clear();
+          valueList.mProducerId = producerInfo.mProducerId;
+          valueList.mParameterKeyType = pInfo.mParameterKeyType;
+          valueList.mParameterKey = pInfo.mParameterKey;
+          valueList.mForecastTimeUTC = forecastTime;
+          return false;
+        }
+      }
+
+
+      //short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
+
+      if (contentLen == 2)
+      {
+        if (contentInfo1->mParameterLevel == *level  &&  contentInfo2->mParameterLevel == *level  &&
+            contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC > fTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
+        {
+          // Content records have different times, but the same levels, so we need to do time interpolation.
+
+          valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+          valueList.mFileId[1] = contentInfo2->mFileId;
+          valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+
+          T::GridValueList valList;
+          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
+          {
+            int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList);
+            if (result != 0)
+            {
+              Fmi::Exception exception(BCP, "DataServer returns an error!");
+              exception.addParameter("Service", "getGridValueListByTimeAndPointList");
+              exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+              exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
+              exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
+              exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
+              exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
+              std::string errorMsg = exception.getStackTrace();
+              PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+              return false;
+            }
+
+            if (conversionByFunction)
+              executeConversion(function, functionParams, forecastTime, valList);
+          }
+
+          uint len = valList.getLength();
+          for (uint t=0; t<len; t++)
+          {
+            T::GridValue *rec = valList.getGridValuePtrByIndex(t);
+            if (rec)
+              valueList.mValueVector.push_back(rec->mValue);
+            else
+              valueList.mValueVector.push_back(ParamValueMissing);
+          }
+
+          if (qParam.mPrecision < 0)
+            qParam.mPrecision = pInfo.mDefaultPrecision;
+
+          //return true;
+        }
+      }
+    }
+    if (valueList.mValueVector.size())
+      return true;
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+
 void ServiceImplementation::getGridValues(
     Query& query,
     QueryParameter& qParam,
     Producer_vec& producers,
     std::set<T::GeometryId>& geometryIdList,
-    uint producerId,
+    T::ProducerId producerId,
     const std::string& analysisTime,
     const std::string& maxAnalysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     const std::string& parameterKey,
     std::size_t parameterHash,
     uint queryFlags,
@@ -9037,7 +9289,7 @@ void ServiceImplementation::getGridValues(
       PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
       PRINT_DATA(mDebugLog, "  - maxAnalysisTime          : %s\n", maxAnalysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags          : %llu\n", generationFlags);
+      PRINT_DATA(mDebugLog, "  - generationFlags          : %lu\n", generationFlags);
       PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
       PRINT_DATA(mDebugLog, "  - queryFlags               : %04x\n", queryFlags);
       PRINT_DATA(mDebugLog, "  - forecastTime             : %s\n", utcTimeFromTimeT(forecastTime).c_str());
@@ -9606,6 +9858,20 @@ void ServiceImplementation::getGridValues(
 
                   }
 
+
+                  if (qParam.mType == QueryParameter::Type::VerticalVector)
+                  {
+                    if (qParam.mLocationType == QueryParameter::LocationType::Point)
+                    {
+                      if (getVerticalValueVectors(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, *pInfo,
+                          forecastTime, pLevelId, qParam.mParameterLevels,producerId, valueList))
+                      {
+                        return;
+                      }
+                    }
+                  }
+
+
                   if ((qParam.mFlags & QueryServer::QueryParameter::Flags::MetricLevels)  &&  (qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
                   {
                     // This is metric query. We should post-process isobands, isolines, etc.
@@ -9713,9 +9979,9 @@ void ServiceImplementation::getGridValues(
     QueryParameter& qParam,
     Producer_vec& producers,
     std::set<T::GeometryId>& geometryIdList,
-    uint producerId,
+    T::ProducerId producerId,
     const std::string& analysisTime,
-    ulonglong generationFlags,
+    UInt64 generationFlags,
     const std::string& parameterKey,
     std::size_t parameterHash,
     uint queryFlags,
@@ -9742,7 +10008,7 @@ void ServiceImplementation::getGridValues(
         PRINT_DATA(mDebugLog, "    * %d\n",* it);
       PRINT_DATA(mDebugLog, "  - producerId                     : %u\n", producerId);
       PRINT_DATA(mDebugLog, "  - analysisTime                   : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags                : %llu\n", generationFlags);
+      PRINT_DATA(mDebugLog, "  - generationFlags                : %lu\n", generationFlags);
       PRINT_DATA(mDebugLog, "  - parameterKey                   : %s\n", parameterKey.c_str());
       PRINT_DATA(mDebugLog, "  - queryFlags                     : %04x\n", queryFlags);
       //PRINT_DATA(mDebugLog, "  - parameterFlags                 : %04x\n", parameterFlags);
@@ -9948,7 +10214,7 @@ void ServiceImplementation::getGridValues(
                   uint validCount = 0;
                   for (int g=gLen-1; g>=0; g--)
                   {
-                    ulonglong gFlags = 1 << c;
+                    UInt64 gFlags = 1 << c;
                     c++;
 
                     bool generationValid = false;
@@ -10828,7 +11094,7 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
 
 
 
-bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,double x,double y,int height,HeightRec& rec)
+bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T::GenerationId generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,double x,double y,int height,HeightRec& rec)
 {
   FUNCTION_TRACE
   try
@@ -10836,14 +11102,14 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
-    uint heightProducerId = 0;
+    T::ProducerId heightProducerId = 0;
     std::string heightParameter;
 
     std::size_t hash = 0;
     Fmi::hash_merge(hash,producerId);
     Fmi::hash_merge(hash,paramLevelId);
     //std::size_t hashConversion = hash;
-    uint heightGenerationId = generationId;
+    T::GenerationId heightGenerationId = generationId;
 
     {
       AutoReadLock lock(&mHeightConversions_modificationLock);
@@ -11165,8 +11431,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
     T::ParamValue middleValue = 0;
 
 
-    std::size_t firstKey = ((std::size_t)first->mFileId << 32) + first->mMessageIndex + coordinateHash;
-    std::size_t lastKey = ((std::size_t)last->mFileId << 32) + last->mMessageIndex + coordinateHash;
+    std::size_t firstKey = ((std::size_t)first->mFileId << 24) + first->mMessageIndex + coordinateHash;
+    std::size_t lastKey = ((std::size_t)last->mFileId << 24) + last->mMessageIndex + coordinateHash;
 
     std::shared_ptr<T::ParamValue_vec> firstValueVec;
     std::shared_ptr<T::ParamValue_vec> lastValueVec;
@@ -11236,7 +11502,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
       if (mid == nullptr)
         return false;
 
-      std::size_t middleKey = ((std::size_t)mid->mFileId << 32) + mid->mMessageIndex + coordinateHash;
+      std::size_t middleKey = ((std::size_t)mid->mFileId << 24) + mid->mMessageIndex + coordinateHash;
 
       auto it = mHeightVecCache.find(middleKey);
       if (it)
@@ -11334,7 +11600,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
 
 
 
-bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,std::vector<T::Coordinate>& coordinates,int height,HeightRec_vec& recs)
+bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T::GenerationId generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,std::vector<T::Coordinate>& coordinates,int height,HeightRec_vec& recs)
 {
   FUNCTION_TRACE
   try
@@ -11342,14 +11608,14 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
-    uint heightProducerId = 0;
+    T::ProducerId heightProducerId = 0;
     std::string heightParameter;
 
     std::size_t hash = 0;
     Fmi::hash_merge(hash,producerId);
     Fmi::hash_merge(hash,paramLevelId);
-    std::size_t hashConversion = hash;
-    uint heightGenerationId = generationId;
+    //std::size_t hashConversion = hash;
+    T::GenerationId heightGenerationId = generationId;
 
     {
       AutoReadLock lock(&mHeightConversions_modificationLock);
@@ -11423,7 +11689,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
     {
       std::set<T::ParamLevel> levels;
       int result = mContentServerPtr->getContentLevelListByGenerationGeometryAndLevelId(0,heightGenerationId,geometryId,paramLevelId,levels);
-      if (levels.size() == 0)
+      if (result != 0 || levels.size() == 0)
       {
         PRINT_DATA(mDebugLog,"  ** No levels found\n");
         return false;
@@ -11515,7 +11781,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(uint producerId,uint genera
       if (contentInfoList1.getLength() != contentInfoList2.getLength())
         return false;
 
-      for (int t=0;t<clen; t++)
+      for (uint t=0;t<clen; t++)
       {
         HeightRec rec;
         rec.levelId = paramLevelId;
@@ -11705,7 +11971,7 @@ void ServiceImplementation::updateProcessing()
     mUpdateProcessingActive = true;
 
     time_t prevTime = time(nullptr);
-    long long prevCounter = mRequestCounter;
+    Int64  prevCounter = mRequestCounter;
 
     while (!mShutdownRequested)
     {

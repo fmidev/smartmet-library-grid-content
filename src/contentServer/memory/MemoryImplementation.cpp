@@ -512,7 +512,7 @@ int MemoryImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInf
 
 
 
-int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,uint producerId)
+int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -590,7 +590,7 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
 
 
 
-int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -625,7 +625,7 @@ int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
 
 
-int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,uint producerId,T::ProducerInfo& producerInfo)
+int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -783,9 +783,9 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,0,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
 
-    std::set<uint> producerIdList;
+    std::set<T::ProducerId> producerIdList;
     uint len = contentInfoList.getLength();
-    uint prevProducerId = 0;
+    T::ProducerId prevProducerId = 0;
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
@@ -814,7 +814,7 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::ProducerInfoList& producerInfoList)
+int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
   try
@@ -888,7 +888,7 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
     {
       T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoByIndex(p);
 
-      std::set<uint> geometryIdList;
+      std::set<T::GeometryId> geometryIdList;
 
       uint len = mContentInfoList[0].getLength();
       for (uint t=0; t<len; t++)
@@ -929,12 +929,12 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     AutoReadLock lock(&mModificationLock);
 
     T::ProducerInfoList producerList = mProducerInfoList;
-    std::map<uint,T::ProducerInfo*> producers;
+    std::map<T::ProducerId,T::ProducerInfo*> producers;
     uint plen = producerList.getLength();
     for (uint t=0; t<plen; t++)
     {
       auto prod = producerList.getProducerInfoByIndex(t);
-      producers.insert(std::pair<uint,T::ProducerInfo*>(prod->mProducerId,prod));
+      producers.insert(std::pair<T::ProducerId,T::ProducerInfo*>(prod->mProducerId,prod));
     }
 
 
@@ -1101,7 +1101,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
-int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
   try
@@ -1354,7 +1354,7 @@ int MemoryImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
-int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,uint generationId)
+int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1430,7 +1430,7 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
 
 
 
-int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<uint>& generationIdList)
+int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -1466,7 +1466,7 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
 
 
-int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1543,7 +1543,7 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
-int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1576,7 +1576,7 @@ int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
 
 
-int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,uint generationId,T::GenerationInfo& generationInfo)
+int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1671,7 +1671,7 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
     generationInfoList.clear();
 
-    std::set<uint> idList;
+    std::set<T::GenerationId> idList;
 
     mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
@@ -1694,7 +1694,7 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
 
 
-int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GenerationInfoList& generationInfoList)
+int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1752,7 +1752,7 @@ int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
 
 
-int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GenerationInfoList& generationInfoList)
+int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1777,7 +1777,7 @@ int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
-int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1859,7 +1859,7 @@ int MemoryImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
-int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,uint generationId,uchar status)
+int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -1957,7 +1957,7 @@ int MemoryImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -1987,7 +1987,7 @@ int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,uint ge
 
 
 
-int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -2017,7 +2017,7 @@ int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId ses
 
 
 
-int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -2046,7 +2046,7 @@ int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessi
 
 
 
-int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -2071,7 +2071,7 @@ int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 
 
-int MemoryImplementation::_getGeometryInfoById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int MemoryImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
@@ -2121,7 +2121,7 @@ int MemoryImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
 
 
 
-int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,uint generationId,T::GeometryInfoList& geometryInfoList)
+int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2150,7 +2150,7 @@ int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 
 
-int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,uint producerId,T::GeometryInfoList& geometryInfoList)
+int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2178,7 +2178,7 @@ int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
 
 
 
-int MemoryImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,uint sourceId,T::GeometryInfoList& geometryInfoList)
+int MemoryImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -2262,7 +2262,7 @@ int MemoryImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
-int MemoryImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int MemoryImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   FUNCTION_TRACE
   try
@@ -2656,7 +2656,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
 
 
-int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,uint fileId)
+int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -2789,7 +2789,7 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
 
 
-int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,uint producerId)
+int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -2857,7 +2857,7 @@ int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
 
 
-int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,uint generationId)
+int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -2891,7 +2891,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
-int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
+int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   FUNCTION_TRACE
   try
@@ -2979,7 +2979,7 @@ int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
-int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,uint sourceId)
+int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -3009,7 +3009,7 @@ int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,u
 
 
 
-int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<uint>& fileIdList)
+int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
   try
@@ -3042,7 +3042,7 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,uint fileId,T::FileInfo& fileInfo)
+int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try
@@ -3096,7 +3096,7 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
-int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3121,7 +3121,7 @@ int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,uint startFile
 
 
 
-int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3152,7 +3152,7 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
-int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3181,7 +3181,7 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,ui
 
 
 
-int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3210,7 +3210,7 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
-int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3239,7 +3239,7 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
-int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3267,7 +3267,7 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
-int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3313,7 +3313,7 @@ int MemoryImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
-int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,uint producerId,uint& count)
+int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3334,7 +3334,7 @@ int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,u
 
 
 
-int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,uint generationId,uint& count)
+int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3355,7 +3355,7 @@ int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,uint sourceId,uint& count)
+int MemoryImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3711,7 +3711,7 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
 
 
 
-int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex)
+int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
   try
@@ -3743,7 +3743,7 @@ int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,uint fileId,
 
 
 
-int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,uint fileId)
+int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -3805,7 +3805,7 @@ int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
-int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,uint producerId)
+int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -3867,7 +3867,7 @@ int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
 
 
-int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,uint generationId)
+int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -3929,7 +3929,7 @@ int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
 
 
-int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,uint sourceId)
+int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -3956,7 +3956,7 @@ int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,ui
 
 
 
-int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uint messageIndex,T::ContentInfo& contentInfo)
+int MemoryImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -3985,7 +3985,7 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,uint fileId,uin
 
 
 
-int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4010,7 +4010,7 @@ int MemoryImplementation::_getContentList(T::SessionId sessionId,uint startFileI
 
 
 
-int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,uint fileId,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4035,7 +4035,7 @@ int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,uint fi
 
 
 
-int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<uint>& fileIdList,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4095,7 +4095,7 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
-int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uint producerId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4124,7 +4124,7 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,uin
 
 
 
-int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4153,7 +4153,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
-int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,uint generationId,uint startFileId,uint startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4182,7 +4182,7 @@ int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,u
 
 
 
-int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4211,7 +4211,7 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
-int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,uint generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4269,7 +4269,7 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
-int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,uint sourceId,uint startFileId,uint startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4367,7 +4367,7 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
-int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4521,7 +4521,7 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
-int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,uint producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4599,7 +4599,7 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 
 
-int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4790,7 +4790,7 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
         T::FileInfo *fileInfo = mFileInfoList.getFileInfoById(cInfo->mFileId);
         if (fileInfo == nullptr)
         {
-          printf("**** INTEGRITY ERROR : File missing (%u)! *****\n",cInfo->mFileId);
+          printf("**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
           cError = cInfo;
         }
 
@@ -4799,7 +4799,7 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
           T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
           if (generationInfo == nullptr)
           {
-            printf("**** INTEGRITY ERROR : Generation missing (%u)! *****\n",cInfo->mGenerationId);
+            printf("**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
             cError = cInfo;
           }
         }
@@ -4830,7 +4830,7 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
 
 
 
-int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,uint generationId,std::set<T::GeometryId>& geometryIdList)
+int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -4859,7 +4859,7 @@ int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
 
 
-int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,uint generationId,T::ContentInfoList& contentParamList)
+int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
   FUNCTION_TRACE
   try
@@ -4915,7 +4915,7 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
-int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,uint generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -4944,7 +4944,7 @@ int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
-int MemoryImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int MemoryImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -4973,7 +4973,7 @@ int MemoryImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
-int MemoryImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int MemoryImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
   try
@@ -5002,7 +5002,7 @@ int MemoryImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(
 
 
 
-int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,uint generationId,std::set<std::string>& contentTimeList)
+int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5032,7 +5032,7 @@ int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
-int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,uint producerId,uint generationId,time_t& startTime,time_t& endTime)
+int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
   try
@@ -5072,7 +5072,7 @@ int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
 
 
 
-int MemoryImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,uint generationId,time_t& startTime,time_t& endTime)
+int MemoryImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
   try
@@ -5100,7 +5100,7 @@ int MemoryImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessio
 
 
 
-int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5129,7 +5129,7 @@ int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
-int MemoryImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+int MemoryImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
   try
@@ -5157,7 +5157,34 @@ int MemoryImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::
 
 
 
-int MemoryImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+int MemoryImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!isSessionValid(sessionId))
+      return Result::INVALID_SESSION;
+
+    AutoReadLock lock(&mModificationLock);
+
+    T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(generationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    contentLevelList.clear();
+
+    mContentInfoList[0].getContentLevelListByParameterGenerationGeometryAndLevelId(generationInfo->mProducerId,generationId,geometryId,parameterKey,levelId,contentLevelList);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+int MemoryImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5186,7 +5213,7 @@ int MemoryImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::S
 
 
 
-int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,uint producerId,std::set<std::string>& contentTimeList)
+int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
   try
@@ -5229,7 +5256,7 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       char st[200];
-      sprintf(st,"%u;%u;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+      sprintf(st,"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
       std::string str = st;
 
 
@@ -5270,7 +5297,7 @@ int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
-int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,uint producerId,ulonglong& hash)
+int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
   FUNCTION_TRACE
   try
@@ -5296,7 +5323,7 @@ int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,uint produ
 
 
 
-ulonglong MemoryImplementation::updateProducerHashNoLock(uint producerId)
+UInt64 MemoryImplementation::updateProducerHashNoLock(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -5352,7 +5379,7 @@ int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-T::EventId MemoryImplementation::addEvent(uint eventType,uint id1,uint id2,uint id3,unsigned long long flags)
+T::EventId MemoryImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags)
 {
   FUNCTION_TRACE
   try
@@ -5724,7 +5751,7 @@ bool MemoryImplementation::syncProducerList()
     }
     fclose(file);
 
-    std::vector<uint> idList;
+    std::vector<T::ProducerId> idList;
     mProducerInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -5833,7 +5860,7 @@ bool MemoryImplementation::syncGenerationList()
     }
     fclose(file);
 
-    std::vector<uint> idList;
+    std::vector<T::GenerationId> idList;
     mGenerationInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
@@ -6044,7 +6071,7 @@ bool MemoryImplementation::syncFileList()
     }
     fclose(file);
 
-    std::vector<uint> idList;
+    std::vector<T::FileId> idList;
     std::vector<std::string> nameList;
     mFileInfoList.getLength();
     for (uint t=0; t<len; t++)

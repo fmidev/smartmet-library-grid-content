@@ -550,7 +550,7 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
 
 
 
-bool GeometryInfoList::deleteGeometryInfoById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+bool GeometryInfoList::deleteGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -594,7 +594,7 @@ bool GeometryInfoList::deleteGeometryInfoById(uint generationId,T::GeometryId ge
 
 
 
-uint GeometryInfoList::deleteGeometryInfoListByProducerId(uint producerId)
+uint GeometryInfoList::deleteGeometryInfoListByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -637,7 +637,7 @@ uint GeometryInfoList::deleteGeometryInfoListByProducerId(uint producerId)
 
 
 
-uint GeometryInfoList::deleteGeometryInfoListByGenerationId(uint generationId)
+uint GeometryInfoList::deleteGeometryInfoListByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -680,7 +680,7 @@ uint GeometryInfoList::deleteGeometryInfoListByGenerationId(uint generationId)
 
 
 
-uint GeometryInfoList::deleteGeometryInfoListByGenerationIdList(std::set<uint>& generationIdList)
+uint GeometryInfoList::deleteGeometryInfoListByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -797,7 +797,7 @@ uint GeometryInfoList::markDeleted()
 
 
 
-uint GeometryInfoList::markDeletedByGenerationId(uint generationId)
+uint GeometryInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -831,7 +831,7 @@ uint GeometryInfoList::markDeletedByGenerationId(uint generationId)
 
 
 
-uint GeometryInfoList::markDeletedByProducerId(uint producerId)
+uint GeometryInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -865,7 +865,7 @@ uint GeometryInfoList::markDeletedByProducerId(uint producerId)
 
 
 
-uint GeometryInfoList::markDeletedBySourceId(uint sourceId)
+uint GeometryInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -899,7 +899,41 @@ uint GeometryInfoList::markDeletedBySourceId(uint sourceId)
 
 
 
-uint GeometryInfoList::markDeletedById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+uint GeometryInfoList::markDeletedByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GeometryInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
+        {
+          info->mFlags |= T::GeometryInfo::Flags::DeletedGeometry;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GeometryInfoList::markDeletedById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -923,7 +957,7 @@ uint GeometryInfoList::markDeletedById(uint generationId,T::GeometryId geometryI
 
 
 
-GeometryInfo* GeometryInfoList::getGeometryInfoById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+GeometryInfo* GeometryInfoList::getGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
   try
@@ -958,7 +992,7 @@ GeometryInfo* GeometryInfoList::getGeometryInfoById(uint generationId,T::Geometr
 
 
 
-bool GeometryInfoList::getGeometryInfoById(uint generationId,T::GeometryId geometryId,T::ParamLevelId levelId,GeometryInfo& geometryInfo)
+bool GeometryInfoList::getGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
   try
@@ -996,7 +1030,7 @@ bool GeometryInfoList::getGeometryInfoById(uint generationId,T::GeometryId geome
 
 
 
-uint GeometryInfoList::deleteGeometryInfoListBySourceId(uint sourceId)
+uint GeometryInfoList::deleteGeometryInfoListBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -1014,6 +1048,49 @@ uint GeometryInfoList::deleteGeometryInfoListBySourceId(uint sourceId)
       if (info != nullptr)
       {
         if (info->mSourceId == sourceId)
+        {
+          cnt++;
+          if (mReleaseObjects)
+            delete info;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GeometryInfoList::deleteGeometryInfoListByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint p = 0;
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GeometryInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
         {
           cnt++;
           if (mReleaseObjects)
@@ -1080,7 +1157,7 @@ GeometryInfo* GeometryInfoList::getGeometryInfoByIndexNoCheck(uint index)
 
 
 
-void GeometryInfoList::getGeometryInfoListByGenerationId(uint generationId,GeometryInfoList& geometryInfoList)
+void GeometryInfoList::getGeometryInfoListByGenerationId(T::GenerationId generationId,GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1136,7 +1213,7 @@ void GeometryInfoList::getGeometryInfoListByGenerationId(uint generationId,Geome
 
 
 
-void GeometryInfoList::getGeometryInfoListByProducerId(uint producerId,GeometryInfoList& geometryInfoList)
+void GeometryInfoList::getGeometryInfoListByProducerId(T::ProducerId producerId,GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1227,7 +1304,7 @@ std::size_t GeometryInfoList::getHash()
 
 
 
-std::size_t GeometryInfoList::getHashByProducerId(uint producerId)
+std::size_t GeometryInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1283,7 +1360,7 @@ std::size_t GeometryInfoList::getHashByProducerId(uint producerId)
 
 
 
-void GeometryInfoList::getGeometryInfoListByGenerationIdAndStatus(uint generationId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
+void GeometryInfoList::getGeometryInfoListByGenerationIdAndStatus(T::GenerationId generationId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
 {
   FUNCTION_TRACE
   try
@@ -1339,7 +1416,7 @@ void GeometryInfoList::getGeometryInfoListByGenerationIdAndStatus(uint generatio
 
 
 
-void GeometryInfoList::getGeometryInfoListByProducerIdAndStatus(uint producerId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
+void GeometryInfoList::getGeometryInfoListByProducerIdAndStatus(T::ProducerId producerId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
 {
   FUNCTION_TRACE
   try
@@ -1395,7 +1472,7 @@ void GeometryInfoList::getGeometryInfoListByProducerIdAndStatus(uint producerId,
 
 
 
-void GeometryInfoList::getGeometryInfoListBySourceId(uint sourceId,GeometryInfoList& geometryInfoList)
+void GeometryInfoList::getGeometryInfoListBySourceId(T::SourceId sourceId,GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
   try

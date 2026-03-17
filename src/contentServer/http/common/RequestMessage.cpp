@@ -88,7 +88,7 @@ void RequestMessage::addLine(const std::string& line)
 
 
 
-void RequestMessage::addLine(unsigned long long line)
+void RequestMessage::addLine(UInt64 line)
 {
   try
   {
@@ -183,7 +183,7 @@ void RequestMessage::addLine(const char *key,time_t line)
 
 
 
-void RequestMessage::addLine(const char *key,unsigned long long line)
+void RequestMessage::addLine(const char *key,UInt64 line)
 {
   try
   {
@@ -285,7 +285,7 @@ std::string RequestMessage::getLineByIndex(uint index)
 
 
 
-long long RequestMessage::getLineValueByIndex(uint index)
+Int64  RequestMessage::getLineValueByIndex(uint index)
 {
   try
   {
@@ -329,7 +329,7 @@ std::string RequestMessage::getLineByKey(const char *key)
 
 
 
-long long RequestMessage::getLineValueByKey(const char *key)
+Int64  RequestMessage::getLineValueByKey(const char *key)
 {
   try
   {
@@ -490,7 +490,7 @@ bool RequestMessage::getLineByKey(const char *key,unsigned char& value)
 
 
 
-bool RequestMessage::getLineByKey(const char *key,unsigned long long& value)
+bool RequestMessage::getLineByKey(const char *key,UInt64 & value)
 {
   try
   {
@@ -517,7 +517,7 @@ bool RequestMessage::getLineByKey(const char *key,unsigned long long& value)
 
 
 
-bool RequestMessage::getLineByKey(const char *key,long long& value)
+bool RequestMessage::getLineByKey(const char *key,Int64 & value)
 {
   try
   {

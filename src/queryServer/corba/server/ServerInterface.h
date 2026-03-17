@@ -27,9 +27,9 @@ class ServerInterface : public POA_SmartMet::QueryServer::Corba::ServiceInterfac
 
     void          init(QueryServer::ServiceInterface *service);
 
-    ::CORBA::Long executeQuery(::CORBA::LongLong sessionId, SmartMet::QueryServer::Corba::CorbaQuery& query);
-    ::CORBA::Long getProducerList(::CORBA::LongLong sessionId, SmartMet::QueryServer::Corba::CorbaStringList_out producerList);
-    ::CORBA::Long getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList);
+    SmartMet::C::Result executeQuery(SmartMet::C::SessionId sessionId, SmartMet::C::Query& query);
+    SmartMet::C::Result getProducerList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out producerList);
+    SmartMet::C::Result getValuesByGridPoint(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfoList& contentInfoList, SmartMet::C::UInt8 coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 interpolationMethod, SmartMet::C::GridPointValueList_out valueList);
 
   protected:
 

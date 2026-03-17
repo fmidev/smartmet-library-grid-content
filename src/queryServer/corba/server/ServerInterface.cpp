@@ -67,8 +67,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
-
-::CORBA::Long ServerInterface::executeQuery(::CORBA::LongLong sessionId, SmartMet::QueryServer::Corba::CorbaQuery& query)
+SmartMet::C::Result ServerInterface::executeQuery(SmartMet::C::SessionId sessionId, SmartMet::C::Query& query)
 {
   FUNCTION_TRACE
   try
@@ -97,7 +96,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getProducerList(::CORBA::LongLong sessionId, SmartMet::QueryServer::Corba::CorbaStringList_out producerList)
+SmartMet::C::Result ServerInterface::getProducerList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out producerList)
 {
   FUNCTION_TRACE
   try
@@ -107,7 +106,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
     string_vec sProducerList;
 
-    QueryServer::Corba::CorbaStringList *corbaProducerList = new QueryServer::Corba::CorbaStringList();
+    C::StringList *corbaProducerList = new C::StringList();
     producerList = corbaProducerList;
 
     int result = mService->getProducerList(sessionId,sProducerList);
@@ -127,7 +126,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
-::CORBA::Long ServerInterface::getValuesByGridPoint(::CORBA::LongLong sessionId, const SmartMet::ContentServer::Corba::CorbaContentInfoList& contentInfoList, ::CORBA::Octet coordinateType, ::CORBA::Double x, ::CORBA::Double y, ::CORBA::Short interpolationMethod, SmartMet::QueryServer::Corba::CorbaGridPointValueList_out valueList)
+SmartMet::C::Result ServerInterface::getValuesByGridPoint(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfoList& contentInfoList, SmartMet::C::UInt8 coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 interpolationMethod, SmartMet::C::GridPointValueList_out valueList)
 {
   FUNCTION_TRACE
   try
@@ -138,7 +137,7 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
     T::GridPointValueList sValueList;
     T::ContentInfoList sContentInfoList;
 
-    QueryServer::Corba::CorbaGridPointValueList *corbaValueList = new QueryServer::Corba::CorbaGridPointValueList();
+    C::GridPointValueList *corbaValueList = new C::GridPointValueList();
     valueList = corbaValueList;
 
     ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);

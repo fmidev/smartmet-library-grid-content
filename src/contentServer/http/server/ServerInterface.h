@@ -144,6 +144,7 @@ class ServerInterface
 
     virtual void getContentGeometryIdListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentLevelListByGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response);
+    virtual void getContentLevelListByParameterGenerationGeometryAndLevelId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamKeyListByGenerationId(T::RequestMessage& request,T::ResponseMessage& response);
     virtual void getContentParamKeyListByGenerationAndGeometryId(T::RequestMessage& request,T::ResponseMessage& response);

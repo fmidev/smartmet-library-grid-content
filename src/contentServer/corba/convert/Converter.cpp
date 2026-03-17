@@ -41,7 +41,7 @@ Converter::~Converter()
 
 
 
-void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaContentInfo& target)
+void Converter::convert(T::ContentInfo& source,C::ContentInfo& target)
 {
   try
   {
@@ -55,10 +55,10 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
     target.forecastTime = CORBA::string_dup(source.getForecastTime());
     target.forecastType = source.mForecastType;
     target.forecastNumber = source.mForecastNumber;
-    target.fmiParameterId = source.mFmiParameterId;
-    target.fmiParameterName = CORBA::string_dup(source.getFmiParameterName());
-    target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    target.parameterLevel = source.mParameterLevel;
+    target.parameterId = source.mFmiParameterId;
+    target.parameterName = CORBA::string_dup(source.getFmiParameterName());
+    target.levelId = source.mFmiParameterLevelId;
+    target.level = source.mParameterLevel;
     target.flags = source.mFlags;
     target.sourceId = source.mSourceId;
     target.geometryId = source.mGeometryId;
@@ -80,7 +80,7 @@ void Converter::convert(T::ContentInfo& source,ContentServer::Corba::CorbaConten
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::ContentInfo& target)
+void Converter::convert(const C::ContentInfo& source,T::ContentInfo& target)
 {
   try
   {
@@ -94,10 +94,10 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
     target.setForecastTime(source.forecastTime);
     target.mForecastType = source.forecastType;
     target.mForecastNumber = source.forecastNumber;
-    target.mFmiParameterId = source.fmiParameterId;
-    target.setFmiParameterName(source.fmiParameterName);
-    target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    target.mParameterLevel = source.parameterLevel;
+    target.mFmiParameterId = source.parameterId;
+    target.setFmiParameterName(source.parameterName);
+    target.mFmiParameterLevelId = source.levelId;
+    target.mParameterLevel = source.level;
     target.mFlags = source.flags;
     target.mSourceId = source.sourceId;
     target.mGeometryId = source.geometryId;
@@ -119,7 +119,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfo& source,T::
 
 
 
-void Converter::convert(T::ContentInfoList& source,ContentServer::Corba::CorbaContentInfoList& target)
+void Converter::convert(T::ContentInfoList& source,C::ContentInfoList& target)
 {
   try
   {
@@ -128,7 +128,7 @@ void Converter::convert(T::ContentInfoList& source,ContentServer::Corba::CorbaCo
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = source.getContentInfoByIndex(t);
-      ContentServer::Corba::CorbaContentInfo corbaObject;
+      C::ContentInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -143,7 +143,7 @@ void Converter::convert(T::ContentInfoList& source,ContentServer::Corba::CorbaCo
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaContentInfoList& source,T::ContentInfoList& target)
+void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& target)
 {
   try
   {
@@ -151,7 +151,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfoList& source
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaContentInfo corbaObject = source[t];
+      C::ContentInfo corbaObject = source[t];
       T::ContentInfo *info = new T::ContentInfo();
       convert(corbaObject,*info);
       target.addContentInfo(info);
@@ -168,7 +168,7 @@ void Converter::convert(const ContentServer::Corba::CorbaContentInfoList& source
 
 
 
-void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo& target)
+void Converter::convert(T::FileInfo& source,C::FileInfo& target)
 {
   try
   {
@@ -195,7 +195,7 @@ void Converter::convert(T::FileInfo& source,ContentServer::Corba::CorbaFileInfo&
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::FileInfo& target)
+void Converter::convert(const C::FileInfo& source,T::FileInfo& target)
 {
   try
   {
@@ -222,7 +222,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfo& source,T::Fil
 
 
 
-void Converter::convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileInfoList& target)
+void Converter::convert(T::FileInfoList& source,C::FileInfoList& target)
 {
   try
   {
@@ -231,7 +231,7 @@ void Converter::convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileI
     for (uint t=0; t<len; t++)
     {
       T::FileInfo *info = source.getFileInfoByIndex(t);
-      ContentServer::Corba::CorbaFileInfo corbaObject;
+      C::FileInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -246,7 +246,7 @@ void Converter::convert(T::FileInfoList& source,ContentServer::Corba::CorbaFileI
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaFileInfoList& source,T::FileInfoList& target)
+void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
 {
   try
   {
@@ -254,7 +254,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfoList& source,T:
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaFileInfo corbaObject = source[t];
+      C::FileInfo corbaObject = source[t];
       T::FileInfo *info = new T::FileInfo();
       convert(corbaObject,*info);
       target.addFileInfo(info);
@@ -270,7 +270,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileInfoList& source,T:
 
 
 
-void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProducerInfo& target)
+void Converter::convert(T::ProducerInfo& source,C::ProducerInfo& target)
 {
   try
   {
@@ -292,7 +292,7 @@ void Converter::convert(T::ProducerInfo& source,ContentServer::Corba::CorbaProdu
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaProducerInfo& source,T::ProducerInfo& target)
+void Converter::convert(const C::ProducerInfo& source,T::ProducerInfo& target)
 {
   try
   {
@@ -314,7 +314,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfo& source,T:
 
 
 
-void Converter::convert(T::ProducerInfoList& source,ContentServer::Corba::CorbaProducerInfoList& target)
+void Converter::convert(T::ProducerInfoList& source,C::ProducerInfoList& target)
 {
   try
   {
@@ -323,7 +323,7 @@ void Converter::convert(T::ProducerInfoList& source,ContentServer::Corba::CorbaP
     for (uint t=0; t<len; t++)
     {
       T::ProducerInfo *info = source.getProducerInfoByIndex(t);
-      ContentServer::Corba::CorbaProducerInfo corbaObject;
+      C::ProducerInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -338,7 +338,7 @@ void Converter::convert(T::ProducerInfoList& source,ContentServer::Corba::CorbaP
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaProducerInfoList& source,T::ProducerInfoList& target)
+void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& target)
 {
   try
   {
@@ -346,7 +346,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfoList& sourc
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaProducerInfo corbaObject = source[t];
+      C::ProducerInfo corbaObject = source[t];
       T::ProducerInfo *info = new T::ProducerInfo();
       convert(corbaObject,*info);
       target.addProducerInfo(info);
@@ -361,7 +361,7 @@ void Converter::convert(const ContentServer::Corba::CorbaProducerInfoList& sourc
 
 
 
-void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGenerationInfo& target)
+void Converter::convert(T::GenerationInfo& source,C::GenerationInfo& target)
 {
   try
   {
@@ -390,7 +390,7 @@ void Converter::convert(T::GenerationInfo& source,ContentServer::Corba::CorbaGen
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,T::GenerationInfo& target)
+void Converter::convert(const C::GenerationInfo& source,T::GenerationInfo& target)
 {
   try
   {
@@ -419,7 +419,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfo& source,
 
 
 
-void Converter::convert(T::GenerationInfoList& source,ContentServer::Corba::CorbaGenerationInfoList& target)
+void Converter::convert(T::GenerationInfoList& source,C::GenerationInfoList& target)
 {
   try
   {
@@ -428,7 +428,7 @@ void Converter::convert(T::GenerationInfoList& source,ContentServer::Corba::Corb
     for (uint t=0; t<len; t++)
     {
       T::GenerationInfo *info = source.getGenerationInfoByIndex(t);
-      ContentServer::Corba::CorbaGenerationInfo corbaObject;
+      C::GenerationInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -443,7 +443,7 @@ void Converter::convert(T::GenerationInfoList& source,ContentServer::Corba::Corb
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& source,T::GenerationInfoList& target)
+void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoList& target)
 {
   try
   {
@@ -451,7 +451,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& sou
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaGenerationInfo corbaObject = source[t];
+      C::GenerationInfo corbaObject = source[t];
       T::GenerationInfo *info = new T::GenerationInfo();
       convert(corbaObject,*info);
       target.addGenerationInfo(info);
@@ -467,7 +467,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGenerationInfoList& sou
 
 
 
-void Converter::convert(T::GeometryInfo& source,ContentServer::Corba::CorbaGeometryInfo& target)
+void Converter::convert(T::GeometryInfo& source,C::GeometryInfo& target)
 {
   try
   {
@@ -491,7 +491,7 @@ void Converter::convert(T::GeometryInfo& source,ContentServer::Corba::CorbaGeome
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaGeometryInfo& source,T::GeometryInfo& target)
+void Converter::convert(const C::GeometryInfo& source,T::GeometryInfo& target)
 {
   try
   {
@@ -516,7 +516,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGeometryInfo& source,T:
 
 
 
-void Converter::convert(T::GeometryInfoList& source,ContentServer::Corba::CorbaGeometryInfoList& target)
+void Converter::convert(T::GeometryInfoList& source,C::GeometryInfoList& target)
 {
   try
   {
@@ -525,7 +525,7 @@ void Converter::convert(T::GeometryInfoList& source,ContentServer::Corba::CorbaG
     for (uint t=0; t<len; t++)
     {
       T::GeometryInfo *info = source.getGeometryInfoByIndex(t);
-      ContentServer::Corba::CorbaGeometryInfo corbaObject;
+      C::GeometryInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -540,7 +540,7 @@ void Converter::convert(T::GeometryInfoList& source,ContentServer::Corba::CorbaG
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaGeometryInfoList& source,T::GeometryInfoList& target)
+void Converter::convert(const C::GeometryInfoList& source,T::GeometryInfoList& target)
 {
   try
   {
@@ -548,7 +548,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGeometryInfoList& sourc
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaGeometryInfo corbaObject = source[t];
+      C::GeometryInfo corbaObject = source[t];
       T::GeometryInfo *info = new T::GeometryInfo();
       convert(corbaObject,*info);
       target.addGeometryInfo(info);
@@ -563,7 +563,7 @@ void Converter::convert(const ContentServer::Corba::CorbaGeometryInfoList& sourc
 
 
 
-void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInfo& target)
+void Converter::convert(T::EventInfo& source,C::EventInfo& target)
 {
   try
   {
@@ -587,7 +587,7 @@ void Converter::convert(T::EventInfo& source,ContentServer::Corba::CorbaEventInf
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::EventInfo& target)
+void Converter::convert(const C::EventInfo& source,T::EventInfo& target)
 {
   try
   {
@@ -611,7 +611,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfo& source,T::Ev
 
 
 
-void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEventInfoList& target)
+void Converter::convert(T::EventInfoList& source,C::EventInfoList& target)
 {
   try
   {
@@ -621,7 +621,7 @@ void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEven
     T::EventInfo *it = source.getFirstEvent();
     while (it != nullptr)
     {
-      ContentServer::Corba::CorbaEventInfo corbaObject;
+      C::EventInfo corbaObject;
       convert(*it,corbaObject);
       target[t] = corbaObject;
       it = it->nextItem;
@@ -638,7 +638,7 @@ void Converter::convert(T::EventInfoList& source,ContentServer::Corba::CorbaEven
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaEventInfoList& source,T::EventInfoList& target)
+void Converter::convert(const C::EventInfoList& source,T::EventInfoList& target)
 {
   try
   {
@@ -646,7 +646,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfoList& source,T
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaEventInfo corbaObject = source[t];
+      C::EventInfo corbaObject = source[t];
       T::EventInfo *info = new T::EventInfo();
       convert(corbaObject,*info);
       target.addEventInfo(info);
@@ -662,7 +662,7 @@ void Converter::convert(const ContentServer::Corba::CorbaEventInfoList& source,T
 
 
 
-void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList& target)
+void Converter::convert(string_vec& source,C::StringList& target)
 {
   try
   {
@@ -682,7 +682,7 @@ void Converter::convert(string_vec& source,ContentServer::Corba::CorbaStringList
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaStringList& source,string_vec& target)
+void Converter::convert(const C::StringList& source,string_vec& target)
 {
   try
   {
@@ -703,7 +703,7 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,stri
 
 
 
-void Converter::convert(std::set<std::string>& source,ContentServer::Corba::CorbaStringList& target)
+void Converter::convert(std::set<std::string>& source,C::TimeStringList& target)
 {
   try
   {
@@ -725,7 +725,7 @@ void Converter::convert(std::set<std::string>& source,ContentServer::Corba::Corb
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaStringList& source,std::set<std::string>& target)
+void Converter::convert(const C::TimeStringList& source,std::set<std::string>& target)
 {
   try
   {
@@ -746,7 +746,50 @@ void Converter::convert(const ContentServer::Corba::CorbaStringList& source,std:
 
 
 
-void Converter::convert(std::vector<uint>& source,ContentServer::Corba::CorbaULongList& target)
+void Converter::convert(std::set<std::string>& source,C::StringList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = CORBA::string_dup(it->c_str());
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void Converter::convert(const C::StringList& source,std::set<std::string>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(std::string(source[t]));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
 {
   try
   {
@@ -770,7 +813,7 @@ void Converter::convert(std::vector<uint>& source,ContentServer::Corba::CorbaULo
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::vector<uint>& target)
+void Converter::convert(const C::UInt32List& source,std::vector<uint>& target)
 {
   try
   {
@@ -791,7 +834,7 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
 
 
 
-void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongList& target)
+void Converter::convert(std::vector<UInt64>& source,C::FileIdList& target)
 {
   try
   {
@@ -815,7 +858,7 @@ void Converter::convert(std::set<uint>& source,ContentServer::Corba::CorbaULongL
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::set<uint>& target)
+void Converter::convert(const C::FileIdList& source,std::vector<UInt64>& target)
 {
   try
   {
@@ -823,7 +866,7 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.insert(source[t]);
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -836,7 +879,7 @@ void Converter::convert(const ContentServer::Corba::CorbaULongList& source,std::
 
 
 
-void Converter::convert(std::set<int>& source,ContentServer::Corba::CorbaLongList& target)
+void Converter::convert(std::set<UInt64>& source,C::GenerationIdList& target)
 {
   try
   {
@@ -860,7 +903,7 @@ void Converter::convert(std::set<int>& source,ContentServer::Corba::CorbaLongLis
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaLongList& source,std::set<int>& target)
+void Converter::convert(const C::GenerationIdList& source,std::set<UInt64>& target)
 {
   try
   {
@@ -880,7 +923,141 @@ void Converter::convert(const ContentServer::Corba::CorbaLongList& source,std::s
 
 
 
-void Converter::convert(T::FileAndContent& source,ContentServer::Corba::CorbaFileContent& target)
+
+void Converter::convert(std::set<UInt64>& source,C::FileIdList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const C::FileIdList& source,std::set<UInt64>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(std::set<int>& source,C::GeometryIdList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const C::GeometryIdList& source,std::set<int>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void Converter::convert(std::set<int>& source,C::LevelList& target)
+{
+  try
+  {
+    uint len = source.size();
+    target.length(len);
+
+    uint t = 0;
+    for (auto it=source.begin(); it!=source.end(); ++it)
+    {
+      target[t] = *it;
+      t++;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void Converter::convert(const C::LevelList& source,std::set<int>& target)
+{
+  try
+  {
+    target.clear();
+    uint len = source.length();
+    for (uint t=0; t<len; t++)
+    {
+      target.insert(source[t]);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void Converter::convert(T::FileAndContent& source,C::FileContent& target)
 {
   try
   {
@@ -897,7 +1074,7 @@ void Converter::convert(T::FileAndContent& source,ContentServer::Corba::CorbaFil
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaFileContent& source,T::FileAndContent& target)
+void Converter::convert(const C::FileContent& source,T::FileAndContent& target)
 {
   try
   {
@@ -914,7 +1091,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContent& source,T::
 
 
 
-void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Corba::CorbaFileContentList& target)
+void Converter::convert(std::vector<T::FileAndContent>& source,C::FileContentList& target)
 {
   try
   {
@@ -922,7 +1099,7 @@ void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Co
     target.length(len);
     for (uint t = 0; t<len; t++)
     {
-      ContentServer::Corba::CorbaFileContent corbaObject;
+      C::FileContent corbaObject;
       convert(source[t],corbaObject);
       target[t] = corbaObject;
     }
@@ -936,7 +1113,7 @@ void Converter::convert(std::vector<T::FileAndContent>& source,ContentServer::Co
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source,std::vector<T::FileAndContent>& target)
+void Converter::convert(const C::FileContentList& source,std::vector<T::FileAndContent>& target)
 {
   try
   {
@@ -960,7 +1137,7 @@ void Converter::convert(const ContentServer::Corba::CorbaFileContentList& source
 
 
 
-void Converter::convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::CorbaForecastTime& target)
+void Converter::convert(T::ForecastTime& source,SmartMet::C::ForecastTimeInfo& target)
 {
   try
   {
@@ -982,7 +1159,7 @@ void Converter::convert(T::ForecastTime& source,SmartMet::ContentServer::Corba::
 
 
 
-void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTime& source,T::ForecastTime& target)
+void Converter::convert(const SmartMet::C::ForecastTimeInfo& source,T::ForecastTime& target)
 {
   try
   {
@@ -1002,7 +1179,7 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTime&
 
 
 
-void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentServer::Corba::CorbaForecastTimeList& target)
+void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::C::ForecastTimeInfoList& target)
 {
   try
   {
@@ -1010,7 +1187,7 @@ void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentSe
     target.length(len);
     for (uint t = 0; t<len; t++)
     {
-      ContentServer::Corba::CorbaForecastTime corbaObject;
+      C::ForecastTimeInfo corbaObject;
       convert(source[t],corbaObject);
       target[t] = corbaObject;
     }
@@ -1025,7 +1202,7 @@ void Converter::convert(std::vector<T::ForecastTime>& source,SmartMet::ContentSe
 
 
 
-void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeList& source,std::vector<T::ForecastTime>& target)
+void Converter::convert(const SmartMet::C::ForecastTimeInfoList& source,std::vector<T::ForecastTime>& target)
 {
   try
   {
@@ -1051,14 +1228,14 @@ void Converter::convert(const SmartMet::ContentServer::Corba::CorbaForecastTimeL
 
 
 
-void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInfo& target)
+void Converter::convert(T::LevelInfo& source,C::LevelInfo& target)
 {
   try
   {
     target.producerId = source.mProducerId;
-    target.fmiParameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
-    target.fmiParameterLevelId = source.mFmiParameterLevelId;
-    target.parameterLevel = source.mParameterLevel;
+    target.parameterName = CORBA::string_dup(source.mFmiParameterName.c_str());
+    target.levelId = source.mFmiParameterLevelId;
+    target.level = source.mParameterLevel;
   }
   catch (...)
   {
@@ -1070,14 +1247,14 @@ void Converter::convert(T::LevelInfo& source,ContentServer::Corba::CorbaLevelInf
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::LevelInfo& target)
+void Converter::convert(const C::LevelInfo& source,T::LevelInfo& target)
 {
   try
   {
     target.mProducerId = source.producerId;
-    target.mFmiParameterName = source.fmiParameterName;
-    target.mFmiParameterLevelId = source.fmiParameterLevelId;
-    target.mParameterLevel = source.parameterLevel;
+    target.mFmiParameterName = source.parameterName;
+    target.mFmiParameterLevelId = source.levelId;
+    target.mParameterLevel = source.level;
   }
   catch (...)
   {
@@ -1089,7 +1266,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfo& source,T::Le
 
 
 
-void Converter::convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLevelInfoList& target)
+void Converter::convert(T::LevelInfoList& source,C::LevelInfoList& target)
 {
   try
   {
@@ -1098,7 +1275,7 @@ void Converter::convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLeve
     for (uint t=0; t<len; t++)
     {
       T::LevelInfo *info = source.getLevelInfoByIndex(t);
-      ContentServer::Corba::CorbaLevelInfo corbaObject;
+      C::LevelInfo corbaObject;
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -1113,7 +1290,7 @@ void Converter::convert(T::LevelInfoList& source,ContentServer::Corba::CorbaLeve
 
 
 
-void Converter::convert(const ContentServer::Corba::CorbaLevelInfoList& source,T::LevelInfoList& target)
+void Converter::convert(const C::LevelInfoList& source,T::LevelInfoList& target)
 {
   try
   {
@@ -1121,7 +1298,7 @@ void Converter::convert(const ContentServer::Corba::CorbaLevelInfoList& source,T
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      ContentServer::Corba::CorbaLevelInfo corbaObject = source[t];
+      C::LevelInfo corbaObject = source[t];
       T::LevelInfo *info = new T::LevelInfo();
       convert(corbaObject,*info);
       target.addLevelInfo(info);

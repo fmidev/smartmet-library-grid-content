@@ -257,11 +257,11 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _executeQuery(sessionId,query);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,Query);result %d;time %f;",__FUNCTION__,sessionId,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -282,11 +282,11 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getProducerList(sessionId,producerList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,producer[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producerList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,producer[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producerList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -307,11 +307,11 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -332,11 +332,11 @@ int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,con
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getParameterValueByPointAndTime(sessionId,producer,parameter,coordinateType,x,y,timeString,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,%s,%u,%f,%f,%s,%d,%d,%d,%f);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,%d,%f);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,value,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -357,11 +357,11 @@ int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getParameterValuesByPointListAndTime(sessionId,producer,parameter,coordinateType,coordinates,timeString,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,%s,%u,Coordinate[%lu],%s,%d,%d,%d,Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%lu],%s,%d,%d,%d,Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,valueList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -382,11 +382,11 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getParameterValuesByPointAndTimeList(sessionId,producer,parameter,coordinateType,x,y,times,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,%s,%u,%f,%f,Time[%lu],%d,%d,%d,Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,times.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,Time[%lu],%d,%d,%d,Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,times.size(),areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -399,6 +399,55 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
 
 
 
+int ServiceInterface::getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    UInt64 timeStart = getTime();
+    int result = _getParameterVerticalValueVectorByPointAndTime(sessionId,producer,parameter,coordinateType,x,y,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
+    UInt64 requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (!mEnabled)
+      return Result::SERVICE_DISABLED;
+
+    UInt64 timeStart = getTime();
+    int result = _getParameterVerticalValueVectorByPointListAndTime(sessionId,producer,parameter,coordinateType,coordinates,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
+    UInt64 requestTime = getTime() - timeStart;
+
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%ld],%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -407,11 +456,11 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
     if (!mEnabled)
       return Result::SERVICE_DISABLED;
 
-    unsigned long long timeStart = getTime();
+    UInt64 timeStart = getTime();
     int result = _getParameterValueVectorByGeometryAndTime(sessionId,producer,parameter,timeString,attributeList,values);
-    unsigned long requestTime = getTime() - timeStart;
+    UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%llu,%s,%s,%s,Attribute[%u],Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),timeString.c_str(),attributeList.getLength(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%s,Attribute[%u],Value[%lu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),timeString.c_str(),attributeList.getLength(),values.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -480,9 +529,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
     if (result != 0)
       return result;
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == 1)
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0]->mValueList.getLength() == 1)
     {
-      auto valuePtr = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getGridValuePtrByIndex(0);
+      auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(0);
       if (valuePtr != nullptr)
       {
         value = valuePtr->mValue;
@@ -530,12 +579,12 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
     if (result != 0)
       return result;
 
-    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == coordinates.size())
+    if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0]->mValueList.getLength() == coordinates.size())
     {
-      uint len = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength();
+      uint len = query.mQueryParameterList[0].mValueList[0]->mValueList.getLength();
       for (uint t=0; t<len; t++)
       {
-        auto valuePtr = (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getGridValuePtrByIndex(t);
+        auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
           valueList.emplace_back(valuePtr->mValue);
         else
@@ -624,6 +673,109 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 
 
 
+int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::AttributeList attributeList;
+
+    attributeList.addAttribute("starttime",timeString);
+    attributeList.addAttribute("timesteps","1");
+    attributeList.addAttribute("producer",producer);
+    attributeList.addAttribute("param",parameter);
+    attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    attributeList.addAttribute("timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    //attributeList.addAttribute("levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
+
+    QueryConfigurator configurator;
+
+    Query query;
+    configurator.configure(query,attributeList);
+
+    query.mCoordinateType = coordinateType;
+    T::Coordinate_vec cc;
+    cc.emplace_back(T::Coordinate(x,y));
+    query.mAreaCoordinates.emplace_back(cc);
+
+    if (query.mQueryParameterList.size() == 1)
+    {
+      query.mQueryParameterList[0].mType = QueryParameter::Type::VerticalVector;
+    }
+
+    int result = _executeQuery(sessionId,query);
+    if (result != 0)
+      return result;
+
+    if (query.mQueryParameterList.size() == 1 &&  query.mQueryParameterList[0].mValueList.size() == 1)
+    {
+      values = (*query.mQueryParameterList[0].mValueList[0]).mValueVector;
+      paramLevelList = query.mQueryParameterList[0].mParameterLevels;
+      return 0;
+    }
+
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+int ServiceInterface::_getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::AttributeList attributeList;
+
+    attributeList.addAttribute("starttime",timeString);
+    attributeList.addAttribute("timesteps","1");
+    attributeList.addAttribute("producer",producer);
+    attributeList.addAttribute("param",parameter);
+    attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
+    attributeList.addAttribute("timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
+    //attributeList.addAttribute("levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
+
+    QueryConfigurator configurator;
+
+    Query query;
+    configurator.configure(query,attributeList);
+
+    query.mCoordinateType = coordinateType;
+    query.mAreaCoordinates.emplace_back(coordinates);
+
+    if (query.mQueryParameterList.size() == 1)
+    {
+      query.mQueryParameterList[0].mType = QueryParameter::Type::VerticalVector;
+    }
+
+    int result = _executeQuery(sessionId,query);
+    if (result != 0)
+      return result;
+
+    if (query.mQueryParameterList.size() == 1 &&  query.mQueryParameterList[0].mValueList.size() == 1)
+    {
+      values = (*query.mQueryParameterList[0].mValueList[0]).mValueVector;
+      paramLevelList = query.mQueryParameterList[0].mParameterLevels;
+      return 0;
+    }
+
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -657,7 +809,7 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
 
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  (*query.mQueryParameterList[0].mValueList.begin())->mValueList.getLength() == 1)
     {
-      values = (*query.mQueryParameterList[0].mValueList.begin())->mValueVector;
+      values = (*query.mQueryParameterList[0].mValueList[0]).mValueVector;
     }
 
     return 0;

@@ -19,8 +19,8 @@ class ValueRecord
 
     virtual void    print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint            mFileId;
-    uint            mMessageIndex;
+    T::FileId       mFileId;
+    T::MessageIndex mMessageIndex;
     CoordinateType  mCoordinateType;
     short           mAreaInterpolationMethod;
     double          mX;

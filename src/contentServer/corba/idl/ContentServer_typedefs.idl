@@ -1,187 +1,180 @@
 #ifndef __CONTENT_SERVER_TYPEDEFS_IDL
 #define __CONTENT_SERVER_TYPEDEFS_IDL
 
+#include "Typedefs.idl"
+
 
 module SmartMet
 {
 
-module ContentServer
+module C
 {
 
-module Corba
+struct ContentInfo
 {
-
-
-typedef sequence<string> CorbaStringList;
-typedef sequence<unsigned long> CorbaULongList;
-typedef sequence<long> CorbaLongList;
-
-
-struct CorbaContentInfo
-{
-  unsigned long      producerId;
-  unsigned long      generationId;
-  octet              fileType;
-  unsigned long      fileId;
-  unsigned long      messageIndex;
-  unsigned long long filePosition;
-  unsigned long      messageSize;
-  string             forecastTime;
-  short              forecastType;
-  short              forecastNumber;
-  unsigned long      fmiParameterId;
-  string             fmiParameterName;
-  short              fmiParameterLevelId;
-  long               parameterLevel;
-  unsigned long      flags;
-  unsigned long      sourceId;
-  long               geometryId;
-  long long          modificationTime;
-  long long          deletionTime;
-  long               aggregationId;
-  long               aggregationPeriod;
-  long               processingTypeId;
-  float              processingTypeValue1;
-  float              processingTypeValue2;
+  C::ProducerId       producerId;
+  C::GenerationId     generationId;
+  C::FileType         fileType;
+  C::FileId           fileId;
+  C::MessageIndex     messageIndex;
+  C::FilePosition     filePosition;
+  C::MessageSize      messageSize;
+  C::TimeString       forecastTime;
+  C::ForecastType     forecastType;
+  C::ForecastNumber   forecastNumber;
+  C::ParameterId      parameterId;
+  C::ParameterName    parameterName;
+  C::LevelId          levelId;
+  C::Level            level;
+  C::UInt32           flags;
+  C::SourceId         sourceId;
+  C::GeometryId       geometryId;
+  C::Timestamp        modificationTime;
+  C::Timestamp        deletionTime;
+  C::Int32            aggregationId;
+  C::Int32            aggregationPeriod;
+  C::Int32            processingTypeId;
+  C::Float32          processingTypeValue1;
+  C::Float32          processingTypeValue2;  
 };
 
-typedef sequence<CorbaContentInfo> CorbaContentInfoList;
+typedef sequence<ContentInfo> ContentInfoList;
 
 
 
-struct CorbaProducerInfo
+struct ProducerInfo
 {
-  unsigned long      producerId;
-  string             name;
-  string             title;
-  string             description;
-  unsigned long      flags;
-  unsigned long      sourceId;
-  unsigned long long hash;  
+  C::ProducerId  producerId;
+  string         name;
+  string         title;
+  string         description;
+  C::UInt32      flags;
+  C::SourceId    sourceId;
+  C::Hash        hash;  
 };
 
-typedef sequence<CorbaProducerInfo> CorbaProducerInfoList;
+typedef sequence<ProducerInfo> ProducerInfoList;
 
 
 
 
-struct CorbaFileInfo
+struct FileInfo
 {
-  unsigned long      producerId;
-  unsigned long      generationId;
-  unsigned long      fileId;
-  octet              protocol;
-  string             server;
-  octet              fileType;
-  string             name;
-  unsigned long long size;
-  unsigned long      flags;
-  unsigned long      sourceId;
-  long long          modificationTime;
-  long long          deletionTime;
+  C::ProducerId    producerId;
+  C::GenerationId  generationId;
+  C::FileId        fileId;
+  C::UInt8         protocol;
+  string           server;
+  C::FileType      fileType;
+  string           name;
+  C::FileSize      size;
+  C::UInt32        flags;
+  C::SourceId      sourceId;
+  C::Timestamp     modificationTime;
+  C::Timestamp     deletionTime;
 };
 
-typedef sequence<CorbaFileInfo> CorbaFileInfoList;
+typedef sequence<FileInfo> FileInfoList;
 
 
 
 
-struct CorbaFileContent
+struct FileContent
 {
-  CorbaFileInfo        fileInfo;
-  CorbaContentInfoList contentInfoList;
+  C::FileInfo        fileInfo;
+  C::ContentInfoList contentInfoList;
 };
 
-typedef sequence<CorbaFileContent> CorbaFileContentList;
+typedef sequence<FileContent> FileContentList;
 
 
 
 
-struct CorbaEventInfo
+struct EventInfo
 {
-  unsigned long long eventId;
-  unsigned long      eventTime;
-  unsigned long      serverTime;
-  unsigned long      type;
-  unsigned long      id1;
-  unsigned long      id2;
-  unsigned long      id3;
-  unsigned long long flags;
-  string             eventData;
+  C::EventId     eventId;
+  C::Timestamp   eventTime;
+  C::Timestamp   serverTime;
+  C::UInt32      type;
+  C::UInt64      id1;
+  C::UInt64      id2;
+  C::UInt64      id3;
+  C::UInt64      flags;
+  string         eventData;
 };
 
-typedef sequence<CorbaEventInfo> CorbaEventInfoList;
+typedef sequence<EventInfo> EventInfoList;
 
 
 
 
-struct CorbaGeometryInfo
+struct GeometryInfo
 {
-  unsigned long      generationId;
-  long               geometryId;
-  short              levelId;
-  unsigned long      producerId;
-  unsigned long      flags;
-  unsigned long      sourceId;
-  long long          modificationTime;
-  long long          deletionTime;
-  octet              status;
-};
+  C::GenerationId  generationId;
+  C::GeometryId    geometryId;
+  C::LevelId       levelId;
+  C::ProducerId    producerId;
+  C::UInt32        flags;
+  C::SourceId      sourceId;
+  C::Timestamp     modificationTime;
+  C::Timestamp     deletionTime;
+  C::Status        status;
+}; 
 
-typedef sequence<CorbaGeometryInfo> CorbaGeometryInfoList;
-
-
+typedef sequence<GeometryInfo> GeometryInfoList;
 
 
-struct CorbaGenerationInfo
+
+
+struct GenerationInfo
 {
-  unsigned long      generationId;
-  unsigned long      generationType;
-  unsigned long      producerId;
-  string             name;
-  string             description;
-  string             analysisTime;
-  octet              status;
-  unsigned long      flags;
-  unsigned long      sourceId;
-  long long          deletionTime;
-  unsigned long long modificationTime;
-  unsigned long long contentStartTime;
-  unsigned long long contentEndTime;
-  unsigned long long contentHash;
+  C::GenerationId   generationId;
+  C::GenerationType generationType;
+  C::ProducerId     producerId;
+  string            name;
+  string            description;
+  C::TimeString     analysisTime;
+  C::Timestamp      deletionTime;
+  C::Timestamp      modificationTime;
+  C::Timestamp      contentStartTime;
+  C::Timestamp      contentEndTime;
+  C::Hash           contentHash;
+  C::SourceId       sourceId;
+  C::UInt32         flags;
+  C::Status         status;
 };
 
-typedef sequence<CorbaGenerationInfo> CorbaGenerationInfoList;
+typedef sequence<GenerationInfo> GenerationInfoList;
 
 
 
-struct CorbaForecastTime
+struct ForecastTimeInfo
 {
-  unsigned long  sourceId;
-  unsigned long  generationId;
-  unsigned long  geometryId;
-  short          forecastType;
-  short          forecastNumber;
-  string      	 forecastTime;
-  string      	 modificationTime;
+  C::SourceId        sourceId;
+  C::GenerationId    generationId;
+  C::GeometryId      geometryId;
+  C::ForecastType    forecastType;
+  C::ForecastNumber  forecastNumber;
+  C::TimeString      forecastTime;
+  C::TimeString      modificationTime;
 };
 
-typedef sequence<CorbaForecastTime> CorbaForecastTimeList;
+typedef sequence<ForecastTimeInfo> ForecastTimeInfoList;
 
 
 
-struct CorbaLevelInfo
+struct LevelInfo
 {
-  unsigned long producerId;
-  string        fmiParameterName;
-  short         fmiParameterLevelId;
-  long          parameterLevel;
+  C::ProducerId  producerId;
+  string         parameterName;
+  C::LevelId     levelId;
+  C::Level       level;
 };
 
-typedef sequence<CorbaLevelInfo> CorbaLevelInfoList;
+typedef sequence<LevelInfo> LevelInfoList;
 
 
-};
+
 };
 };
 

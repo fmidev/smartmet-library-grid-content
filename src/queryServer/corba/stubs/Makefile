@@ -13,7 +13,7 @@ QueryServer_serviceInterface_SK.h: ../idl/QueryServer_serviceInterface.idl
 	
 QueryServer_serviceInterface_SK.cpp: QueryServer_serviceInterface_SK.h
 
-QueryServer_typedefs_SK.h: ../idl/QueryServer_typedefs.idl
-	omniidl  -bcxx -Wbh=_SK.h -Wbs=_SK.cpp ../idl/QueryServer_typedefs.idl 
+QueryServer_typedefs_SK.h: ../idl/QueryServer_typedefs.idl 
+	omniidl  -I../../../contentServer/corba/idl -bcxx -Wbh=_SK.h -Wbs=_SK.cpp ../idl/QueryServer_typedefs.idl 
 	
 QueryServer_typedefs_SK.cpp: QueryServer_typedefs_SK.h

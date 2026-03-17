@@ -25,60 +25,62 @@ class Converter
                   Converter();
     virtual       ~Converter();
 
-    static void   convert(const T::GridData& source,DataServer::Corba::CorbaGridData& target);
-    static void   convert(const DataServer::Corba::CorbaGridData& source,T::GridData& target);
+    static void   convert(const T::GridData& source,C::GridData& target);
+    static void   convert(const C::GridData& source,T::GridData& target);
 
-    static void   convert(const T::Attribute& source,DataServer::Corba::CorbaAttribute& target);
-    static void   convert(const DataServer::Corba::CorbaAttribute& source,T::Attribute& target);
+    static void   convert(const T::Attribute& source,C::AttributeRec& target);
+    static void   convert(const C::AttributeRec& source,T::Attribute& target);
 
-    static void   convert(const T::AttributeList& source,DataServer::Corba::CorbaAttributeList& target);
-    static void   convert(const DataServer::Corba::CorbaAttributeList& source,T::AttributeList& target);
+    static void   convert(const T::AttributeList& source,C::AttributeRecList& target);
+    static void   convert(const C::AttributeRecList& source,T::AttributeList& target);
 
-    static void   convert(const T::PropertySetting& source,DataServer::Corba::CorbaPropertySetting& target);
-    static void   convert(const DataServer::Corba::CorbaPropertySetting& source,T::PropertySetting& target);
+    static void   convert(const T::PropertySetting& source,C::PropertySetting& target);
+    static void   convert(const C::PropertySetting& source,T::PropertySetting& target);
 
-    static void   convert(const T::PropertySettingVec& source,DataServer::Corba::CorbaPropertySettingList& target);
-    static void   convert(const DataServer::Corba::CorbaPropertySettingList& source,T::PropertySettingVec& target);
+    static void   convert(const T::PropertySettingVec& source,C::PropertySettingList& target);
+    static void   convert(const C::PropertySettingList& source,T::PropertySettingVec& target);
 
-    static void   convert(const T::GridCoordinates& source,DataServer::Corba::CorbaGridCoordinates& target);
-    static void   convert(const DataServer::Corba::CorbaGridCoordinates& source,T::GridCoordinates& target);
+    static void   convert(const T::GridCoordinates& source,C::GridCoordinates& target);
+    static void   convert(const C::GridCoordinates& source,T::GridCoordinates& target);
 
-    static void   convert(const T::ValueRecord& source,DataServer::Corba::CorbaValueRecord& target);
-    static void   convert(const DataServer::Corba::CorbaValueRecord& source,T::ValueRecord& target);
+    static void   convert(const T::ValueRecord& source,C::ValueRecord& target);
+    static void   convert(const C::ValueRecord& source,T::ValueRecord& target);
 
-    static void   convert(const T::ValueRecordList& source,DataServer::Corba::CorbaValueRecordList& target);
-    static void   convert(const DataServer::Corba::CorbaValueRecordList& source,T::ValueRecordList& target);
+    static void   convert(const T::ValueRecordList& source,C::ValueRecordList& target);
+    static void   convert(const C::ValueRecordList& source,T::ValueRecordList& target);
 
-    static void   convert(const T::ParamValue_vec& source,DataServer::Corba::CorbaParamValueList& target);
-    static void   convert(const DataServer::Corba::CorbaParamValueList& source,T::ParamValue_vec& target);
+    static void   convert(const T::ParamValue_vec& source,C::ParameterValueList& target);
+    static void   convert(const C::ParameterValueList& source,T::ParamValue_vec& target);
 
-    static void   convert(const T::GridValue& source,DataServer::Corba::CorbaGridValue& target);
-    static void   convert(const DataServer::Corba::CorbaGridValue& source,T::GridValue& target);
+    static void   convert(const T::GridValue& source,C::GridValue& target);
+    static void   convert(const C::GridValue& source,T::GridValue& target);
 
-    static void   convert(const T::GridValueList& source,DataServer::Corba::CorbaGridValueList& target);
-    static void   convert(const DataServer::Corba::CorbaGridValueList& source,T::GridValueList& target);
+    static void   convert(const T::GridValueList& source,C::GridValueList& target);
+    static void   convert(const C::GridValueList& source,T::GridValueList& target);
 
-    static void   convert(const T::Coordinate& source,DataServer::Corba::CorbaCoordinate& target);
-    static void   convert(const DataServer::Corba::CorbaCoordinate& source,T::Coordinate& target);
+    static void   convert(const T::Coordinate& source,C::Coordinate& target);
+    static void   convert(const C::Coordinate& source,T::Coordinate& target);
 
-    static void   convert(const std::vector<T::Coordinate>& source,DataServer::Corba::CorbaCoordinateList& target);
-    static void   convert(const DataServer::Corba::CorbaCoordinateList& source,std::vector<T::Coordinate>& target);
+    static void   convert(const std::vector<T::Coordinate>& source,C::CoordinateList& target);
+    static void   convert(const C::CoordinateList& source,std::vector<T::Coordinate>& target);
 
-    static void   convert(const std::vector<std::vector<T::Coordinate>>& source,SmartMet::DataServer::Corba::CorbaPolygonPath& target);
-    static void   convert(const SmartMet::DataServer::Corba::CorbaPolygonPath& source,std::vector<std::vector<T::Coordinate>>& target);
+    static void   convert(const std::vector<std::vector<T::Coordinate>>& source,SmartMet::C::PolygonPath& target);
+    static void   convert(const SmartMet::C::PolygonPath& source,std::vector<std::vector<T::Coordinate>>& target);
 
-    static void   convert(const double_vec& source,DataServer::Corba::CorbaDoubleList& target);
-    static void   convert(const DataServer::Corba::CorbaDoubleList& source,double_vec& target);
+    static void   convert(const double_vec& source,C::Float64List& target);
+    static void   convert(const C::Float64List& source,double_vec& target);
 
-    static void   convert(const SmartMet::T::ByteData& source, SmartMet::DataServer::Corba::CorbaByteData& target);
-    static void   convert(const SmartMet::DataServer::Corba::CorbaByteData& source,SmartMet::T::ByteData& target);
+    static void   convert(const SmartMet::T::ByteData& source, SmartMet::C::ByteData& target);
+    static void   convert(const SmartMet::C::ByteData& source,SmartMet::T::ByteData& target);
 
-    static void   convert(const SmartMet::T::ByteData_vec& source, SmartMet::DataServer::Corba::CorbaByteDataSequence& target);
-    static void   convert(const SmartMet::DataServer::Corba::CorbaByteDataSequence& source,SmartMet::T::ByteData_vec& target);
+    static void   convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::ByteDataSequence& target);
+    static void   convert(const SmartMet::C::ByteDataSequence& source,SmartMet::T::ByteData_vec& target);
 
-    static void   convert(std::vector<uint>& source,DataServer::Corba::CorbaULongList& target);
-    static void   convert(const DataServer::Corba::CorbaULongList& source,std::vector<uint>& target);
+    static void   convert(std::vector<uint>& source,C::UInt32List& target);
+    static void   convert(const C::UInt32List& source,std::vector<uint>& target);
 
+    //static void   convert(double_vec& source,C::Float64List& target);
+    //static void   convert(const C::Float64List& source,double_vec& target);
 };
 
 

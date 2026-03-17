@@ -325,7 +325,7 @@ void ServiceImplementation::startCacheProcessing()
 
 
 
-ServiceInterface* ServiceImplementation::getDataServerByFileId(uint fileId)
+ServiceInterface* ServiceImplementation::getDataServerByFileId(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -355,7 +355,7 @@ ServiceInterface* ServiceImplementation::getDataServerByFileId(uint fileId)
 
 
 
-GRID::GridFile_sptr ServiceImplementation::getGridFile(uint fileId)
+GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -512,7 +512,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
 
 
 
-int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
   try
@@ -577,7 +577,7 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceImplementation::_getGridData(T::SessionId sessionId,uint fileId,uint messageIndex,T::GridData& data)
+int ServiceImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
 {
   FUNCTION_TRACE
   try
@@ -666,7 +666,7 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
-int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint fileId,uint messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
   FUNCTION_TRACE
   try
@@ -692,7 +692,7 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,uint file
     if (fileStartAddr == nullptr)
       return Result::DATA_NOT_FOUND;
 
-    long long fileSize = gridFile->getSize();
+    Int64  fileSize = gridFile->getSize();
     uchar *fileEndAddr = fileStartAddr + fileSize;
 
     T::FilePosition messagePosition = message->getFilePosition();
@@ -771,7 +771,7 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
 
 
 
-int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList)
+int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -807,7 +807,7 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,uint fil
 
 
 
-int ServiceImplementation::_getGridProperties(T::SessionId sessionId,uint fileId,uint messageIndex,T::PropertySettingVec& propertyList)
+int ServiceImplementation::_getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
 {
   FUNCTION_TRACE
   try
@@ -842,7 +842,7 @@ int ServiceImplementation::_getGridProperties(T::SessionId sessionId,uint fileId
 
 
 
-int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -890,7 +890,7 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,uint file
 
 
 
-int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -949,7 +949,7 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -1008,7 +1008,7 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,ui
 
 
 
-int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,uint fileId1,uint messageIndex1,int level1,uint fileId2,uint messageIndex2,int level2,uint fileId3,uint messageIndex3,int level3,uint fileId4,uint messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
   try
@@ -1087,7 +1087,7 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
 
 
 
-int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileId,uint messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1134,7 +1134,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1193,7 +1193,7 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1252,7 +1252,7 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1311,7 +1311,7 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
 
 
 
-int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1370,7 +1370,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
 
 
 
-int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1417,7 +1417,7 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
 
 
 
-int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1476,7 +1476,7 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
 
 
 
-int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1535,7 +1535,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
 
 
 
-int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1615,7 +1615,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1694,7 +1694,7 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
 
 
 
-int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1774,7 +1774,7 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
 
 
 
-int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -1868,7 +1868,7 @@ int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sess
 
 
 
-int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1915,7 +1915,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -1975,7 +1975,7 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
 
 
 
-int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2034,7 +2034,7 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2114,7 +2114,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
 
 
 
-int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
   try
@@ -2195,7 +2195,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2244,7 +2244,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2303,7 +2303,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
 
 
 
-int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2362,7 +2362,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
 
 
 
-int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2441,7 +2441,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
 
 
 
-int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2488,7 +2488,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2547,7 +2547,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
 
 
 
-int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2606,7 +2606,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2681,7 +2681,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
 
 
 
-int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2728,7 +2728,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2787,7 +2787,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
 
 
 
-int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2847,7 +2847,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
 
 
 
-int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2922,7 +2922,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
 
 
 
-int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
   try
@@ -2970,7 +2970,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,u
 
 
 
-int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uint fileId,uint messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
+int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
   FUNCTION_TRACE
   try
@@ -3018,7 +3018,7 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3066,7 +3066,7 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,uint fileId,u
 
 
 
-int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3114,7 +3114,7 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3162,7 +3162,7 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,uint fi
 
 
 
-int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3221,7 +3221,7 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,uint f
 
 
 
-int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3280,7 +3280,7 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,uint fi
 
 
 
-int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3341,7 +3341,7 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
 
 
 
-int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3401,7 +3401,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3466,7 +3466,7 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3531,7 +3531,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3611,7 +3611,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3691,7 +3691,7 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
 
 
 
-int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3777,7 +3777,7 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
 
 
 
-int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3857,7 +3857,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3936,7 +3936,7 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
 
 
 
-int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -3984,7 +3984,7 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,uint fileId,u
 
 
 
-int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4032,7 +4032,7 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4080,7 +4080,7 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,uint fi
 
 
 
-int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4139,7 +4139,7 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,uint f
 
 
 
-int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4198,7 +4198,7 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,uint fi
 
 
 
-int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4258,7 +4258,7 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
 
 
 
-int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4318,7 +4318,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4383,7 +4383,7 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
 
 
 
-int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
   {
@@ -4448,7 +4448,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
 
 
 
-int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
   try
@@ -4534,7 +4534,7 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
 
 
 
-int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4582,7 +4582,7 @@ int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,uint fileI
 
 
 
-int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,uint fileId,uint messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4629,7 +4629,7 @@ int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,
 
 
 
-int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,uint fileId,uint messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4677,7 +4677,7 @@ int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4736,7 +4736,7 @@ int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,uin
 
 
 
-int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4795,7 +4795,7 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId se
 
 
 
-int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -4860,7 +4860,7 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4919,7 +4919,7 @@ int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,uint
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -4983,7 +4983,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId ses
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
   {
@@ -5050,7 +5050,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId session
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -5130,7 +5130,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessio
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -5209,7 +5209,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionI
 
 
 
-int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,uint fileId1,uint messageIndex1,uint fileId2,uint messageIndex2,uint fileId3,uint messageIndex3,uint fileId4,uint messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
   try
@@ -5299,8 +5299,8 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
   FUNCTION_TRACE
   try
   {
-    uint startFileId = 0;
-    uint startMessageIndex = 0;
+    T::FileId startFileId = 0;
+    T::MessageIndex startMessageIndex = 0;
     uint len = 50000;
     uint counter = 0;
     while (len > 0)
@@ -5496,7 +5496,7 @@ void ServiceImplementation::fullUpdate()
 
     uint counter = 0;
     time_t checkTime = time(nullptr);
-    uint startFileId = 0;
+    T::FileId startFileId = 0;
     uint len = 50000;
     while (len > 0)
     {
@@ -5570,6 +5570,23 @@ void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
   {
     PRINT_DATA(mDebugLog,"*** Clear event : All content files deleted ****\n");
     mGridFileManager.clear();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ServiceImplementation::event_storageClear(T::EventInfo& eventInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    mGridFileManager.deleteFilesByStorageId(eventInfo.mId1);
   }
   catch (...)
   {
@@ -5811,7 +5828,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
       int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
       if (result != 0)
       {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%u) from the content server\n",__FILE__,__LINE__,eventInfo.mId1);
+        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%lu) from the content server\n",__FILE__,__LINE__,eventInfo.mId1);
         PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
@@ -5819,7 +5836,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
       result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
       if (result != 0)
       {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%d) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
+        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%lu) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
         PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
         return;
       }
@@ -5895,7 +5912,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
     if (result != 0)
     {
-      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%u) from the content server\n",__FILE__,__LINE__,eventInfo.mId1);
+      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%lu) from the content server\n",__FILE__,__LINE__,eventInfo.mId1);
       PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
       return;
     }
@@ -5906,7 +5923,7 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
     result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,currentContentList);
     if (result != 0)
     {
-      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%d) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
+      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%lu) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
       PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
       return;
     }
@@ -6144,6 +6161,7 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
   //FUNCTION_TRACE
   try
   {
+    //eventInfo.print(std::cout,0,0);
     switch (eventInfo.mType)
     {
       case ContentServer::EventType::UNKNOWN:
@@ -6151,6 +6169,10 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
       case ContentServer::EventType::CLEAR:
         event_clear(eventInfo);
+        break;
+
+      case ContentServer::EventType::STORAGE_CLEAR:
+        event_storageClear(eventInfo);
         break;
 
       case ContentServer::EventType::CONTENT_SERVER_RELOAD:
@@ -6422,7 +6444,7 @@ void getFileNameHash(const char *filename,std::string& hash)
 
 
 
-void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
+void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filenames)
 {
   FUNCTION_TRACE
   try
@@ -6445,8 +6467,8 @@ void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
         if (source_fsize != target_fsize)
         {
           PRINT_DATA(mDebugLog,"Copying a file into the local cache:\n");
-          PRINT_DATA(mDebugLog,"- source : %s (size: %lld)\n",sourceFile,source_fsize);
-          PRINT_DATA(mDebugLog,"- target : %s (size: %lld bytes)\n",cacheFile.c_str(),target_fsize);
+          PRINT_DATA(mDebugLog,"- source : %s (size: %ld)\n",sourceFile,source_fsize);
+          PRINT_DATA(mDebugLog,"- target : %s (size: %ld bytes)\n",cacheFile.c_str(),target_fsize);
           copyFile(sourceFile,cacheFile.c_str(),mShutdownRequested);
           target_fsize = getFileSize(cacheFile.c_str());
           if (source_fsize != target_fsize)
@@ -6466,7 +6488,7 @@ void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
           if (gridFile)
           {
             PRINT_DATA(mDebugLog,"Using the local cache file:\n");
-            PRINT_DATA(mDebugLog,"- cache-file : %s (size: %lld)\n",cacheFile.c_str(),target_fsize);
+            PRINT_DATA(mDebugLog,"- cache-file : %s (size: %ld)\n",cacheFile.c_str(),target_fsize);
             gridFile->setFlags(gridFile->getFlags() | GRID::GridFile::Flags::LocalCacheReady);
             gridFile->setMappingFileName(cacheFile);
           }
@@ -6484,7 +6506,7 @@ void ServiceImplementation::cacheFiles(std::map<uint,std::string>& filenames)
 
 
 
-void ServiceImplementation::removeOldCacheFiles(std::map<uint,std::string>& cachedFilenames)
+void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>& cachedFilenames)
 {
   FUNCTION_TRACE
   try
@@ -6560,7 +6582,7 @@ void ServiceImplementation::cacheProcessingThread()
 
         // Load list of filenames that needs to be cached (i.e they are not yet cached)
 
-        std::map<uint,std::string> filenames;
+        std::map<T::FileId,std::string> filenames;
         mGridFileManager.getFilesToBeCached(filenames);
 
         // Copy files to cache
@@ -6569,13 +6591,13 @@ void ServiceImplementation::cacheProcessingThread()
 
         // Load list of filenames that should be in the cache now.
 
-        std::map<uint,std::string> cachedFilenames;
+        std::map<T::FileId,std::string> cachedFilenames;
         mGridFileManager.getFilesInCache(cachedFilenames);
 
         // Inform the content server about the files that are currently in the cache. The content
         // server does not switch its search structure before the required files are in the cache.
 
-        std::set<uint> fileIdList;
+        std::set<T::FileId> fileIdList;
         for (auto it = cachedFilenames.begin(); it != cachedFilenames.end(); ++it)
           fileIdList.insert(it->first);
 

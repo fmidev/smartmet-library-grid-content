@@ -117,7 +117,7 @@ void ResponseMessage::addLine(const std::string& line)
 
 
 
-void ResponseMessage::addLine(unsigned long long line)
+void ResponseMessage::addLine(UInt64 line)
 {
   try
   {
@@ -196,7 +196,7 @@ void ResponseMessage::addLine(const char *key,const std::string& line)
 
 
 
-void ResponseMessage::addLine(const char *key,unsigned long long line)
+void ResponseMessage::addLine(const char *key,UInt64 line)
 {
   try
   {
@@ -315,7 +315,7 @@ std::string ResponseMessage::getLineByIndex(uint index)
 
 
 
-long long ResponseMessage::getLineValueByIndex(uint index)
+Int64  ResponseMessage::getLineValueByIndex(uint index)
 {
   try
   {
@@ -384,7 +384,7 @@ int ResponseMessage::getLineValueByKey(const char *key)
 
 
 
-long long ResponseMessage::getLineInt64ValueByKey(const char *key)
+Int64  ResponseMessage::getLineInt64ValueByKey(const char *key)
 {
   try
   {
@@ -518,7 +518,7 @@ bool ResponseMessage::getLineByKey(const char *key,unsigned char& value)
 
 
 
-bool ResponseMessage::getLineByKey(const char *key,unsigned long long& value)
+bool ResponseMessage::getLineByKey(const char *key,UInt64 & value)
 {
   try
   {
@@ -545,7 +545,7 @@ bool ResponseMessage::getLineByKey(const char *key,unsigned long long& value)
 
 
 
-bool ResponseMessage::getLineByKey(const char *key,long long& value)
+bool ResponseMessage::getLineByKey(const char *key,Int64 & value)
 {
   try
   {

@@ -16,7 +16,7 @@ class LevelInfo
                     LevelInfo(const LevelInfo& levelInfo);
 
                     LevelInfo(
-                        uint producerId,
+                        T::ProducerId producerId,
                         std::string fmiParameterName,
                         T::ParamLevelId fmiParameterLevelId,
                         //T::ParamLevelId grib1ParameterLevelId,
@@ -34,7 +34,7 @@ class LevelInfo
     LevelInfo*      duplicate();
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
-    uint            mProducerId;
+    T::ProducerId   mProducerId;
     std::string     mFmiParameterName;
     T::ParamLevelId mFmiParameterLevelId;
     //T::ParamLevelId mGrib1ParameterLevelId;

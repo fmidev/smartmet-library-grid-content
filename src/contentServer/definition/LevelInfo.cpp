@@ -49,7 +49,7 @@ LevelInfo::LevelInfo(const LevelInfo& levelInfo)
 
 
 
-LevelInfo::LevelInfo(uint producerId,std::string fmiParameterName,T::ParamLevelId fmiParameterLevelId,T::ParamLevel parameterLevel)
+LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::ParamLevelId fmiParameterLevelId,T::ParamLevel parameterLevel)
 {
   try
   {

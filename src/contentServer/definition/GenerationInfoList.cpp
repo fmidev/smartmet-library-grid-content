@@ -550,7 +550,7 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
 
 
 
-bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
+bool GenerationInfoList::deleteGenerationInfoById(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -592,7 +592,7 @@ bool GenerationInfoList::deleteGenerationInfoById(uint generationId)
 
 
 
-uint GenerationInfoList::deleteGenerationInfoListByProducerId(uint producerId)
+uint GenerationInfoList::deleteGenerationInfoListByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -709,7 +709,7 @@ uint GenerationInfoList::markDeleted()
 
 
 
-uint GenerationInfoList::markDeletedByProducerId(uint producerId)
+uint GenerationInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -743,7 +743,7 @@ uint GenerationInfoList::markDeletedByProducerId(uint producerId)
 
 
 
-uint GenerationInfoList::markDeletedBySourceId(uint sourceId)
+uint GenerationInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -777,7 +777,41 @@ uint GenerationInfoList::markDeletedBySourceId(uint sourceId)
 
 
 
-uint GenerationInfoList::markDeletedById(uint generationId)
+uint GenerationInfoList::markDeletedByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
+        {
+          info->mFlags |= T::GenerationInfo::Flags::DeletedGeneration;
+          cnt++;
+        }
+      }
+    }
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::markDeletedById(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -801,7 +835,7 @@ uint GenerationInfoList::markDeletedById(uint generationId)
 
 
 
-GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
+GenerationInfo* GenerationInfoList::getGenerationInfoById(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -833,7 +867,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(uint generationId)
 
 
 
-bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo& generationInfo)
+bool GenerationInfoList::getGenerationInfoById(T::GenerationId generationId,GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -868,7 +902,7 @@ bool GenerationInfoList::getGenerationInfoById(uint generationId,GenerationInfo&
 
 
 
-uint GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
+uint GenerationInfoList::deleteGenerationInfoListBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
   try
@@ -886,6 +920,49 @@ uint GenerationInfoList::deleteGenerationInfoListBySourceId(uint sourceId)
       if (info != nullptr)
       {
         if (info->mSourceId == sourceId)
+        {
+          cnt++;
+          if (mReleaseObjects)
+            delete info;
+        }
+        else
+        {
+          mArray[p] = info;
+          p++;
+        }
+      }
+    }
+    mLength = p;
+    return cnt;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+uint GenerationInfoList::deleteGenerationInfoListByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return 0;
+
+    AutoWriteLock lock(mModificationLockPtr);
+    uint p = 0;
+    uint cnt = 0;
+    for (uint t=0; t<mLength; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      mArray[t] = nullptr;
+      if (info != nullptr)
+      {
+        if (info->mStorageId == storageId)
         {
           cnt++;
           if (mReleaseObjects)
@@ -952,7 +1029,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 
 
 
-void GenerationInfoList::getGenerationIdListByStatus(uchar generationStatus,std::set<uint>& idList)
+void GenerationInfoList::getGenerationIdListByStatus(uchar generationStatus,std::set<T::GenerationId>& idList)
 {
   FUNCTION_TRACE
   try
@@ -1036,7 +1113,7 @@ bool GenerationInfoList::getGenerationInfoByName(const std::string& generationNa
 
 
 
-GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(uint generationId,const std::string& analysisTime)
+GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(T::GenerationId generationId,const std::string& analysisTime)
 {
   FUNCTION_TRACE
   try
@@ -1121,7 +1198,7 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::s
 
 
 
-int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(uint generationId,const std::string& analysisTime)
+int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(T::GenerationId generationId,const std::string& analysisTime)
 {
   FUNCTION_TRACE
   try
@@ -1208,7 +1285,7 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& 
 
 
 
-int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
+int GenerationInfoList::getGenerationInfoIndexByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
   try
@@ -1235,7 +1312,7 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(uint generationId)
 
 
 
-void GenerationInfoList::getGenerationInfoListByProducerId(uint producerId,GenerationInfoList& generationInfoList)
+void GenerationInfoList::getGenerationInfoListByProducerId(T::ProducerId producerId,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1325,7 +1402,7 @@ std::size_t GenerationInfoList::getHash()
 
 
 
-std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
+std::size_t GenerationInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1380,7 +1457,7 @@ std::size_t GenerationInfoList::getHashByProducerId(uint producerId)
 
 
 
-void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint producerId,GenerationInfoList& generationInfoList,uchar generationStatus)
+void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(T::ProducerId producerId,GenerationInfoList& generationInfoList,uchar generationStatus)
 {
   FUNCTION_TRACE
   try
@@ -1436,7 +1513,7 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(uint produce
 
 
 
-bool GenerationInfoList::getGenerationInfoByProducerIdAndAnalysisTime(uint producerId,const std::string& analysisTime,GenerationInfo& generationInfo)
+bool GenerationInfoList::getGenerationInfoByProducerIdAndAnalysisTime(T::ProducerId producerId,const std::string& analysisTime,GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1524,7 +1601,7 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& 
 
 
 
-GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus)
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T::ProducerId producerId,uchar generationStatus)
 {
   FUNCTION_TRACE
   try
@@ -1556,7 +1633,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(u
 
 
 
-GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(uint producerId,uchar generationStatus)
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(T::ProducerId producerId,uchar generationStatus)
 {
   FUNCTION_TRACE
   try
@@ -1588,7 +1665,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(
 
 
 
-bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(uint producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -1734,7 +1811,7 @@ GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime(uchar g
 
 
 
-GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint producerId)
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1765,7 +1842,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(uint produ
 
 
 
-GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(uint producerId)
+GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(T::ProducerId producerId)
 {
   FUNCTION_TRACE
   try
@@ -1797,7 +1874,7 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(uint prod
 
 
 
-GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint producerId,const std::string& nextGenerationName)
+GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(T::ProducerId producerId,const std::string& nextGenerationName)
 {
   FUNCTION_TRACE
   try
@@ -1828,7 +1905,7 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(uint prod
 
 
 
-void GenerationInfoList::getGenerationInfoListBySourceId(uint sourceId,GenerationInfoList& generationInfoList)
+void GenerationInfoList::getGenerationInfoListBySourceId(T::SourceId sourceId,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -1945,7 +2022,7 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     {
       GenerationInfo *info = getGenerationInfoByIndexNoCheck(t);
       if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
-      newList.insert(info->mAnalysisTime);
+        newList.insert(info->mAnalysisTime);
     }
 
     analysisTimes.reserve(sz);

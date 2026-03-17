@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../definition/ServiceInterface.h"
+#include "../cache/CacheImplementation.h"
 
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
@@ -15,38 +16,43 @@ namespace SmartMet
 namespace ContentServer
 {
 
-#define CONTENT_LIST_COUNT 2
+
+//#define CONTENT_LIST_COUNT 2
 
 typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;
 
-class SearchStructure
+typedef std::shared_ptr<ContentServer::ServiceInterface> ContentServer_sptr;
+typedef std::vector<ContentServer_sptr> ContentServer_sptr_vec;
+
+
+class ContentSource
 {
   public:
-    T::ProducerInfoList    mProducerInfoList;
-    T::GenerationInfoList  mGenerationInfoList;
-    T::GeometryInfoList    mGeometryInfoList;
-    T::FileInfoList        mFileInfoList;
-    T::FileInfoList        mFileInfoListByName;
-    T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
+    ContentSource()
+    {
+      mContentStorageStartTime = 0;
+      mLastProcessedEventId = 0;
+    }
+
+    ContentServer_sptr     mContentStorage;
+    time_t                 mContentStorageStartTime;
+    T::EventId             mLastProcessedEventId;
 };
 
-//using SearchStructure_sptr = boost::atomic_shared_ptr<SearchStructure>;
-using SearchStructure_sptr = std::shared_ptr<SearchStructure>;
+using ContentSource_vec = std::vector<ContentSource>;
 
 
-
-class CacheImplementation : public ServiceInterface
+class MergeImplementation : public ServiceInterface
 {
   public:
-                    CacheImplementation();
-    virtual         ~CacheImplementation();
+                    MergeImplementation();
+    virtual         ~MergeImplementation();
 
-    virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ServiceInterface *contentStorage);
+    virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ContentServer_sptr_vec& contentStorages);
     virtual bool    isReady();
     virtual void    startEventProcessing();
     virtual void    setEventListMaxLength(uint maxLength);
-    virtual void    setRequestForwardEnabled(bool enabled);
-    virtual void    setContentSwap(bool enabled,uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime);
+    virtual void    setContentSwap(uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime);
     virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
     //std::string&    getSourceInfo();
@@ -203,59 +209,59 @@ class CacheImplementation : public ServiceInterface
 
   protected:
 
+    T::EventId      addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags);
     virtual bool    isSessionValid(T::SessionId sessionId);
 
-    virtual void    readContentList();
-    virtual void    readFileList();
-    virtual void    readProducerList();
-    virtual void    readGenerationList();
-    virtual void    readGeometryList();
+    virtual void    readContentList(uint contentStorageIndex,ContentServer_sptr contentStorage);
+    virtual void    readFileList(uint contentStorageIndex,ContentServer_sptr contentStorage);
+    virtual void    readProducerList(uint contentStorageIndex,ContentServer_sptr contentStorage);
+    virtual void    readGenerationList(uint contentStorageIndex,ContentServer_sptr contentStorage);
+    virtual void    readGeometryList(uint contentStorageIndex,ContentServer_sptr contentStorage);
 
-    virtual void    event_clear(T::EventInfo& eventInfo);
-    virtual void    event_updateLoopStart(T::EventInfo& eventInfo);
-    virtual void    event_updateLoopEnd(T::EventInfo& eventInfo);
-    virtual void    event_contentServerReload(T::EventInfo& eventInfo);
+    virtual void    event_clear(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_updateLoopStart(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentServerReload(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    event_producerAdded(T::EventInfo& eventInfo);
-    virtual void    event_producerDeleted(T::EventInfo& eventInfo);
-    virtual void    event_producerUpdated(T::EventInfo& eventInfo);
-    virtual void    event_producerListDeletedBySourceId(T::EventInfo& eventInfo);
+    virtual void    event_producerAdded(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_producerDeleted(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_producerUpdated(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_producerListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    event_generationAdded(T::EventInfo& eventInfo);
-    virtual void    event_generationDeleted(T::EventInfo& eventInfo);
-    virtual void    event_generationStatusChanged(T::EventInfo& eventInfo);
-    virtual void    event_generationUpdated(T::EventInfo& eventInfo);
-    virtual void    event_generationListDeletedByProducerId(T::EventInfo& eventInfo);
-    virtual void    event_generationListDeletedBySourceId(T::EventInfo& eventInfo);
+    virtual void    event_generationAdded(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_generationDeleted(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_generationStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_generationUpdated(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_generationListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_generationListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    event_geometryAdded(T::EventInfo& eventInfo);
-    virtual void    event_geometryDeleted(T::EventInfo& eventInfo);
-    virtual void    event_geometryStatusChanged(T::EventInfo& eventInfo);
-    virtual void    event_geometryUpdated(T::EventInfo& eventInfo);
-    virtual void    event_geometryListDeletedByProducerId(T::EventInfo& eventInfo);
-    virtual void    event_geometryListDeletedByGenerationId(T::EventInfo& eventInfo);
-    virtual void    event_geometryListDeletedBySourceId(T::EventInfo& eventInfo);
+    virtual void    event_geometryAdded(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryDeleted(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryUpdated(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_geometryListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    event_fileAdded(T::EventInfo& eventInfo);
-    virtual void    event_fileDeleted(T::EventInfo& eventInfo);
-    virtual void    event_fileUpdated(T::EventInfo& eventInfo);
-    virtual void    event_fileListDeletedByProducerId(T::EventInfo& eventInfo);
-    virtual void    event_fileListDeletedByGenerationId(T::EventInfo& eventInfo);
-    virtual void    event_fileListDeletedBySourceId(T::EventInfo& eventInfo);
+    virtual void    event_fileAdded(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_fileDeleted(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_fileUpdated(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_fileListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_fileListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_fileListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    event_contentListDeletedByFileId(T::EventInfo& eventInfo);
-    virtual void    event_contentListDeletedByProducerId(T::EventInfo& eventInfo);
-    virtual void    event_contentListDeletedByGenerationId(T::EventInfo& eventInfo);
-    virtual void    event_contentListDeletedBySourceId(T::EventInfo& eventInfo);
-    virtual void    event_contentAdded(T::EventInfo& eventInfo);
-    virtual void    event_contentDeleted(T::EventInfo& eventInfo);
-    virtual void    event_contentUpdated(T::EventInfo& eventInfo);
+    virtual void    event_contentListDeletedByFileId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentAdded(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentDeleted(uint contentStorageIndex,T::EventInfo& eventInfo);
+    virtual void    event_contentUpdated(uint contentStorageIndex,T::EventInfo& eventInfo);
 
-    virtual void    processEvent(T::EventInfo& eventInfo);
+    virtual void    processEvent(uint contentStorageIndex,T::EventInfo& eventInfo);
     virtual void    processEvents(bool eventThread);
 
     virtual void    reloadData();
-    virtual void    saveData();
 
     virtual void    updateContent();
 
@@ -265,7 +271,6 @@ class CacheImplementation : public ServiceInterface
     bool                   mRequestForwardEnabled;
     T::SessionId           mSessionId;
     T::SessionId           mDataServerSessionId;
-    T::EventId             mLastProcessedEventId;
     T::FileInfoList        mFileInfoList;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
@@ -273,25 +278,18 @@ class CacheImplementation : public ServiceInterface
     T::ContentInfoList     mContentInfoList;
     T::EventInfoList       mEventInfoList;
     time_t                 mStartTime;
+    T::EventId             mEventCounter;
     pthread_t              mThread;
     ThreadLock             mEventProcessingLock;
     ModificationLock       mModificationLock;
     ModificationLock       mSearchModificationLock;
-    ServiceInterface*      mContentStorage;
-    time_t                 mContentStorageStartTime;
+    ContentSource_vec      mContentSources;
     time_t                 mContentChangeTime;
-    bool                   mSaveEnabled;
-    std::string            mSaveDir;
     uint                   mFileDeleteCounter;
     uint                   mContentDeleteCounter;
     uint                   mProducerDeleteCounter;
     uint                   mGenerationDeleteCounter;
     uint                   mGeometryDeleteCounter;
-    uint                   mProducerCount;
-    uint                   mGenerationCount;
-    uint                   mGeometryCount;
-    uint                   mFileCount;
-    uint                   mContentCount;
     uint                   mActiveSearchStructure;
     SearchStructure*       mSearchStructurePtr[2];
     time_t                 mContentUpdateTime;
