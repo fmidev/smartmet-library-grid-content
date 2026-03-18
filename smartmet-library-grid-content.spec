@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.2.4
+Version: 26.3.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.2.4
-BuildRequires: smartmet-library-grid-files-devel >= 26.2.4
+BuildRequires: smartmet-library-gis-devel >= 26.2.17
+BuildRequires: smartmet-library-grid-files-devel >= 26.3.18
 BuildRequires: smartmet-library-macgyver-devel >= 26.2.4
-BuildRequires: smartmet-library-spine-devel >= 26.2.4
+BuildRequires: smartmet-library-spine-devel >= 26.3.13
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -42,10 +42,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.2.4
-Requires: smartmet-library-grid-files >= 26.2.4
+Requires: smartmet-library-gis >= 26.2.17
+Requires: smartmet-library-grid-files >= 26.3.18
 Requires: smartmet-library-macgyver >= 26.2.4
-Requires: smartmet-library-spine >= 26.2.4
+Requires: smartmet-library-spine >= 26.3.13
 
 Provides: %{SPECNAME}
 
@@ -80,9 +80,9 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 26.2.4
-Requires: smartmet-library-gis-devel >= 26.2.4
-Requires: smartmet-library-spine-devel >= 26.2.4
-Requires: smartmet-library-grid-files-devel >= 26.2.4
+Requires: smartmet-library-gis-devel >= 26.2.17
+Requires: smartmet-library-spine-devel >= 26.3.13
+Requires: smartmet-library-grid-files-devel >= 26.3.18
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -92,9 +92,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Mar 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.3.18-1.fmi
+- Added support for multiple content sources
 * Wed Feb  4 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.2.4-1.fmi
 - Update to proj-9.7, gdal-3.12, fmt-12
-
 * Mon Dec 29 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> 25.12.29-1.fmi
 - Repackaged due to API changes
 * Thu Nov 27 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.11.27-1.fmi
