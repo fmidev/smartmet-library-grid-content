@@ -77,7 +77,10 @@ class ContentInfoList
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
 
     void                getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
+    void                getContentInfoList(ContentInfoList& contentInfoList);
+    void                getContentInfoListNoClear(ContentInfoList& contentInfoList);
     void                getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
+    void                getContentInfoListNoClear(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     void                getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList);
     void                getContentInfoListByFileId(T::FileId fileId,ContentInfoList& contentInfoList);
     void                getContentInfoListByForecastTime(const std::string& forecastTime,ContentInfoList& contentInfoList);
@@ -157,6 +160,7 @@ class ContentInfoList
     void                setModificationLockPtr(ModificationLock* modificationLockPtr);
 
     uint                getSize() const;
+    void                setSize(uint newSize);
     bool                getReleaseObjects();
     void                print(std::ostream& stream,uint level,uint optionFlags);
     void                lock();
@@ -172,8 +176,6 @@ class ContentInfoList
     void                writeToFile(const std::string& filename,const char *filemode);
 
   protected:
-
-    void                increaseSize(uint newSize);
 
     ContentInfoPtr      *mArray;
     uint                mSize;

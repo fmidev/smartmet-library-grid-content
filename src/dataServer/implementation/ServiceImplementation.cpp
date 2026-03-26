@@ -415,7 +415,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
       if (fileInfo.mProtocol > 1 || getFileSize(fileInfo.mName.c_str()) > 0)
       {
         T::ContentInfoList contentList;
-        if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0)
+        if (mContentServer->getContentListByFileId(mServerSessionId,fileId,contentList) == 0  &&  contentList.getLength() > 0)
         {
           addFile(fileInfo,contentList);
           gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
@@ -5530,11 +5530,13 @@ void ServiceImplementation::fullUpdate()
           else
             mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentList);
 
-          addFile(*fileInfo,contentList);
-
-          counter++;
-          if ((counter % 10000) == 0)
-            PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
+          if (contentList.getLength() > 0)
+          {
+            addFile(*fileInfo,contentList);
+            counter++;
+            if ((counter % 10000) == 0)
+              PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
+          }
         }
         catch (...)
         {
@@ -5843,6 +5845,12 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
     }
 
     //fileInfo.print(std::cout,0,0);
+    if (contentList.getLength() == 0)
+    {
+      PRINT_DATA(mDebugLog,"%s:%d: Content list is empty (fileId=%lu)!\n",__FILE__,__LINE__,fileInfo.mFileId);
+      return;
+    }
+
     addFile(fileInfo,contentList);
 
     uint cnt = mGridFileManager.getFileCount();

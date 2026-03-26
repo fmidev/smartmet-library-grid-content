@@ -95,14 +95,14 @@ MergeImplementation::MergeImplementation()
     mContentDeleteCounter = 0;
     mActiveSearchStructure = 0;
 
-    mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
-    mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    //mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    //mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
     mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
 
     mProducerInfoList.setLockingEnabled(true);
     mGenerationInfoList.setLockingEnabled(true);
-    mFileInfoList.setLockingEnabled(true);
-    mContentInfoList.setLockingEnabled(true);
+    //mFileInfoList.setLockingEnabled(true);
+    //mContentInfoList.setLockingEnabled(true);
 
     mContentUpdateTime = 0;
     mContentUpdateInterval = 180;
@@ -206,7 +206,7 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
         readGeometryList(t,mContentSources[t].mContentStorage);
         readFileList(t,mContentSources[t].mContentStorage);
 
-        mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+        //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
 
         readContentList(t,mContentSources[t].mContentStorage);
       }
@@ -492,7 +492,7 @@ void MergeImplementation::reloadData()
         readGeometryList(t,mContentSources[t].mContentStorage);
         readFileList(t,mContentSources[t].mContentStorage);
 
-        mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+        //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
 
         readContentList(t,mContentSources[t].mContentStorage);
       }
@@ -4879,14 +4879,14 @@ int MergeImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       return Result::INVALID_SESSION;
 
     levelInfoList.clear();
-
+/*
     if (sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
       mContentInfoList.getLevelInfoList(levelInfoList);
       return Result::OK;
     }
-
+*/
     auto ssp = mSearchStructurePtr[mActiveSearchStructure];
     if (!ssp)
       return Result::DATA_NOT_FOUND;
@@ -5108,7 +5108,7 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
       return;
 
     //mFileInfoList.clear();
-    mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
+    //mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
 
 
     T::FileId startFileId = 0;
@@ -6788,10 +6788,10 @@ void MergeImplementation::updateContent()
     nptr->mProducerInfoList = mProducerInfoList;
     nptr->mGenerationInfoList = mGenerationInfoList;
     nptr->mGeometryInfoList = mGeometryInfoList;
-    nptr->mFileInfoList = mFileInfoList;
+    mFileInfoList.getFileInfoList(nptr->mFileInfoList);
     nptr->mFileInfoListByName.setReleaseObjects(false);
     nptr->mFileInfoListByName = nptr->mFileInfoList;
-    nptr->mContentInfoList[0] = mContentInfoList;
+    mContentInfoList.getContentInfoList(nptr->mContentInfoList[0]);
 
     nptr->mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
     nptr->mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);

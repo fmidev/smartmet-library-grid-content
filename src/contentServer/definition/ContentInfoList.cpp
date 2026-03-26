@@ -558,7 +558,7 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
     if (mArray == nullptr  ||  mLength == mSize)
     {
-      increaseSize(mSize + mSize/4 + 100);
+      setSize(mSize + mSize/4 + 100);
     }
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
@@ -652,7 +652,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     {
       if (mArray == nullptr  ||  mLength == mSize  ||  (mLength + len2) > mSize)
       {
-        increaseSize(len1 + len2 + mSize/5);
+        setSize(len1 + len2 + mSize/5);
       }
 
       for (uint t=0; t<len2; t++)
@@ -751,7 +751,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
 
 
-void ContentInfoList::increaseSize(uint newSize)
+void ContentInfoList::setSize(uint newSize)
 {
   FUNCTION_TRACE
   try
@@ -2356,13 +2356,79 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
 
 
 
+void ContentInfoList::getContentInfoList(ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    contentInfoList.clear();
+    getContentInfoListNoClear(contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+void ContentInfoList::getContentInfoListNoClear(ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      ContentInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      {
+        if (contentInfoList.getReleaseObjects())
+          contentInfoList.addContentInfo(info->duplicate());
+        else
+          contentInfoList.addContentInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
   {
     contentInfoList.clear();
+    getContentInfoListNoClear(startFileId,startMessageIndex,maxRecords,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
+
+
+
+
+void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr ||  mLength == 0)
       return;
 
