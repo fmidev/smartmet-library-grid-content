@@ -1,5 +1,7 @@
-Grid Content Library
-====================
+# smartmet-library-grid-content
+
+Part of [SmartMet Server](https://github.com/fmidev/smartmet-library-spine). See the [SmartMet Server documentation](https://github.com/fmidev/smartmet-library-spine) for an overview of the ecosystem.
+
 ## Introduction
 
 This library is used by the SmartMet Server grid support. The library defines three different service APIs (Application Programming Interfaces) and one or more implementations for each of these APIs. In practice, service API definitions are C++ class definitions, that contain service method definitions, but not their implementations. The actual implementations are inherited from these service classes. In this way, we can have multiple different implementations for the same service interface.
