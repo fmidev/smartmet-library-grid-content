@@ -4027,7 +4027,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     if (producerHash == 0)
     {
       //producerHash = getProducerHash(producerId);
-      printf("%s:%d:%s: The producer hash should be never zero!\n",BCP);
+      PRINT_DATA(mDebugLog,"%s:%d:%s: The producer hash should be never zero!\n",BCP);
     }
 
     // ### Checking if we have the result for this search already in the cache
@@ -4097,6 +4097,9 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     {
       // The content entry in the cache seems to be old or missing. That's why we should update this entry.
 
+      // Track the old record count so we can adjust the counter for in-place updates
+      std::size_t oldLen = newEntry ? 0 : std::max(entry->contentInfoList.getLength(), (uint)1);
+
       time_t startTime = 0;
       time_t endTime = 0xFFFFFFFF;
 
@@ -4122,6 +4125,22 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         case T::ParamKeyTypeValue::FMI_NAME:
           entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
           break;
+      }
+
+      // Adjust the records counter for in-place updates (when the entry already existed)
+      if (!newEntry && oldLen > 0)
+      {
+        std::size_t newLen = std::max(entry->contentInfoList.getLength(), (uint)1);
+        if (newLen > oldLen)
+        {
+          mContentCache_records += (newLen - oldLen);
+          mContentCache_size += (newLen - oldLen);
+        }
+        else if (oldLen > newLen)
+        {
+          mContentCache_records -= (oldLen - newLen);
+          mContentCache_size -= (oldLen - newLen);
+        }
       }
     }
 
@@ -4231,7 +4250,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
       }
       else
       {
-        printf("%s:%d:%s: The code should never reach this point!\n",BCP);
+        PRINT_DATA(mDebugLog,"%s:%d:%s: The code should never reach this point!\n",BCP);
       }
     }
 

@@ -4913,20 +4913,9 @@ int MergeImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::F
     {
       AutoWriteLock lock(&mModificationLock);
 
-      // Question: Is is faster to just replace the whole set:
-      //
-      //   mCachedFiles = fileIdList;
-
-      for (auto it = mCachedFiles.begin(); it != mCachedFiles.end(); ++it)
-      {
-        if (fileIdList.find(*it) == fileIdList.end())
-          mCachedFiles.erase(*it);
-      }
-
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
-      {
-        mCachedFiles.insert(*it);
-      }
+      mCachedFiles.clear();
+      for (auto fileId : fileIdList)
+        mCachedFiles.insert(static_cast<uint>(fileId));
     }
 
     return Result::OK;
