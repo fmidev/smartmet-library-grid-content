@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.3.18
-Release: 2%{?dist}.fmi
+Version: 26.4.13
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -32,7 +32,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.4.13
-BuildRequires: smartmet-library-grid-files-devel >= 26.3.18
+BuildRequires: smartmet-library-grid-files-devel >= 26.4.13
 BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
 BuildRequires: smartmet-library-spine-devel >= 26.3.13
 BuildRequires: postgresql15-devel
@@ -43,7 +43,7 @@ Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.4.13
-Requires: smartmet-library-grid-files >= 26.3.18
+Requires: smartmet-library-grid-files >= 26.4.13
 Requires: smartmet-library-macgyver >= 26.4.13
 Requires: smartmet-library-spine >= 26.3.13
 
@@ -82,7 +82,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 26.4.13
 Requires: smartmet-library-gis-devel >= 26.4.13
 Requires: smartmet-library-spine-devel >= 26.3.13
-Requires: smartmet-library-grid-files-devel >= 26.3.18
+Requires: smartmet-library-grid-files-devel >= 26.4.13
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -92,6 +92,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.13-1.fmi
+- Repackaged due to API changes
 * Wed Mar 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.3.18-2.fmi
 - Added support for multiple content sources
 * Wed Feb  4 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.2.4-1.fmi
