@@ -11,6 +11,7 @@ namespace QueryServer
 
 
 ParameterMappingFile::ParameterMappingFile()
+  : mLastModified(0)
 {
   try
   {
@@ -25,6 +26,7 @@ ParameterMappingFile::ParameterMappingFile()
 
 
 ParameterMappingFile::ParameterMappingFile(const std::string& filename)
+  : mLastModified(0)
 {
   try
   {
