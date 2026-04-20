@@ -947,13 +947,76 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 
 
 
+void FileInfoList::getFileInfoList(FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    fileInfoList.clear();
+    getFileInfoListNoClear(fileInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+void FileInfoList::getFileInfoListNoClear(FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    for (uint t=0; t<mLength; t++)
+    {
+      FileInfo *info = mArray[t];
+      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      {
+        if (fileInfoList.getReleaseObjects())
+          fileInfoList.addFileInfo(info->duplicate());
+        else
+          fileInfoList.addFileInfo(info);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 void FileInfoList::getFileInfoList(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
   {
     fileInfoList.clear();
+    getFileInfoListNoClear(startFileId,maxRecords,fileInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
+
+
+
+void FileInfoList::getFileInfoListNoClear(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
     if (mArray == nullptr ||  mLength == 0)
       return;
 

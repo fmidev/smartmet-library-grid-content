@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../definition/ServiceInterface.h"
+#include "../definition/ContentListStorage.h"
+#include "../definition/FileListStorage.h"
 #include "../cache/CacheImplementation.h"
 
 #include <grid-files/common/ModificationLock.h>
@@ -271,11 +273,11 @@ class MergeImplementation : public ServiceInterface
     bool                   mRequestForwardEnabled;
     T::SessionId           mSessionId;
     T::SessionId           mDataServerSessionId;
-    T::FileInfoList        mFileInfoList;
+    T::FileListStorage     mFileInfoList;
     T::ProducerInfoList    mProducerInfoList;
     T::GenerationInfoList  mGenerationInfoList;
     T::GeometryInfoList    mGeometryInfoList;
-    T::ContentInfoList     mContentInfoList;
+    T::ContentListStorage  mContentInfoList;
     T::EventInfoList       mEventInfoList;
     time_t                 mStartTime;
     T::EventId             mEventCounter;

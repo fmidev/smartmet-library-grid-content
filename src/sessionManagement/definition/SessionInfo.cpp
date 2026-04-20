@@ -3,6 +3,8 @@
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <macgyver/Exception.h>
+#include <random>
+#include <cstdint>
 
 
 namespace SmartMet
@@ -14,7 +16,10 @@ SessionInfo::SessionInfo()
 {
   try
   {
-    mSessionId = getTime() * rand();
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dist;
+    mSessionId = dist(gen);
     mStartTime = time(nullptr);
     mLastAccessTime = mStartTime;
     mTimeOutInSeconds = 600;
