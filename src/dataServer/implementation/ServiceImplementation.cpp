@@ -1284,6 +1284,29 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
+      const char *crsStr = attributeList.getAttributeValue("grid.crs");
+      if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
+      {
+        const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
+        if (geometryIdStr == nullptr)
+        {
+          // Adding  geometryId information into the request if the requester obviously
+          // wants to fetch the original grid. This makes its prosessing faster.
+
+          const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
+          const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
+          const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
+          const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
+          const char *centerStr = attributeList.getAttributeValue("grid.center");
+
+          if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+          {
+            attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
+          }
+        }
+      }
+
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByLevelAndGeometry(*message1,*message2,newLevel,attributeList,modificationOperation,modificationParameters,values);
 
@@ -1342,6 +1365,29 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
       GRID::Message *message2 = gridFile2->getMessageByIndex(messageIndex2);
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
+
+      const char *crsStr = attributeList.getAttributeValue("grid.crs");
+      if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
+      {
+        const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
+        if (geometryIdStr == nullptr)
+        {
+          // Adding  geometryId information into the request if the requester obviously
+          // wants to fetch the original grid. This makes its prosessing faster.
+
+          const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
+          const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
+          const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
+          const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
+          const char *centerStr = attributeList.getAttributeValue("grid.center");
+
+          if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+          {
+            attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
+          }
+        }
+      }
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeAndGeometry(*message1,*message2,newTime,attributeList,modificationOperation,modificationParameters,values);
@@ -1663,6 +1709,29 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
       if (message4 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
+      const char *crsStr = attributeList.getAttributeValue("grid.crs");
+      if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
+      {
+        const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
+        if (geometryIdStr == nullptr)
+        {
+          // Adding  geometryId information into the request if the requester obviously
+          // wants to fetch the original grid. This makes its prosessing faster.
+
+          const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
+          const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
+          const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
+          const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
+          const char *centerStr = attributeList.getAttributeValue("grid.center");
+
+          if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+          {
+            attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
+          }
+        }
+      }
+
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeLevelAndGeometry(*message1,*message2,*message3,*message4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
 
@@ -1797,6 +1866,30 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
       GRID::Message *message = gridFile->getMessageByIndex(messageIndex);
       if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
+
+
+      const char *crsStr = attributeList.getAttributeValue("grid.crs");
+      if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
+      {
+        const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
+        if (geometryIdStr == nullptr)
+        {
+          // Adding  geometryId information into the request if the requester obviously
+          // wants to fetch the original grid. This makes its prosessing faster.
+
+          const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
+          const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
+          const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
+          const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
+          const char *centerStr = attributeList.getAttributeValue("grid.center");
+
+          if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+          {
+            attributeList.addAttribute("grid.geometryId",std::to_string(message->getGridGeometryId()));
+          }
+        }
+      }
 
       message->getGridValueVectorByGeometry(attributeList,modificationOperation,modificationParameters,values);
       return Result::OK;
