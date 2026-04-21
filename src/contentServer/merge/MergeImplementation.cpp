@@ -186,32 +186,34 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
 
     uint len = mContentSources.size();
     mUpdateInProgress = true;
-    AutoWriteLock lock(&mModificationLock);
-
-    for (uint t=0; t<len; t++)
     {
-      if (mContentSources[t].mContentStorage != nullptr)
-      {
+      AutoWriteLock lock(&mModificationLock);
 
-        T::EventInfo eventInfo;
-        eventInfo.mEventId = 0;
-        if (mContentSources[t].mContentStorage->getLastEventInfo(sessionId,0,eventInfo) == 0)
+      for (uint t=0; t<len; t++)
+      {
+        if (mContentSources[t].mContentStorage != nullptr)
         {
-          mContentSources[t].mLastProcessedEventId = eventInfo.mEventId;
-          mContentSources[t].mContentStorageStartTime = eventInfo.mServerTime;
+
+          T::EventInfo eventInfo;
+          eventInfo.mEventId = 0;
+          if (mContentSources[t].mContentStorage->getLastEventInfo(sessionId,0,eventInfo) == 0)
+          {
+            mContentSources[t].mLastProcessedEventId = eventInfo.mEventId;
+            mContentSources[t].mContentStorageStartTime = eventInfo.mServerTime;
+          }
+
+          readProducerList(t,mContentSources[t].mContentStorage);
+          readGenerationList(t,mContentSources[t].mContentStorage);
+          readGeometryList(t,mContentSources[t].mContentStorage);
+          readFileList(t,mContentSources[t].mContentStorage);
+
+          //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+
+          readContentList(t,mContentSources[t].mContentStorage);
         }
 
-        readProducerList(t,mContentSources[t].mContentStorage);
-        readGenerationList(t,mContentSources[t].mContentStorage);
-        readGeometryList(t,mContentSources[t].mContentStorage);
-        readFileList(t,mContentSources[t].mContentStorage);
-
-        //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-
-        readContentList(t,mContentSources[t].mContentStorage);
+        mUpdateInProgress = false;
       }
-
-      mUpdateInProgress = false;
     }
     updateContent();
 
@@ -465,41 +467,43 @@ void MergeImplementation::reloadData()
 
     uint len = mContentSources.size();
     mUpdateInProgress = true;
-    AutoWriteLock lock(&mModificationLock);
-
-    mFileInfoList.clear();
-    mProducerInfoList.clear();
-    mGenerationInfoList.clear();
-    mGeometryInfoList.clear();
-    mContentInfoList.clear();
-    mEventInfoList.clear();
-
-    for (uint t=0; t<len; t++)
     {
-      if (mContentSources[t].mContentStorage != nullptr)
+      AutoWriteLock lock(&mModificationLock);
+
+      mFileInfoList.clear();
+      mProducerInfoList.clear();
+      mGenerationInfoList.clear();
+      mGeometryInfoList.clear();
+      mContentInfoList.clear();
+      mEventInfoList.clear();
+
+      for (uint t=0; t<len; t++)
       {
-
-        T::EventInfo eventInfo;
-        eventInfo.mEventId = 0;
-        if (mContentSources[t].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo) == 0)
+        if (mContentSources[t].mContentStorage != nullptr)
         {
-          mContentSources[t].mLastProcessedEventId = eventInfo.mEventId;
-          mContentSources[t].mContentStorageStartTime = eventInfo.mServerTime;
+
+          T::EventInfo eventInfo;
+          eventInfo.mEventId = 0;
+          if (mContentSources[t].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo) == 0)
+          {
+            mContentSources[t].mLastProcessedEventId = eventInfo.mEventId;
+            mContentSources[t].mContentStorageStartTime = eventInfo.mServerTime;
+          }
+
+          readProducerList(t,mContentSources[t].mContentStorage);
+          readGenerationList(t,mContentSources[t].mContentStorage);
+          readGeometryList(t,mContentSources[t].mContentStorage);
+          readFileList(t,mContentSources[t].mContentStorage);
+
+          //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+
+          readContentList(t,mContentSources[t].mContentStorage);
         }
-
-        readProducerList(t,mContentSources[t].mContentStorage);
-        readGenerationList(t,mContentSources[t].mContentStorage);
-        readGeometryList(t,mContentSources[t].mContentStorage);
-        readFileList(t,mContentSources[t].mContentStorage);
-
-        //mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-
-        readContentList(t,mContentSources[t].mContentStorage);
       }
+      mContentUpdateTime = 0;
+      mUpdateInProgress = false;
+      mReloadActivated = false;
     }
-    mContentUpdateTime = 0;
-    mUpdateInProgress = false;
-    mReloadActivated = false;
     updateContent();
   }
   catch (...)
