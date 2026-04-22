@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.4.22
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -92,6 +92,8 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Apr 22 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.22-2.fmi
+- Added possibility to subdivide contouring cells with bilinear interpolation
 * Wed Apr 22 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.22-1.fmi
 - Improving data fetching performace when using original geometries
 - MergeImplementation: fix same-thread re-lock in init() and reloadData()
