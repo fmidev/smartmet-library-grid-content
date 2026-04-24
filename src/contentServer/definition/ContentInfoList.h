@@ -8,6 +8,8 @@
 #include <grid-files/common/ModificationLock.h>
 #include <vector>
 #include <set>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
 
 
 namespace SmartMet
@@ -28,6 +30,7 @@ class ContentInfoList
     ContentInfoList&    operator=(const ContentInfoList& contentInfoList);
 
     ContentInfo*        addContentInfo(ContentInfo *contentInfo);
+    ContentInfo*        addContentInfoNoLock(ContentInfo *contentInfo);
     void                addContentInfoList(ContentInfoList& contentInfoList);
     void                addContentInfoListNoLock(ContentInfoList& contentInfoList);
 
@@ -66,8 +69,10 @@ class ContentInfoList
 
     ContentInfo*        getContentInfoByIndex(uint index) const;
     ContentInfo*        getContentInfoByIndexNoCheck(uint index);
-    ContentInfo*        getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex);
-    ContentInfo*        getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex);
+    //ContentInfo*        getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex);
+    //ContentInfo*        getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx);
+    //ContentInfo*        getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex);
+    //ContentInfo*        getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx);
     bool                getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo);
     ContentInfo*        getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
 
@@ -122,7 +127,7 @@ class ContentInfoList
     void                getContentInfoListByProducerId(T::ProducerId producerId,ContentInfoList& contentInfoList);
     void                getContentInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     int                 getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo);
-    int                 getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo);
+    //int                 getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo);
     void                getContentInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
 
     void                getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
@@ -162,6 +167,7 @@ class ContentInfoList
     uint                getSize() const;
     void                setSize(uint newSize);
     bool                getReleaseObjects();
+    void                setContentInfoByIndex(uint index,ContentInfo *contentInfo);
     void                print(std::ostream& stream,uint level,uint optionFlags);
     void                lock();
     void                unlock();
@@ -184,6 +190,170 @@ class ContentInfoList
     ModificationLock*   mModificationLockPtr;
     bool                mReleaseObjects;
     uint                mComparisonMethod;
+
+  public:
+
+    inline int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
+    {
+      if (mArray == nullptr  ||  mLength == 0)
+        return 0;
+
+      if (comparisonMethod != mComparisonMethod)
+      {
+        for (uint t=0; t<mLength; t++)
+        {
+          if (mArray[t] != nullptr)
+          {
+            int res = mArray[t]->compare(comparisonMethod,&contentInfo);
+            if (res == 0)
+            {
+              return t;
+            }
+          }
+        }
+        return 0;
+      }
+
+      int low = 0;
+      int high = C_INT(mLength) - 1;
+      int mid = 0;
+
+      while (low <= high)
+      {
+        mid = (low + high) / 2;
+
+        if (mArray[mid] == nullptr)
+          return 0;
+
+        int res = mArray[mid]->compare(comparisonMethod,&contentInfo);
+
+        if (res == 0)
+        {
+          while (mid > 0  &&  mArray[mid-1] != nullptr  &&  mArray[mid-1]->compare(comparisonMethod,&contentInfo) == 0)
+            mid--;
+
+          return mid;
+        }
+
+        if (res < 0)
+          low = mid + 1;
+        else
+          high = mid - 1;
+      }
+
+      if (mid >= 0  &&  mid < C_INT(mLength))
+      {
+        if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+        {
+          while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+            mid++;
+
+          return mid-1;
+        }
+        else
+        {
+          while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
+            mid--;
+
+          return mid;
+        }
+      }
+      return 0;
+    }
+
+
+    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
+    {
+      try
+      {
+        AutoReadLock lock(mModificationLockPtr);
+        return getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
+      }
+      catch (...)
+      {
+        throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+      }
+    }
+
+
+
+
+
+    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
+    {
+      try
+      {
+        if (mArray == nullptr ||  mLength == 0)
+          return nullptr;
+
+        ContentInfo contentInfo;
+        contentInfo.mFileId = fileId;
+        contentInfo.mMessageIndex = messageIndex;
+
+        int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+        if (idx < 0  ||  C_UINT(idx) >= mLength)
+          return nullptr;
+
+        T::ContentInfo *info = mArray[idx];
+        if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+          return mArray[idx];
+
+        return nullptr;
+      }
+      catch (...)
+      {
+        throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+      }
+    }
+
+
+
+
+
+    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    {
+      try
+      {
+        AutoReadLock lock(mModificationLockPtr);
+        return getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex,idx);
+      }
+      catch (...)
+      {
+        throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+      }
+    }
+
+
+
+
+    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    {
+      try
+      {
+        if (mArray == nullptr ||  mLength == 0)
+          return nullptr;
+
+        ContentInfo contentInfo;
+        contentInfo.mFileId = fileId;
+        contentInfo.mMessageIndex = messageIndex;
+
+        idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+        if (idx < 0  ||  C_UINT(idx) >= mLength)
+          return nullptr;
+
+        T::ContentInfo *info = mArray[idx];
+        if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+          return mArray[idx];
+
+        return nullptr;
+      }
+      catch (...)
+      {
+        throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+      }
+    }
+
+
 };
 
 

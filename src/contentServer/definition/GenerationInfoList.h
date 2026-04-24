@@ -64,6 +64,7 @@ class GenerationInfoList
     uint                getLength();
     std::size_t         getHash();
     std::size_t         getHashByProducerId(T::ProducerId producerId);
+    std::size_t         getHashByStorageId(T::StorageId storageId);
     ModificationLock*   getModificationLockPtr();
     bool                getReleaseObjects();
     uint                getSize() const;

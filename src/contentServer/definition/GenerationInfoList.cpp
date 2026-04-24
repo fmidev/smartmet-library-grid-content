@@ -1402,6 +1402,39 @@ std::size_t GenerationInfoList::getHash()
 
 
 
+std::size_t GenerationInfoList::getHashByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    int len = getLength();
+    for (int t=0; t<len; t++)
+    {
+      GenerationInfo *info = mArray[t];
+      if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0  &&  info->mStorageId == storageId)
+      {
+        Fmi::hash_merge(hash,info->mGenerationId);
+        Fmi::hash_merge(hash,info->mStatus);
+        Fmi::hash_merge(hash,info->mModificationTime);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 std::size_t GenerationInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE

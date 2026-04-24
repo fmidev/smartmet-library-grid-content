@@ -81,17 +81,23 @@ CacheImplementation::CacheImplementation()
 
     mContentUpdateTime = 0;
     mContentUpdateInterval = 180;
+    mContentUpdateRequired = false;
     mContentSwapEnabled = true;
     mSearchStructurePtr[0] = nullptr;
     mSearchStructurePtr[1] = nullptr;
     mContentChangeTime = 0;
     mContentSwapCounter = 0;
+    mContentSourceHash = 0;
+    mSsProducerHash = 0;
+    mSsGenerationHash = 0;
+    mSsGeometryHash = 0;
+    mSsFileHash = 0;
+    mSsContentHash = 0;
 
     mCachedFiles_waitTime = 20;          // Wait time before the next local cache check
     mCachedFiles_totalWaitTime = 0;      // Total time that the search structure swapping is waited
     mCachedFiles_maxWaitTime = 0;        // The search structure swapping is forced after this wait (in seconds)
     mCachedFiles_maxFirstWaitTime = 0;   // The search structure swapping (the first time) is forced after this wait (in seconds)
-
   }
   catch (...)
   {
@@ -148,7 +154,7 @@ void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Init start\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::init();Start");
     mStartTime = time(nullptr);
     mSessionId = sessionId;
     mDataServerSessionId = dataServerSessionId;
@@ -183,7 +189,7 @@ void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
     }
     updateContent();
 
-    PRINT_DATA(mDebugLog,"* Init end\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::init();End");
   }
   catch (...)
   {
@@ -6216,7 +6222,7 @@ void CacheImplementation::readProducerList()
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the producer list\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readProducerList();Start");
 
     if (mContentStorage == nullptr)
       return;
@@ -6233,6 +6239,7 @@ void CacheImplementation::readProducerList()
       exception.addParameter("ServiceResult",getResultString(result));
       throw exception;
     }
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readProducerList();End");
   }
   catch (...)
   {
@@ -6248,7 +6255,7 @@ void CacheImplementation::readGenerationList()
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readGenerationList();Start");
 
     if (mContentStorage == nullptr)
       return;
@@ -6267,6 +6274,7 @@ void CacheImplementation::readGenerationList()
     }
 
     mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readGenerationList();End");
   }
   catch (...)
   {
@@ -6282,7 +6290,7 @@ void CacheImplementation::readGeometryList()
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readGeometryList();Start");
 
     if (mContentStorage == nullptr)
       return;
@@ -6301,6 +6309,7 @@ void CacheImplementation::readGeometryList()
     }
 
     mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readGeometryList();End");
   }
   catch (...)
   {
@@ -6316,7 +6325,7 @@ void CacheImplementation::readFileList()
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the file list\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readFileList();Start");
 
     if (mContentStorage == nullptr)
       return;
@@ -6361,6 +6370,7 @@ void CacheImplementation::readFileList()
         }
       }
     }
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readFileList();End");
   }
   catch (...)
   {
@@ -6376,7 +6386,7 @@ void CacheImplementation::readContentList()
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the content list\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readContentList();Start");
     if (mContentStorage == nullptr)
       return;
 
@@ -6423,6 +6433,7 @@ void CacheImplementation::readContentList()
         }
       }
     }
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::readContentList();End");
   }
   catch (...)
   {
@@ -6437,7 +6448,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information!\n");
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_clear();Start");
 
     AutoWriteLock lock(&mModificationLock);
 
@@ -6501,6 +6512,13 @@ void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
+    mContentSourceHash = mFileInfoList.getHash()
+        + mProducerInfoList.getHash()
+        + mGenerationInfoList.getHash()
+        + mGeometryInfoList.getHash()
+        + mContentInfoList.getHash();
+
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopStart();Hash %ld",mContentSourceHash);
   }
   catch (...)
   {
@@ -6518,8 +6536,23 @@ void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
   FUNCTION_TRACE
   try
   {
-    // Content will be swapped if it has changed
-    mContentUpdateTime = time(0) - mContentUpdateInterval;
+    std::size_t hash = mFileInfoList.getHash()
+        + mProducerInfoList.getHash()
+        + mGenerationInfoList.getHash()
+        + mGeometryInfoList.getHash()
+        + mContentInfoList.getHash();
+
+    if (hash != mContentSourceHash)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();### Hash changed %ld ###",hash);
+      mContentUpdateRequired = true;
+    }
+    else
+    {
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();Hash not changed %ld",hash);
+    }
+
+    mContentSourceHash = hash;
   }
   catch (...)
   {
@@ -7900,10 +7933,19 @@ void CacheImplementation::processEvents(bool eventThread)
       return;
     }
 
-    updateContent();
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
+    uint ecnt = 0;
     uint len = 1000;
     while (len > 0)
     {
@@ -7917,10 +7959,10 @@ void CacheImplementation::processEvents(bool eventThread)
       {
         if (eventThread  &&  mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
         {
-          PRINT_DATA(mDebugLog, "#### Content server restart detected, reload required #######\n");
+          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();Content server restart detected, reload required");
           mEventInfoList.clear();
           reloadData();
-          updateContent();
+          mContentUpdateRequired = true;
           mContentStorageStartTime = eventInfo.mServerTime;
           return;
         }
@@ -7950,6 +7992,7 @@ void CacheImplementation::processEvents(bool eventThread)
           try
           {
             processEvent(*it);
+            ecnt++;
           }
           catch (...)
           {
@@ -7971,21 +8014,26 @@ void CacheImplementation::processEvents(bool eventThread)
       }
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-    if (ssp)
+    if (ecnt > 0)
     {
-      AutoReadLock lock(&mContentTimeCache_modificationLock);
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();%u",ecnt);
 
-      for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
+      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      if (ssp)
       {
-        if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-        {
-          if (mShutdownRequested)
-            return;
+        AutoReadLock lock(&mContentTimeCache_modificationLock);
 
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          mContentTimeCache.erase(it->first);
-          mContentTimeCache_modificationLock.writeUnlock();
+        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
+        {
+          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+          {
+            if (mShutdownRequested)
+              return;
+
+            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+            mContentTimeCache.erase(it->first);
+            mContentTimeCache_modificationLock.writeUnlock();
+          }
         }
       }
     }
@@ -8090,9 +8138,10 @@ void CacheImplementation::updateContent()
     if (mReloadActivated)
       return;
 
-    long diff = time(nullptr) - mContentUpdateTime;
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
 
-    if (diff < mContentUpdateInterval)
+    if (t1 == t2)
       return;
 
     auto ssp = mSearchStructurePtr[mActiveSearchStructure];
@@ -8103,25 +8152,34 @@ void CacheImplementation::updateContent()
 
       if (ssp)
       {
+        std::size_t producerHash = mProducerInfoList.getHash();
+        std::size_t generationHash = mGenerationInfoList.getHash();
+        std::size_t geometryHash = mGeometryInfoList.getHash();
+        std::size_t fileHash = mFileInfoList.getHash();
+        std::size_t contentHash = mContentInfoList.getHash();
+
         if (mDebugLog &&  mDebugLog->isEnabled())
         {
-          PRINT_DATA(mDebugLog,"\nproducers  %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
-          PRINT_DATA(mDebugLog,"generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
-          PRINT_DATA(mDebugLog,"geometries  %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
-          PRINT_DATA(mDebugLog,"files  %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
-          PRINT_DATA(mDebugLog,"content  %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
+          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Comparing hash values");
+
+
+          PRINT_DATA(mDebugLog,"  ** Producers    %ld  %ld\n",mSsProducerHash,producerHash);
+          PRINT_DATA(mDebugLog,"  ** Generations  %ld  %ld\n",mSsGenerationHash,generationHash);
+          PRINT_DATA(mDebugLog,"  ** Geometries   %ld  %ld\n",mSsGeometryHash,geometryHash);
+          PRINT_DATA(mDebugLog,"  ** Files        %ld  %ld\n",mSsFileHash,fileHash);
+          PRINT_DATA(mDebugLog,"  ** Content      %ld  %ld\n",mSsContentHash,contentHash);
         }
 
         if (mCachedFiles_totalWaitTime == 0 &&
-            ssp->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
-            ssp->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
-            ssp->mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
-            ssp->mFileInfoList.getHash() == mFileInfoList.getHash() &&
-            ssp->mContentInfoList[0].getHash() == mContentInfoList.getHash())
+            mSsProducerHash == producerHash &&
+            mSsGenerationHash == generationHash &&
+            mSsGeometryHash == geometryHash &&
+            mSsFileHash == fileHash &&
+            mSsContentHash == contentHash)
         {
           // Nothing has changed. No swapping needed.
 
-          PRINT_DATA(mDebugLog, "#### No search structure swapping required #######\n");
+          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();No search structure swapping required");
 
           mContentUpdateTime = time(nullptr);
           return;
@@ -8129,6 +8187,8 @@ void CacheImplementation::updateContent()
       }
 
       AutoReadLock lock(&mModificationLock);
+
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping started");
 
       if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
           (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime))
@@ -8162,18 +8222,18 @@ void CacheImplementation::updateContent()
                     if (fsize > 0)
                     {
                       // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
-                      PRINT_DATA(mDebugLog, "#### Delaying the search structure swap about %u seconds #######\n",mCachedFiles_waitTime);
-                      PRINT_DATA(mDebugLog, "- Reason      : Required file is not ready in the local cache.\n");
-                      PRINT_DATA(mDebugLog, "- FileId      : %lu\n",fInfo->mFileId);
-                      PRINT_DATA(mDebugLog, "- FileName    : %s\n",fInfo->mName.c_str());
-                      PRINT_DATA(mDebugLog, "- Wait time   : %u\n",mCachedFiles_totalWaitTime);
+                      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
+                      PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
+                      PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
+                      PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
+                      PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
                       if (mContentSwapCounter == 0)
                       {
-                        PRINT_DATA(mDebugLog, "- MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
+                        PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
                       }
                       else
                       {
-                        PRINT_DATA(mDebugLog, "- MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
+                        PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
                       }
 
                       mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
@@ -8250,7 +8310,7 @@ void CacheImplementation::updateContent()
           std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
           std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
           std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t contentHash = nptr->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
+          std::size_t contentHash = nptr->mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
 
           std::size_t h = 0;
           Fmi::hash_merge(h,generationHash);
@@ -8275,7 +8335,13 @@ void CacheImplementation::updateContent()
         nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
       }
 
-      PRINT_DATA(mDebugLog, "#### Search structure swapped #######\n");
+      mSsProducerHash = nptr->mProducerInfoList.getHash();
+      mSsGenerationHash = nptr->mGenerationInfoList.getHash();
+      mSsGeometryHash = nptr->mGeometryInfoList.getHash();
+      mSsFileHash = nptr->mFileInfoList.getHash();
+      mSsContentHash = nptr->mContentInfoList[0].getHash();
+
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping ended");
 
       if (mActiveSearchStructure == 0)
         mActiveSearchStructure = 1;
@@ -8462,6 +8528,7 @@ void CacheImplementation::updateContent()
       }
 
       uint pLen = ssp->mProducerInfoList.getLength();
+
 
       for (uint p=0; p<pLen; p++)
       {

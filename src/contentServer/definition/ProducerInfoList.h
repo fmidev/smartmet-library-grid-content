@@ -39,6 +39,7 @@ class ProducerInfoList
     void              getProducerInfoListBySourceId(T::SourceId sourceId,ProducerInfoList& producerInfoList);
     uint              getLength();
     std::size_t       getHash();
+    std::size_t       getHashByStorageId(T::StorageId storageId);
     void              setLockingEnabled(bool lockingEnabled);
     void              sortByName();
     uint              markDeletedById(T::ProducerId producerId);

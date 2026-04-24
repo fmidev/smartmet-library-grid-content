@@ -63,6 +63,7 @@ class ContentListStorage
 
     std::size_t         getHash();
     std::size_t         getHashByProducerId(T::ProducerId producerId);
+    std::size_t         getHashByStorageId(T::StorageId storageId);
     uint                getLength()const;
 
     void                print(std::ostream& stream,uint level,uint optionFlags);
