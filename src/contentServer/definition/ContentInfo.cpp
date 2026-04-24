@@ -514,7 +514,7 @@ void ContentInfo::setCsv(const std::string& csv)
 
 
 
-
+#if 0 // Moved to inline
 int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
 {
   try
@@ -813,7 +813,7 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
-
+#endif
 
 
 

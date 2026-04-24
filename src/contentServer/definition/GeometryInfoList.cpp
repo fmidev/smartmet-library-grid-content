@@ -1304,6 +1304,40 @@ std::size_t GeometryInfoList::getHash()
 
 
 
+std::size_t GeometryInfoList::getHashByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+    if (mArray == nullptr ||  mLength == 0)
+      return hash;
+
+    AutoReadLock lock(mModificationLockPtr);
+
+    int len = getLength();
+    for (int t=0; t<len; t++)
+    {
+      GeometryInfo *info = mArray[t];
+      if (info != nullptr && (info->mFlags & T::GeometryInfo::Flags::DeletedGeometry) == 0 && info->mStorageId == storageId)
+      {
+        Fmi::hash_merge(hash,info->mGenerationId);
+        Fmi::hash_merge(hash,info->mGeometryId);
+        Fmi::hash_merge(hash,info->mLevelId);
+        Fmi::hash_merge(hash,info->mStatus);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 std::size_t GeometryInfoList::getHashByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE

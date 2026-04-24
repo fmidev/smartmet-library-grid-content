@@ -294,6 +294,13 @@ class CacheImplementation : public ServiceInterface
     uint                   mContentCount;
     uint                   mActiveSearchStructure;
     SearchStructure*       mSearchStructurePtr[2];
+    std::size_t            mSsProducerHash;
+    std::size_t            mSsGenerationHash;
+    std::size_t            mSsGeometryHash;
+    std::size_t            mSsFileHash;
+    std::size_t            mSsContentHash;
+    std::size_t            mContentSourceHash;
+    bool                   mContentUpdateRequired;
     time_t                 mContentUpdateTime;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;

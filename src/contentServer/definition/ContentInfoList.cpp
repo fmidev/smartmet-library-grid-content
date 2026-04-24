@@ -5,8 +5,6 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/GeneralDefinitions.h>
 #include <grid-files/common/AutoThreadLock.h>
-#include <grid-files/common/AutoReadLock.h>
-#include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <macgyver/Hash.h>
 
@@ -535,6 +533,28 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
 
 
 
+void ContentInfoList::setContentInfoByIndex(uint index,ContentInfo *contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mArray  &&  index < mSize)
+    {
+      if (mReleaseObjects  &&  mArray[index])
+        delete mArray[index];
+
+      mArray[index] = contentInfo;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 {
   FUNCTION_TRACE
@@ -603,6 +623,75 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
   }
 }
 
+
+
+
+
+inline ContentInfo* ContentInfoList::addContentInfoNoLock(ContentInfo *contentInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (contentInfo == nullptr)
+      throw Fmi::Exception(BCP,"The 'contentInfo' parameter points to NULL!");
+
+    if (contentInfo->mForecastTimeUTC == 0)
+    {
+      try
+      {
+        contentInfo->mForecastTimeUTC = utcTimeToTimeT(contentInfo->getForecastTime());
+      }
+      catch (...)
+      {
+      }
+    }
+
+    if (mArray == nullptr  ||  mLength == mSize)
+    {
+      setSize(mSize + mSize/4 + 100);
+    }
+
+    if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
+    {
+      mArray[mLength] = contentInfo;
+      mLength++;
+      return contentInfo;
+    }
+
+    int idx = getClosestIndexNoLock(mComparisonMethod,*contentInfo);
+
+    if (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) == 0)
+    {
+      // If content with the same id exists, we should not add the new contet, because other contentLists might point
+      // the existing content record;
+
+      return mArray[idx];
+    }
+
+    while (idx < C_INT(mLength)  &&  mArray[idx] != nullptr  &&   mArray[idx]->compare(mComparisonMethod,contentInfo) < 0)
+    {
+      idx++;
+    }
+
+    if (idx == C_INT(mLength))
+    {
+      mArray[mLength] = contentInfo;
+      mLength++;
+      return contentInfo;
+    }
+
+    if (idx < C_INT(mLength))
+      memmove(&mArray[idx+1],&mArray[idx],sizeof(void*)*(mLength-idx));
+
+    mArray[idx] = contentInfo;
+    mLength++;
+    return contentInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
 
 
 
@@ -2051,7 +2140,7 @@ int ContentInfoList::getClosestIndex(uint comparisonMethod,ContentInfo& contentI
 
 
 
-
+#if 0 // Moved to inline
 
 int ContentInfoList::getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
 {
@@ -2138,23 +2227,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fi
   //FUNCTION_TRACE
   try
   {
-    if (mArray == nullptr ||  mLength == 0)
-      return nullptr;
-
     AutoReadLock lock(mModificationLockPtr);
-    ContentInfo contentInfo;
-    contentInfo.mFileId = fileId;
-    contentInfo.mMessageIndex = messageIndex;
-
-    int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-    if (idx < 0  ||  C_UINT(idx) >= mLength)
-      return nullptr;
-
-    T::ContentInfo *info = mArray[idx];
-    if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
-      return mArray[idx];
-
-    return nullptr;
+    return getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex);
   }
   catch (...)
   {
@@ -2195,6 +2269,57 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::Fil
 }
 
 
+
+
+
+ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+{
+  //FUNCTION_TRACE
+  try
+  {
+    AutoReadLock lock(mModificationLockPtr);
+
+    return getContentInfoByFileIdAndMessageIndexNoLock(fileId,messageIndex,idx);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+{
+  //FUNCTION_TRACE
+  try
+  {
+    if (mArray == nullptr ||  mLength == 0)
+      return nullptr;
+
+    ContentInfo contentInfo;
+    contentInfo.mFileId = fileId;
+    contentInfo.mMessageIndex = messageIndex;
+
+    idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+    if (idx < 0  ||  C_UINT(idx) >= mLength)
+      return nullptr;
+
+    T::ContentInfo *info = mArray[idx];
+    if (info != nullptr &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex)
+      return mArray[idx];
+
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+#endif
 
 
 
@@ -5707,11 +5832,9 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
     if (mArray == nullptr ||  mLength == 0)
       return hash;
 
-    if (mComparisonMethod != ContentInfo::ComparisonMethod::producer_file_message)
+    if (mComparisonMethod != ContentInfo::ComparisonMethod::producer_file_message  &&
+        mComparisonMethod != ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time)
     {
-      // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
-      // is used as the start index in the list.
-
       for (uint t=0; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
@@ -5728,7 +5851,7 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
     ContentInfo contentInfo;
     contentInfo.mProducerId = producerId;
 
-    int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::producer_file_message,contentInfo);
+    int startIdx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
     if (startIdx < 0)
       startIdx = 0;
 

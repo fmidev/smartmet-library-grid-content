@@ -34,11 +34,13 @@ class ContentSource
     {
       mContentStorageStartTime = 0;
       mLastProcessedEventId = 0;
+      mHash = 0;
     }
 
     ContentServer_sptr     mContentStorage;
     time_t                 mContentStorageStartTime;
     T::EventId             mLastProcessedEventId;
+    std::size_t            mHash;
 };
 
 using ContentSource_vec = std::vector<ContentSource>;
@@ -295,6 +297,7 @@ class MergeImplementation : public ServiceInterface
     uint                   mActiveSearchStructure;
     SearchStructure*       mSearchStructurePtr[2];
     time_t                 mContentUpdateTime;
+    bool                   mContentUpdateRequired;
     uint                   mContentUpdateInterval;
     bool                   mContentSwapEnabled;
     uint                   mContentSwapCounter;
