@@ -39,6 +39,7 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
     mModificationLock.setLockingEnabled(false);
     producerInfoList.lock();
     uint sz = producerInfoList.getLength();
+    mList.reserve(sz);
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
@@ -93,6 +94,7 @@ ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList
 
     AutoWriteLock lock(&mModificationLock);
     uint sz = producerInfoList.getLength();
+    mList.reserve(sz);
     for (uint t=0; t<sz; t++)
     {
       ProducerInfo *info = producerInfoList.getProducerInfoByIndexNoCheck(t);
@@ -497,6 +499,41 @@ std::size_t ProducerInfoList::getHash()
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+
+
+
+
+std::size_t ProducerInfoList::getHashByStorageId(T::StorageId storageId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::size_t hash = 0;
+
+    AutoReadLock lock(&mModificationLock);
+    uint sz = getLength();
+    for (uint t=0; t<sz; t++)
+    {
+      ProducerInfo *info = getProducerInfoByIndexNoCheck(t);
+      if (info != nullptr  &&  info->mStorageId == storageId)
+      {
+        Fmi::hash_merge(hash,info->mProducerId);
+        Fmi::hash_merge(hash,info->mName);
+        Fmi::hash_merge(hash,info->mTitle);
+        Fmi::hash_merge(hash,info->mDescription);
+        Fmi::hash_merge(hash,info->mFlags);
+        Fmi::hash_merge(hash,info->mSourceId);
+      }
+    }
+    return hash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
 
 
 

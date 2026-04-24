@@ -93,6 +93,7 @@ MergeImplementation::MergeImplementation()
     mGeometryDeleteCounter = 0;
     mFileDeleteCounter = 0;
     mContentDeleteCounter = 0;
+    mContentUpdateRequired = false;
     mActiveSearchStructure = 0;
 
     //mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::none);
@@ -172,7 +173,7 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Init start\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::init();Start");
     mStartTime = time(nullptr);
     mSessionId = sessionId;
     mDataServerSessionId = dataServerSessionId;
@@ -217,7 +218,7 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
     }
     updateContent();
 
-    PRINT_DATA(mDebugLog,"* Init end\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::init();End");
   }
   catch (...)
   {
@@ -463,6 +464,8 @@ void MergeImplementation::reloadData()
   FUNCTION_TRACE
   try
   {
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::reloadData();Start");
+
     mReloadActivated = true;
 
     uint len = mContentSources.size();
@@ -505,6 +508,7 @@ void MergeImplementation::reloadData()
       mReloadActivated = false;
     }
     updateContent();
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::reloadData();End");
   }
   catch (...)
   {
@@ -4950,7 +4954,7 @@ void MergeImplementation::readProducerList(uint contentStorageIndex,ContentServe
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the producer list\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readProducerList(%u);Start",contentStorageIndex);
 
     if (contentStorage == nullptr)
       return;
@@ -4983,6 +4987,7 @@ void MergeImplementation::readProducerList(uint contentStorageIndex,ContentServe
         mProducerInfoList.addProducerInfo(producerInfo->duplicate());
       }
     }
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readProducerList(%u);End",contentStorageIndex);
   }
   catch (...)
   {
@@ -4998,7 +5003,7 @@ void MergeImplementation::readGenerationList(uint contentStorageIndex,ContentSer
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readGenerationList(%u);Start",contentStorageIndex);
 
     if (contentStorage == nullptr)
       return;
@@ -5035,6 +5040,7 @@ void MergeImplementation::readGenerationList(uint contentStorageIndex,ContentSer
     }
 
     mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readGenerationList(%u);End",contentStorageIndex);
   }
   catch (...)
   {
@@ -5050,7 +5056,7 @@ void MergeImplementation::readGeometryList(uint contentStorageIndex,ContentServe
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the generation list\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readGeometryList(%u);Start",contentStorageIndex);
 
     if (contentStorage == nullptr)
       return;
@@ -5088,6 +5094,7 @@ void MergeImplementation::readGeometryList(uint contentStorageIndex,ContentServe
     }
 
     mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readGeometryList(%u);End",contentStorageIndex);
   }
   catch (...)
   {
@@ -5103,7 +5110,7 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the file list\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readFileList(%u);Start",contentStorageIndex);
 
     if (contentStorage == nullptr)
       return;
@@ -5154,6 +5161,7 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
         }
       }
     }
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readFileList(%u);End",contentStorageIndex);
   }
   catch (...)
   {
@@ -5169,7 +5177,8 @@ void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"* Reading the content list\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readContentList(%u);Start",contentStorageIndex);
+
     if (contentStorage == nullptr)
       return;
 
@@ -5221,6 +5230,7 @@ void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer
         }
       }
     }
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::readContentList(%u);End",contentStorageIndex);
   }
   catch (...)
   {
@@ -5235,7 +5245,7 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
   FUNCTION_TRACE
   try
   {
-    PRINT_DATA(mDebugLog,"*** Clear event : Deleting all cached information (%u)!\n",contentStorageIndex);
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_clear(%u);",contentStorageIndex);
 
     AutoWriteLock lock(&mModificationLock);
 
@@ -5288,6 +5298,13 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
   FUNCTION_TRACE
   try
   {
+    mContentSources[contentStorageIndex].mHash = mFileInfoList.getHashByStorageId(contentStorageIndex)
+        + mProducerInfoList.getHashByStorageId(contentStorageIndex)
+        + mGenerationInfoList.getHashByStorageId(contentStorageIndex)
+        + mGeometryInfoList.getHashByStorageId(contentStorageIndex)
+        + mContentInfoList.getHashByStorageId(contentStorageIndex);
+
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopStart(%u);Hash %ld",contentStorageIndex,mContentSources[contentStorageIndex].mHash);
   }
   catch (...)
   {
@@ -5305,8 +5322,25 @@ void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventI
   FUNCTION_TRACE
   try
   {
+    std::size_t hash = mFileInfoList.getHashByStorageId(contentStorageIndex)
+        + mProducerInfoList.getHashByStorageId(contentStorageIndex)
+        + mGenerationInfoList.getHashByStorageId(contentStorageIndex)
+        + mGeometryInfoList.getHashByStorageId(contentStorageIndex)
+        + mContentInfoList.getHashByStorageId(contentStorageIndex);
+
     // Content will be swapped if it has changed
-    mContentUpdateTime = time(0) - mContentUpdateInterval;
+
+    if (hash != mContentSources[contentStorageIndex].mHash)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);### Hash changed %ld ###",contentStorageIndex,hash);
+      mContentUpdateRequired = true;
+    }
+    else
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);Hash not changed %ld",contentStorageIndex,hash);
+    }
+
+    mContentSources[contentStorageIndex].mHash = hash;
   }
   catch (...)
   {
@@ -5558,7 +5592,6 @@ void MergeImplementation::event_generationStatusChanged(uint contentStorageIndex
         info->mStatus = eventInfo.mId2;
 
       addEvent(eventInfo.mType,newGenerationId,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
-
     }
   }
   catch (...)
@@ -6521,11 +6554,27 @@ void MergeImplementation::processEvents(bool eventThread)
       return;
     }
 
-    updateContent();
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
     uint slen = mContentSources.size();
+    uint ecnt = 0;
+
+    UInt64 startEventId[slen];
+    for (uint s=0; s<slen; s++)
+    {
+      startEventId[s] = mContentSources[s].mLastProcessedEventId;
+    }
+
 
     uint tlen = 1000;
     while (tlen > 0)
@@ -6546,16 +6595,14 @@ void MergeImplementation::processEvents(bool eventThread)
         {
           if (eventThread  &&  mContentSources[s].mContentStorageStartTime > 0 &&  mContentSources[s].mContentStorageStartTime < eventInfo.mServerTime)
           {
-            PRINT_DATA(mDebugLog, "#### Content server restart detected, reload required #######\n");
+            PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents(%u);Content server restart detected, reload required",s);
             mEventInfoList.clear();
             reloadData();
-            updateContent();
             mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
+            mContentUpdateRequired  = true;
             return;
           }
         }
-
-        PRINT_DATA(mDebugLog, "#### processEvents %u %lu %lu\n",s,eventInfo.mEventId,mContentSources[s].mLastProcessedEventId);
 
         if (result == Result::OK)
         {
@@ -6580,6 +6627,7 @@ void MergeImplementation::processEvents(bool eventThread)
               try
               {
                 processEvent(s,*it);
+                ecnt++;
               }
               catch (...)
               {
@@ -6597,21 +6645,34 @@ void MergeImplementation::processEvents(bool eventThread)
       }
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-    if (ssp)
+    if (ecnt > 0)
     {
-      AutoReadLock lock(&mContentTimeCache_modificationLock);
-
-      for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
+      char buf[10000];
+      char *p = buf;
+      *p = '\0';
+      for (uint s=0; s<slen; s++)
       {
-        if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-        {
-          if (mShutdownRequested)
-            return;
+        p += sprintf(p,"%u:%lu ",s,mContentSources[s].mLastProcessedEventId-startEventId[s]);
+      }
 
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          mContentTimeCache.erase(it->first);
-          mContentTimeCache_modificationLock.writeUnlock();
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents();%s",buf);
+
+      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      if (ssp)
+      {
+        AutoReadLock lock(&mContentTimeCache_modificationLock);
+
+        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
+        {
+          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+          {
+            if (mShutdownRequested)
+              return;
+
+            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+            mContentTimeCache.erase(it->first);
+            mContentTimeCache_modificationLock.writeUnlock();
+          }
         }
       }
     }
@@ -6665,9 +6726,10 @@ void MergeImplementation::updateContent()
     if (mReloadActivated)
       return;
 
-    long diff = time(nullptr) - mContentUpdateTime;
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
 
-    if (diff < mContentUpdateInterval)
+    if (t1 == t2)
       return;
 
     auto ssp = mSearchStructurePtr[mActiveSearchStructure];
@@ -6677,11 +6739,13 @@ void MergeImplementation::updateContent()
     {
       if (mDebugLog &&  mDebugLog->isEnabled())
       {
-        PRINT_DATA(mDebugLog,"\nproducers  %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
-        PRINT_DATA(mDebugLog,"generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
-        PRINT_DATA(mDebugLog,"geometries  %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
-        PRINT_DATA(mDebugLog,"files  %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
-        PRINT_DATA(mDebugLog,"content  %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
+        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
+
+        PRINT_DATA(mDebugLog,"  ** Producers    %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Geometries   %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Files        %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Content      %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
       }
 
       if (mCachedFiles_totalWaitTime == 0 &&
@@ -6693,14 +6757,16 @@ void MergeImplementation::updateContent()
       {
          // Nothing has changed. No swapping needed.
 
-        PRINT_DATA(mDebugLog, "#### No search structure swapping required #######\n");
-
+        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();No search structure swapping required");
         mContentUpdateTime = time(nullptr);
         return;
       }
     }
 
     AutoReadLock lock(&mModificationLock);
+
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping started");
+
 
     if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
         (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime))
@@ -6734,18 +6800,18 @@ void MergeImplementation::updateContent()
                   if (fsize > 0)
                   {
                     // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
-                    PRINT_DATA(mDebugLog, "#### Delaying the search structure swap about %u seconds #######\n",mCachedFiles_waitTime);
-                    PRINT_DATA(mDebugLog, "- Reason      : Required file is not ready in the local cache.\n");
-                    PRINT_DATA(mDebugLog, "- FileId      : %lu\n",fInfo->mFileId);
-                    PRINT_DATA(mDebugLog, "- FileName    : %s\n",fInfo->mName.c_str());
-                    PRINT_DATA(mDebugLog, "- Wait time   : %u\n",mCachedFiles_totalWaitTime);
+                    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
+                    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
+                    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
+                    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
+                    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
                     if (mContentSwapCounter == 0)
                     {
-                      PRINT_DATA(mDebugLog, "- MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
+                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
                     }
                     else
                     {
-                      PRINT_DATA(mDebugLog, "- MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
+                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
                     }
 
                     mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
@@ -6786,28 +6852,41 @@ void MergeImplementation::updateContent()
       if (mSearchStructurePtr[0])
         delete mSearchStructurePtr[0];
 
-      mSearchStructurePtr[0] = nptr;
+       mSearchStructurePtr[0] = nptr;
     }
 
     nptr->mProducerInfoList = mProducerInfoList;
+    //PRINT_EVENT_LINE(mDebugLog,"** producerList copied");
     nptr->mGenerationInfoList = mGenerationInfoList;
+    //PRINT_EVENT_LINE(mDebugLog,"** generationList copied");
     nptr->mGeometryInfoList = mGeometryInfoList;
+    //PRINT_EVENT_LINE(mDebugLog,"** geometryList copied");
     mFileInfoList.getFileInfoList(nptr->mFileInfoList);
+    //PRINT_EVENT_LINE(mDebugLog,"** fileList copied");
     nptr->mFileInfoListByName.setReleaseObjects(false);
     nptr->mFileInfoListByName = nptr->mFileInfoList;
+    //PRINT_EVENT_LINE(mDebugLog,"** fileNameList copied");
     mContentInfoList.getContentInfoList(nptr->mContentInfoList[0]);
+   //PRINT_EVENT_LINE(mDebugLog,"** contentList copied");
 
     nptr->mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+    //PRINT_EVENT_LINE(mDebugLog,"** fileList sorted");
     nptr->mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
+    //PRINT_EVENT_LINE(mDebugLog,"** fileNameList sorted");
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
       nptr->mContentInfoList[t].setReleaseObjects(false);
       nptr->mContentInfoList[t] = nptr->mContentInfoList[0];
     }
+    //PRINT_EVENT_LINE(mDebugLog,"** contentList pointer copied");
 
     nptr->mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
+    //PRINT_EVENT_LINE(mDebugLog,"** contentList 1 sorted");
     nptr->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
+    //PRINT_EVENT_LINE(mDebugLog,"** contentList 2 sorted");
+
+    // ### Updating producer hash values
 
     uint pLen = nptr->mProducerInfoList.getLength();
 
@@ -6822,7 +6901,7 @@ void MergeImplementation::updateContent()
         std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
         std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
         std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t contentHash = nptr->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
+        std::size_t contentHash = nptr->mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
 
         std::size_t h = 0;
         Fmi::hash_merge(h,generationHash);
@@ -6833,6 +6912,8 @@ void MergeImplementation::updateContent()
         producerInfo->mHash = h;
       }
     }
+
+    //PRINT_EVENT_LINE(mDebugLog,"** producerHash calculated");
 
 
     // ### Updating generation time ranges
@@ -6847,7 +6928,7 @@ void MergeImplementation::updateContent()
       nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
     }
 
-    PRINT_DATA(mDebugLog, "#### Search structure swapped #######\n");
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping ended");
 
     if (mActiveSearchStructure == 0)
       mActiveSearchStructure = 1;

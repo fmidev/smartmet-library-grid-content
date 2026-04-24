@@ -1,8 +1,8 @@
 #pragma once
 
 #include <grid-files/grid/Typedefs.h>
+#include <grid-files/common/GeneralFunctions.h>
 #include <string>
-
 
 namespace SmartMet
 {
@@ -34,7 +34,7 @@ class ContentInfo
 
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
-    int                compare(uint comparisonMethod,ContentInfo *contentInfo);
+    //int                compare(uint comparisonMethod,ContentInfo *contentInfo);
     ContentInfo*       duplicate();
     void               print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -95,6 +95,308 @@ class ContentInfo
         static const uint PreloadRequired         = 0x0004;
         static const uint DeletedContent          = 0x1000;
     };
+
+  public:
+
+    inline int compare(uint comparisonMethod,ContentInfo *contentInfo)
+    {
+      try
+      {
+        if (contentInfo == nullptr)
+          return 0;
+
+        int res = 0;
+
+        switch (comparisonMethod)
+        {
+          case ContentInfo::ComparisonMethod::file_message:
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            return num_compare(mMessageIndex,contentInfo->mMessageIndex);
+
+          case ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time:
+            res = num_compare(mProducerId,contentInfo->mProducerId);
+            if (res != 0)
+              return res;
+            res = num_compare(mGenerationId,contentInfo->mGenerationId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time:
+            res = num_compare(mProducerId,contentInfo->mProducerId);
+            if (res != 0)
+              return res;
+            res = num_compare(mGenerationId,contentInfo->mGenerationId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::starttime_file_message:
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            return num_compare(mMessageIndex,contentInfo->mMessageIndex);
+
+          case ContentInfo::ComparisonMethod::fmiName_starttime_level_file_message:
+            res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::fmiId_fmiLevelId_level_starttime_file_message:
+            res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::starttime_fmiId_fmiLevelId_level_file_message:
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterId,contentInfo->mFmiParameterId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::starttime_fmiName_fmiLevelId_level_file_message:
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::generationId_starttime_file_message:
+            res = num_compare(mGenerationId,contentInfo->mGenerationId);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::fmiName_fmiLevelId_level_starttime_file_message:
+            res = num_compare(mFmiParameterName,contentInfo->mFmiParameterName);
+            if (res != 0)
+              return res;
+            res = num_compare(mFmiParameterLevelId,contentInfo->mFmiParameterLevelId);
+            if (res != 0)
+              return res;
+            res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mGeometryId,contentInfo->mGeometryId);
+            if (res != 0)
+              return res;
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::starttime_generationId_file_message:
+            res = time_compare(mForecastTimeUTC,contentInfo->mForecastTimeUTC);
+            if (res != 0)
+              return res;
+            res = num_compare(mGenerationId,contentInfo->mGenerationId);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastType,contentInfo->mForecastType);
+            if (res != 0)
+              return res;
+            res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+          case ContentInfo::ComparisonMethod::producer_file_message:
+            res = num_compare(mProducerId,contentInfo->mProducerId);
+            if (res != 0)
+              return res;
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            res = num_compare(mMessageIndex,contentInfo->mMessageIndex);
+            if (res != 0)
+              return res;
+            return 0;
+
+
+          default:
+            res = num_compare(mFileId,contentInfo->mFileId);
+            if (res != 0)
+              return res;
+            return num_compare(mMessageIndex,contentInfo->mMessageIndex);
+        }
+        return 0;
+      }
+      catch (...)
+      {
+        throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+      }
+    }
+
 };
 
 

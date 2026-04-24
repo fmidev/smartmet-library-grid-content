@@ -548,6 +548,25 @@ std::size_t FileListStorage::getHash()
 
 
 
+std::size_t FileListStorage::getHashByStorageId(T::StorageId storageId)
+{
+  try
+  {
+    if (storageId < MAX_CONTENT_SOURCES)
+      return mFileLists[storageId].getHash();
+
+    return 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 std::size_t FileListStorage::getHashByProducerId(T::ProducerId producerId)
 {
   try
