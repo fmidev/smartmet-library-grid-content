@@ -5831,10 +5831,8 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
 
     if (len > 0)
     {
-      char *buf = new char[len+10];
-
-      strcpy(buf,eventInfo.mEventData.c_str());
-      char *s = buf;
+      std::string bufStr(eventInfo.mEventData);
+      char *s = bufStr.data();
 
       while (s != nullptr)
       {
@@ -5842,7 +5840,7 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
         if (p != nullptr)
         {
           *p = '\0';
-          if (s == buf)
+          if (s == bufStr.data())
           {
             T::FileInfo *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
@@ -5907,7 +5905,6 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
           s = nullptr;
         }
       }
-      delete [] buf;
     }
     else
     {

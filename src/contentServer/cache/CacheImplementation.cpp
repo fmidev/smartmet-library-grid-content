@@ -7202,10 +7202,8 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
     if (len > 0)
     {
-      char *buf = new char[len+10];
-
-      strcpy(buf,eventInfo.mEventData.c_str());
-      char *s = buf;
+      std::string bufStr(eventInfo.mEventData);
+      char *s = bufStr.data();
 
       while (s != nullptr)
       {
@@ -7213,7 +7211,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
         if (p != nullptr)
         {
           *p = '\0';
-          if (s == buf)
+          if (s == bufStr.data())
           {
             T::FileInfo *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
@@ -7262,7 +7260,6 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           s = nullptr;
         }
       }
-      delete [] buf;
     }
     else
     {

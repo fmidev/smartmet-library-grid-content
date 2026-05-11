@@ -394,12 +394,11 @@ void ContentInfo::setCsv(const char *csv)
   {
     char empty = '\0';
     char *field[100] = {&empty};
-    char st[1000];
-    strcpy(st,csv);
+    std::string tmp(csv);
 
     uint c = 0;
-    field[0] = st;
-    char *p = st;
+    field[0] = tmp.data();
+    char *p = tmp.data();
     while (*p != '\0'  &&  c < 100)
     {
       if (*p == ';'  ||  *p == '\n')
