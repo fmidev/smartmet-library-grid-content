@@ -116,7 +116,7 @@ std::string LevelInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;;;%d",
+    snprintf(st,sizeof(st),"%u;%u;;;%d",
         mProducerId,
         mFmiParameterLevelId,
         //mGrib1ParameterLevelId,

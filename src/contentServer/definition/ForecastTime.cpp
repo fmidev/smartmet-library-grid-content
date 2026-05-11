@@ -91,8 +91,8 @@ std::string ForecastTime::getCsv()
 {
   try
   {
-    char buf[200];
-    sprintf(buf,"%u;%lu;%d;%d;%d;%s;%s",
+    char buf[1000];
+    snprintf(buf,sizeof(buf),"%u;%lu;%d;%d;%d;%s;%s",
         mSourceId,
         mGenerationId,
         mGeometryId,

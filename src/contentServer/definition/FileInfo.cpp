@@ -180,7 +180,7 @@ std::string FileInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%lu;%u;%s;%u;%lu;%u;%u;%u;%ld;%ld;%s;%lu;%u;%u;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%s;%u;%lu;%u;%u;%u;%ld;%ld;%s;%lu;%u;%u;%u",
         mFileId,
         mFileType,
         mName.c_str(),

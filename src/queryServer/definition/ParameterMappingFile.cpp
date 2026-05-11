@@ -2,6 +2,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <macgyver/StringConversion.h>
+#include <memory>
 
 
 namespace SmartMet
@@ -340,13 +341,9 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
             {
               ParameterMapping newMapping = *m;
               partList[sz-1] = uIt->mTargetUnit;
-              char newName[100];
-              char *p = newName;
-              p += sprintf(p,"%s",partList[0].c_str());
+              std::string newName = partList[0];
               for (uint t=1; t<sz; t++)
-              {
-                p += sprintf(p,"-%s",partList[t].c_str());
-              }
+                newName += "-" + partList[t];
               newMapping.mParameterName = newName;
               newMapping.mConversionFunction = uIt->mConversionFunction;
               newMapping.mReverseConversionFunction = uIt->mReverseConversionFunction;
@@ -468,8 +465,8 @@ void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
 {
   try
   {
-    MappingSearch *msearch = new MappingSearch();
-    MappingSearch *mreverseSearch = new MappingSearch();
+    auto msearch = std::make_unique<MappingSearch>();
+    auto mreverseSearch = std::make_unique<MappingSearch>();
 
     for (auto it = mappings.begin(); it != mappings.end(); ++it)
     {
@@ -502,8 +499,8 @@ void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
     }
 
     AutoWriteLock lock(&mModificationLock);
-    mMappingSearch.reset(msearch);
-    mMappingReverseSearch.reset(mreverseSearch);
+    mMappingSearch.reset(msearch.release());
+    mMappingReverseSearch.reset(mreverseSearch.release());
   }
   catch (...)
   {
@@ -524,20 +521,20 @@ void ParameterMappingFile::loadFile()
     if (mLastModified == modTime)
       return;
 
-    FILE *file = fopen(mFilename.c_str(),"re");
-    if (file == nullptr)
+    auto file = std::unique_ptr<FILE, int(*)(FILE*)>(fopen(mFilename.c_str(),"re"), fclose);
+    if (!file)
     {
       Fmi::Exception exception(BCP,"Cannot open the mapping file!");
       exception.addParameter("Filename",mFilename);
       throw exception;
     }
 
-    MappingSearch *msearch = new MappingSearch();
-    MappingSearch *mreverseSearch = new MappingSearch();
+    auto msearch = std::make_unique<MappingSearch>();
+    auto mreverseSearch = std::make_unique<MappingSearch>();
 
     char st[1000];
 
-    while (fgets(st,1000,file) != nullptr)
+    while (fgets(st,1000,file.get()) != nullptr)
     {
       if (st[0] != '#')
       {
@@ -650,11 +647,9 @@ void ParameterMappingFile::loadFile()
         }
       }
     }
-    fclose(file);
-
     AutoWriteLock lock(&mModificationLock);
-    mMappingSearch.reset(msearch);
-    mMappingReverseSearch.reset(mreverseSearch);
+    mMappingSearch.reset(msearch.release());
+    mMappingReverseSearch.reset(mreverseSearch.release());
 
     mLastModified = modTime;
   }

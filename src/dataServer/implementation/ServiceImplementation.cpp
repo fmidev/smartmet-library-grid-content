@@ -6636,7 +6636,6 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
 
     // ### Removing files that should not be in the cache directory:
 
-    char buf[1000];
     for (auto it = fileList.begin(); it != fileList.end(); ++it)
     {
       if (mShutdownRequested)
@@ -6644,9 +6643,9 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
 
       if (hashList.find(it->second) == hashList.end())
       {
-        sprintf(buf,"%s/%s",mFileCache_directory.c_str(),it->second.c_str());
-        PRINT_DATA(mDebugLog,"Removing cached file: %s\n",buf);
-        remove(buf);
+        std::string filePath = mFileCache_directory + "/" + it->second;
+        PRINT_DATA(mDebugLog,"Removing cached file: %s\n",filePath.c_str());
+        remove(filePath.c_str());
         mFileCache_fileCount--;
       }
     }

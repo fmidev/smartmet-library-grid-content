@@ -129,7 +129,7 @@ std::string ProducerInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%s;%s;%s;%u;%u;%u;%u",
+    snprintf(st,sizeof(st),"%u;%s;%s;%s;%u;%u;%u;%u",
         mProducerId,
         mName.c_str(),
         mTitle.c_str(),

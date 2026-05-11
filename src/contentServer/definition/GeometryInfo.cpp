@@ -135,7 +135,7 @@ std::string GeometryInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%lu;%d;%d;%u;%u;%u;%u;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%d;%d;%u;%u;%u;%u;%ld;%ld;%u",
         mGenerationId,
         mGeometryId,
         mLevelId,

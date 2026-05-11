@@ -325,7 +325,7 @@ std::string ContentInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld;%u",
         mFileId,
         mMessageIndex,
         mFileType,

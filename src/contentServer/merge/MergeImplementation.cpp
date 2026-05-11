@@ -925,9 +925,7 @@ int MergeImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
           T::ContentInfo *contentInfo = ssp->mContentInfoList[0].getContentInfoByIndex(t);
           if (contentInfo != nullptr && producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
           {
-            char tmp[100];
-            sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
-            list.insert(std::string(tmp));
+            list.insert(producerInfo->mName + ";" + std::to_string(contentInfo->mGeometryId));
             geometryIdList.insert(contentInfo->mGeometryId);
           }
         }
@@ -1102,26 +1100,20 @@ int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             auto it = producers.find(contentInfo->mProducerId);
             if (it != producers.end())
             {
-              char tmp[200];
-              char *p = tmp;
-              p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                    it->second->mName.c_str(),
-                    sourceParamKey.c_str(),
-                    targetParameterKeyType,
-                    targetParamKey.c_str(),
-                    contentInfo->mGeometryId,
-                    //paramLevelIdType,
-                    paramLevelId,
-                    contentInfo->mParameterLevel,
-                    contentInfo->mForecastType,
-                    contentInfo->mForecastNumber);
-
-              if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-                p += sprintf(p,";1");
-              else
-                p += sprintf(p,";0");
-
-              list.insert(std::string(tmp));
+              char levelBuf[10];
+              snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
+              std::string tmp =
+                    it->second->mName + ";" +
+                    sourceParamKey + ";" +
+                    std::to_string(targetParameterKeyType) + ";" +
+                    targetParamKey + ";" +
+                    std::to_string(contentInfo->mGeometryId) + ";;" +
+                    std::to_string(paramLevelId) + ";" +
+                    levelBuf + ";" +
+                    std::to_string(contentInfo->mForecastType) + ";" +
+                    std::to_string(contentInfo->mForecastNumber) + ";" +
+                    ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+              list.insert(tmp);
             }
           }
         }
@@ -1286,26 +1278,20 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
           {
             tmpList.insert(seed);
 
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;1;%d;%06d;%d;%d",
-                  producerInfo->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
+            char levelBuf[10];
+            snprintf(levelBuf,sizeof(levelBuf),"%06d",contentInfo->mParameterLevel);
+            std::string tmp =
+                  producerInfo->mName + ";" +
+                  sourceParamKey + ";" +
+                  std::to_string(targetParameterKeyType) + ";" +
+                  targetParamKey + ";" +
+                  std::to_string(contentInfo->mGeometryId) + ";1;" +
+                  std::to_string(paramLevelId) + ";" +
+                  levelBuf + ";" +
+                  std::to_string(contentInfo->mForecastType) + ";" +
+                  std::to_string(contentInfo->mForecastNumber) + ";" +
+                  ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+            list.insert(tmp);
           }
         }
       }
@@ -1479,8 +1465,8 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
       T::ContentInfo *info = ssp->mContentInfoList[0].getContentInfoByIndex(t);
       if (info != nullptr)
       {
-        char st[200];
-        sprintf(st,"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+        char st[1000];
+        snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
         std::string str = st;
         if (list.find(str) == list.end())
           list.insert(str);
