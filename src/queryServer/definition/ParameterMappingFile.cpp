@@ -537,9 +537,9 @@ void ParameterMappingFile::loadFile()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         bool ind = false;
         char *field[100];

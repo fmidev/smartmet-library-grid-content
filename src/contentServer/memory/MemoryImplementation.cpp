@@ -5425,9 +5425,9 @@ void MemoryImplementation::readProducerList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5476,9 +5476,9 @@ void MemoryImplementation::readGenerationList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5525,9 +5525,9 @@ void MemoryImplementation::readGeometryList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5571,9 +5571,9 @@ void MemoryImplementation::readFileList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5620,9 +5620,9 @@ void MemoryImplementation::readContentList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5721,9 +5721,9 @@ bool MemoryImplementation::syncProducerList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5821,9 +5821,9 @@ bool MemoryImplementation::syncGenerationList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5929,9 +5929,9 @@ bool MemoryImplementation::syncGeometryList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -6027,9 +6027,9 @@ bool MemoryImplementation::syncFileList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -6162,9 +6162,9 @@ bool MemoryImplementation::syncContentList()
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)

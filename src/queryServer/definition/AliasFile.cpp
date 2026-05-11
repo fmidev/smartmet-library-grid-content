@@ -296,7 +296,8 @@ void AliasFile::loadFile()
     char st[30000];
 
     uint lineCount = 0;
-    while (!feof(file))
+    bool readOk = true;
+    while (readOk)
     {
       char *pp = st;
       bool ind = true;
@@ -319,11 +320,12 @@ void AliasFile::loadFile()
         }
         else
         {
+          readOk = false;
           pp[0] = '\n';
         }
       }
 
-      if (st[0] != '#')
+      if (readOk && st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
