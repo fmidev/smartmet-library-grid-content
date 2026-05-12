@@ -116,7 +116,7 @@ std::string LevelInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%u;;;%d",
+    snprintf(st,sizeof(st),"%u;%u;;;%d",
         mProducerId,
         mFmiParameterLevelId,
         //mGrib1ParameterLevelId,
@@ -157,12 +157,11 @@ void LevelInfo::setCsv(const char *csv)
   try
   {
     char *field[100];
-    char st[1000];
-    strcpy(st,csv);
+    std::string tmp(csv);
 
     uint c = 0;
-    field[0] = st;
-    char *p = st;
+    field[0] = tmp.data();
+    char *p = tmp.data();
     while (*p != '\0'  &&  c < 100)
     {
       if (*p == ';'  ||  *p == '\n')

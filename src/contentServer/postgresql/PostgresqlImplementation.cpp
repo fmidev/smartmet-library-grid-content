@@ -812,27 +812,24 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
     producerInfoList.clear();
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -4760,27 +4757,24 @@ int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -4815,27 +4809,24 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::Sessi
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -4870,27 +4861,24 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::Ses
 
     contentInfoList.clear();
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -4923,27 +4911,24 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::Session
     if (getProducerById(producerId,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_ID;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -4978,27 +4963,24 @@ int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastT
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 
@@ -5055,27 +5037,24 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::Sessi
     if (getProducerByName(producerName,producerInfo) != Result::OK)
       return Result::UNKNOWN_PRODUCER_NAME;
 
-    char st[100];
-    strcpy(st,parameterKey.c_str());
-
     if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME || parameterKeyType == T::ParamKeyTypeValue::GRIB_ID || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID  || parameterKeyType == T::ParamKeyTypeValue::NEWBASE_NAME)
     {
-      if (strncasecmp(st,"GRIB-",5) == 0)
+      if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::GRIB_ID;
-        parameterKey = st+5;
+        parameterKey = parameterKey.substr(5);
       }
       else
-      if (strncasecmp(st,"NB-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_ID;
-        parameterKey = st+3;
+        parameterKey = parameterKey.substr(3);
       }
       else
-      if (strncasecmp(st,"NBN-",3) == 0)
+      if (strncasecmp(parameterKey.c_str(),"NBN-",3) == 0)
       {
         parameterKeyType = T::ParamKeyTypeValue::NEWBASE_NAME;
-        parameterKey = st+4;
+        parameterKey = parameterKey.substr(4);
       }
     }
 

@@ -164,19 +164,16 @@ std::string EventInfo::getCsv()
 {
   try
   {
-    char st[1000];
-    sprintf(st,"%lu;%lu;%lu;%u;%lu;%lu;%lu;%lu;%s",
-        mEventId,
-        mEventTime,
-        mServerTime,
-        mType,
-        mId1,
-        mId2,
-        mId3,
-        mFlags,
-        mEventData.c_str());
-
-    return std::string(st);
+    return
+      std::to_string(mEventId) + ";" +
+      std::to_string(mEventTime) + ";" +
+      std::to_string(mServerTime) + ";" +
+      std::to_string(mType) + ";" +
+      std::to_string(mId1) + ";" +
+      std::to_string(mId2) + ";" +
+      std::to_string(mId3) + ";" +
+      std::to_string(mFlags) + ";" +
+      mEventData;
   }
   catch (...)
   {
@@ -210,12 +207,11 @@ void EventInfo::setCsv(const char *csv)
   try
   {
     char *field[100];
-    char st[1000];
-    strcpy(st,csv);
+    std::string tmp(csv);
 
     uint c = 0;
-    field[0] = st;
-    char *p = st;
+    field[0] = tmp.data();
+    char *p = tmp.data();
     while (*p != '\0'  &&  c < 100)
     {
       if (*p == ';'  ||  *p == '\n')

@@ -1215,9 +1215,7 @@ int RedisImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
         if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
         {
-          char tmp[100];
-          sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
-          list.insert(std::string(tmp));
+          list.insert(producerInfo->mName + ";" + std::to_string(contentInfo->mGeometryId));
           geometryIdList.insert(contentInfo->mGeometryId);
         }
       }
@@ -1393,26 +1391,20 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
           {
             tmpList.insert(seed);
 
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                  producerInfo->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
+            char levelBuf[10];
+            snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
+            std::string tmp =
+                  producerInfo->mName + ";" +
+                  sourceParamKey + ";" +
+                  std::to_string(targetParameterKeyType) + ";" +
+                  targetParamKey + ";" +
+                  std::to_string(contentInfo->mGeometryId) + ";;" +
+                  std::to_string(paramLevelId) + ";" +
+                  levelBuf + ";" +
+                  std::to_string(contentInfo->mForecastType) + ";" +
+                  std::to_string(contentInfo->mForecastNumber) + ";" +
+                  ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+            list.insert(tmp);
           }
         }
       }
@@ -1576,26 +1568,20 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
           {
             tmpList.insert(seed);
 
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                  producerInfo.mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
+            char levelBuf[10];
+            snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
+            std::string tmp =
+                  producerInfo.mName + ";" +
+                  sourceParamKey + ";" +
+                  std::to_string(targetParameterKeyType) + ";" +
+                  targetParamKey + ";" +
+                  std::to_string(contentInfo->mGeometryId) + ";;" +
+                  std::to_string(paramLevelId) + ";" +
+                  levelBuf + ";" +
+                  std::to_string(contentInfo->mForecastType) + ";" +
+                  std::to_string(contentInfo->mForecastNumber) + ";" +
+                  ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+            list.insert(tmp);
           }
         }
       }
@@ -8043,8 +8029,8 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
           T::ContentInfo contentInfo;
           contentInfo.setCsv(reply->element[t]->str);
 
-          char st[200];
-          sprintf(st,"%u;%lu;%u;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.getForecastTime(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
+          char st[1000];
+          snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.getForecastTime(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
           std::string str = st;
 
           if (list.find(str) == list.end())
@@ -8778,10 +8764,10 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
 
     std::set<std::string> searchList;
 
-    char tmp[200];
+    char tmp[1000];
     for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
     {
-      sprintf(tmp,"%lu;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
+      snprintf(tmp,sizeof(tmp),"%lu;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
       std::string st = tmp;
       if (searchList.find(st) == searchList.end())
         searchList.insert(st);

@@ -242,7 +242,7 @@ void MemoryImplementation::syncProcessingThread()
     if (!mContentSyncEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
     time_t delay = 10;
     while (!mShutdownRequested)
     {
@@ -251,19 +251,19 @@ void MemoryImplementation::syncProcessingThread()
 
         time_t tt = time(0) - delay;
 
-        sprintf(filename,"%s/producers.csv",mContentDir.c_str());
+        snprintf(filename,sizeof(filename),"%s/producers.csv",mContentDir.c_str());
         time_t t1 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/generations.csv",mContentDir.c_str());
+        snprintf(filename,sizeof(filename),"%s/generations.csv",mContentDir.c_str());
         time_t t2 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
+        snprintf(filename,sizeof(filename),"%s/geometries.csv",mContentDir.c_str());
         time_t t3 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/files.csv",mContentDir.c_str());
+        snprintf(filename,sizeof(filename),"%s/files.csv",mContentDir.c_str());
         time_t t4 = getFileModificationTime(filename);
 
-        sprintf(filename,"%s/content.csv",mContentDir.c_str());
+        snprintf(filename,sizeof(filename),"%s/content.csv",mContentDir.c_str());
         time_t t5 = getFileModificationTime(filename);
 
         time_t max = t1;
@@ -896,9 +896,7 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
         T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByIndex(t);
         if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
         {
-          char tmp[100];
-          sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
-          list.insert(std::string(tmp));
+          list.insert(producerInfo->mName + ";" + std::to_string(contentInfo->mGeometryId));
           geometryIdList.insert(contentInfo->mGeometryId);
         }
       }
@@ -1064,26 +1062,20 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
           auto it = producers.find(contentInfo->mProducerId);
           if (it != producers.end())
           {
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                  it->second->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
+            char levelBuf[10];
+            snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
+            std::string tmp =
+                  it->second->mName + ";" +
+                  sourceParamKey + ";" +
+                  std::to_string(targetParameterKeyType) + ";" +
+                  targetParamKey + ";" +
+                  std::to_string(contentInfo->mGeometryId) + ";;" +
+                  std::to_string(paramLevelId) + ";" +
+                  levelBuf + ";" +
+                  std::to_string(contentInfo->mForecastType) + ";" +
+                  std::to_string(contentInfo->mForecastNumber) + ";" +
+                  ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+            list.insert(tmp);
           }
         }
       }
@@ -1242,26 +1234,20 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
           {
             tmpList.insert(seed);
 
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                  producerInfo->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
-                  //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
-            else
-              p += sprintf(p,";0");
-
-            list.insert(std::string(tmp));
+            char levelBuf[10];
+            snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
+            std::string tmp =
+                  producerInfo->mName + ";" +
+                  sourceParamKey + ";" +
+                  std::to_string(targetParameterKeyType) + ";" +
+                  targetParamKey + ";" +
+                  std::to_string(contentInfo->mGeometryId) + ";;" +
+                  std::to_string(paramLevelId) + ";" +
+                  levelBuf + ";" +
+                  std::to_string(contentInfo->mForecastType) + ";" +
+                  std::to_string(contentInfo->mForecastNumber) + ";" +
+                  ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+            list.insert(tmp);
           }
         }
       }
@@ -5255,8 +5241,8 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
-      char st[200];
-      sprintf(st,"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+      char st[1000];
+      snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
       std::string str = st;
 
 
@@ -5416,18 +5402,18 @@ void MemoryImplementation::readProducerList()
     if (!mContentLoadEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
 
-    sprintf(filename,"%s/producers.csv",mContentDir.c_str());
+    snprintf(filename,sizeof(filename),"%s/producers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5467,18 +5453,18 @@ void MemoryImplementation::readGenerationList()
     if (!mContentLoadEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
 
-    sprintf(filename,"%s/generations.csv",mContentDir.c_str());
+    snprintf(filename,sizeof(filename),"%s/generations.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5516,18 +5502,18 @@ void MemoryImplementation::readGeometryList()
     if (!mContentLoadEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
 
-    sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
+    snprintf(filename,sizeof(filename),"%s/geometries.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5562,18 +5548,18 @@ void MemoryImplementation::readFileList()
     if (!mContentLoadEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
 
-    sprintf(filename,"%s/files.csv",mContentDir.c_str());
+    snprintf(filename,sizeof(filename),"%s/files.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5611,18 +5597,18 @@ void MemoryImplementation::readContentList()
     if (!mContentLoadEnabled)
       return;
 
-    char filename[200];
+    char filename[2048];
 
-    sprintf(filename,"%s/content.csv",mContentDir.c_str());
+    snprintf(filename,sizeof(filename),"%s/content.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5713,17 +5699,17 @@ bool MemoryImplementation::syncProducerList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    char filename[200];
-    sprintf(filename,"%s/producers.csv",mContentDir.c_str());
+    char filename[2048];
+    snprintf(filename,sizeof(filename),"%s/producers.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return true;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5813,17 +5799,17 @@ bool MemoryImplementation::syncGenerationList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    char filename[200];
-    sprintf(filename,"%s/generations.csv",mContentDir.c_str());
+    char filename[2048];
+    snprintf(filename,sizeof(filename),"%s/generations.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return true;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -5921,17 +5907,17 @@ bool MemoryImplementation::syncGeometryList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    char filename[200];
-    sprintf(filename,"%s/geometries.csv",mContentDir.c_str());
+    char filename[2048];
+    snprintf(filename,sizeof(filename),"%s/geometries.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return true;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -6019,17 +6005,17 @@ bool MemoryImplementation::syncFileList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    char filename[200];
-    sprintf(filename,"%s/files.csv",mContentDir.c_str());
+    char filename[2048];
+    snprintf(filename,sizeof(filename),"%s/files.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return true;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
@@ -6154,17 +6140,17 @@ bool MemoryImplementation::syncContentList()
     T::ContentInfoList contentToAdd;
     contentToAdd.setReleaseObjects(false);
 
-    char filename[200];
-    sprintf(filename,"%s/content.csv",mContentDir.c_str());
+    char filename[2048];
+    snprintf(filename,sizeof(filename),"%s/content.csv",mContentDir.c_str());
     FILE *file = fopen(filename,"re");
     if (file == nullptr)
       return true;
 
     char st[1000];
 
-    while (!feof(file))
+    while (fgets(st,1000,file) != nullptr)
     {
-      if (fgets(st,1000,file) != nullptr  &&  st[0] != '#')
+      if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)

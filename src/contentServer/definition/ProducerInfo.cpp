@@ -129,7 +129,7 @@ std::string ProducerInfo::getCsv()
   try
   {
     char st[1000];
-    sprintf(st,"%u;%s;%s;%s;%u;%u;%u;%u",
+    snprintf(st,sizeof(st),"%u;%s;%s;%s;%u;%u;%u;%u",
         mProducerId,
         mName.c_str(),
         mTitle.c_str(),
@@ -173,12 +173,11 @@ void ProducerInfo::setCsv(const char *csv)
   try
   {
     char *field[100];
-    char st[1000];
-    strcpy(st,csv);
+    std::string tmp(csv);
 
     uint c = 0;
-    field[0] = st;
-    char *p = st;
+    field[0] = tmp.data();
+    char *p = tmp.data();
     while (*p != '\0'  &&  c < 100)
     {
       if (*p == ';'  ||  *p == '\n')
