@@ -215,7 +215,7 @@ DEPFILES = $(OBJFILES:%.o=%.d)
 INCLUDES := -Isrc $(INCLUDES)
 
 
-.PHONY: test rpm
+.PHONY: test rpm doc
 
 # The rules
 
@@ -257,10 +257,14 @@ $(LIBFILE): $(OBJFILES)
 		exit 1; \
 	fi
 
+doc:
+	doxygen Doxyfile
+
 clean: delete_stubs
 	rm -f src/*~ src/*/*~ src/*/*/*~
 	rm -rf obj
 	rm -rf $(LIBFILE)
+	rm -rf doc/html
 
 clean-install:
 	rm -rf $(includedir)/$(INCDIR)/*
