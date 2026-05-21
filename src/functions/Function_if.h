@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Selects element-wise from grid A or grid B based on a boolean condition grid. */
+// ====================================================================================
+
 class Function_if : public Function
 {
   public:

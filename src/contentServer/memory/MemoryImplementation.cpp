@@ -20,6 +20,8 @@ namespace ContentServer
 
 
 
+/*! \brief Memory backend: thread entry point that invokes syncProcessingThread on the implementation. */
+
 static void* MemoryImplementation_syncProcessingThread(void *arg)
 {
   try
@@ -39,6 +41,8 @@ static void* MemoryImplementation_syncProcessingThread(void *arg)
 
 
 
+
+/*! \brief Memory backend: default constructor initializing counters, lists and flags. */
 
 MemoryImplementation::MemoryImplementation()
 {
@@ -106,6 +110,8 @@ MemoryImplementation::MemoryImplementation()
 
 
 
+/*! \brief Memory backend: destructor that requests shutdown and joins the sync thread. */
+
 MemoryImplementation::~MemoryImplementation()
 {
   FUNCTION_TRACE
@@ -124,6 +130,8 @@ MemoryImplementation::~MemoryImplementation()
 
 
 
+
+/*! \brief Memory backend: configure load/save/sync behaviour and optionally read content from disk. */
 
 void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,bool contentSyncEnabled,bool eventsEnabled,const std::string& contentDir,uint contentSaveInterval)
 {
@@ -183,6 +191,8 @@ void MemoryImplementation::init(bool contentLoadEnabled,bool contentSaveEnabled,
 
 
 
+/*! \brief Memory backend: request the implementation to stop background processing. */
+
 void MemoryImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -199,6 +209,8 @@ void MemoryImplementation::shutdown()
 
 
 
+
+/*! \brief Memory backend: return true if the given session id is currently valid. */
 
 bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
 {
@@ -217,6 +229,8 @@ bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
+/*! \brief Memory backend: spawn the background sync processing thread. */
+
 void MemoryImplementation::startSyncProcessing()
 {
   FUNCTION_TRACE
@@ -233,6 +247,8 @@ void MemoryImplementation::startSyncProcessing()
 
 
 
+
+/*! \brief Memory backend: main loop of the background sync/save processing thread. */
 
 void MemoryImplementation::syncProcessingThread()
 {
@@ -310,6 +326,8 @@ void MemoryImplementation::syncProcessingThread()
 
 
 
+/*! \brief Memory backend: cap the maximum number of retained event entries. */
+
 void MemoryImplementation::setEventListMaxLength(uint maxLength)
 {
   FUNCTION_TRACE
@@ -326,6 +344,8 @@ void MemoryImplementation::setEventListMaxLength(uint maxLength)
 
 
 
+
+/*! \brief Memory backend: erase all in-memory data and counters. */
 
 int MemoryImplementation::_clear(T::SessionId sessionId)
 {
@@ -358,6 +378,8 @@ int MemoryImplementation::_clear(T::SessionId sessionId)
 
 
 
+
+/*! \brief Memory backend: reload data from disk storage into memory. */
 
 int MemoryImplementation::_reload(T::SessionId sessionId)
 {
@@ -413,6 +435,8 @@ int MemoryImplementation::_reload(T::SessionId sessionId)
 
 
 
+/*! \brief Memory backend: return the timestamp of the last content modification. */
+
 int MemoryImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
   FUNCTION_TRACE
@@ -434,6 +458,8 @@ int MemoryImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& c
 
 
 
+
+/*! \brief Memory backend: register a new producer record. */
 
 int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -478,6 +504,8 @@ int MemoryImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInf
 
 
 
+/*! \brief Memory backend: update the fields of an existing producer record. */
+
 int MemoryImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -511,6 +539,8 @@ int MemoryImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInf
 
 
 
+
+/*! \brief Memory backend: delete the producer matching the given id along with its dependants. */
 
 int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -551,6 +581,8 @@ int MemoryImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::Prod
 
 
 
+/*! \brief Memory backend: delete the producer matching the given name along with its dependants. */
+
 int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -590,6 +622,8 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
 
 
 
+/*! \brief Memory backend: delete every producer originating from the given source. */
+
 int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -625,6 +659,8 @@ int MemoryImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
 
 
+/*! \brief Memory backend: copy the producer with the given id into the output parameter. */
+
 int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -654,6 +690,8 @@ int MemoryImplementation::_getProducerInfoById(T::SessionId sessionId,T::Produce
 
 
 
+/*! \brief Memory backend: copy the producer with the given name into the output parameter. */
+
 int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -682,6 +720,8 @@ int MemoryImplementation::_getProducerInfoByName(T::SessionId sessionId,const st
 
 
 
+
+/*! \brief Memory backend: return the complete list of producer records. */
 
 int MemoryImplementation::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
@@ -716,6 +756,8 @@ int MemoryImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
 
 
 
+
+/*! \brief Memory backend: list producers offering data for the given parameter key. */
 
 int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -814,6 +856,8 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
 
 
+/*! \brief Memory backend: list every producer originating from the given source. */
+
 int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -849,6 +893,8 @@ int MemoryImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
 
 
 
+/*! \brief Memory backend: return the number of registered producers. */
+
 int MemoryImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -869,6 +915,8 @@ int MemoryImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
 
 
 
+
+/*! \brief Memory backend: collect all unique producer/geometry name pairs known to the server. */
 
 int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -913,6 +961,8 @@ int MemoryImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
+
+/*! \brief Memory backend: list all distinct parameters across producers translated between key types. */
 
 int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -1093,6 +1143,8 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
+/*! \brief Memory backend: list all distinct parameters offered by the given producer. */
+
 int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -1265,6 +1317,8 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
 
 
+/*! \brief Memory backend: register a new generation record under an existing producer. */
+
 int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1301,6 +1355,8 @@ int MemoryImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
+
+/*! \brief Memory backend: update the fields of an existing generation record. */
 
 int MemoryImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -1340,6 +1396,8 @@ int MemoryImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generatio
 
 
 
+/*! \brief Memory backend: delete the generation with the given id and its dependent data. */
+
 int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1377,6 +1435,8 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Ge
 
 
 
+
+/*! \brief Memory backend: delete the generation with the given name and its dependent data. */
 
 int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -1416,6 +1476,8 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
 
 
 
+/*! \brief Memory backend: delete all generations whose ids appear in the given list. */
+
 int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -1451,6 +1513,8 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
 
 
+
+/*! \brief Memory backend: delete all generations belonging to the given producer id. */
 
 int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -1489,6 +1553,8 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
 
 
 
+
+/*! \brief Memory backend: delete all generations belonging to the named producer. */
 
 int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -1529,6 +1595,8 @@ int MemoryImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
+/*! \brief Memory backend: delete all generations originating from the given source. */
+
 int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1562,6 +1630,8 @@ int MemoryImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
 
 
+/*! \brief Memory backend: copy the generation with the given id into the output parameter. */
+
 int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1590,6 +1660,8 @@ int MemoryImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Gener
 
 
 
+
+/*! \brief Memory backend: copy the generation with the given name into the output parameter. */
 
 int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
@@ -1620,6 +1692,8 @@ int MemoryImplementation::_getGenerationInfoByName(T::SessionId sessionId,const 
 
 
 
+/*! \brief Memory backend: return the complete list of generations. */
+
 int MemoryImplementation::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1644,6 +1718,8 @@ int MemoryImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
 
 
 
+
+/*! \brief Memory backend: list generations that contain data for the given geometry. */
 
 int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
@@ -1680,6 +1756,8 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
 
 
+/*! \brief Memory backend: list generations belonging to the given producer id. */
+
 int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1708,6 +1786,8 @@ int MemoryImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
 
 
 
+
+/*! \brief Memory backend: list generations belonging to the named producer. */
 
 int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
@@ -1738,6 +1818,8 @@ int MemoryImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
 
 
+/*! \brief Memory backend: list generations originating from the given source. */
+
 int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1762,6 +1844,8 @@ int MemoryImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
+
+/*! \brief Memory backend: return the most recent generation matching the producer and status. */
 
 int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -1794,6 +1878,8 @@ int MemoryImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
 
 
 
+/*! \brief Memory backend: return the most recent generation matching the named producer and status. */
+
 int MemoryImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1824,6 +1910,8 @@ int MemoryImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
 
 
 
+/*! \brief Memory backend: return the number of registered generations. */
+
 int MemoryImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -1844,6 +1932,8 @@ int MemoryImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
+
+/*! \brief Memory backend: change the status of the generation with the given id. */
 
 int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
@@ -1875,6 +1965,8 @@ int MemoryImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T:
 
 
 
+/*! \brief Memory backend: change the status of the generation with the given name. */
+
 int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
@@ -1904,6 +1996,8 @@ int MemoryImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
 
 
 
+
+/*! \brief Memory backend: register a new geometry record for a generation. */
 
 int MemoryImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -1943,6 +2037,8 @@ int MemoryImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
+/*! \brief Memory backend: delete the geometry identified by generation, geometry and level id. */
+
 int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
@@ -1972,6 +2068,8 @@ int MemoryImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::Gene
 
 
 
+
+/*! \brief Memory backend: delete every geometry attached to the given generation id. */
 
 int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -2003,6 +2101,8 @@ int MemoryImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId ses
 
 
 
+/*! \brief Memory backend: delete every geometry belonging to the given producer id. */
+
 int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -2032,6 +2132,8 @@ int MemoryImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessi
 
 
 
+/*! \brief Memory backend: delete every geometry originating from the given source. */
+
 int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2056,6 +2158,8 @@ int MemoryImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 
 
+
+/*! \brief Memory backend: copy the geometry identified by generation, geometry and level id. */
 
 int MemoryImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
@@ -2083,6 +2187,8 @@ int MemoryImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generat
 
 
 
+/*! \brief Memory backend: return the complete list of geometries. */
+
 int MemoryImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2106,6 +2212,8 @@ int MemoryImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
 
 
 
+
+/*! \brief Memory backend: list every geometry attached to the given generation id. */
 
 int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
@@ -2136,6 +2244,8 @@ int MemoryImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Memory backend: list every geometry belonging to the given producer id. */
+
 int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2164,6 +2274,8 @@ int MemoryImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
 
 
 
+/*! \brief Memory backend: list every geometry originating from the given source. */
+
 int MemoryImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2189,6 +2301,8 @@ int MemoryImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,
 
 
 
+/*! \brief Memory backend: return the number of registered geometry records. */
+
 int MemoryImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2209,6 +2323,8 @@ int MemoryImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& cou
 
 
 
+
+/*! \brief Memory backend: update the fields of an existing geometry record. */
 
 int MemoryImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -2248,6 +2364,8 @@ int MemoryImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
+/*! \brief Memory backend: change the status of a geometry identified by generation, geometry and level id. */
+
 int MemoryImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   FUNCTION_TRACE
@@ -2278,6 +2396,8 @@ int MemoryImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::G
 
 
 
+
+/*! \brief Memory backend: register a new file metadata record. */
 
 int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -2343,6 +2463,8 @@ int MemoryImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
 
 
+/*! \brief Memory backend: update the fields of an existing file metadata record. */
+
 int MemoryImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2398,6 +2520,8 @@ int MemoryImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileI
 
 
 
+
+/*! \brief Memory backend: register a file together with its associated content records. */
 
 int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
@@ -2498,6 +2622,8 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Memory backend: bulk register a batch of files together with their content lists. */
 
 int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
@@ -2642,6 +2768,8 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
 
 
+/*! \brief Memory backend: delete the file with the given id and its content records. */
+
 int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -2676,6 +2804,8 @@ int MemoryImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId f
 
 
 
+
+/*! \brief Memory backend: delete the file with the given name and its content records. */
 
 int MemoryImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -2712,6 +2842,8 @@ int MemoryImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std
 
 
 
+
+/*! \brief Memory backend: delete files whose forecast time matches any entry in the list. */
 
 int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
@@ -2775,6 +2907,8 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
 
 
+/*! \brief Memory backend: delete every file belonging to the given producer id. */
+
 int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -2808,6 +2942,8 @@ int MemoryImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
 
 
 
+
+/*! \brief Memory backend: delete every file belonging to the named producer. */
 
 int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -2843,6 +2979,8 @@ int MemoryImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
 
 
+/*! \brief Memory backend: delete every file belonging to the given generation id. */
+
 int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -2876,6 +3014,8 @@ int MemoryImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Memory backend: delete files matching the given generation, geometry and forecast key. */
 
 int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
@@ -2931,6 +3071,8 @@ int MemoryImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
 
 
 
+/*! \brief Memory backend: delete every file belonging to the named generation. */
+
 int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -2965,6 +3107,8 @@ int MemoryImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
+/*! \brief Memory backend: delete every file originating from the given source. */
+
 int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2994,6 +3138,8 @@ int MemoryImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Memory backend: delete every file whose id appears in the given list. */
 
 int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
@@ -3028,6 +3174,8 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
 
 
+/*! \brief Memory backend: copy the file record with the given id into the output parameter. */
+
 int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -3054,6 +3202,8 @@ int MemoryImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId file
 
 
 
+
+/*! \brief Memory backend: copy the file record with the given name into the output parameter. */
 
 int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
@@ -3082,6 +3232,8 @@ int MemoryImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
+/*! \brief Memory backend: return a page of file records starting at the given file id. */
+
 int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3106,6 +3258,8 @@ int MemoryImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId star
 
 
 
+
+/*! \brief Memory backend: return file records for every id appearing in the given list. */
 
 int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
@@ -3138,6 +3292,8 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
+/*! \brief Memory backend: return a page of file records belonging to the given producer id. */
+
 int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3166,6 +3322,8 @@ int MemoryImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Memory backend: return a page of file records belonging to the named producer. */
 
 int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3196,6 +3354,8 @@ int MemoryImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
+/*! \brief Memory backend: return a page of file records belonging to the given generation id. */
+
 int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3225,6 +3385,8 @@ int MemoryImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
+/*! \brief Memory backend: return a page of file records belonging to the named generation. */
+
 int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3253,6 +3415,8 @@ int MemoryImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
+/*! \brief Memory backend: return a page of file records originating from the given source. */
+
 int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3278,6 +3442,8 @@ int MemoryImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::S
 
 
 
+/*! \brief Memory backend: return the total number of registered file records. */
+
 int MemoryImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3298,6 +3464,8 @@ int MemoryImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Memory backend: count the file records belonging to the given producer id. */
 
 int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
@@ -3320,6 +3488,8 @@ int MemoryImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T
 
 
 
+/*! \brief Memory backend: count the file records belonging to the given generation id. */
+
 int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
@@ -3341,6 +3511,8 @@ int MemoryImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
 
 
+/*! \brief Memory backend: count the file records originating from the given source. */
+
 int MemoryImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
@@ -3361,6 +3533,8 @@ int MemoryImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Memory backend: append an event record to the event log. */
 
 int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
@@ -3384,6 +3558,8 @@ int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
 
 
 
+
+/*! \brief Memory backend: return the most recent event record visible to the requesting server. */
 
 int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -3414,6 +3590,8 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 
 
+
+/*! \brief Memory backend: return a page of event records starting at the given event id. */
 
 int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
@@ -3493,6 +3671,8 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
 
 
 
+/*! \brief Memory backend: return the number of event records in the log. */
+
 int MemoryImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3513,6 +3693,8 @@ int MemoryImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Memory backend: register a single content record. */
 
 int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -3570,6 +3752,8 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
 
 
 
+/*! \brief Memory backend: update the fields of an existing content record. */
+
 int MemoryImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -3626,6 +3810,8 @@ int MemoryImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo&
 
 
 
+
+/*! \brief Memory backend: register a batch of content records in one call. */
 
 int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
@@ -3697,6 +3883,8 @@ int MemoryImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoL
 
 
 
+/*! \brief Memory backend: delete the content record identified by file id and message index. */
+
 int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -3729,6 +3917,8 @@ int MemoryImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fi
 
 
 
+/*! \brief Memory backend: delete every content record belonging to the given file id. */
+
 int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -3759,6 +3949,8 @@ int MemoryImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Memory backend: delete every content record belonging to the named file. */
 
 int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
@@ -3791,6 +3983,8 @@ int MemoryImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
+/*! \brief Memory backend: delete every content record belonging to the given producer id. */
+
 int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -3821,6 +4015,8 @@ int MemoryImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Memory backend: delete every content record belonging to the named producer. */
 
 int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -3853,6 +4049,8 @@ int MemoryImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
 
 
+/*! \brief Memory backend: delete every content record belonging to the given generation id. */
+
 int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -3883,6 +4081,8 @@ int MemoryImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
 
 
 
+
+/*! \brief Memory backend: delete every content record belonging to the named generation. */
 
 int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -3915,6 +4115,8 @@ int MemoryImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
 
 
+/*! \brief Memory backend: delete every content record originating from the given source. */
+
 int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -3941,6 +4143,8 @@ int MemoryImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Memory backend: copy the content record identified by file id and message index. */
 
 int MemoryImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -3971,6 +4175,8 @@ int MemoryImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileI
 
 
 
+/*! \brief Memory backend: return a page of content records starting at the given file/message position. */
+
 int MemoryImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3996,6 +4202,8 @@ int MemoryImplementation::_getContentList(T::SessionId sessionId,T::FileId start
 
 
 
+/*! \brief Memory backend: return every content record belonging to the given file id. */
+
 int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4020,6 +4228,8 @@ int MemoryImplementation::_getContentListByFileId(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Memory backend: return content records for every file id appearing in the given list. */
 
 int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -4052,6 +4262,8 @@ int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
 
 
 
+/*! \brief Memory backend: return every content record belonging to the named file. */
+
 int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4080,6 +4292,8 @@ int MemoryImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
+
+/*! \brief Memory backend: return a page of content records belonging to the given producer id. */
 
 int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -4110,6 +4324,8 @@ int MemoryImplementation::_getContentListByProducerId(T::SessionId sessionId,T::
 
 
 
+/*! \brief Memory backend: return a page of content records belonging to the named producer. */
+
 int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4138,6 +4354,8 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
+
+/*! \brief Memory backend: return a page of content records belonging to the given generation id. */
 
 int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4168,6 +4386,8 @@ int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T
 
 
 
+/*! \brief Memory backend: return a page of content records belonging to the named generation. */
+
 int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4196,6 +4416,8 @@ int MemoryImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
+
+/*! \brief Memory backend: return content records for the given generation within the time range. */
 
 int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -4226,6 +4448,8 @@ int MemoryImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
 
 
+/*! \brief Memory backend: return content records for the named generation within the time range. */
+
 int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4255,6 +4479,8 @@ int MemoryImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
+/*! \brief Memory backend: return a page of content records originating from the given source. */
+
 int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4279,6 +4505,8 @@ int MemoryImplementation::_getContentListBySourceId(T::SessionId sessionId,T::So
 
 
 
+
+/*! \brief Memory backend: return content records matching the specified parameter and filter criteria. */
 
 int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4352,6 +4580,8 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Memory backend: return content records matching the parameter filter within a single generation. */
 
 int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4430,6 +4660,8 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 
 
+/*! \brief Memory backend: return content records matching the parameter filter within a named generation. */
+
 int MemoryImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4506,6 +4738,8 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
+
+/*! \brief Memory backend: return content records matching the parameter filter within a single producer. */
 
 int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4584,6 +4818,8 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 
 
+
+/*! \brief Memory backend: return content records bracketing the requested forecast time for a parameter and generation. */
 
 int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -4677,6 +4913,8 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
 
 
+/*! \brief Memory backend: return content records matching the parameter filter within a named producer. */
+
 int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4754,6 +4992,8 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
+/*! \brief Memory backend: return content records that reference missing producers, generations or files. */
+
 int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4816,6 +5056,8 @@ int MemoryImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
 
 
 
+/*! \brief Memory backend: list distinct geometry ids appearing in content for the given generation. */
+
 int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -4844,6 +5086,8 @@ int MemoryImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
 
 
+
+/*! \brief Memory backend: list unique parameter descriptors present in content for the given generation. */
 
 int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -4901,6 +5145,8 @@ int MemoryImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Memory backend: list distinct parameter keys for a generation using the given key type. */
+
 int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -4929,6 +5175,8 @@ int MemoryImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+
+/*! \brief Memory backend: list distinct parameter keys for a generation and geometry combination. */
 
 int MemoryImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -4959,6 +5207,8 @@ int MemoryImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
+/*! \brief Memory backend: list distinct parameter keys for a generation, geometry and level combination. */
+
 int MemoryImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -4987,6 +5237,8 @@ int MemoryImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(
 
 
 
+
+/*! \brief Memory backend: list distinct forecast times appearing in content for the given generation. */
 
 int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -5017,6 +5269,8 @@ int MemoryImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Memory backend: compute the time range spanned by content for the given producer and generation. */
 
 int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -5058,6 +5312,8 @@ int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
 
 
 
+/*! \brief Memory backend: compute the time range spanned by content for the given generation. */
+
 int MemoryImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -5085,6 +5341,8 @@ int MemoryImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessio
 
 
 
+
+/*! \brief Memory backend: list forecast times appearing in content for the generation and geometry. */
 
 int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
@@ -5115,6 +5373,8 @@ int MemoryImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
+/*! \brief Memory backend: list distinct levels for the generation, geometry and level id combination. */
+
 int MemoryImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -5143,6 +5403,8 @@ int MemoryImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::
 
 
 
+/*! \brief Memory backend: list levels available for the given parameter within a generation and geometry. */
+
 int MemoryImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -5169,6 +5431,8 @@ int MemoryImplementation::_getContentLevelListByParameterGenerationGeometryAndLe
 }
 
 
+
+/*! \brief Memory backend: list forecast times available for the generation, geometry and level id combination. */
 
 int MemoryImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
@@ -5199,6 +5463,8 @@ int MemoryImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::S
 
 
 
+/*! \brief Memory backend: list forecast times appearing in content for the given producer. */
+
 int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -5224,6 +5490,8 @@ int MemoryImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
 
 
 
+
+/*! \brief Memory backend: list unique generation/geometry/forecast-time triplets across all content. */
 
 int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -5262,6 +5530,8 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
 
 
 
+/*! \brief Memory backend: return the total number of registered content records. */
+
 int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -5282,6 +5552,8 @@ int MemoryImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Memory backend: return a content hash representing the current state of the given producer. */
 
 int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
@@ -5308,6 +5580,8 @@ int MemoryImplementation::_getHashByProducerId(T::SessionId sessionId,T::Produce
 
 
 
+
+/*! \brief Memory backend: recompute the cached hash for the producer assuming the caller holds the lock. */
 
 UInt64 MemoryImplementation::updateProducerHashNoLock(T::ProducerId producerId)
 {
@@ -5342,6 +5616,8 @@ UInt64 MemoryImplementation::updateProducerHashNoLock(T::ProducerId producerId)
 
 
 
+/*! \brief Memory backend: list distinct parameter-level descriptors across all content. */
+
 int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -5364,6 +5640,8 @@ int MemoryImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
+
+/*! \brief Memory backend: helper that appends a typed event to the event log. */
 
 T::EventId MemoryImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags)
 {
@@ -5391,6 +5669,8 @@ T::EventId MemoryImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,U
 
 
 
+
+/*! \brief Memory backend: load the producer list from disk storage into memory. */
 
 void MemoryImplementation::readProducerList()
 {
@@ -5443,6 +5723,8 @@ void MemoryImplementation::readProducerList()
 
 
 
+/*! \brief Memory backend: load the generation list from disk storage into memory. */
+
 void MemoryImplementation::readGenerationList()
 {
   FUNCTION_TRACE
@@ -5492,6 +5774,8 @@ void MemoryImplementation::readGenerationList()
 
 
 
+/*! \brief Memory backend: load the geometry list from disk storage into memory. */
+
 void MemoryImplementation::readGeometryList()
 {
   FUNCTION_TRACE
@@ -5537,6 +5821,8 @@ void MemoryImplementation::readGeometryList()
 
 
 
+
+/*! \brief Memory backend: load the file list from disk storage into memory. */
 
 void MemoryImplementation::readFileList()
 {
@@ -5587,6 +5873,8 @@ void MemoryImplementation::readFileList()
 
 
 
+/*! \brief Memory backend: load the content list from disk storage into memory. */
+
 void MemoryImplementation::readContentList()
 {
   FUNCTION_TRACE
@@ -5631,6 +5919,8 @@ void MemoryImplementation::readContentList()
 
 
 
+
+/*! \brief Memory backend: persist the in-memory state back to disk storage. */
 
 void MemoryImplementation::saveData()
 {
@@ -5681,6 +5971,8 @@ void MemoryImplementation::saveData()
 
 
 
+
+/*! \brief Memory backend: reconcile the in-memory producer list with the persisted storage. */
 
 bool MemoryImplementation::syncProducerList()
 {
@@ -5781,6 +6073,8 @@ bool MemoryImplementation::syncProducerList()
 
 
 
+
+/*! \brief Memory backend: reconcile the in-memory generation list with the persisted storage. */
 
 bool MemoryImplementation::syncGenerationList()
 {
@@ -5890,6 +6184,8 @@ bool MemoryImplementation::syncGenerationList()
 
 
 
+/*! \brief Memory backend: reconcile the in-memory geometry list with the persisted storage. */
+
 bool MemoryImplementation::syncGeometryList()
 {
   FUNCTION_TRACE
@@ -5982,6 +6278,8 @@ bool MemoryImplementation::syncGeometryList()
 
 
 
+
+/*! \brief Memory backend: reconcile the in-memory file list with the persisted storage. */
 
 bool MemoryImplementation::syncFileList()
 {
@@ -6114,6 +6412,8 @@ bool MemoryImplementation::syncFileList()
 
 
 
+
+/*! \brief Memory backend: reconcile the in-memory content list with the persisted storage. */
 
 bool MemoryImplementation::syncContentList()
 {

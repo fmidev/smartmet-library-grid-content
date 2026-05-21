@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_mul::Function_mul()
 {
   try
@@ -22,6 +24,8 @@ Function_mul::Function_mul()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_mul::Function_mul(const Function_mul& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_mul::Function_mul(const Function_mul& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_mul::~Function_mul()
 {
   try
@@ -54,6 +60,8 @@ Function_mul::~Function_mul()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_mul::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -84,6 +92,8 @@ float Function_mul::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -112,6 +122,8 @@ double Function_mul::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -183,6 +195,8 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -251,6 +265,8 @@ void Function_mul::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_mul::duplicate()
 {

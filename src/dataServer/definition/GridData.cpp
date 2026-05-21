@@ -10,6 +10,8 @@ namespace T
 
 
 
+/*! \brief Default constructor: zero-initializes grid data fields. */
+
 GridData::GridData()
 {
   try
@@ -89,6 +91,8 @@ GridData::GridData(GridData& gridData)
 
 
 
+/*! \brief Destructor. */
+
 GridData::~GridData()
 {
   try
@@ -104,6 +108,8 @@ GridData::~GridData()
 
 
 
+
+/*! \brief Prints all grid data fields to the given stream. */
 
 void GridData::print(std::ostream& stream,uint level,uint optionFlags)
 {

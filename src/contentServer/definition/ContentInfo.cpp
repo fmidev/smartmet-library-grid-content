@@ -12,6 +12,8 @@ namespace SmartMet
 namespace T
 {
 
+/*! \brief Default constructor for ContentInfo. */
+
 ContentInfo::ContentInfo()
 {
   try
@@ -52,6 +54,8 @@ ContentInfo::ContentInfo()
 
 
 
+
+/*! \brief Copy constructor for ContentInfo. */
 
 ContentInfo::ContentInfo(const ContentInfo& contentInfo)
 {
@@ -95,6 +99,8 @@ ContentInfo::ContentInfo(const ContentInfo& contentInfo)
 
 
 
+/*! \brief Construct ContentInfo from a CSV-formatted string. */
+
 ContentInfo::ContentInfo(const char *csv)
 {
   try
@@ -136,6 +142,8 @@ ContentInfo::ContentInfo(const char *csv)
 
 
 
+/*! \brief Destructor for ContentInfo. */
+
 ContentInfo::~ContentInfo()
 {
   try
@@ -151,6 +159,8 @@ ContentInfo::~ContentInfo()
 
 
 
+
+/*! \brief Copy assignment operator for ContentInfo. */
 
 ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 {
@@ -199,6 +209,8 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 
 
 
+/*! \brief Return the FMI parameter name string. */
+
 char* ContentInfo::getFmiParameterName()
 {
   try
@@ -214,6 +226,8 @@ char* ContentInfo::getFmiParameterName()
 
 
 
+
+/*! \brief Set the FMI parameter name from a C string. */
 
 void ContentInfo::setFmiParameterName(const char *name)
 {
@@ -236,6 +250,8 @@ void ContentInfo::setFmiParameterName(const char *name)
 
 
 
+/*! \brief Set the FMI parameter name from a std::string. */
+
 void ContentInfo::setFmiParameterName(const std::string& name)
 {
   try
@@ -252,6 +268,8 @@ void ContentInfo::setFmiParameterName(const std::string& name)
 
 
 
+/*! \brief Return the forecast time string. */
+
 char* ContentInfo::getForecastTime()
 {
   try
@@ -267,6 +285,8 @@ char* ContentInfo::getForecastTime()
 
 
 
+
+/*! \brief Set the forecast time from a time_t value. */
 
 void ContentInfo::setForecastTime(time_t ftime)
 {
@@ -286,6 +306,8 @@ void ContentInfo::setForecastTime(time_t ftime)
 
 
 
+/*! \brief Set the forecast time from a C string. */
+
 void ContentInfo::setForecastTime(const char *ftime)
 {
   try
@@ -303,6 +325,8 @@ void ContentInfo::setForecastTime(const char *ftime)
 
 
 
+/*! \brief Set the forecast time from a std::string. */
+
 void ContentInfo::setForecastTime(const std::string& ftime)
 {
   try
@@ -319,6 +343,8 @@ void ContentInfo::setForecastTime(const std::string& ftime)
 
 
 
+
+/*! \brief Return this record formatted as a CSV row. */
 
 std::string ContentInfo::getCsv()
 {
@@ -371,6 +397,8 @@ std::string ContentInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string ContentInfo::getCsvHeader()
 {
   try
@@ -387,6 +415,8 @@ std::string ContentInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void ContentInfo::setCsv(const char *csv)
 {
@@ -498,6 +528,8 @@ UInt64 ContentInfo::getRequestCounterKey()
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void ContentInfo::setCsv(const std::string& csv)
 {
   try
@@ -514,6 +546,9 @@ void ContentInfo::setCsv(const std::string& csv)
 
 
 #if 0 // Moved to inline
+
+/*! \brief Compare this record to another using the requested ordering method. */
+
 int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
 {
   try
@@ -817,6 +852,8 @@ int ContentInfo::compare(uint comparisonMethod,ContentInfo *contentInfo)
 
 
 
+/*! \brief Return a deep copy of this ContentInfo. */
+
 ContentInfo* ContentInfo::duplicate()
 {
   try
@@ -832,6 +869,8 @@ ContentInfo* ContentInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

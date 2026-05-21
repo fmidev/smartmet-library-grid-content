@@ -8,6 +8,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for ForecastTime. */
+
 ForecastTime::ForecastTime()
 {
   try
@@ -27,6 +29,8 @@ ForecastTime::ForecastTime()
 
 
 
+
+/*! \brief Copy constructor for ForecastTime. */
 
 ForecastTime::ForecastTime(const ForecastTime& forecastTime)
 {
@@ -50,6 +54,8 @@ ForecastTime::ForecastTime(const ForecastTime& forecastTime)
 
 
 
+/*! \brief Construct ForecastTime from a CSV-formatted string. */
+
 ForecastTime::ForecastTime(const char *csv)
 {
   try
@@ -71,6 +77,8 @@ ForecastTime::ForecastTime(const char *csv)
 
 
 
+/*! \brief Destructor for ForecastTime. */
+
 ForecastTime::~ForecastTime()
 {
   try
@@ -86,6 +94,8 @@ ForecastTime::~ForecastTime()
 
 
 
+
+/*! \brief Return this record formatted as a CSV row. */
 
 std::string ForecastTime::getCsv()
 {
@@ -112,6 +122,8 @@ std::string ForecastTime::getCsv()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void ForecastTime::setCsv(const char *csv)
 {
@@ -141,6 +153,8 @@ void ForecastTime::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void ForecastTime::setCsv(const std::string& csv)
 {
   try
@@ -156,6 +170,8 @@ void ForecastTime::setCsv(const std::string& csv)
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void ForecastTime::print(std::ostream& stream,uint level,uint optionFlags)
 {

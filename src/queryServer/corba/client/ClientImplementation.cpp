@@ -48,6 +48,8 @@ namespace Corba
 
 
 
+/*! \brief Query Server: Constructor. */
+
 ClientImplementation::ClientImplementation()
 {
   try
@@ -66,6 +68,8 @@ ClientImplementation::ClientImplementation()
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ClientImplementation::~ClientImplementation()
 {
   try
@@ -81,6 +85,8 @@ ClientImplementation::~ClientImplementation()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void ClientImplementation::init(const std::string& serviceIor)
 {
@@ -114,6 +120,8 @@ void ClientImplementation::init(const std::string& serviceIor)
 
 
 
+/*! \brief Query Server: Protected hook: execute query. */
+
 int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 {
   try
@@ -138,6 +146,8 @@ int ClientImplementation::_executeQuery(T::SessionId sessionId,Query& query)
 
 
 
+/*! \brief Query Server: Protected hook: get producer list. */
+
 int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& producerList)
 {
   try
@@ -160,6 +170,8 @@ int ClientImplementation::_getProducerList(T::SessionId sessionId,string_vec& pr
 
 
 
+
+/*! \brief Query Server: Protected hook: get values by grid point. */
 
 int ClientImplementation::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {

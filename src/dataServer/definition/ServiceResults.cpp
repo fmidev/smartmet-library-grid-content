@@ -9,6 +9,8 @@ namespace DataServer
 {
 
 
+/*! \brief Returns a human-readable description for the given service result code. */
+
 std::string getResultString(int resultCode)
 {
   try

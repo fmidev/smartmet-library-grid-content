@@ -11,6 +11,13 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// ====================================================================================
+/*! \brief Loads and caches a file of parameter name alias definitions.
+ *
+ *  Reads alias name → expansion string pairs from a text file and provides
+ *  getAlias() / replaceAlias() lookup.  checkUpdates() hot-reloads the file when
+ *  its mtime changes. */
+// ====================================================================================
 
 class AliasFile
 {
@@ -34,17 +41,17 @@ class AliasFile
 
     virtual void  loadFile();
 
-    std::string       mFilename;
-    time_t            mLastModified;
-    Alias_map         mAliasList;
-    Alias_vec         mAliasVector;
-    ModificationLock  mModificationLock;
-    bool              mDuplicatesAllowed;
+    std::string       mFilename;          //!< Path to the alias definition file on disk.
+    time_t            mLastModified;      //!< File mtime at last load, used for change detection.
+    Alias_map         mAliasList;         //!< Map for O(1) unique-key alias lookups.
+    Alias_vec         mAliasVector;       //!< Ordered list used when duplicates are allowed.
+    ModificationLock  mModificationLock;  //!< Lock protecting the alias data structures.
+    bool              mDuplicatesAllowed; //!< When true, multiple aliases with the same name are kept.
 };
 
 
 
-typedef std::vector<AliasFile> AliasFile_vec;
+typedef std::vector<AliasFile> AliasFile_vec;  //!< Ordered collection of AliasFile objects.
 
 
 }  // namespace QueryServer

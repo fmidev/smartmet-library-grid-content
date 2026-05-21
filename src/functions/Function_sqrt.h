@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the square root of each grid value element-wise. */
+// ====================================================================================
+
 class Function_sqrt : public Function
 {
   public:

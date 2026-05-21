@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_sum::Function_sum()
 {
   try
@@ -22,6 +24,8 @@ Function_sum::Function_sum()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_sum::Function_sum(const Function_sum& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_sum::Function_sum(const Function_sum& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_sum::~Function_sum()
 {
   try
@@ -54,6 +60,8 @@ Function_sum::~Function_sum()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_sum::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -81,6 +89,8 @@ float Function_sum::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_sum::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -106,6 +116,8 @@ double Function_sum::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -178,6 +190,8 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -246,6 +260,8 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_sum::duplicate()
 {

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the element-wise sum of an ensemble of grids. */
+// ====================================================================================
+
 class Function_sum : public Function
 {
   public:

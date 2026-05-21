@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Rotates the eastward (U) wind component to the target grid projection orientation. */
+// ====================================================================================
+
 class Function_windU : public Function
 {
   public:

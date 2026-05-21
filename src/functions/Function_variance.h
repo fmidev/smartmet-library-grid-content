@@ -8,7 +8,9 @@ namespace SmartMet
 namespace Functions
 {
 
-// Standard deviation
+// ====================================================================================
+/*! \brief Computes the variance of an ensemble of grids element-wise. */
+// ====================================================================================
 
 class Function_variance : public Function
 {

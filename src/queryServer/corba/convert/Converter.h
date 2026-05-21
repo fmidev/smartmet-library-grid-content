@@ -18,7 +18,12 @@ namespace QueryServer
 namespace Corba
 {
 
-
+// ====================================================================================
+/*! \brief Utility class providing bidirectional C++ ↔ CORBA type conversion for the QueryServer.
+ *
+ *  All methods are static; the class is not instantiated — it acts as a conversion
+ *  namespace.  Each overloaded convert() pair handles one C++ / CORBA type pairing. */
+// ====================================================================================
 
 class Converter
 {

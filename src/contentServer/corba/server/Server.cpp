@@ -30,6 +30,8 @@ static void* Server_maintenanceThread(void *arg)
 
 
 
+/*! \brief Content Server: Constructor. */
+
 Server::Server(const char *address,const char *port)
 {
   try
@@ -92,6 +94,8 @@ Server::Server(const char *address,const char *port)
 
 
 
+/*! \brief Content Server: Destructor. */
+
 Server::~Server()
 {
   try
@@ -108,6 +112,8 @@ Server::~Server()
 
 
 
+
+/*! \brief Content Server: Init. */
 
 void Server::init(ContentServer::ServiceInterface *serviceInterface)
 {
@@ -160,6 +166,8 @@ void Server::init(ContentServer::ServiceInterface *serviceInterface)
 
 
 
+/*! \brief Content Server: Shutdown. */
+
 void Server::shutdown()
 {
   try
@@ -177,6 +185,8 @@ void Server::shutdown()
 
 
 
+/*! \brief Content Server: Start. */
+
 void Server::start()
 {
   try
@@ -191,6 +201,8 @@ void Server::start()
 
 
 
+
+/*! \brief Content Server: Run. */
 
 void Server::run()
 {
@@ -232,6 +244,8 @@ void Server::run()
 
 
 
+/*! \brief Content Server: Get service ior. */
+
 std::string Server::getServiceIor()
 {
   try
@@ -246,6 +260,8 @@ std::string Server::getServiceIor()
 
 
 
+
+/*! \brief Content Server: Get server id. */
 
 uint Server::getServerId()
 {

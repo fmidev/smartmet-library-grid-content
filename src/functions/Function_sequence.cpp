@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_sequence::Function_sequence()
 {
   try
@@ -21,6 +23,8 @@ Function_sequence::Function_sequence()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_sequence::Function_sequence(const Function_sequence& function)
 :Function(function)
@@ -40,6 +44,8 @@ Function_sequence::Function_sequence(const Function_sequence& function)
 
 
 
+
+/*! \brief Function: Destructor. */
 
 Function_sequence::~Function_sequence()
 {
@@ -61,6 +67,8 @@ Function_sequence::~Function_sequence()
 
 
 
+/*! \brief Function: Add function. */
+
 void Function_sequence::addFunction(Function *function)
 {
   try
@@ -76,6 +84,8 @@ void Function_sequence::addFunction(Function *function)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -105,6 +115,8 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -132,6 +144,8 @@ double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_sequence::duplicate()
 {

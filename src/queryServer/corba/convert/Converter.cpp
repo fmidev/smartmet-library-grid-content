@@ -11,6 +11,8 @@ namespace Corba
 
 
 
+/*! \brief Query Server: Constructor. */
+
 Converter::Converter()
 {
   try
@@ -25,6 +27,8 @@ Converter::Converter()
 
 
 
+
+/*! \brief Query Server: Destructor. */
 
 Converter::~Converter()
 {
@@ -41,6 +45,8 @@ Converter::~Converter()
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(T::GeometryId_set& source,C::GeometryIdList& target)
 {
@@ -65,6 +71,8 @@ void Converter::convert(T::GeometryId_set& source,C::GeometryIdList& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const C::GeometryIdList& source,T::GeometryId_set& target)
 {
@@ -93,6 +101,8 @@ void Converter::convert(const C::GeometryIdList& source,T::GeometryId_set& targe
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(std::set<time_t>& source,C::TimestampList& target)
 {
   try
@@ -117,6 +127,8 @@ void Converter::convert(std::set<time_t>& source,C::TimestampList& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const C::TimestampList& source,std::set<time_t>& target)
 {
   try
@@ -137,6 +149,8 @@ void Converter::convert(const C::TimestampList& source,std::set<time_t>& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
 {
@@ -162,6 +176,8 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const C::UInt32List& source,std::vector<uint>& target)
 {
   try
@@ -182,6 +198,8 @@ void Converter::convert(const C::UInt32List& source,std::vector<uint>& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(std::vector<int>& source,C::LevelList& target)
 {
@@ -207,6 +225,8 @@ void Converter::convert(std::vector<int>& source,C::LevelList& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const C::LevelList& source,std::vector<int>& target)
 {
   try
@@ -227,6 +247,8 @@ void Converter::convert(const C::LevelList& source,std::vector<int>& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(string_set& source,C::StringList& target)
 {
@@ -250,6 +272,8 @@ void Converter::convert(string_set& source,C::StringList& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::StringList& source,string_set& target)
 {
   try
@@ -270,6 +294,8 @@ void Converter::convert(C::StringList& source,string_set& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(string_vec& source,C::StringList& target)
 {
@@ -294,6 +320,8 @@ void Converter::convert(string_vec& source,C::StringList& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::StringList& source,string_vec& target)
 {
   try
@@ -316,6 +344,8 @@ void Converter::convert(C::StringList& source,string_vec& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const T::Attribute& source,C::AttributeRec& target)
 {
   try
@@ -333,6 +363,8 @@ void Converter::convert(const T::Attribute& source,C::AttributeRec& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const C::AttributeRec& source,T::Attribute& target)
 {
   try
@@ -349,6 +381,8 @@ void Converter::convert(const C::AttributeRec& source,T::Attribute& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const T::AttributeList& source,C::AttributeRecList& target)
 {
@@ -374,6 +408,8 @@ void Converter::convert(const T::AttributeList& source,C::AttributeRecList& targ
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const C::AttributeRecList& source,T::AttributeList& target)
 {
   try
@@ -397,6 +433,8 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const T::ParamValue_vec& source,C::ParameterValueList& target)
 {
   try
@@ -416,6 +454,8 @@ void Converter::convert(const T::ParamValue_vec& source,C::ParameterValueList& t
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const C::ParameterValueList& source,T::ParamValue_vec& target)
 {
@@ -439,6 +479,8 @@ void Converter::convert(const C::ParameterValueList& source,T::ParamValue_vec& t
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::GridPointValue& source,C::GridPointValue& target)
 {
   try
@@ -461,6 +503,8 @@ void Converter::convert(T::GridPointValue& source,C::GridPointValue& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::GridPointValue& source,T::GridPointValue& target)
 {
   try
@@ -482,6 +526,8 @@ void Converter::convert(C::GridPointValue& source,T::GridPointValue& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(T::GridPointValueList& source,C::GridPointValueList& target)
 {
@@ -507,6 +553,8 @@ void Converter::convert(T::GridPointValueList& source,C::GridPointValueList& tar
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::GridPointValueList& source,T::GridPointValueList& target)
 {
   try
@@ -531,6 +579,8 @@ void Converter::convert(C::GridPointValueList& source,T::GridPointValueList& tar
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::GridValue& source,C::GridValue& target)
 {
   try
@@ -550,6 +600,8 @@ void Converter::convert(T::GridValue& source,C::GridValue& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::GridValue& source,T::GridValue& target)
 {
   try
@@ -568,6 +620,8 @@ void Converter::convert(C::GridValue& source,T::GridValue& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::GridValueList& source,T::GridValueList& target)
 {
@@ -593,6 +647,8 @@ void Converter::convert(C::GridValueList& source,T::GridValueList& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::GridValueList& source,C::GridValueList& target)
 {
   try
@@ -617,6 +673,8 @@ void Converter::convert(T::GridValueList& source,C::GridValueList& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::ParameterValues& source,QueryServer::ParameterValues& target)
 {
@@ -659,6 +717,8 @@ void Converter::convert(C::ParameterValues& source,QueryServer::ParameterValues&
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(QueryServer::ParameterValues& source,C::ParameterValues& target)
 {
   try
@@ -700,6 +760,8 @@ void Converter::convert(QueryServer::ParameterValues& source,C::ParameterValues&
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(SmartMet::C::FunctionParam& source, SmartMet::QueryServer::FunctionParam& target)
 {
   try
@@ -717,6 +779,8 @@ void Converter::convert(SmartMet::C::FunctionParam& source, SmartMet::QueryServe
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(SmartMet::QueryServer::FunctionParam& source,SmartMet::C::FunctionParam& target)
 {
   try
@@ -732,6 +796,8 @@ void Converter::convert(SmartMet::QueryServer::FunctionParam& source,SmartMet::C
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(SmartMet::C::FunctionParamList& source, SmartMet::QueryServer::FunctionParam_vec& target)
 {
@@ -759,6 +825,8 @@ void Converter::convert(SmartMet::C::FunctionParamList& source, SmartMet::QueryS
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(SmartMet::QueryServer::FunctionParam_vec& source,SmartMet::C::FunctionParamList& target)
 {
   try
@@ -781,6 +849,8 @@ void Converter::convert(SmartMet::QueryServer::FunctionParam_vec& source,SmartMe
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::ParameterValuesList& source,QueryServer::ParameterValues_sptr_vec& target)
 {
@@ -807,6 +877,8 @@ void Converter::convert(C::ParameterValuesList& source,QueryServer::ParameterVal
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(QueryServer::ParameterValues_sptr_vec& source,C::ParameterValuesList& target)
 {
   try
@@ -831,6 +903,8 @@ void Converter::convert(QueryServer::ParameterValues_sptr_vec& source,C::Paramet
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::QueryParameter& source,QueryServer::QueryParameter& target)
 {
@@ -882,6 +956,8 @@ void Converter::convert(C::QueryParameter& source,QueryServer::QueryParameter& t
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(QueryServer::QueryParameter& source,C::QueryParameter& target)
 {
   try
@@ -932,6 +1008,8 @@ void Converter::convert(QueryServer::QueryParameter& source,C::QueryParameter& t
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::QueryParameterList& source,QueryServer::QueryParameter_vec& target)
 {
   try
@@ -957,6 +1035,8 @@ void Converter::convert(C::QueryParameterList& source,QueryServer::QueryParamete
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(QueryServer::QueryParameter_vec& source,C::QueryParameterList& target)
 {
   try
@@ -980,6 +1060,8 @@ void Converter::convert(QueryServer::QueryParameter_vec& source,C::QueryParamete
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::Coordinate& source,C::Coordinate& target)
 {
   try
@@ -997,6 +1079,8 @@ void Converter::convert(T::Coordinate& source,C::Coordinate& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(C::Coordinate& source,T::Coordinate& target)
 {
   try
@@ -1012,6 +1096,8 @@ void Converter::convert(C::Coordinate& source,T::Coordinate& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::CoordinateList& source,T::Coordinate_vec& target)
 {
@@ -1038,6 +1124,8 @@ void Converter::convert(C::CoordinateList& source,T::Coordinate_vec& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::Coordinate_vec& source,C::CoordinateList& target)
 {
   try
@@ -1060,6 +1148,8 @@ void Converter::convert(T::Coordinate_vec& source,C::CoordinateList& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::AreaCoordinates& source,T::AreaCoordinates& target)
 {
@@ -1086,6 +1176,8 @@ void Converter::convert(C::AreaCoordinates& source,T::AreaCoordinates& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(T::AreaCoordinates& source,C::AreaCoordinates& target)
 {
   try
@@ -1108,6 +1200,8 @@ void Converter::convert(T::AreaCoordinates& source,C::AreaCoordinates& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(C::Query& source,QueryServer::Query& target)
 {
@@ -1143,6 +1237,8 @@ void Converter::convert(C::Query& source,QueryServer::Query& target)
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(QueryServer::Query& source,C::Query& target)
 {
@@ -1180,6 +1276,8 @@ void Converter::convert(QueryServer::Query& source,C::Query& target)
 
 
 
+/*! \brief Query Server: Convert. */
+
 void Converter::convert(const SmartMet::T::ByteData& source, SmartMet::C::ByteData& target)
 {
   try
@@ -1200,6 +1298,8 @@ void Converter::convert(const SmartMet::T::ByteData& source, SmartMet::C::ByteDa
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const SmartMet::C::ByteData& source,SmartMet::T::ByteData& target)
 {
@@ -1222,6 +1322,8 @@ void Converter::convert(const SmartMet::C::ByteData& source,SmartMet::T::ByteDat
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::ByteDataSequence& target)
 {
@@ -1246,6 +1348,8 @@ void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::By
 
 
 
+
+/*! \brief Query Server: Convert. */
 
 void Converter::convert(const SmartMet::C::ByteDataSequence& source,SmartMet::T::ByteData_vec& target)
 {

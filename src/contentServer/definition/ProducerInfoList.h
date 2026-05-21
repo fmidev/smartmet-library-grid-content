@@ -12,8 +12,15 @@ namespace SmartMet
 namespace T
 {
 
-typedef std::vector<ProducerInfo*> ProducerInfo_pvec;
+typedef std::vector<ProducerInfo*> ProducerInfo_pvec;  //!< Convenience vector of ProducerInfo pointers.
 
+// ====================================================================================
+/*! \brief Thread-safe container of ProducerInfo pointers for the Content Server producer registry.
+ *
+ *  ProducerInfoList stores all registered producer records in a std::vector and
+ *  provides lookup by producer id and name. It is the in-memory registry consulted by
+ *  all Content Server backends when resolving producer identities. */
+// ====================================================================================
 
 class ProducerInfoList
 {
@@ -52,8 +59,8 @@ class ProducerInfoList
 
   protected:
 
-    ModificationLock  mModificationLock;
-    ProducerInfo_pvec mList;
+    ModificationLock  mModificationLock;  //!< Lock protecting all list operations.
+    ProducerInfo_pvec mList;              //!< Underlying vector of ProducerInfo pointers.
 };
 
 

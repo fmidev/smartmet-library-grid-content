@@ -13,6 +13,8 @@ namespace SessionManagement
 
 
 
+/*! \brief Constructor. */
+
 ServiceInterface::ServiceInterface()
 {
   FUNCTION_TRACE
@@ -30,11 +32,15 @@ ServiceInterface::ServiceInterface()
 
 
 
+/*! \brief Destructor. */
+
 ServiceInterface::~ServiceInterface()
 {
 }
 
 
+
+/*! \brief Shutdown. */
 
 void ServiceInterface::shutdown()
 {
@@ -42,6 +48,8 @@ void ServiceInterface::shutdown()
 
 
 
+
+/*! \brief Get debug log. */
 
 Log* ServiceInterface::getDebugLog()
 {
@@ -58,6 +66,8 @@ Log* ServiceInterface::getDebugLog()
 
 
 
+
+/*! \brief Get processing log. */
 
 Log* ServiceInterface::getProcessingLog()
 {
@@ -76,6 +86,8 @@ Log* ServiceInterface::getProcessingLog()
 
 
 
+/*! \brief Set processing log. */
+
 void ServiceInterface::setProcessingLog(Log *processingLog)
 {
   FUNCTION_TRACE
@@ -92,6 +104,8 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
+
+/*! \brief Set debug log. */
 
 void ServiceInterface::setDebugLog(Log *debugLog)
 {
@@ -110,6 +124,8 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 
 
+/*! \brief Set enabled. */
+
 void ServiceInterface::setEnabled(bool enabled)
 {
   FUNCTION_TRACE
@@ -125,6 +141,8 @@ void ServiceInterface::setEnabled(bool enabled)
 
 
 
+
+/*! \brief Is enabled. */
 
 bool ServiceInterface::isEnabled()
 {
@@ -142,6 +160,8 @@ bool ServiceInterface::isEnabled()
 
 
 
+
+/*! \brief Create session. */
 
 int ServiceInterface::createSession(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
@@ -166,6 +186,8 @@ int ServiceInterface::createSession(T::SessionId sessionId,SessionInfo& sessionI
 
 
 
+/*! \brief Delete session. */
+
 int ServiceInterface::deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
@@ -188,6 +210,8 @@ int ServiceInterface::deleteSession(T::SessionId sessionId,T::SessionId requeste
 }
 
 
+
+/*! \brief Delete expired sessions. */
 
 int ServiceInterface::deleteExpiredSessions(T::SessionId sessionId)
 {
@@ -213,6 +237,8 @@ int ServiceInterface::deleteExpiredSessions(T::SessionId sessionId)
 
 
 
+/*! \brief Update session access time. */
+
 int ServiceInterface::updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
@@ -236,6 +262,8 @@ int ServiceInterface::updateSessionAccessTime(T::SessionId sessionId,T::SessionI
 
 
 
+
+/*! \brief Update session info. */
 
 int ServiceInterface::updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
@@ -262,6 +290,8 @@ int ServiceInterface::updateSessionInfo(T::SessionId sessionId,SessionInfo& sess
 
 
 
+/*! \brief Get session attribute. */
+
 int ServiceInterface::getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
   FUNCTION_TRACE
@@ -286,6 +316,8 @@ int ServiceInterface::getSessionAttribute(T::SessionId sessionId,T::SessionId re
 
 
 
+/*! \brief Get session attributes. */
+
 int ServiceInterface::getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -308,6 +340,8 @@ int ServiceInterface::getSessionAttributes(T::SessionId sessionId,T::SessionId r
 }
 
 
+
+/*! \brief Get session info. */
 
 int ServiceInterface::getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
 {
@@ -333,6 +367,8 @@ int ServiceInterface::getSessionInfo(T::SessionId sessionId,T::SessionId request
 
 
 
+/*! \brief Set session attribute. */
+
 int ServiceInterface::setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   FUNCTION_TRACE
@@ -355,6 +391,8 @@ int ServiceInterface::setSessionAttribute(T::SessionId sessionId,T::SessionId re
 }
 
 
+
+/*! \brief Set session attributes. */
 
 int ServiceInterface::setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
@@ -379,6 +417,8 @@ int ServiceInterface::setSessionAttributes(T::SessionId sessionId,T::SessionId r
 
 
 
+/*! \brief Delete session attribute. */
+
 int ServiceInterface::deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
 {
   FUNCTION_TRACE
@@ -401,6 +441,8 @@ int ServiceInterface::deleteSessionAttribute(T::SessionId sessionId,T::SessionId
 }
 
 
+
+/*! \brief Delete session attribute group. */
 
 int ServiceInterface::deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup)
 {
@@ -425,6 +467,8 @@ int ServiceInterface::deleteSessionAttributeGroup(T::SessionId sessionId,T::Sess
 
 
 
+
+/*! \brief Delete session attributes. */
 
 int ServiceInterface::deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {
@@ -451,6 +495,8 @@ int ServiceInterface::deleteSessionAttributes(T::SessionId sessionId,T::SessionI
 
 
 
+/*! \brief Protected hook: create session. */
+
 int ServiceInterface::_createSession(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -459,12 +505,16 @@ int ServiceInterface::_createSession(T::SessionId sessionId,SessionInfo& session
 
 
 
+/*! \brief Protected hook: delete session. */
+
 int ServiceInterface::_deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
+
+/*! \brief Protected hook: delete expired sessions. */
 
 int ServiceInterface::_deleteExpiredSessions(T::SessionId sessionId)
 {
@@ -473,12 +523,16 @@ int ServiceInterface::_deleteExpiredSessions(T::SessionId sessionId)
 
 
 
+/*! \brief Protected hook: update session access time. */
+
 int ServiceInterface::_updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
+
+/*! \brief Protected hook: update session info. */
 
 int ServiceInterface::_updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
@@ -488,12 +542,16 @@ int ServiceInterface::_updateSessionInfo(T::SessionId sessionId,SessionInfo& ses
 
 
 
+/*! \brief Protected hook: get session attribute. */
+
 int ServiceInterface::_getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
+
+/*! \brief Protected hook: get session attributes. */
 
 int ServiceInterface::_getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
@@ -502,12 +560,16 @@ int ServiceInterface::_getSessionAttributes(T::SessionId sessionId,T::SessionId 
 
 
 
+/*! \brief Protected hook: get session info. */
+
 int ServiceInterface::_getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
+
+/*! \brief Protected hook: set session attribute. */
 
 int ServiceInterface::_setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
@@ -516,12 +578,16 @@ int ServiceInterface::_setSessionAttribute(T::SessionId sessionId,T::SessionId r
 
 
 
+/*! \brief Protected hook: set session attributes. */
+
 int ServiceInterface::_setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
 
+
+/*! \brief Protected hook: delete session attribute. */
 
 int ServiceInterface::_deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
 {
@@ -530,11 +596,15 @@ int ServiceInterface::_deleteSessionAttribute(T::SessionId sessionId,T::SessionI
 
 
 
+/*! \brief Protected hook: delete session attribute group. */
+
 int ServiceInterface::_deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
 
+
+/*! \brief Protected hook: delete session attributes. */
 
 int ServiceInterface::_deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {

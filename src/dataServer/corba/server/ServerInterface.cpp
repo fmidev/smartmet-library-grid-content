@@ -15,6 +15,8 @@ namespace Corba
 {
 
 
+/*! \brief Data Server: Constructor. */
+
 ServerInterface::ServerInterface()
 {
   FUNCTION_TRACE
@@ -31,6 +33,8 @@ ServerInterface::ServerInterface()
 
 
 
+
+/*! \brief Data Server: Destructor. */
 
 ServerInterface::~ServerInterface()
 {
@@ -49,6 +53,8 @@ ServerInterface::~ServerInterface()
 
 
 
+/*! \brief Data Server: Init. */
+
 void ServerInterface::init(DataServer::ServiceInterface *service)
 {
   FUNCTION_TRACE
@@ -64,6 +70,8 @@ void ServerInterface::init(DataServer::ServiceInterface *service)
 
 
 
+
+/*! \brief Data Server: Get grid coordinates. */
 
 SmartMet::C::Result ServerInterface::getGridCoordinates(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::GridCoordinates_out coordinates)
 {
@@ -95,6 +103,8 @@ SmartMet::C::Result ServerInterface::getGridCoordinates(SmartMet::C::SessionId s
 
 
 
+
+/*! \brief Data Server: Get grid latlon coordinates by geometry. */
 
 SmartMet::C::Result ServerInterface::getGridLatlonCoordinatesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::GridCoordinates_out coordinates)
 {
@@ -133,6 +143,8 @@ SmartMet::C::Result ServerInterface::getGridLatlonCoordinatesByGeometry(SmartMet
 
 
 
+/*! \brief Data Server: Get grid data. */
+
 SmartMet::C::Result ServerInterface::getGridData(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::GridData_out data)
 {
   FUNCTION_TRACE
@@ -164,6 +176,8 @@ SmartMet::C::Result ServerInterface::getGridData(SmartMet::C::SessionId sessionI
 
 
 
+/*! \brief Data Server: Get grid file count. */
+
 SmartMet::C::Result ServerInterface::getGridFileCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -191,6 +205,8 @@ SmartMet::C::Result ServerInterface::getGridFileCount(SmartMet::C::SessionId ses
 
 
 
+
+/*! \brief Data Server: Get grid message bytes. */
 
 SmartMet::C::Result ServerInterface::getGridMessageBytes(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::ByteData_out messageBytes, SmartMet::C::UInt32List_out messageSections)
 {
@@ -231,6 +247,8 @@ SmartMet::C::Result ServerInterface::getGridMessageBytes(SmartMet::C::SessionId 
 
 
 
+/*! \brief Data Server: Get grid attribute list. */
+
 SmartMet::C::Result ServerInterface::getGridAttributeList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList_out attributeList)
 {
   FUNCTION_TRACE
@@ -262,6 +280,8 @@ SmartMet::C::Result ServerInterface::getGridAttributeList(SmartMet::C::SessionId
 
 
 
+/*! \brief Data Server: Get grid properties. */
+
 SmartMet::C::Result ServerInterface::getGridProperties(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::PropertySettingList_out propertyList)
 {
   FUNCTION_TRACE
@@ -290,6 +310,8 @@ SmartMet::C::Result ServerInterface::getGridProperties(SmartMet::C::SessionId se
 }
 
 
+
+/*! \brief Data Server: Get property values by coordinates. */
 
 SmartMet::C::Result ServerInterface::getPropertyValuesByCoordinates(SmartMet::C::SessionId sessionId, const char* propertyName, const SmartMet::C::CoordinateList& latlonCoordinates, SmartMet::C::ParameterValueList_out values)
 {
@@ -325,6 +347,8 @@ SmartMet::C::Result ServerInterface::getPropertyValuesByCoordinates(SmartMet::C:
 
 
 
+/*! \brief Data Server: Get grid value by point. */
+
 SmartMet::C::Result ServerInterface::getGridValueByPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
@@ -355,6 +379,8 @@ SmartMet::C::Result ServerInterface::getGridValueByPoint(SmartMet::C::SessionId 
 
 
 
+
+/*! \brief Data Server: Get grid value by level and point. */
 
 SmartMet::C::Result ServerInterface::getGridValueByLevelAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::Int32 level1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Int32 level2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
@@ -387,6 +413,8 @@ SmartMet::C::Result ServerInterface::getGridValueByLevelAndPoint(SmartMet::C::Se
 
 
 
+/*! \brief Data Server: Get grid value by time and point. */
+
 SmartMet::C::Result ServerInterface::getGridValueByTimeAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
@@ -418,6 +446,8 @@ SmartMet::C::Result ServerInterface::getGridValueByTimeAndPoint(SmartMet::C::Ses
 
 
 
+/*! \brief Data Server: Get grid value by time level and point. */
+
 SmartMet::C::Result ServerInterface::getGridValueByTimeLevelAndPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::Int32 level1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Int32 level2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::Int32 level3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Int32 level4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValue& value)
 {
   FUNCTION_TRACE
@@ -447,6 +477,8 @@ SmartMet::C::Result ServerInterface::getGridValueByTimeLevelAndPoint(SmartMet::C
 
 
 
+
+/*! \brief Data Server: Get grid value list by circle. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -482,6 +514,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByCircle(SmartMet::C::Sessi
 
 
 
+/*! \brief Data Server: Get grid value list by level and circle. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByLevelAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -515,6 +549,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndCircle(SmartMet::
 
 
 
+
+/*! \brief Data Server: Get grid value list by time and circle. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByTimeAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -550,6 +586,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndCircle(SmartMet::C
 
 
 
+/*! \brief Data Server: Get grid value list by time level and circle. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndCircle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 origoX, SmartMet::C::Float64 origoY, SmartMet::C::Float64 radius, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -583,6 +621,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndCircle(SmartM
 
 
 
+
+/*! \brief Data Server: Get grid value list by point list. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -621,6 +661,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByPointList(SmartMet::C::Se
 
 
 
+/*! \brief Data Server: Get grid value list by level and point list. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -657,6 +699,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPointList(SmartMe
 
 
 
+
+/*! \brief Data Server: Get grid value list by time and point list. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -695,6 +739,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPointList(SmartMet
 
 
 
+/*! \brief Data Server: Get grid value list by time level and point list. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPointList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& pointList, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -731,6 +777,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPointList(Sma
 
 
 
+
+/*! \brief Data Server: Get grid value list by polygon. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -769,6 +817,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByPolygon(SmartMet::C::Sess
 
 
 
+/*! \brief Data Server: Get grid value list by level and polygon. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -805,6 +855,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygon(SmartMet:
 
 
 
+
+/*! \brief Data Server: Get grid value list by time and polygon. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -843,6 +895,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygon(SmartMet::
 
 
 
+/*! \brief Data Server: Get grid value list by time level and polygon. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygon(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& polygonPoints, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -879,6 +933,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygon(Smart
 
 
 
+
+/*! \brief Data Server: Get grid value list by polygon path. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -917,6 +973,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByPolygonPath(SmartMet::C::
 
 
 
+/*! \brief Data Server: Get grid value list by level and polygon path. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -953,6 +1011,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygonPath(Smart
 
 
 
+
+/*! \brief Data Server: Get grid value list by time and polygon path. */
 
 SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
@@ -991,6 +1051,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygonPath(SmartM
 
 
 
+/*! \brief Data Server: Get grid value list by time level and polygon path. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygonPath(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::PolygonPath& polygonPath, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -1028,6 +1090,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygonPath(S
 
 
 
+/*! \brief Data Server: Get grid value list by rectangle. */
+
 SmartMet::C::Result ServerInterface::getGridValueListByRectangle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x1, SmartMet::C::Float64 y1, SmartMet::C::Float64 x2, SmartMet::C::Float64 y2, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::GridValueList_out valueList)
 {
   FUNCTION_TRACE
@@ -1061,6 +1125,8 @@ SmartMet::C::Result ServerInterface::getGridValueListByRectangle(SmartMet::C::Se
 
 
 
+
+/*! \brief Data Server: Get grid value vector. */
 
 SmartMet::C::Result ServerInterface::getGridValueVector(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1096,6 +1162,8 @@ SmartMet::C::Result ServerInterface::getGridValueVector(SmartMet::C::SessionId s
 
 
 
+/*! \brief Data Server: Get grid value vector by level. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1130,6 +1198,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevel(SmartMet::C::Sess
 
 
 
+/*! \brief Data Server: Get grid value vector by time. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1163,6 +1233,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTime(SmartMet::C::Sessi
 
 
 
+
+/*! \brief Data Server: Get grid value vector by level and geometry. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1202,6 +1274,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndGeometry(SmartM
 
 
 
+
+/*! \brief Data Server: Get grid value vector by time and geometry. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1243,6 +1317,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndGeometry(SmartMe
 
 
 
+/*! \brief Data Server: Get grid value vector by coordinate list. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1279,6 +1355,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByCoordinateList(SmartMet
 
 
 
+
+/*! \brief Data Server: Get grid value vector by level and coordinate list. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1322,6 +1400,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndCoordinateList(
 
 
 
+/*! \brief Data Server: Get grid value vector by time and coordinate list. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1364,6 +1444,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndCoordinateList(S
 
 
 
+/*! \brief Data Server: Get grid value vector by geometry. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1404,6 +1486,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByGeometry(SmartMet::C::S
 
 
 
+/*! \brief Data Server: Get grid value vector by rectangle. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByRectangle(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::UInt32 columns, SmartMet::C::UInt32 rows, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Float64 xStep, SmartMet::C::Float64 yStep, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
   FUNCTION_TRACE
@@ -1438,6 +1522,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByRectangle(SmartMet::C::
 
 
 
+/*! \brief Data Server: Get grid value vector by point. */
+
 SmartMet::C::Result ServerInterface::getGridValueVectorByPoint(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::CoordinateType coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::UInt32 vectorType, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::Float64List_out valueVector)
 {
   FUNCTION_TRACE
@@ -1471,6 +1557,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByPoint(SmartMet::C::Sess
 
 
 
+
+/*! \brief Data Server: Get grid value vector by time and level. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::Int16 areaInterpolationMethod, SmartMet::C::Int16 timeInterpolationMethod, SmartMet::C::Int16 levelInterpolationMethod, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1507,6 +1595,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndLevel(SmartMet::
 
 
 
+
+/*! \brief Data Server: Get grid value vector by time level and geometry. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1547,6 +1637,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndGeometry(Sm
 
 
 
+
+/*! \brief Data Server: Get grid value vector by time level and coordinate list. */
 
 SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndCoordinateList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::CoordinateType coordinateType, const SmartMet::C::CoordinateList& coordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ParameterValueList_out values)
 {
@@ -1589,6 +1681,8 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndCoordinateL
 
 
 
+
+/*! \brief Data Server: Get grid isobands. */
 
 SmartMet::C::Result ServerInterface::getGridIsobands(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -1636,6 +1730,8 @@ SmartMet::C::Result ServerInterface::getGridIsobands(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Data Server: Get grid isobands by geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -1680,6 +1776,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByGeometry(SmartMet::C::Sess
 
 
 
+
+/*! \brief Data Server: Get grid isobands by grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsobandsByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -1728,6 +1826,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByGrid(SmartMet::C::SessionI
 
 
 
+/*! \brief Data Server: Get grid isobands by level. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -1773,6 +1873,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevel(SmartMet::C::Session
 
 
 
+
+/*! \brief Data Server: Get grid isobands by time. */
 
 SmartMet::C::Result ServerInterface::getGridIsobandsByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -1820,6 +1922,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTime(SmartMet::C::SessionI
 
 
 
+/*! \brief Data Server: Get grid isobands by level and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -1864,6 +1968,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGeometry(SmartMet:
 
 
 
+
+/*! \brief Data Server: Get grid isobands by time and geometry. */
 
 SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -1910,6 +2016,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGeometry(SmartMet::
 
 
 
+/*! \brief Data Server: Get grid isobands by level and grid. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -1955,6 +2063,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGrid(SmartMet::C::
 
 
 
+
+/*! \brief Data Server: Get grid isobands by time and grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2003,6 +2113,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGrid(SmartMet::C::S
 
 
 
+/*! \brief Data Server: Get grid isobands by time and level. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2049,6 +2161,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndLevel(SmartMet::C::
 
 
 
+/*! \brief Data Server: Get grid isobands by time level and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2094,6 +2208,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGeometry(Smart
 
 
 
+
+/*! \brief Data Server: Get grid isobands by time level and grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourLowValues, const SmartMet::C::ParameterValueList& contourHighValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2143,6 +2259,8 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGrid(SmartMet:
 
 
 
+/*! \brief Data Server: Get grid isolines by time and level. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2186,6 +2304,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndLevel(SmartMet::C::
 
 
 
+
+/*! \brief Data Server: Get grid isolines by time level and geometry. */
 
 SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2231,6 +2351,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGeometry(Smart
 
 
 
+/*! \brief Data Server: Get grid isolines. */
+
 SmartMet::C::Result ServerInterface::getGridIsolines(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2274,6 +2396,8 @@ SmartMet::C::Result ServerInterface::getGridIsolines(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Data Server: Get grid isolines by geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2316,6 +2440,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByGeometry(SmartMet::C::Sess
 
 
 
+
+/*! \brief Data Server: Get grid isolines by grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsolinesByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2362,6 +2488,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByGrid(SmartMet::C::SessionI
 
 
 
+/*! \brief Data Server: Get grid isolines by level. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2404,6 +2532,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevel(SmartMet::C::Session
 
 
 
+
+/*! \brief Data Server: Get grid isolines by time. */
 
 SmartMet::C::Result ServerInterface::getGridIsolinesByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2448,6 +2578,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTime(SmartMet::C::SessionI
 
 
 
+/*! \brief Data Server: Get grid isolines by level and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2491,6 +2623,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGeometry(SmartMet:
 
 
 
+/*! \brief Data Server: Get grid isolines by time and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2533,6 +2667,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGeometry(SmartMet::
 
 
 
+
+/*! \brief Data Server: Get grid isolines by level and grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2579,6 +2715,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGrid(SmartMet::C::
 
 
 
+/*! \brief Data Server: Get grid isolines by time and grid. */
+
 SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
   FUNCTION_TRACE
@@ -2623,6 +2761,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGrid(SmartMet::C::S
 
 
 
+
+/*! \brief Data Server: Get grid isolines by time level and grid. */
 
 SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, const SmartMet::C::ParameterValueList& contourValues, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out contours)
 {
@@ -2669,6 +2809,8 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGrid(SmartMet:
 
 
 
+/*! \brief Data Server: Get grid streamlines. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlines(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2709,6 +2851,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlines(SmartMet::C::SessionId s
 
 
 
+/*! \brief Data Server: Get grid streamlines by geometry. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2748,6 +2892,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByGeometry(SmartMet::C::S
 
 
 
+
+/*! \brief Data Server: Get grid streamlines by grid. */
 
 SmartMet::C::Result ServerInterface::getGridStreamlinesByGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
@@ -2792,6 +2938,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByGrid(SmartMet::C::Sessi
 
 
 
+/*! \brief Data Server: Get grid streamlines by level. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2832,6 +2980,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevel(SmartMet::C::Sess
 
 
 
+/*! \brief Data Server: Get grid streamlines by level and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2871,6 +3021,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGeometry(SmartM
 
 
 
+
+/*! \brief Data Server: Get grid streamlines by level and grid. */
 
 SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Float64 newLevel, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
@@ -2915,6 +3067,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGrid(SmartMet::
 
 
 
+/*! \brief Data Server: Get grid streamlines by time. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTime(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2955,6 +3109,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTime(SmartMet::C::Sessi
 
 
 
+/*! \brief Data Server: Get grid streamlines by time and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -2994,6 +3150,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGeometry(SmartMe
 
 
 
+
+/*! \brief Data Server: Get grid streamlines by time and grid. */
 
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::Timestamp newTime, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
@@ -3038,6 +3196,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGrid(SmartMet::C
 
 
 
+/*! \brief Data Server: Get grid streamlines by time and level. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndLevel(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -3078,6 +3238,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndLevel(SmartMet::
 
 
 
+/*! \brief Data Server: Get grid streamlines by time level and geometry. */
+
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
   FUNCTION_TRACE
@@ -3117,6 +3279,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(Sm
 
 
 
+
+/*! \brief Data Server: Get grid streamlines by time level and grid. */
 
 SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGrid(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId1, SmartMet::C::MessageIndex messageIndex1, SmartMet::C::FileId fileId2, SmartMet::C::MessageIndex messageIndex2, SmartMet::C::FileId fileId3, SmartMet::C::MessageIndex messageIndex3, SmartMet::C::FileId fileId4, SmartMet::C::MessageIndex messageIndex4, SmartMet::C::Timestamp newTime, SmartMet::C::Float64 newLevel, SmartMet::C::UInt32 gridWidth, SmartMet::C::UInt32 gridHeight, const SmartMet::C::CoordinateList& gridLatLonCoordinates, SmartMet::C::AttributeRecList& attributeList, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ByteDataSequence_out streamlines)
 {
@@ -3161,6 +3325,8 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGrid(SmartM
 
 
 
+
+/*! \brief Data Server: Get multiple grid values. */
 
 SmartMet::C::Result ServerInterface::getMultipleGridValues(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 modificationOperation, const SmartMet::C::Float64List& modificationParameters, SmartMet::C::ValueRecordList& valueRecordList)
 {

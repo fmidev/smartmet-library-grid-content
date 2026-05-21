@@ -10,6 +10,14 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// ====================================================================================
+/*! \brief Holds the decoded values returned for one parameter at one forecast time.
+ *
+ *  Carries the full provenance (producer, generation, geometry, file, message)
+ *  alongside the actual value payload which can be a grid value list, a flat value
+ *  vector, or raw byte data depending on the query type. */
+// ====================================================================================
+
 class ParameterValues
 {
   public:
@@ -21,45 +29,48 @@ class ParameterValues
     void                    print(std::ostream& stream,uint level,uint optionFlags);
 
     //std::string             mForecastTime;
-    time_t                  mForecastTimeUTC;
-    T::ProducerId           mProducerId;
-    T::GenerationId         mGenerationId;
-    UInt64                  mGenerationFlags;
-    T::GeometryId           mGeometryId;
-    T::FileId               mFileId[4];
-    T::MessageIndex         mMessageIndex[4];
-    std::string             mAnalysisTime;
-    time_t                  mModificationTime;
+    time_t                  mForecastTimeUTC;    //!< Forecast valid time as UTC epoch seconds.
+    T::ProducerId           mProducerId;         //!< Identifier of the producer that generated this data.
+    T::GenerationId         mGenerationId;       //!< Identifier of the model run (generation).
+    UInt64                  mGenerationFlags;    //!< Flags describing properties of the generation.
+    T::GeometryId           mGeometryId;         //!< Identifier of the grid geometry used.
+    T::FileId               mFileId[4];          //!< File identifiers for up to four contributing messages.
+    T::MessageIndex         mMessageIndex[4];    //!< Message indices within the corresponding files.
+    std::string             mAnalysisTime;       //!< Analysis (reference) time string for the model run.
+    time_t                  mModificationTime;   //!< Epoch time when this value record was last updated.
 
-    T::ParamKeyType         mParameterKeyType;
-    T::ParamId              mParameterKey;
-    T::ParamLevelId         mParameterLevelId;
-    T::ParamLevel           mParameterLevel;
-    T::ForecastType         mForecastType;
-    T::ForecastNumber       mForecastNumber;
-    uint                    mFlags;
-    T::GridValueList        mValueList;
-    T::ParamValue_vec       mValueVector;
-    T::ByteData_vec         mValueData;
+    T::ParamKeyType         mParameterKeyType;   //!< Key encoding used in mParameterKey.
+    T::ParamId              mParameterKey;       //!< Concrete parameter key within the key encoding.
+    T::ParamLevelId         mParameterLevelId;   //!< Level type identifier for this record.
+    T::ParamLevel           mParameterLevel;     //!< Numeric level value for this record.
+    T::ForecastType         mForecastType;       //!< Forecast type (deterministic, ensemble member, …).
+    T::ForecastNumber       mForecastNumber;     //!< Ensemble member number, or 0 for deterministic.
+    uint                    mFlags;              //!< Bitmask from Flags classifying this value record.
+    T::GridValueList        mValueList;          //!< Coordinate-tagged grid values (used for point/polygon queries).
+    T::ParamValue_vec       mValueVector;        //!< Flat array of grid values (used for full-grid output).
+    T::ByteData_vec         mValueData;          //!< Raw byte payloads (used for grid file output).
 
 
+    // ====================================================================================
+    /*! \brief Bit-flag constants for mFlags. */
+    // ====================================================================================
     class Flags
     {
       public:
-        static const uint  AdditionalValue                       = 1 << 0;  // Value is added in order to fill missing times
-        static const uint  AggregationValue                      = 1 << 1;  // Value is added for aggregation purposes
-        static const uint  DataAvailable                         = 1 << 2;
-        static const uint  DataAvailableByTimeInterpolation      = 1 << 3;
-        static const uint  DataAvailableByLevelInterpolation     = 1 << 4;
-        static const uint  InternalAggregationValue              = 1 << 5;  // Value is added for internal aggregation purposes
+        static const uint  AdditionalValue                       = 1 << 0;  //!< Value inserted to fill a missing time step.
+        static const uint  AggregationValue                      = 1 << 1;  //!< Value inserted for aggregation purposes.
+        static const uint  DataAvailable                         = 1 << 2;  //!< Actual data was found and loaded.
+        static const uint  DataAvailableByTimeInterpolation      = 1 << 3;  //!< Value obtained via time interpolation.
+        static const uint  DataAvailableByLevelInterpolation     = 1 << 4;  //!< Value obtained via level interpolation.
+        static const uint  InternalAggregationValue              = 1 << 5;  //!< Value used internally during aggregation.
     };
 
 };
 
 
-typedef std::shared_ptr<ParameterValues> ParameterValues_sptr;
-typedef std::vector<ParameterValues> ParameterValues_vec;
-typedef std::vector<ParameterValues_sptr> ParameterValues_sptr_vec;
+typedef std::shared_ptr<ParameterValues> ParameterValues_sptr;             //!< Shared pointer to a ParameterValues record.
+typedef std::vector<ParameterValues> ParameterValues_vec;                  //!< Owned vector of ParameterValues records.
+typedef std::vector<ParameterValues_sptr> ParameterValues_sptr_vec;        //!< Vector of shared pointers to ParameterValues records.
 
 
 }  // namespace QueryServer

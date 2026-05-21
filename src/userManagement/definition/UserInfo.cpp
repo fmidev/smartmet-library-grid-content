@@ -10,6 +10,8 @@ namespace SmartMet
 namespace UserManagement
 {
 
+/*! \brief Constructor. */
+
 UserInfo::UserInfo()
 {
   try
@@ -27,11 +29,15 @@ UserInfo::UserInfo()
 
 
 
+/*! \brief Destructor. */
+
 UserInfo::~UserInfo()
 {
 }
 
 
+
+/*! \brief Get attribute list. */
 
 AttributeList* UserInfo::getAttributeList(const char *attributeGroup)
 {
@@ -53,6 +59,8 @@ AttributeList* UserInfo::getAttributeList(const char *attributeGroup)
 
 
 
+/*! \brief Get attribute group list. */
+
 AttributeGroupList& UserInfo::getAttributeGroupList()
 {
   try
@@ -67,6 +75,8 @@ AttributeGroupList& UserInfo::getAttributeGroupList()
 
 
 
+
+/*! \brief Update user info. */
 
 void UserInfo::updateUserInfo(UserInfo& sessionInfo)
 {
@@ -111,6 +121,8 @@ void UserInfo::updateUserInfo(UserInfo& sessionInfo)
 
 
 
+/*! \brief Get start time. */
+
 time_t UserInfo::getStartTime()
 {
   try
@@ -125,6 +137,8 @@ time_t UserInfo::getStartTime()
 
 
 
+
+/*! \brief Get end time. */
 
 time_t UserInfo::getEndTime()
 {
@@ -141,6 +155,8 @@ time_t UserInfo::getEndTime()
 
 
 
+/*! \brief Get status. */
+
 uchar UserInfo::getStatus()
 {
   try
@@ -156,6 +172,8 @@ uchar UserInfo::getStatus()
 
 
 
+/*! \brief Get user id. */
+
 uint UserInfo::getUserId()
 {
   try
@@ -170,6 +188,8 @@ uint UserInfo::getUserId()
 
 
 
+
+/*! \brief Get full name. */
 
 const char* UserInfo::getFullName()
 {
@@ -202,6 +222,8 @@ void UserInfo:: setFullName(const char *fullName)
 
 
 
+/*! \brief Get username. */
+
 const char* UserInfo::getUsername()
 {
   try
@@ -232,6 +254,8 @@ void UserInfo:: setUsername(const char *username)
 
 
 
+
+/*! \brief Get password. */
 
 const char* UserInfo::getPassword()
 {
@@ -264,6 +288,8 @@ void UserInfo:: setPassword(const char *password)
 
 
 
+/*! \brief Set status. */
+
 void UserInfo::setStatus(uchar status)
 {
   try
@@ -278,6 +304,8 @@ void UserInfo::setStatus(uchar status)
 
 
 
+
+/*! \brief Set user id. */
 
 void UserInfo::setUserId(uint userId)
 {
@@ -294,6 +322,8 @@ void UserInfo::setUserId(uint userId)
 
 
 
+/*! \brief Add permission. */
+
 void UserInfo::addPermission(const char *permission)
 {
   try
@@ -308,6 +338,8 @@ void UserInfo::addPermission(const char *permission)
 
 
 
+
+/*! \brief Clear permissions. */
 
 void UserInfo::clearPermissions()
 {
@@ -324,6 +356,8 @@ void UserInfo::clearPermissions()
 
 
 
+/*! \brief Delete permission. */
+
 void UserInfo::deletePermission(const char *permission)
 {
   try
@@ -338,6 +372,8 @@ void UserInfo::deletePermission(const char *permission)
 
 
 
+
+/*! \brief Has permission. */
 
 bool UserInfo::hasPermission(const char *permission)
 {
@@ -357,6 +393,8 @@ bool UserInfo::hasPermission(const char *permission)
 
 
 
+/*! \brief Add user group. */
+
 void UserInfo::addUserGroup(const char *userGroup)
 {
   try
@@ -371,6 +409,8 @@ void UserInfo::addUserGroup(const char *userGroup)
 
 
 
+
+/*! \brief Clear user groups. */
 
 void UserInfo::clearUserGroups()
 {
@@ -388,6 +428,8 @@ void UserInfo::clearUserGroups()
 
 
 
+/*! \brief Delete user group. */
+
 void UserInfo::deleteUserGroup(const char *userGroup)
 {
   try
@@ -402,6 +444,8 @@ void UserInfo::deleteUserGroup(const char *userGroup)
 
 
 
+
+/*! \brief Is user group member. */
 
 bool UserInfo::isUserGroupMember(const char *userGroup)
 {
@@ -421,6 +465,8 @@ bool UserInfo::isUserGroupMember(const char *userGroup)
 
 
 
+
+/*! \brief Get attribute. */
 
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
@@ -450,6 +496,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Get attribute. */
+
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,int& attributeValue)
 {
   try
@@ -476,6 +524,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Get attribute. */
 
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,uint& attributeValue)
 {
@@ -504,6 +554,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Get attribute. */
+
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,Int64  & attributeValue)
 {
   try
@@ -530,6 +582,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Get attribute. */
 
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,UInt64 & attributeValue)
 {
@@ -558,6 +612,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Get attribute. */
+
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,float& attributeValue)
 {
   try
@@ -584,6 +640,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Get attribute. */
 
 bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName,double& attributeValue)
 {
@@ -612,6 +670,8 @@ bool UserInfo::getAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Get attributes. */
 
 void UserInfo::getAttributes(const char *attributeGroup,AttributeList& attributeList)
 {
@@ -645,6 +705,8 @@ void UserInfo::getAttributes(const char *attributeGroup,AttributeList& attribute
 
 
 
+/*! \brief Set attribute. */
+
 void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   try
@@ -676,6 +738,8 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Set attribute. */
 
 void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,int attributeValue)
 {
@@ -709,6 +773,8 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Set attribute. */
+
 void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,uint attributeValue)
 {
   try
@@ -740,6 +806,8 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+
+/*! \brief Set attribute. */
 
 void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue)
 {
@@ -773,6 +841,8 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Set attribute. */
+
 void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue)
 {
   try
@@ -805,6 +875,8 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 
 
+/*! \brief Set attributes. */
+
 void UserInfo::setAttributes(const char *attributeGroup,AttributeList& attributeList)
 {
   try
@@ -836,6 +908,8 @@ void UserInfo::setAttributes(const char *attributeGroup,AttributeList& attribute
 
 
 
+/*! \brief Delete attribute. */
+
 void UserInfo::deleteAttribute(const char *attributeGroup,const char *attributeName)
 {
   try
@@ -858,6 +932,8 @@ void UserInfo::deleteAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Delete attribute group. */
+
 void UserInfo::deleteAttributeGroup(const char *attributeGroup)
 {
   try
@@ -874,6 +950,8 @@ void UserInfo::deleteAttributeGroup(const char *attributeGroup)
 
 
 
+
+/*! \brief Delete attributes. */
 
 void UserInfo::deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {
@@ -899,6 +977,8 @@ void UserInfo::deleteAttributes(const char *attributeGroup,std::vector<std::stri
 
 
 
+
+/*! \brief Print. */
 
 void UserInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

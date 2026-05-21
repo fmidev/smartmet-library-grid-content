@@ -11,10 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 make                    # Build (generates CORBA stubs first if enabled)
 make CORBA=disabled     # Build without CORBA support
-make clean              # Clean build artifacts
+make clean              # Clean build artifacts (removes doc/html/)
 make install            # Install to PREFIX=/usr
 make rpm                # Build RPM package
 make format             # Run clang-format
+make doc                # Generate Doxygen HTML documentation in doc/html/
 ```
 
 There is no test suite in this repository. Testing is done via integration with SmartMet Server components.

@@ -17,6 +17,8 @@ namespace T
 
 
 
+/*! \brief Qsort comparator for GeometryInfo using comparison method 1. */
+
 int geometryInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -30,6 +32,8 @@ int geometryInfo_compare_1(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for GeometryInfo using comparison method 2. */
 
 int geometryInfo_compare_2(const void *_val1,const void *_val2)
 {
@@ -45,6 +49,8 @@ int geometryInfo_compare_2(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for GeometryInfo using comparison method 3. */
+
 int geometryInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -58,6 +64,8 @@ int geometryInfo_compare_3(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for GeometryInfo using comparison method 4. */
 
 int geometryInfo_compare_4(const void *_val1,const void *_val2)
 {
@@ -74,6 +82,8 @@ int geometryInfo_compare_4(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for GeometryInfo using comparison method 5. */
+
 int geometryInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -88,6 +98,8 @@ int geometryInfo_compare_5(const void *_val1,const void *_val2)
 
 
 
+
+/*! \brief Default constructor for GeometryInfoList. */
 
 GeometryInfoList::GeometryInfoList()
 {
@@ -111,6 +123,8 @@ GeometryInfoList::GeometryInfoList()
 
 
 
+
+/*! \brief Copy constructor for GeometryInfoList. */
 
 GeometryInfoList::GeometryInfoList(GeometryInfoList& geometryInfoList)
 {
@@ -158,6 +172,8 @@ GeometryInfoList::GeometryInfoList(GeometryInfoList& geometryInfoList)
 
 
 
+/*! \brief Destructor for GeometryInfoList. */
+
 GeometryInfoList::~GeometryInfoList()
 {
   FUNCTION_TRACE
@@ -187,6 +203,8 @@ GeometryInfoList::~GeometryInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for GeometryInfoList. */
 
 GeometryInfoList& GeometryInfoList::operator=(GeometryInfoList& geometryInfoList)
 {
@@ -244,6 +262,8 @@ GeometryInfoList& GeometryInfoList::operator=(GeometryInfoList& geometryInfoList
 
 
 
+/*! \brief Set the pointer to the modification mutex used by the list. */
+
 void GeometryInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 {
   FUNCTION_TRACE
@@ -264,6 +284,8 @@ void GeometryInfoList::setModificationLockPtr(ModificationLock* modificationLock
 
 
 
+/*! \brief Return a pointer to the internal modification mutex. */
+
 ModificationLock* GeometryInfoList::getModificationLockPtr()
 {
   FUNCTION_TRACE
@@ -281,6 +303,8 @@ ModificationLock* GeometryInfoList::getModificationLockPtr()
 
 
 
+/*! \brief Acquire the internal mutex protecting the list. */
+
 void GeometryInfoList::lock()
 {
   FUNCTION_TRACE
@@ -296,6 +320,8 @@ void GeometryInfoList::lock()
 
 
 
+
+/*! \brief Release the internal mutex protecting the list. */
 
 void GeometryInfoList::unlock()
 {
@@ -313,6 +339,8 @@ void GeometryInfoList::unlock()
 
 
 
+
+/*! \brief Add a GeometryInfo record to the list. */
 
 GeometryInfo* GeometryInfoList::addGeometryInfo(GeometryInfo *geometryInfo)
 {
@@ -375,6 +403,8 @@ GeometryInfo* GeometryInfoList::addGeometryInfo(GeometryInfo *geometryInfo)
 
 
 
+/*! \brief Increase the capacity of the underlying storage. */
+
 void GeometryInfoList::increaseSize(uint newSize)
 {
   FUNCTION_TRACE
@@ -419,6 +449,8 @@ void GeometryInfoList::increaseSize(uint newSize)
 
 
 
+/*! \brief Remove all entries from the list. */
+
 void GeometryInfoList::clear()
 {
   FUNCTION_TRACE
@@ -453,6 +485,8 @@ void GeometryInfoList::clear()
 
 
 
+/*! \brief Return the index of the entry closest to the given GeometryInfo. */
+
 int GeometryInfoList::getClosestIndex(uint comparisonMethod,GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -473,6 +507,8 @@ int GeometryInfoList::getClosestIndex(uint comparisonMethod,GeometryInfo& geomet
 
 
 
+
+/*! \brief Return the index of the entry closest to the given GeometryInfo without locking. */
 
 int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& geometryInfo)
 {
@@ -550,6 +586,8 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
 
 
 
+/*! \brief Delete the entry matching the given generation, geometry, and level ids. */
+
 bool GeometryInfoList::deleteGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
@@ -594,6 +632,8 @@ bool GeometryInfoList::deleteGeometryInfoById(T::GenerationId generationId,T::Ge
 
 
 
+/*! \brief Delete all entries whose producer id matches the given value. */
+
 uint GeometryInfoList::deleteGeometryInfoListByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -636,6 +676,8 @@ uint GeometryInfoList::deleteGeometryInfoListByProducerId(T::ProducerId producer
 
 
 
+
+/*! \brief Delete all entries whose generation id matches the given value. */
 
 uint GeometryInfoList::deleteGeometryInfoListByGenerationId(T::GenerationId generationId)
 {
@@ -680,6 +722,8 @@ uint GeometryInfoList::deleteGeometryInfoListByGenerationId(T::GenerationId gene
 
 
 
+/*! \brief Delete all entries whose generation id is in the given set. */
+
 uint GeometryInfoList::deleteGeometryInfoListByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -722,6 +766,8 @@ uint GeometryInfoList::deleteGeometryInfoListByGenerationIdList(std::set<T::Gene
 
 
 
+
+/*! \brief Remove all entries previously flagged for deletion. */
 
 uint GeometryInfoList::deleteMarkedGeometries()
 {
@@ -766,6 +812,8 @@ uint GeometryInfoList::deleteMarkedGeometries()
 
 
 
+/*! \brief Flag every entry in the list as deleted. */
+
 uint GeometryInfoList::markDeleted()
 {
   FUNCTION_TRACE
@@ -796,6 +844,8 @@ uint GeometryInfoList::markDeleted()
 
 
 
+
+/*! \brief Flag entries whose generation id matches the given value as deleted. */
 
 uint GeometryInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
@@ -831,6 +881,8 @@ uint GeometryInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
+
 uint GeometryInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -864,6 +916,8 @@ uint GeometryInfoList::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Flag entries whose source id matches the given value as deleted. */
 
 uint GeometryInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
@@ -899,6 +953,8 @@ uint GeometryInfoList::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
+
 uint GeometryInfoList::markDeletedByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -933,6 +989,8 @@ uint GeometryInfoList::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Flag the entry matching the given generation, geometry, and level ids as deleted. */
+
 uint GeometryInfoList::markDeletedById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
@@ -956,6 +1014,8 @@ uint GeometryInfoList::markDeletedById(T::GenerationId generationId,T::GeometryI
 
 
 
+
+/*! \brief Return the GeometryInfo matching the given generation, geometry, and level ids. */
 
 GeometryInfo* GeometryInfoList::getGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
@@ -991,6 +1051,8 @@ GeometryInfo* GeometryInfoList::getGeometryInfoById(T::GenerationId generationId
 
 
 
+
+/*! \brief Copy the GeometryInfo matching the given generation, geometry, and level ids into the output structure. */
 
 bool GeometryInfoList::getGeometryInfoById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,GeometryInfo& geometryInfo)
 {
@@ -1029,6 +1091,8 @@ bool GeometryInfoList::getGeometryInfoById(T::GenerationId generationId,T::Geome
 
 
 
+
+/*! \brief Delete all entries whose source id matches the given value. */
 
 uint GeometryInfoList::deleteGeometryInfoListBySourceId(T::SourceId sourceId)
 {
@@ -1073,6 +1137,8 @@ uint GeometryInfoList::deleteGeometryInfoListBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Delete all entries whose storage id matches the given value. */
+
 uint GeometryInfoList::deleteGeometryInfoListByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -1116,6 +1182,8 @@ uint GeometryInfoList::deleteGeometryInfoListByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return the GeometryInfo at the given list index. */
+
 GeometryInfo* GeometryInfoList::getGeometryInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -1140,6 +1208,8 @@ GeometryInfo* GeometryInfoList::getGeometryInfoByIndex(uint index)
 
 
 
+/*! \brief Return the GeometryInfo at the given list index without bounds checking. */
+
 GeometryInfo* GeometryInfoList::getGeometryInfoByIndexNoCheck(uint index)
 {
   FUNCTION_TRACE
@@ -1156,6 +1226,8 @@ GeometryInfo* GeometryInfoList::getGeometryInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Append all entries matching the given generation id to the target list. */
 
 void GeometryInfoList::getGeometryInfoListByGenerationId(T::GenerationId generationId,GeometryInfoList& geometryInfoList)
 {
@@ -1213,6 +1285,8 @@ void GeometryInfoList::getGeometryInfoListByGenerationId(T::GenerationId generat
 
 
 
+/*! \brief Append all entries matching the given producer id to the target list. */
+
 void GeometryInfoList::getGeometryInfoListByProducerId(T::ProducerId producerId,GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1269,6 +1343,8 @@ void GeometryInfoList::getGeometryInfoListByProducerId(T::ProducerId producerId,
 
 
 
+/*! \brief Return a hash value computed from the entire list contents. */
+
 std::size_t GeometryInfoList::getHash()
 {
   FUNCTION_TRACE
@@ -1304,6 +1380,8 @@ std::size_t GeometryInfoList::getHash()
 
 
 
+/*! \brief Return a hash value computed from entries matching the given storage id. */
+
 std::size_t GeometryInfoList::getHashByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -1337,6 +1415,8 @@ std::size_t GeometryInfoList::getHashByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Return a hash value computed from entries matching the given producer id. */
 
 std::size_t GeometryInfoList::getHashByProducerId(T::ProducerId producerId)
 {
@@ -1394,6 +1474,8 @@ std::size_t GeometryInfoList::getHashByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Append entries matching the given generation id and status to the target list. */
+
 void GeometryInfoList::getGeometryInfoListByGenerationIdAndStatus(T::GenerationId generationId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
 {
   FUNCTION_TRACE
@@ -1449,6 +1531,8 @@ void GeometryInfoList::getGeometryInfoListByGenerationIdAndStatus(T::GenerationI
 
 
 
+
+/*! \brief Append entries matching the given producer id and status to the target list. */
 
 void GeometryInfoList::getGeometryInfoListByProducerIdAndStatus(T::ProducerId producerId,GeometryInfoList& geometryInfoList,uchar geometryStatus)
 {
@@ -1506,6 +1590,8 @@ void GeometryInfoList::getGeometryInfoListByProducerIdAndStatus(T::ProducerId pr
 
 
 
+/*! \brief Append all entries matching the given source id to the target list. */
+
 void GeometryInfoList::getGeometryInfoListBySourceId(T::SourceId sourceId,GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1538,6 +1624,8 @@ void GeometryInfoList::getGeometryInfoListBySourceId(T::SourceId sourceId,Geomet
 
 
 
+/*! \brief Return the number of entries in the list. */
+
 uint GeometryInfoList::getLength()
 {
   FUNCTION_TRACE
@@ -1554,6 +1642,8 @@ uint GeometryInfoList::getLength()
 
 
 
+
+/*! \brief Return the capacity of the underlying storage. */
 
 uint GeometryInfoList::getSize() const
 {
@@ -1572,6 +1662,8 @@ uint GeometryInfoList::getSize() const
 
 
 
+/*! \brief Return whether contained objects are owned and released by the list. */
+
 bool GeometryInfoList::getReleaseObjects()
 {
   FUNCTION_TRACE
@@ -1588,6 +1680,8 @@ bool GeometryInfoList::getReleaseObjects()
 
 
 
+
+/*! \brief Set whether contained objects are owned and released by the list. */
 
 void GeometryInfoList::setReleaseObjects(bool releaseObjects)
 {
@@ -1606,6 +1700,8 @@ void GeometryInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+/*! \brief Enable or disable internal locking on the list. */
+
 void GeometryInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
@@ -1622,6 +1718,8 @@ void GeometryInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
+
+/*! \brief Set the comparison method used for sorting the list. */
 
 void GeometryInfoList::setComparisonMethod(uint comparisonMethod)
 {
@@ -1642,6 +1740,8 @@ void GeometryInfoList::setComparisonMethod(uint comparisonMethod)
 
 
 
+
+/*! \brief Sort the list using the given comparison method. */
 
 void GeometryInfoList::sort(uint comparisonMethod)
 {
@@ -1686,6 +1786,8 @@ void GeometryInfoList::sort(uint comparisonMethod)
 
 
 
+/*! \brief Write the list contents to the named file. */
+
 void GeometryInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -1718,6 +1820,8 @@ void GeometryInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void GeometryInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

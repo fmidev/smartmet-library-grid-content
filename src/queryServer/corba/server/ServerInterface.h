@@ -18,6 +18,13 @@ namespace QueryServer
 namespace Corba
 {
 
+// ====================================================================================
+/*! \brief CORBA servant that exposes a QueryServer::ServiceInterface over CORBA.
+ *
+ *  Implements the POA skeleton generated from the IDL.  Each CORBA operation
+ *  deserialises its arguments, delegates to the wrapped ServiceInterface, and
+ *  serialises the results back to CORBA types. */
+// ====================================================================================
 
 class ServerInterface : public POA_SmartMet::QueryServer::Corba::ServiceInterface
 {
@@ -33,7 +40,7 @@ class ServerInterface : public POA_SmartMet::QueryServer::Corba::ServiceInterfac
 
   protected:
 
-    QueryServer::ServiceInterface *mService;
+    QueryServer::ServiceInterface *mService;  //!< Local service implementation delegate.
 };
 
 }

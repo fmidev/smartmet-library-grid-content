@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_div::Function_div()
 {
   try
@@ -22,6 +24,8 @@ Function_div::Function_div()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_div::Function_div(const Function_div& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_div::Function_div(const Function_div& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_div::~Function_div()
 {
   try
@@ -54,6 +60,8 @@ Function_div::~Function_div()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_div::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -88,6 +96,8 @@ float Function_div::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_div::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -120,6 +130,8 @@ double Function_div::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -199,6 +211,8 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -274,6 +288,8 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_div::duplicate()
 {

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Rotates the northward (V) stream-line component to the target grid orientation. */
+// ====================================================================================
+
 class Function_streamV : public Function
 {
   public:

@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_smedian::Function_smedian()
 {
   try
@@ -22,6 +24,8 @@ Function_smedian::Function_smedian()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_smedian::Function_smedian(const Function_smedian& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_smedian::Function_smedian(const Function_smedian& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_smedian::~Function_smedian()
 {
   try
@@ -54,6 +60,8 @@ Function_smedian::~Function_smedian()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -113,6 +121,8 @@ float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -174,6 +184,8 @@ double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -246,6 +258,8 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -315,6 +329,8 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_smedian::duplicate()
 {

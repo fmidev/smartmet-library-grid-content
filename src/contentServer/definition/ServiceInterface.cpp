@@ -14,6 +14,8 @@ namespace ContentServer
 {
 
 
+/*! \brief Constructor: initializes log pointers to null, marks implementation type as Interface and enables the service. */
+
 ServiceInterface::ServiceInterface()
 {
   FUNCTION_TRACE
@@ -34,6 +36,8 @@ ServiceInterface::ServiceInterface()
 
 
 
+/*! \brief Destructor: virtual, catches exceptions and logs them rather than propagating. */
+
 ServiceInterface::~ServiceInterface()
 {
   FUNCTION_TRACE
@@ -51,6 +55,8 @@ ServiceInterface::~ServiceInterface()
 
 
 
+/*! \brief Enables or disables the service; disabled services return SERVICE_DISABLED from API calls. */
+
 void ServiceInterface::setEnabled(bool enabled)
 {
   FUNCTION_TRACE
@@ -66,6 +72,8 @@ void ServiceInterface::setEnabled(bool enabled)
 
 
 
+
+/*! \brief Returns true if the service is currently enabled. */
 
 bool ServiceInterface::isEnabled()
 {
@@ -84,6 +92,8 @@ bool ServiceInterface::isEnabled()
 
 
 
+/*! \brief Returns true when the backend is ready to serve requests; base implementation always returns true. */
+
 bool ServiceInterface::isReady()
 {
   FUNCTION_TRACE
@@ -101,6 +111,8 @@ bool ServiceInterface::isReady()
 
 
 
+/*! \brief Fills in cache statistics for monitoring; base implementation is a no-op. */
+
 void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   FUNCTION_TRACE
@@ -116,6 +128,8 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
 
 
 
+
+/*! \brief Appends service state attributes (log file names and enabled flags) to the given attribute tree. */
 
 void ServiceInterface::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -152,6 +166,8 @@ void ServiceInterface::getStateAttributes(std::shared_ptr<T::AttributeNode> pare
 
 
 
+/*! \brief Returns the timestamp of the last content change observed by the service; base implementation returns 0. */
+
 time_t ServiceInterface::getContentChangeTime()
 {
   FUNCTION_TRACE
@@ -168,6 +184,8 @@ time_t ServiceInterface::getContentChangeTime()
 
 
 
+
+/*! \brief Returns the implementation type identifier (Interface, Redis, Cache, CorbaClient, HttpClient, Memory, Postgres). */
 
 Implementation ServiceInterface::getImplementationType()
 {
@@ -186,6 +204,8 @@ Implementation ServiceInterface::getImplementationType()
 
 
 
+/*! \brief Returns the pointer to the debug log instance, or nullptr if unset. */
+
 Log* ServiceInterface::getDebugLog()
 {
   FUNCTION_TRACE
@@ -201,6 +221,8 @@ Log* ServiceInterface::getDebugLog()
 
 
 
+
+/*! \brief Returns the pointer to the processing (request/timing) log instance, or nullptr if unset. */
 
 Log* ServiceInterface::getProcessingLog()
 {
@@ -219,6 +241,8 @@ Log* ServiceInterface::getProcessingLog()
 
 
 
+/*! \brief Installs an external debug Log instance used by backends for verbose diagnostics. */
+
 void ServiceInterface::setDebugLog(Log *debugLog)
 {
   FUNCTION_TRACE
@@ -236,6 +260,8 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 
 
+/*! \brief Installs an external processing Log instance used to record per-call results and timings. */
+
 void ServiceInterface::setProcessingLog(Log *processingLog)
 {
   FUNCTION_TRACE
@@ -252,23 +278,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
-/*
-std::string& ServiceInterface::getSourceInfo()
-{
-  FUNCTION_TRACE
-  try
-  {
-    return mSourceInfo;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
+/*! \brief Initiates an orderly shutdown of the service; base implementation is a no-op for backends to override. */
 
 void ServiceInterface::shutdown()
 {
@@ -285,6 +295,8 @@ void ServiceInterface::shutdown()
 
 
 
+
+/*! \brief Public API: clears all backend state; logs and delegates to the protected hook. */
 
 int ServiceInterface::clear(T::SessionId sessionId)
 {
@@ -307,6 +319,8 @@ int ServiceInterface::clear(T::SessionId sessionId)
 
 
 
+/*! \brief Public API: reloads backend data from its underlying source; logs and delegates to the protected hook. */
+
 int ServiceInterface::reload(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -327,6 +341,8 @@ int ServiceInterface::reload(T::SessionId sessionId)
 
 
 
+
+/*! \brief Public API: returns the latest content-change timestamp via the protected hook. */
 
 int ServiceInterface::getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
@@ -349,6 +365,8 @@ int ServiceInterface::getContentChangeTime(T::SessionId sessionId,time_t& change
 
 
 
+
+/*! \brief Public API: registers a new producer; logs and delegates to the protected hook. */
 
 int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -379,6 +397,8 @@ int ServiceInterface::addProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
 
 
 
+/*! \brief Public API: updates an existing producer record; logs and delegates to the protected hook. */
+
 int ServiceInterface::setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -406,6 +426,8 @@ int ServiceInterface::setProducerInfo(T::SessionId sessionId,T::ProducerInfo& pr
 
 
 
+
+/*! \brief Public API: deletes a producer by ID; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -435,6 +457,8 @@ int ServiceInterface::deleteProducerInfoById(T::SessionId sessionId,T::ProducerI
 
 
 
+/*! \brief Public API: deletes a producer by name; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -462,6 +486,8 @@ int ServiceInterface::deleteProducerInfoByName(T::SessionId sessionId,const std:
 
 
 
+
+/*! \brief Public API: deletes all producers belonging to the given source; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -491,6 +517,8 @@ int ServiceInterface::deleteProducerInfoListBySourceId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Public API: returns producer info by ID; logs and delegates to the protected hook. */
+
 int ServiceInterface::getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -518,6 +546,8 @@ int ServiceInterface::getProducerInfoById(T::SessionId sessionId,T::ProducerId p
 
 
 
+
+/*! \brief Public API: returns producer info by name; logs and delegates to the protected hook. */
 
 int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
@@ -547,6 +577,8 @@ int ServiceInterface::getProducerInfoByName(T::SessionId sessionId,const std::st
 
 
 
+/*! \brief Public API: returns the full list of producers; logs and delegates to the protected hook. */
+
 int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -574,6 +606,8 @@ int ServiceInterface::getProducerInfoList(T::SessionId sessionId,T::ProducerInfo
 
 
 
+
+/*! \brief Public API: lists producers that publish the given parameter key; logs and delegates to the protected hook. */
 
 int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -603,6 +637,8 @@ int ServiceInterface::getProducerInfoListByParameter(T::SessionId sessionId,T::P
 
 
 
+/*! \brief Public API: lists producers belonging to the given source; logs and delegates to the protected hook. */
+
 int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -630,6 +666,8 @@ int ServiceInterface::getProducerInfoListBySourceId(T::SessionId sessionId,T::So
 
 
 
+
+/*! \brief Public API: returns the number of producers; logs and delegates to the protected hook. */
 
 int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -659,6 +697,8 @@ int ServiceInterface::getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Public API: returns a set of producer-name/geometry-id pairs; logs and delegates to the protected hook. */
+
 int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -686,6 +726,8 @@ int ServiceInterface::getProducerNameAndGeometryList(T::SessionId sessionId,std:
 
 
 
+
+/*! \brief Public API: lists parameters known across all producers, translated between key types; logs and delegates to the protected hook. */
 
 int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -715,6 +757,8 @@ int ServiceInterface::getProducerParameterList(T::SessionId sessionId,T::ParamKe
 
 
 
+/*! \brief Public API: lists parameters published by a single producer, translated between key types; logs and delegates to the protected hook. */
+
 int ServiceInterface::getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -742,6 +786,8 @@ int ServiceInterface::getProducerParameterListByProducerId(T::SessionId sessionI
 
 
 
+
+/*! \brief Public API: registers a new generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -771,6 +817,8 @@ int ServiceInterface::addGenerationInfo(T::SessionId sessionId,T::GenerationInfo
 
 
 
+/*! \brief Public API: updates an existing generation; logs and delegates to the protected hook. */
+
 int ServiceInterface::setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -798,6 +846,8 @@ int ServiceInterface::setGenerationInfo(T::SessionId sessionId,T::GenerationInfo
 
 
 
+
+/*! \brief Public API: deletes a generation by ID; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -827,6 +877,8 @@ int ServiceInterface::deleteGenerationInfoById(T::SessionId sessionId,T::Generat
 
 
 
+/*! \brief Public API: deletes a generation by name; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -854,6 +906,8 @@ int ServiceInterface::deleteGenerationInfoByName(T::SessionId sessionId,const st
 
 
 
+
+/*! \brief Public API: deletes generations matching the given ID set; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
@@ -883,6 +937,8 @@ int ServiceInterface::deleteGenerationInfoListByIdList(T::SessionId sessionId,st
 
 
 
+/*! \brief Public API: deletes all generations of a producer (by ID); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -910,6 +966,8 @@ int ServiceInterface::deleteGenerationInfoListByProducerId(T::SessionId sessionI
 
 
 
+
+/*! \brief Public API: deletes all generations of a producer (by name); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -939,6 +997,8 @@ int ServiceInterface::deleteGenerationInfoListByProducerName(T::SessionId sessio
 
 
 
+/*! \brief Public API: deletes all generations belonging to the given source; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -966,6 +1026,8 @@ int ServiceInterface::deleteGenerationInfoListBySourceId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Public API: lists generations that contain the given geometry; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
@@ -995,6 +1057,8 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
 
 
 
+/*! \brief Public API: returns generation info by ID; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1022,6 +1086,8 @@ int ServiceInterface::getGenerationInfoById(T::SessionId sessionId,T::Generation
 
 
 
+
+/*! \brief Public API: returns generation info by name; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
@@ -1051,6 +1117,8 @@ int ServiceInterface::getGenerationInfoByName(T::SessionId sessionId,const std::
 
 
 
+/*! \brief Public API: returns the full list of generations; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1078,6 +1146,8 @@ int ServiceInterface::getGenerationInfoList(T::SessionId sessionId,T::Generation
 
 
 
+
+/*! \brief Public API: lists generations belonging to a producer (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
@@ -1107,6 +1177,8 @@ int ServiceInterface::getGenerationInfoListByProducerId(T::SessionId sessionId,T
 
 
 
+/*! \brief Public API: lists generations belonging to a producer (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1134,6 +1206,8 @@ int ServiceInterface::getGenerationInfoListByProducerName(T::SessionId sessionId
 
 
 
+
+/*! \brief Public API: lists generations belonging to the given source; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
@@ -1163,6 +1237,8 @@ int ServiceInterface::getGenerationInfoListBySourceId(T::SessionId sessionId,T::
 
 
 
+/*! \brief Public API: returns the latest generation of a producer (by ID) with the given status; logs and delegates to the protected hook. */
+
 int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1190,6 +1266,8 @@ int ServiceInterface::getLastGenerationInfoByProducerIdAndStatus(T::SessionId se
 
 
 
+
+/*! \brief Public API: returns the latest generation of a producer (by name) with the given status; logs and delegates to the protected hook. */
 
 int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -1219,6 +1297,8 @@ int ServiceInterface::getLastGenerationInfoByProducerNameAndStatus(T::SessionId 
 
 
 
+/*! \brief Public API: returns the number of generations; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -1246,6 +1326,8 @@ int ServiceInterface::getGenerationInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Public API: sets the status of a generation identified by ID; logs and delegates to the protected hook. */
 
 int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
@@ -1275,6 +1357,8 @@ int ServiceInterface::setGenerationInfoStatusById(T::SessionId sessionId,T::Gene
 
 
 
+/*! \brief Public API: sets the status of a generation identified by name; logs and delegates to the protected hook. */
+
 int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
@@ -1302,6 +1386,8 @@ int ServiceInterface::setGenerationInfoStatusByName(T::SessionId sessionId,const
 
 
 
+
+/*! \brief Public API: registers a new geometry record; logs and delegates to the protected hook. */
 
 int ServiceInterface::addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -1331,6 +1417,8 @@ int ServiceInterface::addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& ge
 
 
 
+/*! \brief Public API: deletes a geometry record identified by generation/geometry/level; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
@@ -1358,6 +1446,8 @@ int ServiceInterface::deleteGeometryInfoById(T::SessionId sessionId,T::Generatio
 
 
 
+
+/*! \brief Public API: deletes all geometry records belonging to a generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -1387,6 +1477,8 @@ int ServiceInterface::deleteGeometryInfoListByGenerationId(T::SessionId sessionI
 
 
 
+/*! \brief Public API: deletes all geometry records of a producer; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1414,6 +1506,8 @@ int ServiceInterface::deleteGeometryInfoListByProducerId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Public API: deletes all geometry records belonging to a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -1443,6 +1537,8 @@ int ServiceInterface::deleteGeometryInfoListBySourceId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Public API: returns the geometry record identified by generation/geometry/level; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -1471,6 +1567,8 @@ int ServiceInterface::getGeometryInfoById(T::SessionId sessionId,T::GenerationId
 
 
 
+/*! \brief Public API: returns the full list of geometry records; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1497,6 +1595,8 @@ int ServiceInterface::getGeometryInfoList(T::SessionId sessionId,T::GeometryInfo
 
 
 
+
+/*! \brief Public API: lists geometry records belonging to a generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
@@ -1525,6 +1625,8 @@ int ServiceInterface::getGeometryInfoListByGenerationId(T::SessionId sessionId,T
 
 
 
+/*! \brief Public API: lists geometry records belonging to a producer; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1551,6 +1653,8 @@ int ServiceInterface::getGeometryInfoListByProducerId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Public API: lists geometry records belonging to a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
@@ -1580,6 +1684,8 @@ int ServiceInterface::getGeometryInfoListBySourceId(T::SessionId sessionId,T::So
 
 
 
+/*! \brief Public API: returns the number of geometry records; logs and delegates to the protected hook. */
+
 int ServiceInterface::getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -1608,6 +1714,8 @@ int ServiceInterface::getGeometryInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Public API: updates an existing geometry record; logs and delegates to the protected hook. */
+
 int ServiceInterface::setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -1634,6 +1742,8 @@ int ServiceInterface::setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& ge
 
 
 
+
+/*! \brief Public API: sets the status of a geometry record identified by generation/geometry/level; logs and delegates to the protected hook. */
 
 int ServiceInterface::setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
@@ -1663,6 +1773,8 @@ int ServiceInterface::setGeometryInfoStatusById(T::SessionId sessionId,T::Genera
 
 
 
+/*! \brief Public API: registers a new file record; logs and delegates to the protected hook. */
+
 int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -1690,6 +1802,8 @@ int ServiceInterface::addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+
+/*! \brief Public API: updates an existing file record; logs and delegates to the protected hook. */
 
 int ServiceInterface::setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -1719,6 +1833,8 @@ int ServiceInterface::setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+/*! \brief Public API: registers a file along with all its content records in one call; logs and delegates to the protected hook. */
+
 int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -1746,6 +1862,8 @@ int ServiceInterface::addFileInfoWithContentList(T::SessionId sessionId,T::FileI
 
 
 
+
+/*! \brief Public API: batch-registers multiple files together with their content records; logs and delegates to the protected hook. */
 
 int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
@@ -1775,6 +1893,8 @@ int ServiceInterface::addFileInfoListWithContent(T::SessionId sessionId,uint req
 
 
 
+/*! \brief Public API: deletes a file (and its contents) by file ID; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -1802,6 +1922,8 @@ int ServiceInterface::deleteFileInfoById(T::SessionId sessionId,T::FileId fileId
 
 
 
+
+/*! \brief Public API: deletes a file (and its contents) by filename; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -1831,6 +1953,8 @@ int ServiceInterface::deleteFileInfoByName(T::SessionId sessionId,const std::str
 
 
 
+/*! \brief Public API: deletes all files of a producer (by ID); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1858,6 +1982,8 @@ int ServiceInterface::deleteFileInfoListByProducerId(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Public API: deletes all files of a producer (by name); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -1887,6 +2013,8 @@ int ServiceInterface::deleteFileInfoListByProducerName(T::SessionId sessionId,co
 
 
 
+/*! \brief Public API: deletes all files of a generation; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1914,6 +2042,8 @@ int ServiceInterface::deleteFileInfoListByGenerationId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Public API: deletes files matching generation, geometry, forecast type/number and the given forecast time (string form); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
@@ -1943,6 +2073,8 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
 
 
 
+/*! \brief Public API: deletes files matching generation, geometry, forecast type/number and the given forecast time (epoch form); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   FUNCTION_TRACE
@@ -1970,6 +2102,8 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
 
 
 
+
+/*! \brief Public API: deletes files matching a list of forecast-time keys; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
@@ -1999,6 +2133,8 @@ int ServiceInterface::deleteFileInfoListByForecastTimeList(T::SessionId sessionI
 
 
 
+/*! \brief Public API: deletes all files of a generation identified by name; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -2026,6 +2162,8 @@ int ServiceInterface::deleteFileInfoListByGenerationName(T::SessionId sessionId,
 
 
 
+
+/*! \brief Public API: deletes all files belonging to the given source; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -2055,6 +2193,8 @@ int ServiceInterface::deleteFileInfoListBySourceId(T::SessionId sessionId,T::Sou
 
 
 
+/*! \brief Public API: deletes files matching the given ID set; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -2082,6 +2222,8 @@ int ServiceInterface::deleteFileInfoListByFileIdList(T::SessionId sessionId,std:
 
 
 
+
+/*! \brief Public API: returns file info by ID; logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
@@ -2111,6 +2253,8 @@ int ServiceInterface::getFileInfoById(T::SessionId sessionId,T::FileId fileId,T:
 
 
 
+/*! \brief Public API: returns file info by filename; logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2138,6 +2282,8 @@ int ServiceInterface::getFileInfoByName(T::SessionId sessionId,const std::string
 
 
 
+
+/*! \brief Public API: returns a paginated list of files starting from startFileId; logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2167,6 +2313,8 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,T::FileId startFile
 
 
 
+/*! \brief Public API: returns file info entries matching the given ID list; logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2194,6 +2342,8 @@ int ServiceInterface::getFileInfoListByFileIdList(T::SessionId sessionId,std::ve
 
 
 
+
+/*! \brief Public API: paginated list of files for a producer (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2223,6 +2373,8 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,T::Prod
 
 
 
+/*! \brief Public API: paginated list of files for a producer (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2250,6 +2402,8 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const
 
 
 
+
+/*! \brief Public API: paginated list of files for a generation (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2279,6 +2433,8 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,T::Ge
 
 
 
+/*! \brief Public API: paginated list of files for a generation (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2306,6 +2462,8 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
 
 
 
+
+/*! \brief Public API: paginated list of files for a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2335,6 +2493,8 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,T::Source
 
 
 
+/*! \brief Public API: returns the total number of files; logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2362,6 +2522,8 @@ int ServiceInterface::getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Public API: returns the number of files belonging to a producer; logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
@@ -2391,6 +2553,8 @@ int ServiceInterface::getFileInfoCountByProducerId(T::SessionId sessionId,T::Pro
 
 
 
+/*! \brief Public API: returns the number of files belonging to a generation; logs and delegates to the protected hook. */
+
 int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
@@ -2418,6 +2582,8 @@ int ServiceInterface::getFileInfoCountByGenerationId(T::SessionId sessionId,T::G
 
 
 
+
+/*! \brief Public API: returns the number of files belonging to a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
@@ -2447,6 +2613,8 @@ int ServiceInterface::getFileInfoCountBySourceId(T::SessionId sessionId,T::Sourc
 
 
 
+/*! \brief Public API: records a server event into the event log; logs and delegates to the protected hook. */
+
 int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2475,6 +2643,8 @@ int ServiceInterface::addEventInfo(T::SessionId sessionId,T::EventInfo& eventInf
 
 
 
+/*! \brief Public API: returns the most recent event observed by the service; logs and delegates to the protected hook. */
+
 int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2501,6 +2671,8 @@ int ServiceInterface::getLastEventInfo(T::SessionId sessionId,uint requestingSer
 
 
 
+
+/*! \brief Public API: returns a paginated batch of events used by clients to follow change notifications; logs and delegates to the protected hook. */
 
 int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
@@ -2531,6 +2703,8 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
 
 
 
+/*! \brief Public API: returns the total number of events known to the service; logs and delegates to the protected hook. */
+
 int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2558,6 +2732,8 @@ int ServiceInterface::getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Public API: registers a new content (grib message) record; logs and delegates to the protected hook. */
 
 int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -2587,6 +2763,8 @@ int ServiceInterface::addContentInfo(T::SessionId sessionId,T::ContentInfo& cont
 
 
 
+/*! \brief Public API: updates an existing content record; logs and delegates to the protected hook. */
+
 int ServiceInterface::setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2614,6 +2792,8 @@ int ServiceInterface::setContentInfo(T::SessionId sessionId,T::ContentInfo& cont
 
 
 
+
+/*! \brief Public API: batch-registers a list of content records; logs and delegates to the protected hook. */
 
 int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
@@ -2643,6 +2823,8 @@ int ServiceInterface::addContentList(T::SessionId sessionId,T::ContentInfoList& 
 
 
 
+/*! \brief Public API: deletes a single content record identified by file ID and message index; logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -2670,6 +2852,8 @@ int ServiceInterface::deleteContentInfo(T::SessionId sessionId,T::FileId fileId,
 
 
 
+
+/*! \brief Public API: deletes all content records belonging to a file (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
@@ -2699,6 +2883,8 @@ int ServiceInterface::deleteContentListByFileId(T::SessionId sessionId,T::FileId
 
 
 
+/*! \brief Public API: deletes all content records belonging to a file (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
@@ -2726,6 +2912,8 @@ int ServiceInterface::deleteContentListByFileName(T::SessionId sessionId,const s
 
 
 
+
+/*! \brief Public API: deletes all content records belonging to a producer (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -2755,6 +2943,8 @@ int ServiceInterface::deleteContentListByProducerId(T::SessionId sessionId,T::Pr
 
 
 
+/*! \brief Public API: deletes all content records belonging to a producer (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -2782,6 +2972,8 @@ int ServiceInterface::deleteContentListByProducerName(T::SessionId sessionId,con
 
 
 
+
+/*! \brief Public API: deletes all content records belonging to a generation (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -2811,6 +3003,8 @@ int ServiceInterface::deleteContentListByGenerationId(T::SessionId sessionId,T::
 
 
 
+/*! \brief Public API: deletes all content records belonging to a generation (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -2838,6 +3032,8 @@ int ServiceInterface::deleteContentListByGenerationName(T::SessionId sessionId,c
 
 
 
+
+/*! \brief Public API: deletes all content records belonging to a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -2867,6 +3063,8 @@ int ServiceInterface::deleteContentListBySourceId(T::SessionId sessionId,T::Sour
 
 
 
+/*! \brief Public API: returns a single content record identified by file ID and message index; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2894,6 +3092,8 @@ int ServiceInterface::getContentInfo(T::SessionId sessionId,T::FileId fileId,T::
 
 
 
+
+/*! \brief Public API: returns a paginated batch of content records starting from (file,message); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -2923,6 +3123,8 @@ int ServiceInterface::getContentList(T::SessionId sessionId,T::FileId startFileI
 
 
 
+/*! \brief Public API: returns all content records of a single file (by ID); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2950,6 +3152,8 @@ int ServiceInterface::getContentListByFileId(T::SessionId sessionId,T::FileId fi
 
 
 
+
+/*! \brief Public API: returns content records for files matching the given ID list; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -2979,6 +3183,8 @@ int ServiceInterface::getContentListByFileIdList(T::SessionId sessionId,std::vec
 
 
 
+/*! \brief Public API: returns all content records of a single file (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3006,6 +3212,8 @@ int ServiceInterface::getContentListByFileName(T::SessionId sessionId,const std:
 
 
 
+
+/*! \brief Public API: paginated content listing for a producer (by ID); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -3035,6 +3243,8 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,T::Produ
 
 
 
+/*! \brief Public API: paginated content listing for a producer (by name); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3062,6 +3272,8 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const 
 
 
 
+
+/*! \brief Public API: paginated content listing for a source; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -3091,6 +3303,8 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,T::SourceI
 
 
 
+/*! \brief Public API: paginated content listing for a generation (by ID), with request flag filtering; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3118,6 +3332,8 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,T::Gen
 
 
 
+
+/*! \brief Public API: paginated content listing for a generation (by name); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -3147,6 +3363,8 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,cons
 
 
 
+/*! \brief Public API: content records of a generation (by ID) within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3174,6 +3392,8 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
 
 
 
+
+/*! \brief Public API: content records of a generation (by ID) within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -3203,6 +3423,8 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
 
 
 
+/*! \brief Public API: content records of a generation (by name) within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3230,6 +3452,8 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
 
 
 
+
+/*! \brief Public API: content records of a generation (by name) within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -3259,6 +3483,8 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
 
 
 
+/*! \brief Public API: content records matching parameter/level/forecast/geometry filters and a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3286,6 +3512,8 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
 
 
 
+
+/*! \brief Public API: content records matching parameter/level/forecast/geometry filters and a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3315,6 +3543,8 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
 
 
 
+/*! \brief Public API: content records filtered by parameter and generation (by ID), within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3342,6 +3572,8 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
 
 
 
+
+/*! \brief Public API: content records filtered by parameter and generation (by ID), within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3371,6 +3603,8 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
 
 
 
+/*! \brief Public API: content records filtered by parameter and generation (by name), within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3398,6 +3632,8 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
 
 
 
+
+/*! \brief Public API: content records filtered by parameter and generation (by name), within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3427,6 +3663,8 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
 
 
 
+/*! \brief Public API: content records filtered by parameter and producer (by ID), within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3454,6 +3692,8 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
 
 
 
+
+/*! \brief Public API: content records filtered by parameter and producer (by ID), within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3483,6 +3723,8 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
 
 
 
+/*! \brief Public API: content records filtered by parameter and producer (by name), within a time range (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3510,6 +3752,8 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
+
+/*! \brief Public API: content records filtered by parameter and producer (by name), within a time range (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3539,6 +3783,8 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
 
 
 
+/*! \brief Public API: content records bracketing the given forecast time for parameter/generation (string form); logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3566,6 +3812,8 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
 
 
 
+
+/*! \brief Public API: content records bracketing the given forecast time for parameter/generation (epoch form); logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -3595,6 +3843,8 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
 
 
 
+/*! \brief Public API: returns content records that failed integrity checks; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3622,6 +3872,8 @@ int ServiceInterface::getContentListOfInvalidIntegrity(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Public API: returns the distinct geometry IDs found in the content of a generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
@@ -3651,6 +3903,8 @@ int ServiceInterface::getContentGeometryIdListByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Public API: returns the distinct levels found in content matching generation/geometry/level-id; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -3679,6 +3933,8 @@ int ServiceInterface::getContentLevelListByGenerationGeometryAndLevelId(T::Sessi
 
 
 
+/*! \brief Public API: returns the distinct levels found in content matching parameter/generation/geometry/level-id; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -3705,6 +3961,8 @@ int ServiceInterface::getContentLevelListByParameterGenerationGeometryAndLevelId
 
 
 
+
+/*! \brief Public API: returns one representative content record per distinct parameter in a generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -3734,6 +3992,8 @@ int ServiceInterface::getContentParamListByGenerationId(T::SessionId sessionId,T
 
 
 
+/*! \brief Public API: returns the set of parameter keys (of the requested key type) used in a generation; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -3761,6 +4021,8 @@ int ServiceInterface::getContentParamKeyListByGenerationId(T::SessionId sessionI
 
 
 
+
+/*! \brief Public API: returns the set of parameter keys for a given generation/geometry; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -3790,6 +4052,8 @@ int ServiceInterface::getContentParamKeyListByGenerationAndGeometryId(T::Session
 
 
 
+/*! \brief Public API: returns the set of parameter keys for a given generation/geometry/level-id; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -3817,6 +4081,8 @@ int ServiceInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::Se
 
 
 
+
+/*! \brief Public API: returns the set of forecast times available in a generation; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -3846,6 +4112,8 @@ int ServiceInterface::getContentTimeListByGenerationId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Public API: returns the set of forecast times available for a generation/geometry; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -3873,6 +4141,8 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
 
 
 
+
+/*! \brief Public API: returns the set of forecast times for a given generation/geometry/level-id; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
@@ -3902,6 +4172,8 @@ int ServiceInterface::getContentTimeListByGenerationGeometryAndLevelId(T::Sessio
 
 
 
+/*! \brief Public API: returns the set of forecast times available across all generations of a producer; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -3929,6 +4201,8 @@ int ServiceInterface::getContentTimeListByProducerId(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Public API: returns the [start,end] forecast time range for a producer+generation pair; logs and delegates to the protected hook. */
 
 int ServiceInterface::getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -3958,6 +4232,8 @@ int ServiceInterface::getContentTimeRangeByProducerAndGenerationId(T::SessionId 
 
 
 
+/*! \brief Public API: returns the [start,end] forecast time range for a generation; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -3985,6 +4261,8 @@ int ServiceInterface::getContentTimeRangeByGenerationId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Public API: returns a flat set of generationId/geometryId/forecastTime triplets; logs and delegates to the protected hook. */
 
 int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -4014,6 +4292,8 @@ int ServiceInterface::getGenerationIdGeometryIdAndForecastTimeList(T::SessionId 
 
 
 
+/*! \brief Public API: returns the total number of content records; logs and delegates to the protected hook. */
+
 int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -4041,6 +4321,8 @@ int ServiceInterface::getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Public API: returns a content-hash representing the state of a producer; used for cache invalidation; logs and delegates to the protected hook. */
 
 int ServiceInterface::getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
@@ -4070,6 +4352,8 @@ int ServiceInterface::getHashByProducerId(T::SessionId sessionId,T::ProducerId p
 
 
 
+/*! \brief Public API: returns metadata about all level types/levels currently in the registry; logs and delegates to the protected hook. */
+
 int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -4098,6 +4382,8 @@ int ServiceInterface::getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& 
 
 
 
+/*! \brief Public API: refreshes cached file metadata for the given file IDs; logs and delegates to the protected hook. */
+
 int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -4125,6 +4411,8 @@ int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<T::FileI
 
 
 
+/*! \brief Protected hook for backend implementations of clear() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_clear(T::SessionId sessionId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4133,6 +4421,8 @@ int ServiceInterface::_clear(T::SessionId sessionId)
 
 
 
+
+/*! \brief Protected hook for backend implementations of reload() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_reload(T::SessionId sessionId)
 {
@@ -4143,6 +4433,8 @@ int ServiceInterface::_reload(T::SessionId sessionId)
 
 
 
+/*! \brief Protected hook for backend implementations of getContentChangeTime() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4150,6 +4442,8 @@ int ServiceInterface::_getContentChangeTime(T::SessionId sessionId,time_t& chang
 
 
 
+
+/*! \brief Protected hook for backend implementations of addProducerInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -4160,6 +4454,8 @@ int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 
 
+/*! \brief Protected hook for backend implementations of setProducerInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4168,6 +4464,8 @@ int ServiceInterface::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteProducerInfoById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -4178,6 +4476,8 @@ int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,T::Producer
 
 
 
+/*! \brief Protected hook for backend implementations of deleteProducerInfoByName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4186,6 +4486,8 @@ int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,const std
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteProducerInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -4196,6 +4498,8 @@ int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Protected hook for backend implementations of getProducerInfoById() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4204,6 +4508,8 @@ int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,T::ProducerId 
 
 
 
+
+/*! \brief Protected hook for backend implementations of getProducerInfoByName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
@@ -4214,6 +4520,8 @@ int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,const std::s
 
 
 
+/*! \brief Protected hook for backend implementations of getProducerInfoList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4222,6 +4530,8 @@ int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInf
 
 
 
+
+/*! \brief Protected hook for backend implementations of getProducerInfoListByParameter() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -4232,6 +4542,8 @@ int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::
 
 
 
+/*! \brief Protected hook for backend implementations of getProducerInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4240,6 +4552,8 @@ int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,T::S
 
 
 
+
+/*! \brief Protected hook for backend implementations of getProducerInfoCount() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -4250,6 +4564,8 @@ int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Protected hook for backend implementations of getProducerNameAndGeometryList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4258,6 +4574,8 @@ int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std
 
 
 
+
+/*! \brief Protected hook for backend implementations of getProducerParameterList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -4268,6 +4586,8 @@ int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamK
 
 
 
+/*! \brief Protected hook for backend implementations of getProducerParameterListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4276,6 +4596,8 @@ int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId session
 
 
 
+
+/*! \brief Protected hook for backend implementations of addGenerationInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -4286,6 +4608,8 @@ int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInf
 
 
 
+/*! \brief Protected hook for backend implementations of setGenerationInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4294,6 +4618,8 @@ int ServiceInterface::_setGenerationInfo(T::SessionId sessionId,T::GenerationInf
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -4304,6 +4630,8 @@ int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,T::Genera
 
 
 
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoByName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4312,6 +4640,8 @@ int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,const s
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoListByIdList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
@@ -4322,6 +4652,8 @@ int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,s
 
 
 
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4330,6 +4662,8 @@ int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId session
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -4340,6 +4674,8 @@ int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessi
 
 
 
+/*! \brief Protected hook for backend implementations of deleteGenerationInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4348,6 +4684,8 @@ int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGenerationInfoById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
@@ -4358,6 +4696,8 @@ int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,T::Generatio
 
 
 
+/*! \brief Protected hook for backend implementations of getGenerationInfoByName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4366,6 +4706,8 @@ int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,const std:
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGenerationInfoList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
@@ -4376,6 +4718,8 @@ int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::Generatio
 
 
 
+/*! \brief Protected hook for backend implementations of getGenerationInfoListByGeometryId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4384,6 +4728,8 @@ int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGenerationInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
@@ -4394,6 +4740,8 @@ int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,
 
 
 
+/*! \brief Protected hook for backend implementations of getGenerationInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4402,6 +4750,8 @@ int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionI
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGenerationInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
@@ -4412,6 +4762,8 @@ int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Protected hook for backend implementations of getLastGenerationInfoByProducerIdAndStatus() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4420,6 +4772,8 @@ int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId s
 
 
 
+
+/*! \brief Protected hook for backend implementations of getLastGenerationInfoByProducerNameAndStatus() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -4430,6 +4784,8 @@ int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId
 
 
 
+/*! \brief Protected hook for backend implementations of getGenerationInfoCount() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4438,6 +4794,8 @@ int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count
 
 
 
+
+/*! \brief Protected hook for backend implementations of setGenerationInfoStatusById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
@@ -4448,6 +4806,8 @@ int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,T::Gen
 
 
 
+/*! \brief Protected hook for backend implementations of setGenerationInfoStatusByName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4456,6 +4816,8 @@ int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,cons
 
 
 
+
+/*! \brief Protected hook for backend implementations of addGeometryInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -4466,6 +4828,8 @@ int ServiceInterface::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& g
 
 
 
+/*! \brief Protected hook for backend implementations of deleteGeometryInfoById() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4474,6 +4838,8 @@ int ServiceInterface::_deleteGeometryInfoById(T::SessionId sessionId,T::Generati
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteGeometryInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -4484,6 +4850,8 @@ int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId session
 
 
 
+/*! \brief Protected hook for backend implementations of deleteGeometryInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4492,6 +4860,8 @@ int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId sessionId
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteGeometryInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -4502,6 +4872,8 @@ int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Protected hook for backend implementations of getGeometryInfoById() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4510,6 +4882,8 @@ int ServiceInterface::_getGeometryInfoById(T::SessionId sessionId,T::GenerationI
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGeometryInfoList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
@@ -4520,6 +4894,8 @@ int ServiceInterface::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInf
 
 
 
+/*! \brief Protected hook for backend implementations of getGeometryInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4528,6 +4904,8 @@ int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGeometryInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
@@ -4538,6 +4916,8 @@ int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Protected hook for backend implementations of getGeometryInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4546,6 +4926,8 @@ int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::S
 
 
 
+
+/*! \brief Protected hook for backend implementations of getGeometryInfoCount() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -4556,6 +4938,8 @@ int ServiceInterface::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Protected hook for backend implementations of setGeometryInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4563,6 +4947,8 @@ int ServiceInterface::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& g
 
 
 
+
+/*! \brief Protected hook for backend implementations of setGeometryInfoStatusById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
@@ -4573,6 +4959,8 @@ int ServiceInterface::_setGeometryInfoStatusById(T::SessionId sessionId,T::Gener
 
 
 
+/*! \brief Protected hook for backend implementations of addFileInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4581,6 +4969,8 @@ int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+
+/*! \brief Protected hook for backend implementations of setFileInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -4591,6 +4981,8 @@ int ServiceInterface::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 
 
+/*! \brief Protected hook for backend implementations of addFileInfoWithContentList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4599,6 +4991,8 @@ int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Protected hook for backend implementations of addFileInfoListWithContent() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
@@ -4609,6 +5003,8 @@ int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint re
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoById() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4617,6 +5013,8 @@ int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileI
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteFileInfoByName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -4627,6 +5025,8 @@ int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4635,6 +5035,8 @@ int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -4645,6 +5047,8 @@ int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,c
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4653,6 +5057,8 @@ int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationIdAndForecastTime() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 try
@@ -4669,6 +5075,8 @@ catch (...)
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationIdAndForecastTime() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4677,6 +5085,8 @@ int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::Sessio
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByForecastTimeList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
@@ -4687,6 +5097,8 @@ int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId session
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4695,6 +5107,8 @@ int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteFileInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -4705,6 +5119,8 @@ int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::So
 
 
 
+/*! \brief Protected hook for backend implementations of deleteFileInfoListByFileIdList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4713,6 +5129,8 @@ int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoById() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
@@ -4723,6 +5141,8 @@ int ServiceInterface::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoByName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4731,6 +5151,8 @@ int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::strin
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoList() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -4741,6 +5163,8 @@ int ServiceInterface::_getFileInfoList(T::SessionId sessionId,T::FileId startFil
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoListByFileIdList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4749,6 +5173,8 @@ int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::v
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -4759,6 +5185,8 @@ int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,T::Pro
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4767,6 +5195,8 @@ int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,cons
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -4777,6 +5207,8 @@ int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,T::G
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoListByGenerationName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4785,6 +5217,8 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,co
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -4795,6 +5229,8 @@ int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,T::Sourc
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoCount() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4803,6 +5239,8 @@ int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoCountByProducerId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
@@ -4813,6 +5251,8 @@ int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,T::Pr
 
 
 
+/*! \brief Protected hook for backend implementations of getFileInfoCountByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4821,6 +5261,8 @@ int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Protected hook for backend implementations of getFileInfoCountBySourceId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
@@ -4831,6 +5273,8 @@ int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,T::Sour
 
 
 
+/*! \brief Protected hook for backend implementations of addEventInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4839,6 +5283,8 @@ int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventIn
 
 
 
+
+/*! \brief Protected hook for backend implementations of getLastEventInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -4849,6 +5295,8 @@ int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingSe
 
 
 
+/*! \brief Protected hook for backend implementations of getEventInfoList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4857,6 +5305,8 @@ int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingSe
 
 
 
+
+/*! \brief Protected hook for backend implementations of getEventInfoCount() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -4867,6 +5317,8 @@ int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Protected hook for backend implementations of addContentInfo() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4875,6 +5327,8 @@ int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& con
 
 
 
+
+/*! \brief Protected hook for backend implementations of setContentInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -4885,6 +5339,8 @@ int ServiceInterface::_setContentInfo(T::SessionId sessionId,T::ContentInfo& con
 
 
 
+/*! \brief Protected hook for backend implementations of addContentList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4893,6 +5349,8 @@ int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList&
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteContentInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
@@ -4903,6 +5361,8 @@ int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId
 
 
 
+/*! \brief Protected hook for backend implementations of deleteContentListByFileId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4911,6 +5371,8 @@ int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,T::FileI
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteContentListByFileName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
@@ -4921,6 +5383,8 @@ int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const 
 
 
 
+/*! \brief Protected hook for backend implementations of deleteContentListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4929,6 +5393,8 @@ int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteContentListByProducerName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -4939,6 +5405,8 @@ int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,co
 
 
 
+/*! \brief Protected hook for backend implementations of deleteContentListByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4947,6 +5415,8 @@ int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Protected hook for backend implementations of deleteContentListByGenerationName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -4957,6 +5427,8 @@ int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,
 
 
 
+/*! \brief Protected hook for backend implementations of deleteContentListBySourceId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4965,6 +5437,8 @@ int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,T::Sou
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentInfo() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -4975,6 +5449,8 @@ int ServiceInterface::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T:
 
 
 
+/*! \brief Protected hook for backend implementations of getContentList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -4983,6 +5459,8 @@ int ServiceInterface::_getContentList(T::SessionId sessionId,T::FileId startFile
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByFileId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
@@ -4993,6 +5471,8 @@ int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,T::FileId f
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByFileIdList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5001,6 +5481,8 @@ int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::ve
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByFileName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
@@ -5011,6 +5493,8 @@ int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5019,6 +5503,8 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,T::Prod
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByProducerName() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -5029,6 +5515,8 @@ int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListBySourceId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5037,6 +5525,8 @@ int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,T::Source
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5047,6 +5537,8 @@ int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,T::Ge
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByGenerationName() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5055,6 +5547,8 @@ int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,con
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByGenerationIdAndTimeRange() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
@@ -5074,6 +5568,8 @@ int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId ses
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByGenerationIdAndTimeRange() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5081,6 +5577,8 @@ int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId ses
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByGenerationNameAndTimeRange() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
@@ -5100,6 +5598,8 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByGenerationNameAndTimeRange() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5108,6 +5608,8 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameter() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5127,6 +5629,8 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameter() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5135,6 +5639,8 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationId() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5154,6 +5660,8 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationId() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5162,6 +5670,8 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationName() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5181,6 +5691,8 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationName() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5189,6 +5701,8 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerId() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5208,6 +5722,8 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerId() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5216,6 +5732,8 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerName() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5235,6 +5753,8 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerName() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5243,6 +5763,8 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListByParameterGenerationIdAndForecastTime() (string form) — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -5261,6 +5783,8 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
 
 
 
+/*! \brief Protected hook for backend implementations of getContentListByParameterGenerationIdAndForecastTime() (epoch form) — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5269,6 +5793,8 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentListOfInvalidIntegrity() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
@@ -5279,6 +5805,8 @@ int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T
 
 
 
+/*! \brief Protected hook for backend implementations of getContentGeometryIdListByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5287,6 +5815,8 @@ int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessi
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentLevelListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
@@ -5297,6 +5827,8 @@ int ServiceInterface::_getContentLevelListByGenerationGeometryAndLevelId(T::Sess
 
 
 
+/*! \brief Protected hook for backend implementations of getContentLevelListByParameterGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5304,6 +5836,8 @@ int ServiceInterface::_getContentLevelListByParameterGenerationGeometryAndLevelI
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentParamListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -5314,6 +5848,8 @@ int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,
 
 
 
+/*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5322,6 +5858,8 @@ int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationAndGeometryId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -5332,6 +5870,8 @@ int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::Sessio
 
 
 
+/*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5340,6 +5880,8 @@ int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::S
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentTimeListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -5350,6 +5892,8 @@ int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,T
 
 
 
+/*! \brief Protected hook for backend implementations of getContentTimeListByGenerationAndGeometryId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   return 0; // throw Fmi::Exception(BCP,"Implementation required!");
@@ -5359,6 +5903,8 @@ int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId 
 
 
 
+/*! \brief Protected hook for backend implementations of getContentTimeListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5366,6 +5912,8 @@ int ServiceInterface::_getContentTimeListByGenerationGeometryAndLevelId(T::Sessi
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentTimeListByProducerId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
@@ -5376,6 +5924,8 @@ int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,T::
 
 
 
+/*! \brief Protected hook for backend implementations of getContentTimeRangeByProducerAndGenerationId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5384,6 +5934,8 @@ int ServiceInterface::_getContentTimeRangeByProducerAndGenerationId(T::SessionId
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentTimeRangeByGenerationId() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -5394,6 +5946,8 @@ int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId sessionId,
 
 
 
+/*! \brief Protected hook for backend implementations of getGenerationIdGeometryIdAndForecastTimeList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5402,6 +5956,8 @@ int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId
 
 
 
+
+/*! \brief Protected hook for backend implementations of getContentCount() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 {
@@ -5412,6 +5968,8 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Protected hook for backend implementations of getHashByProducerId() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5421,6 +5979,8 @@ int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,T::ProducerId 
 
 
 
+/*! \brief Protected hook for backend implementations of getLevelInfoList() — base returns NOT_IMPLEMENTED. */
+
 int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -5428,6 +5988,8 @@ int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList&
 
 
 
+
+/*! \brief Protected hook for backend implementations of updateCachedFiles() — base returns NOT_IMPLEMENTED. */
 
 int ServiceInterface::_updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {

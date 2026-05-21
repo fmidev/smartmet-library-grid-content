@@ -16,19 +16,37 @@ namespace DataServer
 {
 
 
+// ====================================================================================
+/*! \brief Index record used during start-up file-cache pre-population.
+ *
+ *  Associates a file position and message size with the producer/generation/
+ *  file/message identifiers so that the cache can be seeded without a full
+ *  ContentServer scan. */
+// ====================================================================================
+
 struct StartUpCacheIndexRec
 {
-  T::ProducerId producerId;
-  T::GenerationId generationId;
-  T::FileId fileId;
-  T::MessageIndex messageIndex;
-  T::FilePosition filePosition;
-  uint messageSize;
+  T::ProducerId producerId;     //!< Producer identifier for this cached message.
+  T::GenerationId generationId; //!< Generation (model run) identifier.
+  T::FileId fileId;             //!< File identifier in the ContentServer.
+  T::MessageIndex messageIndex; //!< Message index within the file.
+  T::FilePosition filePosition; //!< Byte offset of the message within the file.
+  uint messageSize;             //!< Size of the message in bytes.
 };
 
 
-typedef std::map<UInt64 ,StartUpCacheIndexRec> StartUpIndexMap;
+typedef std::map<UInt64,StartUpCacheIndexRec> StartUpIndexMap;  //!< Map from composite key to start-up cache index record.
 
+
+// ====================================================================================
+/*! \brief Concrete DataServer implementation that reads grid files from disk.
+ *
+ *  Implements all ServiceInterface data-retrieval methods by locating grid files
+ *  through the ContentServer, memory-mapping them via GridFileManager, and
+ *  delegating interpolation to the grid-files library.  A background thread
+ *  processes ContentServer change events to keep the open-file set in sync;
+ *  an optional second thread pre-populates a local file cache. */
+// ====================================================================================
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -192,36 +210,36 @@ class ServiceImplementation : public ServiceInterface
      ServiceInterface*    getDataServerByFileId(T::FileId fileId);
      GRID::GridFile_sptr  getGridFile(T::FileId fileId);
 
-     T::EventId           mLastProcessedEventId;
-     bool                 mShutdownRequested;
-     bool                 mFullUpdateRequired;
-     bool                 mEventProcessingActive;
-     bool                 mCacheProcessingActive;
-     T::SessionId         mServerSessionId;
-     uint                 mServerId;
-     std::string          mServerName;
-     std::string          mServerIor;
-     std::string          mDataDir;
-     pthread_t            mEventProcessingThread;
-     pthread_t            mCacheProcessingThread;
-     time_t               mContentServerStartTime;
-     GridFileManager      mGridFileManager;
-     std::vector<uint>    mFileAdditionList;
-     ThreadLock           mThreadLock;
-     time_t               mContentChangeTime;
-     std::string          mFileCache_directory;
-     bool                 mFileCache_enabled;
-     uint                 mFileCache_fileCount;
-     time_t               mStartTime;
+     T::EventId           mLastProcessedEventId;        //!< Event identifier of the last ContentServer event processed.
+     bool                 mShutdownRequested;            //!< True once shutdown() has been called.
+     bool                 mFullUpdateRequired;           //!< True if a full ContentServer resync is pending.
+     bool                 mEventProcessingActive;        //!< True while the event-processing thread is running.
+     bool                 mCacheProcessingActive;        //!< True while the cache-processing thread is running.
+     T::SessionId         mServerSessionId;              //!< Session identifier used for ContentServer calls.
+     uint                 mServerId;                     //!< Numeric identifier of this DataServer instance.
+     std::string          mServerName;                   //!< Human-readable name of this server instance.
+     std::string          mServerIor;                    //!< CORBA IOR string published by this server (may be empty).
+     std::string          mDataDir;                      //!< Filesystem path used for locally stored grid files.
+     pthread_t            mEventProcessingThread;        //!< Thread handle for the event-processing background thread.
+     pthread_t            mCacheProcessingThread;        //!< Thread handle for the cache-processing background thread.
+     time_t               mContentServerStartTime;       //!< Startup timestamp of the ContentServer, used for event replay detection.
+     GridFileManager      mGridFileManager;              //!< Registry of open memory-mapped grid files.
+     std::vector<uint>    mFileAdditionList;             //!< Pending file-addition queue between event and main threads.
+     ThreadLock           mThreadLock;                   //!< Lock protecting mFileAdditionList.
+     time_t               mContentChangeTime;            //!< Timestamp of the most recent ContentServer change event.
+     std::string          mFileCache_directory;          //!< Directory path for the optional local file cache.
+     bool                 mFileCache_enabled;            //!< True if the local file cache is enabled.
+     uint                 mFileCache_fileCount;          //!< Number of files currently held in the local cache.
+     time_t               mStartTime;                    //!< Wall-clock time when init() was called.
 
 
-     ContentServer::ServiceInterface*   mContentServer;
-     time_t                             mFileCleanup_age;
-     time_t                             mFileCleanup_checkInterval;
-     time_t                             mFileCleanup_time;
-     time_t                             mDeletedFileCleanup_time;
-     std::shared_ptr<Fmi::DEM>          mDem;
-     std::shared_ptr<Fmi::LandCover>    mLandCover;
+     ContentServer::ServiceInterface*   mContentServer;            //!< Non-owning pointer to the ContentServer used for metadata queries.
+     time_t                             mFileCleanup_age;          //!< Minimum age (seconds) before an unused open file is closed.
+     time_t                             mFileCleanup_checkInterval; //!< How often (seconds) to check for files to close.
+     time_t                             mFileCleanup_time;         //!< Timestamp of the next scheduled cleanup pass.
+     time_t                             mDeletedFileCleanup_time;  //!< Timestamp of the next deleted-file cleanup pass.
+     std::shared_ptr<Fmi::DEM>          mDem;                      //!< Optional digital elevation model used for DEM-based queries.
+     std::shared_ptr<Fmi::LandCover>    mLandCover;                //!< Optional land-cover dataset used for land-cover-based queries.
 };
 
 

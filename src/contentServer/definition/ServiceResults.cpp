@@ -9,6 +9,8 @@ namespace ContentServer
 {
 
 
+/*! \brief Translate a ContentServer result code into a human-readable description. */
+
 std::string getResultString(int resultCode)
 {
   try

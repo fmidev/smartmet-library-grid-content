@@ -12,6 +12,15 @@ namespace Corba
 {
 
 
+// ====================================================================================
+/*! \brief CORBA client proxy that forwards DataServer calls to a remote server.
+ *
+ *  Implements every protected ServiceInterface method by converting C++ types
+ *  to CORBA types via Converter, invoking the remote CORBA servant through the
+ *  narrow'd stub, and converting out-parameters back.  Callers interact with
+ *  this class exactly as they would with a local ServiceImplementation. */
+// ====================================================================================
+
 class ClientImplementation : public DataServer::ServiceInterface
 {
   public:
@@ -114,10 +123,10 @@ class ClientImplementation : public DataServer::ServiceInterface
 
   private:
 
-     bool           mInitialized;
-     std::string    mServiceIor;
+     bool           mInitialized;  //!< True after init() has successfully narrowed the remote object.
+     std::string    mServiceIor;   //!< Stringified IOR of the remote DataServer CORBA service.
 
-     DataServer::Corba::ServiceInterface_var  mService;
+     DataServer::Corba::ServiceInterface_var  mService;  //!< CORBA stub for the remote service.
 };
 
 

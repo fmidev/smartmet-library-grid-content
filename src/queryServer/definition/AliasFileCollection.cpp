@@ -8,6 +8,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 AliasFileCollection::AliasFileCollection()
 {
   try
@@ -25,6 +27,8 @@ AliasFileCollection::AliasFileCollection()
 
 
 
+
+/*! \brief Query Server: Constructor. */
 
 AliasFileCollection::AliasFileCollection(string_vec& filenames)
 {
@@ -61,6 +65,8 @@ AliasFileCollection::AliasFileCollection(const AliasFileCollection& aliasFileCol
 
 
 
+/*! \brief Query Server: Destructor. */
+
 AliasFileCollection::~AliasFileCollection()
 {
   try
@@ -76,6 +82,8 @@ AliasFileCollection::~AliasFileCollection()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void AliasFileCollection::init()
 {
@@ -106,6 +114,8 @@ void AliasFileCollection::init()
 
 
 
+/*! \brief Query Server: Init. */
+
 void AliasFileCollection::init(string_vec& filenames)
 {
   try
@@ -122,6 +132,8 @@ void AliasFileCollection::init(string_vec& filenames)
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void AliasFileCollection::init(string_vec& filenames,bool duplicatesAllowed)
 {
@@ -140,6 +152,8 @@ void AliasFileCollection::init(string_vec& filenames,bool duplicatesAllowed)
 
 
 
+
+/*! \brief Query Server: Check updates. */
 
 bool AliasFileCollection::checkUpdates(bool force)
 {
@@ -170,6 +184,8 @@ bool AliasFileCollection::checkUpdates(bool force)
 
 
 
+/*! \brief Query Server: Get alias. */
+
 bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
 {
   try
@@ -193,6 +209,8 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
 
 
 
+/*! \brief Query Server: Get alias list. */
+
 void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::string>& aliasList)
 {
   try
@@ -213,6 +231,8 @@ void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::
 
 
 
+
+/*! \brief Query Server: Replace alias. */
 
 bool AliasFileCollection::replaceAlias(const std::string& name,std::string& alias)
 {
@@ -246,6 +266,8 @@ bool AliasFileCollection::replaceAlias(const std::string& name,std::string& alia
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void AliasFileCollection::print(std::ostream& stream,uint level,uint optionFlags)
 {

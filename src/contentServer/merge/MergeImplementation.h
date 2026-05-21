@@ -21,12 +21,17 @@ namespace ContentServer
 
 //#define CONTENT_LIST_COUNT 2
 
-typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;
+typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;  //!< Map from generation id to a set of forecast time strings.
 
-typedef std::shared_ptr<ContentServer::ServiceInterface> ContentServer_sptr;
-typedef std::vector<ContentServer_sptr> ContentServer_sptr_vec;
+typedef std::shared_ptr<ContentServer::ServiceInterface> ContentServer_sptr;      //!< Shared pointer to a ServiceInterface backend.
+typedef std::vector<ContentServer_sptr> ContentServer_sptr_vec;                    //!< Ordered collection of ServiceInterface backends.
 
-
+// ====================================================================================
+/*! \brief Tracks the sync state for one backend ServiceInterface in a merge scenario.
+ *
+ *  Holds the shared pointer to the backend, the start time used to detect restarts,
+ *  the last event id processed from that backend, and a content hash for change detection. */
+// ====================================================================================
 class ContentSource
 {
   public:
@@ -37,15 +42,22 @@ class ContentSource
       mHash = 0;
     }
 
-    ContentServer_sptr     mContentStorage;
-    time_t                 mContentStorageStartTime;
-    T::EventId             mLastProcessedEventId;
-    std::size_t            mHash;
+    ContentServer_sptr     mContentStorage;          //!< Shared pointer to the backend ServiceInterface.
+    time_t                 mContentStorageStartTime; //!< Start time of the backend, used to detect restarts.
+    T::EventId             mLastProcessedEventId;    //!< Highest event id already processed from this backend.
+    std::size_t            mHash;                    //!< Content hash used to detect bulk changes.
 };
 
-using ContentSource_vec = std::vector<ContentSource>;
+using ContentSource_vec = std::vector<ContentSource>;  //!< Collection of content sources managed by the merge layer.
 
-
+// ====================================================================================
+/*! \brief Merges content from multiple ServiceInterface backends into a unified view.
+ *
+ *  Subscribes to events from each registered backend and maintains a single merged
+ *  in-memory index of producers, generations, geometries, files and content records.
+ *  Read queries are served from the merged index; write operations are forwarded to
+ *  the appropriate backend. */
+// ====================================================================================
 class MergeImplementation : public ServiceInterface
 {
   public:
@@ -59,7 +71,6 @@ class MergeImplementation : public ServiceInterface
     virtual void    setContentSwap(uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime);
     virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
-    //std::string&    getSourceInfo();
 
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
     virtual void    getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
@@ -269,45 +280,45 @@ class MergeImplementation : public ServiceInterface
 
     virtual void    updateContent();
 
-    bool                   mReloadActivated;
-    bool                   mShutdownRequested;
-    bool                   mUpdateInProgress;
-    bool                   mRequestForwardEnabled;
-    T::SessionId           mSessionId;
-    T::SessionId           mDataServerSessionId;
-    T::FileListStorage     mFileInfoList;
-    T::ProducerInfoList    mProducerInfoList;
-    T::GenerationInfoList  mGenerationInfoList;
-    T::GeometryInfoList    mGeometryInfoList;
-    T::ContentListStorage  mContentInfoList;
-    T::EventInfoList       mEventInfoList;
-    time_t                 mStartTime;
-    T::EventId             mEventCounter;
-    pthread_t              mThread;
-    ThreadLock             mEventProcessingLock;
-    ModificationLock       mModificationLock;
-    ModificationLock       mSearchModificationLock;
-    ContentSource_vec      mContentSources;
-    time_t                 mContentChangeTime;
-    uint                   mFileDeleteCounter;
-    uint                   mContentDeleteCounter;
-    uint                   mProducerDeleteCounter;
-    uint                   mGenerationDeleteCounter;
-    uint                   mGeometryDeleteCounter;
-    uint                   mActiveSearchStructure;
-    SearchStructure*       mSearchStructurePtr[2];
-    time_t                 mContentUpdateTime;
-    bool                   mContentUpdateRequired;
-    uint                   mContentUpdateInterval;
-    bool                   mContentSwapEnabled;
-    uint                   mContentSwapCounter;
-    ContentTimeCache       mContentTimeCache;
-    ModificationLock       mContentTimeCache_modificationLock;
-    std::set<uint>         mCachedFiles;
-    uint                   mCachedFiles_waitTime;
-    uint                   mCachedFiles_totalWaitTime;
-    uint                   mCachedFiles_maxWaitTime;
-    uint                   mCachedFiles_maxFirstWaitTime;
+    bool                   mReloadActivated;              //!< True when a full reload from all backends has been triggered.
+    bool                   mShutdownRequested;            //!< True after shutdown() has been called.
+    bool                   mUpdateInProgress;             //!< True while a bulk content update is running.
+    bool                   mRequestForwardEnabled;        //!< When true, write operations are forwarded to the backends.
+    T::SessionId           mSessionId;                    //!< Session identifier used for backend queries.
+    T::SessionId           mDataServerSessionId;          //!< Session identifier passed to the data server.
+    T::FileListStorage     mFileInfoList;                 //!< Merged file records.
+    T::ProducerInfoList    mProducerInfoList;             //!< Merged producer records.
+    T::GenerationInfoList  mGenerationInfoList;           //!< Merged generation records.
+    T::GeometryInfoList    mGeometryInfoList;             //!< Merged geometry records.
+    T::ContentListStorage  mContentInfoList;              //!< Merged content records.
+    T::EventInfoList       mEventInfoList;                //!< Local event log aggregated from all backends.
+    time_t                 mStartTime;                    //!< Unix timestamp when the implementation was initialised.
+    T::EventId             mEventCounter;                 //!< Counter for locally generated event ids.
+    pthread_t              mThread;                       //!< Handle of the background event-processing thread.
+    ThreadLock             mEventProcessingLock;          //!< Prevents concurrent event-processing runs.
+    ModificationLock       mModificationLock;             //!< Guards mutable list members during updates.
+    ModificationLock       mSearchModificationLock;       //!< Guards the active search-structure pointer swap.
+    ContentSource_vec      mContentSources;               //!< Registered backends and their per-source sync state.
+    time_t                 mContentChangeTime;            //!< Time of the most recent merged content change.
+    uint                   mFileDeleteCounter;            //!< Running count of file deletions since last reload.
+    uint                   mContentDeleteCounter;         //!< Running count of content deletions since last reload.
+    uint                   mProducerDeleteCounter;        //!< Running count of producer deletions since last reload.
+    uint                   mGenerationDeleteCounter;      //!< Running count of generation deletions since last reload.
+    uint                   mGeometryDeleteCounter;        //!< Running count of geometry deletions since last reload.
+    uint                   mActiveSearchStructure;        //!< Index (0 or 1) of the currently active SearchStructure.
+    SearchStructure*       mSearchStructurePtr[2];        //!< Double-buffered search structures for lock-free reads.
+    time_t                 mContentUpdateTime;            //!< Time of the last content update.
+    bool                   mContentUpdateRequired;        //!< True when a content refresh is pending.
+    uint                   mContentUpdateInterval;        //!< Minimum seconds between successive content updates.
+    bool                   mContentSwapEnabled;           //!< True when double-buffered search-structure swapping is active.
+    uint                   mContentSwapCounter;           //!< Counter used to throttle search-structure swaps.
+    ContentTimeCache       mContentTimeCache;             //!< Per-generation cache of available forecast time strings.
+    ModificationLock       mContentTimeCache_modificationLock;  //!< Guards mContentTimeCache during updates.
+    std::set<uint>         mCachedFiles;                  //!< Set of file ids whose content is explicitly cached.
+    uint                   mCachedFiles_waitTime;         //!< Current wait time before rechecking a cached file.
+    uint                   mCachedFiles_totalWaitTime;    //!< Accumulated wait time for all cached files.
+    uint                   mCachedFiles_maxWaitTime;      //!< Maximum allowed wait time between cached-file rechecks.
+    uint                   mCachedFiles_maxFirstWaitTime; //!< Maximum wait time before the first recheck of a cached file.
 };
 
 

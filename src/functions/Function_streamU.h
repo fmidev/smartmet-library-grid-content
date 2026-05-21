@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Rotates the eastward (U) stream-line component to the target grid orientation. */
+// ====================================================================================
+
 class Function_streamU : public Function
 {
   public:

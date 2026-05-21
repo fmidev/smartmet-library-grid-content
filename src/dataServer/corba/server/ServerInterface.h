@@ -18,6 +18,15 @@ namespace DataServer
 namespace Corba
 {
 
+// ====================================================================================
+/*! \brief CORBA servant that bridges the CORBA skeleton to a DataServer::ServiceInterface.
+ *
+ *  Implements every IDL method by converting CORBA types to C++ types via
+ *  Converter, forwarding the call to the wrapped local service, and converting
+ *  out-parameters back.  The file is maintained manually — the auto-generated
+ *  *_i.cc skeleton is not used in the build. */
+// ====================================================================================
+
 class ServerInterface : public POA_SmartMet::DataServer::Corba::ServiceInterface
 {
   public:
@@ -109,7 +118,7 @@ class ServerInterface : public POA_SmartMet::DataServer::Corba::ServiceInterface
 
   protected:
 
-    DataServer::ServiceInterface *mService;
+    DataServer::ServiceInterface *mService;  //!< Non-owning pointer to the local DataServer implementation.
 };
 
 }

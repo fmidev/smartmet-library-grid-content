@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Rotates the northward (V) wind component to the target grid projection orientation. */
+// ====================================================================================
+
 class Function_windV : public Function
 {
   public:

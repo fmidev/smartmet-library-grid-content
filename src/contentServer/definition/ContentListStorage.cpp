@@ -7,6 +7,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for ContentListStorage. */
+
 ContentListStorage::ContentListStorage()
 {
   try
@@ -22,6 +24,8 @@ ContentListStorage::ContentListStorage()
 
 
 
+
+/*! \brief Copy constructor for ContentListStorage. */
 
 ContentListStorage::ContentListStorage(const ContentListStorage& contentListStorage)
 {
@@ -42,6 +46,8 @@ ContentListStorage::ContentListStorage(const ContentListStorage& contentListStor
 
 
 
+/*! \brief Destructor for ContentListStorage. */
+
 ContentListStorage::~ContentListStorage()
 {
   try
@@ -57,6 +63,8 @@ ContentListStorage::~ContentListStorage()
 
 
 
+
+/*! \brief Add a ContentInfo record into the appropriate sub-list. */
 
 ContentInfo* ContentListStorage::addContentInfo(ContentInfo *contentInfo)
 {
@@ -77,6 +85,8 @@ ContentInfo* ContentListStorage::addContentInfo(ContentInfo *contentInfo)
 
 
 
+/*! \brief Remove all entries from every sub-list. */
+
 void ContentListStorage::clear()
 {
   try
@@ -92,6 +102,8 @@ void ContentListStorage::clear()
 
 
 
+
+/*! \brief Delete all entries whose file id matches the given value. */
 
 uint ContentListStorage::deleteContentInfoByFileId(T::FileId fileId)
 {
@@ -109,6 +121,8 @@ uint ContentListStorage::deleteContentInfoByFileId(T::FileId fileId)
 
 
 
+/*! \brief Delete the entry matching the given file id and message index. */
+
 uint ContentListStorage::deleteContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   try
@@ -124,6 +138,8 @@ uint ContentListStorage::deleteContentInfoByFileIdAndMessageIndex(T::FileId file
 
 
 
+
+/*! \brief Delete all entries whose producer id matches the given value. */
 
 uint ContentListStorage::deleteContentInfoByProducerId(T::ProducerId producerId)
 {
@@ -141,6 +157,8 @@ uint ContentListStorage::deleteContentInfoByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Delete all entries whose generation id matches the given value. */
+
 uint ContentListStorage::deleteContentInfoByGenerationId(T::GenerationId generationId)
 {
   try
@@ -156,6 +174,8 @@ uint ContentListStorage::deleteContentInfoByGenerationId(T::GenerationId generat
 
 
 
+
+/*! \brief Delete all entries whose source id matches the given value. */
 
 uint ContentListStorage::deleteContentInfoBySourceId(T::SourceId sourceId)
 {
@@ -173,6 +193,8 @@ uint ContentListStorage::deleteContentInfoBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Delete all entries whose storage id matches the given value. */
 
 uint ContentListStorage::deleteContentInfoByStorageId(T::StorageId storageId)
 {
@@ -196,6 +218,8 @@ uint ContentListStorage::deleteContentInfoByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Remove all entries previously flagged for deletion. */
+
 uint ContentListStorage::deleteMarkedContent()
 {
   try
@@ -215,6 +239,8 @@ uint ContentListStorage::deleteMarkedContent()
 
 
 
+/*! \brief Flag entries whose file id matches the given value as deleted. */
+
 uint ContentListStorage::markDeletedByFileId(T::FileId fileId)
 {
   try
@@ -230,6 +256,8 @@ uint ContentListStorage::markDeletedByFileId(T::FileId fileId)
 
 
 
+
+/*! \brief Flag the entry matching the given file id and message index as deleted. */
 
 uint ContentListStorage::markDeletedByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
@@ -247,6 +275,8 @@ uint ContentListStorage::markDeletedByFileIdAndMessageIndex(T::FileId fileId,T::
 
 
 
+/*! \brief Flag entries whose generation id matches the given value as deleted. */
+
 uint ContentListStorage::markDeletedByGenerationId(T::GenerationId generationId)
 {
   try
@@ -262,6 +292,8 @@ uint ContentListStorage::markDeletedByGenerationId(T::GenerationId generationId)
 
 
 
+
+/*! \brief Flag entries matching the given generation and geometry ids as deleted. */
 
 uint ContentListStorage::markDeletedByGenerationAndGeometryId(T::GenerationId generationId,T::GeometryId geometryId)
 {
@@ -279,6 +311,8 @@ uint ContentListStorage::markDeletedByGenerationAndGeometryId(T::GenerationId ge
 
 
 
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
+
 uint ContentListStorage::markDeletedByProducerId(T::ProducerId producerId)
 {
   try
@@ -295,6 +329,8 @@ uint ContentListStorage::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Flag entries whose source id matches the given value as deleted. */
+
 uint ContentListStorage::markDeletedBySourceId(T::SourceId sourceId)
 {
   try
@@ -310,6 +346,8 @@ uint ContentListStorage::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
 
 uint ContentListStorage::markDeletedByStorageId(T::StorageId storageId)
 {
@@ -332,6 +370,8 @@ uint ContentListStorage::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Return the ContentInfo at the given global index across all sub-lists. */
 
 ContentInfo* ContentListStorage::getContentInfoByIndex(uint index) const
 {
@@ -357,6 +397,8 @@ ContentInfo* ContentListStorage::getContentInfoByIndex(uint index) const
 
 
 
+/*! \brief Return the entry matching the given file id and message index. */
+
 ContentInfo* ContentListStorage::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   try
@@ -373,6 +415,8 @@ ContentInfo* ContentListStorage::getContentInfoByFileIdAndMessageIndex(T::FileId
 
 
 
+/*! \brief Copy the entry matching the given file id and message index into the output ContentInfo. */
+
 bool ContentListStorage::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo)
 {
   try
@@ -388,6 +432,8 @@ bool ContentListStorage::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,
 
 
 
+
+/*! \brief Copy the entire combined list into the given target list. */
 
 void ContentListStorage::getContentInfoList(ContentInfoList& contentInfoList)
 {
@@ -409,6 +455,8 @@ void ContentListStorage::getContentInfoList(ContentInfoList& contentInfoList)
 
 
 
+
+/*! \brief Copy a paginated slice of the combined list starting from the given file id and message index. */
 
 void ContentListStorage::getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -436,6 +484,8 @@ void ContentListStorage::getContentInfoList(T::FileId startFileId,T::MessageInde
 
 
 
+/*! \brief Append entries matching the given geometry id to the target list. */
+
 void ContentListStorage::getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList)
 {
   try
@@ -449,6 +499,8 @@ void ContentListStorage::getContentInfoListByGeometryId(T::GeometryId geometryId
 
 
 
+
+/*! \brief Append entries matching the given file id to the target list. */
 
 void ContentListStorage::getContentInfoListByFileId(T::FileId fileId,ContentInfoList& contentInfoList)
 {
@@ -466,6 +518,8 @@ void ContentListStorage::getContentInfoListByFileId(T::FileId fileId,ContentInfo
 
 
 
+/*! \brief Append a paginated slice of entries matching the given generation id. */
+
 void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   try
@@ -481,6 +535,8 @@ void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producer
 
 
 
+
+/*! \brief Append entries matching the given generation id and string time range. */
 
 void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,ContentInfoList& contentInfoList)
 {
@@ -498,6 +554,8 @@ void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producer
 
 
 
+/*! \brief Append entries matching the given generation id and UTC time range. */
+
 void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList)
 {
   try
@@ -513,6 +571,8 @@ void ContentListStorage::getContentInfoListByGenerationId(T::ProducerId producer
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given generation and geometry ids. */
 
 void ContentListStorage::getContentInfoListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -530,6 +590,8 @@ void ContentListStorage::getContentInfoListByGenerationAndGeometryId(T::Producer
 
 
 
+/*! \brief Append all entries matching the given producer id to the target list. */
+
 void ContentListStorage::getContentInfoListByProducerId(T::ProducerId producerId,ContentInfoList& contentInfoList)
 {
   try
@@ -545,6 +607,8 @@ void ContentListStorage::getContentInfoListByProducerId(T::ProducerId producerId
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given producer id. */
 
 void ContentListStorage::getContentInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -562,6 +626,8 @@ void ContentListStorage::getContentInfoListByProducerId(T::ProducerId producerId
 
 
 
+/*! \brief Append a paginated slice of entries matching the given source id. */
+
 void ContentListStorage::getContentInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   try
@@ -576,6 +642,8 @@ void ContentListStorage::getContentInfoListBySourceId(T::SourceId sourceId,T::Fi
 }
 
 
+
+/*! \brief Return a hash value computed from all entries across the storage. */
 
 std::size_t ContentListStorage::getHash()
 {
@@ -597,6 +665,8 @@ std::size_t ContentListStorage::getHash()
 
 
 
+/*! \brief Return a hash value for entries belonging to the given storage id. */
+
 std::size_t ContentListStorage::getHashByStorageId(T::StorageId storageId)
 {
   try
@@ -616,6 +686,8 @@ std::size_t ContentListStorage::getHashByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return a hash value for entries belonging to the given producer id. */
+
 std::size_t ContentListStorage::getHashByProducerId(T::ProducerId producerId)
 {
   try
@@ -631,6 +703,8 @@ std::size_t ContentListStorage::getHashByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Return the total number of entries across all sub-lists. */
 
 uint ContentListStorage::getLength()const
 {
@@ -651,6 +725,8 @@ uint ContentListStorage::getLength()const
 
 
 
+/*! \brief Print the storage contents to the given stream. */
+
 void ContentListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -666,6 +742,8 @@ void ContentListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
+
+/*! \brief Return the sub-list index for the given producer id. */
 
 uint ContentListStorage::getProducerStorageIndex(T::ProducerId producerId)
 {
@@ -689,6 +767,8 @@ uint ContentListStorage::getProducerStorageIndex(T::ProducerId producerId)
 }
 
 
+
+/*! \brief Return the sub-list index for the given source id. */
 
 uint ContentListStorage::getSourceStorageIndex(T::SourceId sourceId)
 {
@@ -714,6 +794,8 @@ uint ContentListStorage::getSourceStorageIndex(T::SourceId sourceId)
 
 
 
+/*! \brief Return the sub-list index for the given file id. */
+
 uint ContentListStorage::getFileStorageIndex(T::FileId fileId)
 {
   try
@@ -737,6 +819,8 @@ uint ContentListStorage::getFileStorageIndex(T::FileId fileId)
 
 
 
+
+/*! \brief Return the sub-list index for the given generation id. */
 
 uint ContentListStorage::getGenerationStorageIndex(T::GenerationId generationId)
 {

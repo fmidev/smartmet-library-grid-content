@@ -9,6 +9,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_feelsLike::Function_feelsLike()
 {
   try
@@ -24,6 +26,8 @@ Function_feelsLike::Function_feelsLike()
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_feelsLike::Function_feelsLike(const Function_feelsLike& function)
 :Function(function)
 {
@@ -38,6 +42,8 @@ Function_feelsLike::Function_feelsLike(const Function_feelsLike& function)
 
 
 
+
+/*! \brief Function: Destructor. */
 
 Function_feelsLike::~Function_feelsLike()
 {
@@ -78,6 +84,8 @@ double Function_feelsLike:: SSI(double rh,double t)
 
 
 
+
+/*! \brief Function: Feels like. */
 
 double Function_feelsLike::feelsLike(double wind,double rh,double temp,double rad)
 {
@@ -137,6 +145,8 @@ double Function_feelsLike::feelsLike(double wind,double rh,double temp,double ra
 
 
 
+/*! \brief Function: Execute function call1. */
+
 float Function_feelsLike::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
@@ -169,6 +179,8 @@ float Function_feelsLike::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_feelsLike::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -204,6 +216,8 @@ double Function_feelsLike::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
@@ -233,6 +247,8 @@ void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -261,6 +277,8 @@ void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_feelsLike::duplicate()
 {
   try
@@ -275,6 +293,8 @@ Function* Function_feelsLike::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_feelsLike::print(std::ostream& stream,uint level,uint optionFlags)
 {

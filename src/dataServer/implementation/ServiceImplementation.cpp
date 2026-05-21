@@ -61,6 +61,8 @@ static void* ServiceImplementation_cacheProcessingThread(void *arg)
 
 
 
+/*! \brief Data Server: Constructor. */
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -96,6 +98,8 @@ ServiceImplementation::ServiceImplementation()
 
 
 
+/*! \brief Data Server: Destructor. */
+
 ServiceImplementation::~ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -114,6 +118,8 @@ ServiceImplementation::~ServiceImplementation()
 
 
 
+
+/*! \brief Data Server: Init. */
 
 void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,const std::string& serverName,const std::string& serverIor,const std::string& dataDir,ContentServer::ServiceInterface *contentServer)
 {
@@ -142,6 +148,8 @@ void ServiceImplementation::init(T::SessionId serverSessionId,uint serverId,cons
 
 
 
+
+/*! \brief Data Server: Get state attributes. */
 
 void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -180,6 +188,8 @@ void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode>
 
 
 
+/*! \brief Data Server: Set file cache. */
+
 void ServiceImplementation::setFileCache(bool enabled,const char *directory)
 {
   FUNCTION_TRACE
@@ -196,6 +206,8 @@ void ServiceImplementation::setFileCache(bool enabled,const char *directory)
 
 
 
+
+/*! \brief Data Server: Shutdown. */
 
 void ServiceImplementation::shutdown()
 {
@@ -218,6 +230,8 @@ void ServiceImplementation::shutdown()
 
 
 
+/*! \brief Data Server: Set land cover. */
+
 void ServiceImplementation::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
   try
@@ -235,6 +249,8 @@ void ServiceImplementation::setLandCover(std::shared_ptr<Fmi::LandCover> landCov
 
 
 
+/*! \brief Data Server: Set dem. */
+
 void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
   try
@@ -251,6 +267,8 @@ void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 
 
+
+/*! \brief Data Server: Is session valid. */
 
 bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
 {
@@ -272,6 +290,8 @@ bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
+/*! \brief Data Server: Set cleanup. */
+
 void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
 {
   FUNCTION_TRACE
@@ -290,6 +310,8 @@ void ServiceImplementation::setCleanup(time_t age,time_t checkInterval)
 
 
 
+/*! \brief Data Server: Start event processing. */
+
 void ServiceImplementation::startEventProcessing()
 {
   FUNCTION_TRACE
@@ -306,6 +328,8 @@ void ServiceImplementation::startEventProcessing()
 
 
 
+
+/*! \brief Data Server: Start cache processing. */
 
 void ServiceImplementation::startCacheProcessing()
 {
@@ -324,6 +348,8 @@ void ServiceImplementation::startCacheProcessing()
 
 
 
+
+/*! \brief Data Server: Get data server by file id. */
 
 ServiceInterface* ServiceImplementation::getDataServerByFileId(T::FileId fileId)
 {
@@ -354,6 +380,8 @@ ServiceInterface* ServiceImplementation::getDataServerByFileId(T::FileId fileId)
 
 
 
+
+/*! \brief Data Server: Get grid file. */
 
 GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
 {
@@ -438,6 +466,8 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
 
 
 
+/*! \brief Data Server: Protected hook: get multiple grid values. */
+
 int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
 {
   FUNCTION_TRACE
@@ -512,6 +542,8 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
 
 
 
+/*! \brief Data Server: Protected hook: get grid coordinates. */
+
 int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
@@ -576,6 +608,8 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId 
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid data. */
 
 int ServiceImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
 {
@@ -645,6 +679,8 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid file count. */
+
 int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -665,6 +701,8 @@ int ServiceImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid message bytes. */
 
 int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
@@ -729,6 +767,8 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId
 
 
 
+/*! \brief Data Server: Protected hook: get property values by coordinates. */
+
 int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -771,6 +811,8 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid attribute list. */
+
 int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -807,6 +849,8 @@ int ServiceImplementation::_getGridAttributeList(T::SessionId sessionId,T::FileI
 
 
 
+/*! \brief Data Server: Protected hook: get grid properties. */
+
 int ServiceImplementation::_getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
 {
   FUNCTION_TRACE
@@ -841,6 +885,8 @@ int ServiceImplementation::_getGridProperties(T::SessionId sessionId,T::FileId f
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value by point. */
 
 int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
@@ -889,6 +935,8 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value by level and point. */
 
 int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
@@ -949,6 +997,8 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T
 
 
 
+/*! \brief Data Server: Protected hook: get grid value by time and point. */
+
 int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   FUNCTION_TRACE
@@ -1007,6 +1057,8 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value by time level and point. */
 
 int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
@@ -1087,6 +1139,8 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector. */
+
 int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1133,6 +1187,8 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId 
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by level. */
 
 int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1193,6 +1249,8 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time. */
+
 int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1251,6 +1309,8 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by level and geometry. */
 
 int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1334,6 +1394,8 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time and geometry. */
+
 int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1416,6 +1478,8 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by coordinate list. */
+
 int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1462,6 +1526,8 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by level and coordinate list. */
 
 int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1522,6 +1588,8 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time and coordinate list. */
+
 int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1580,6 +1648,8 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by time and level. */
 
 int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1660,6 +1730,8 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by time level and geometry. */
 
 int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1763,6 +1835,8 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time level and coordinate list. */
+
 int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1843,6 +1917,8 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by geometry. */
+
 int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -1914,6 +1990,8 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid latlon coordinates by geometry. */
+
 int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
 {
   FUNCTION_TRACE
@@ -1961,6 +2039,8 @@ int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sess
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by circle. */
+
 int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2007,6 +2087,8 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time and circle. */
 
 int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2068,6 +2150,8 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by level and circle. */
+
 int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2126,6 +2210,8 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time level and circle. */
 
 int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2206,6 +2292,8 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by rectangle. */
 
 int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -2288,6 +2376,8 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by point list. */
+
 int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2336,6 +2426,8 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by level and point list. */
 
 int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2396,6 +2488,8 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time and point list. */
+
 int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2454,6 +2548,8 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time level and point list. */
 
 int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2534,6 +2630,8 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by polygon. */
+
 int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2580,6 +2678,8 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by level and polygon. */
 
 int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2640,6 +2740,8 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time and polygon. */
+
 int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2698,6 +2800,8 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time level and polygon. */
 
 int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2774,6 +2878,8 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by polygon path. */
+
 int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2820,6 +2926,8 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time and polygon path. */
 
 int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -2880,6 +2988,8 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by level and polygon path. */
+
 int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -2939,6 +3049,8 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time level and polygon path. */
 
 int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -3015,6 +3127,8 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by rectangle. */
+
 int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   FUNCTION_TRACE
@@ -3062,6 +3176,8 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by point. */
 
 int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
@@ -3111,6 +3227,8 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands. */
+
 int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3158,6 +3276,8 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId fil
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by geometry. */
 
 int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3207,6 +3327,8 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by grid. */
+
 int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3254,6 +3376,8 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by level. */
 
 int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3314,6 +3438,8 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::Fil
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time. */
+
 int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3372,6 +3498,8 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by level and geometry. */
 
 int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3434,6 +3562,8 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time and geometry. */
+
 int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3493,6 +3623,8 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by level and grid. */
 
 int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3559,6 +3691,8 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time and grid. */
+
 int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3623,6 +3757,8 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by time and level. */
 
 int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3704,6 +3840,8 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time level and geometry. */
+
 int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3783,6 +3921,8 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by time level and grid. */
 
 int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -3870,6 +4010,8 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and level. */
+
 int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -3950,6 +4092,8 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time level and geometry. */
+
 int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -4029,6 +4173,8 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines. */
+
 int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -4076,6 +4222,8 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId fil
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by geometry. */
 
 int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -4125,6 +4273,8 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by grid. */
+
 int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -4172,6 +4322,8 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by level. */
 
 int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -4232,6 +4384,8 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::Fil
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time. */
+
 int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -4290,6 +4444,8 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by level and geometry. */
 
 int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -4351,6 +4507,8 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and geometry. */
+
 int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   FUNCTION_TRACE
@@ -4410,6 +4568,8 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by level and grid. */
 
 int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -4476,6 +4636,8 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and grid. */
+
 int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -4540,6 +4702,8 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by time level and grid. */
 
 int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -4627,6 +4791,8 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines. */
+
 int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -4675,6 +4841,8 @@ int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId 
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by geometry. */
+
 int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -4721,6 +4889,8 @@ int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by grid. */
 
 int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -4769,6 +4939,8 @@ int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by level. */
 
 int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -4829,6 +5001,8 @@ int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by level and geometry. */
+
 int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -4887,6 +5061,8 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId se
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by level and grid. */
 
 int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -4953,6 +5129,8 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time. */
+
 int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -5011,6 +5189,8 @@ int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time and geometry. */
 
 int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -5075,6 +5255,8 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time and grid. */
 
 int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -5142,6 +5324,8 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId session
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time and level. */
 
 int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -5223,6 +5407,8 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time level and geometry. */
+
 int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   FUNCTION_TRACE
@@ -5301,6 +5487,8 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionI
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time level and grid. */
 
 int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -5387,6 +5575,8 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId se
 
 
 
+/*! \brief Data Server: Read content list. */
+
 void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
 {
   FUNCTION_TRACE
@@ -5431,6 +5621,8 @@ void ServiceImplementation::readContentList(T::ContentInfoList& contentList)
 
 
 
+
+/*! \brief Data Server: Add file. */
 
 void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& contentList)
 {
@@ -5561,6 +5753,8 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
 
 
+/*! \brief Data Server: Full update. */
+
 void ServiceImplementation::fullUpdate()
 {
   FUNCTION_TRACE
@@ -5658,6 +5852,8 @@ void ServiceImplementation::fullUpdate()
 
 
 
+/*! \brief Data Server: Event clear. */
+
 void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5676,6 +5872,8 @@ void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event storage clear. */
+
 void ServiceImplementation::event_storageClear(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5692,6 +5890,8 @@ void ServiceImplementation::event_storageClear(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Event content server reload. */
 
 void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 {
@@ -5710,6 +5910,8 @@ void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event producer added. */
+
 void ServiceImplementation::event_producerAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5725,6 +5927,8 @@ void ServiceImplementation::event_producerAdded(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Event producer deleted. */
 
 void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 {
@@ -5743,6 +5947,8 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event producer updated. */
+
 void ServiceImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5758,6 +5964,8 @@ void ServiceImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Event producer list deleted by source id. */
 
 void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
 {
@@ -5776,6 +5984,8 @@ void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& ev
 
 
 
+/*! \brief Data Server: Event generation added. */
+
 void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5791,6 +6001,8 @@ void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Event generation deleted. */
 
 void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 {
@@ -5809,6 +6021,8 @@ void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event generation updated. */
+
 void ServiceImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5825,6 +6039,8 @@ void ServiceImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event generation status changed. */
+
 void ServiceImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5840,6 +6056,8 @@ void ServiceImplementation::event_generationStatusChanged(T::EventInfo& eventInf
 
 
 
+
+/*! \brief Data Server: Event generation list deleted by producer id. */
 
 void ServiceImplementation::event_generationListDeletedByProducerId(T::EventInfo& eventInfo)
 {
@@ -5858,6 +6076,8 @@ void ServiceImplementation::event_generationListDeletedByProducerId(T::EventInfo
 
 
 
+/*! \brief Data Server: Event generation list deleted by source id. */
+
 void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5874,6 +6094,8 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
 
 
 
+
+/*! \brief Data Server: Event file added. */
 
 void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
@@ -5959,6 +6181,8 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
 
 
 
+/*! \brief Data Server: Event file deleted. */
+
 void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5979,6 +6203,8 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Event file updated. */
 
 void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
 {
@@ -6040,6 +6266,8 @@ void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event file list deleted by producer id. */
+
 void ServiceImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6056,6 +6284,8 @@ void ServiceImplementation::event_fileListDeletedByProducerId(T::EventInfo& even
 
 
 
+
+/*! \brief Data Server: Event file list deleted by generation id. */
 
 void ServiceImplementation::event_fileListDeletedByGenerationId(T::EventInfo& eventInfo)
 {
@@ -6075,6 +6305,8 @@ void ServiceImplementation::event_fileListDeletedByGenerationId(T::EventInfo& ev
 
 
 
+/*! \brief Data Server: Event file list deleted by source id. */
+
 void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6092,6 +6324,8 @@ void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventI
 
 
 
+/*! \brief Data Server: Event content list deleted by file id. */
+
 void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6107,6 +6341,8 @@ void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& event
 
 
 
+
+/*! \brief Data Server: Event content list deleted by producer id. */
 
 void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& eventInfo)
 {
@@ -6124,6 +6360,8 @@ void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& e
 
 
 
+/*! \brief Data Server: Event content list deleted by generation id. */
+
 void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6138,6 +6376,8 @@ void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo&
 
 
 
+
+/*! \brief Data Server: Event content list deleted by source id. */
 
 void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eventInfo)
 {
@@ -6154,6 +6394,8 @@ void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eve
 
 
 
+
+/*! \brief Data Server: Event content added. */
 
 void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 {
@@ -6223,6 +6465,8 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event content updated. */
+
 void ServiceImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6239,6 +6483,8 @@ void ServiceImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Data Server: Event content deleted. */
+
 void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6254,6 +6500,8 @@ void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Data Server: Process event. */
 
 void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
 {
@@ -6381,6 +6629,8 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
 
 
+/*! \brief Data Server: Process events. */
+
 void ServiceImplementation::processEvents()
 {
   //FUNCTION_TRACE
@@ -6475,6 +6725,8 @@ void ServiceImplementation::processEvents()
 
 
 
+/*! \brief Data Server: Event processing thread. */
+
 void ServiceImplementation::eventProcessingThread()
 {
   FUNCTION_TRACE
@@ -6543,6 +6795,8 @@ void getFileNameHash(const char *filename,std::string& hash)
 
 
 
+/*! \brief Data Server: Cache files. */
+
 void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filenames)
 {
   FUNCTION_TRACE
@@ -6605,6 +6859,8 @@ void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filename
 
 
 
+/*! \brief Data Server: Remove old cache files. */
+
 void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>& cachedFilenames)
 {
   FUNCTION_TRACE
@@ -6658,6 +6914,8 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
 
 
 
+
+/*! \brief Data Server: Cache processing thread. */
 
 void ServiceImplementation::cacheProcessingThread()
 {

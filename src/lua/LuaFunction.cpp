@@ -8,6 +8,8 @@ namespace Lua
 {
 
 
+/*! \brief Constructor. */
+
 LuaFunction::LuaFunction()
 {
   try
@@ -23,6 +25,8 @@ LuaFunction::LuaFunction()
 
 
 
+
+/*! \brief Constructor. */
 
 LuaFunction::LuaFunction(const LuaFunction& luaFunction)
 {
@@ -41,6 +45,8 @@ LuaFunction::LuaFunction(const LuaFunction& luaFunction)
 
 
 
+/*! \brief Constructor. */
+
 LuaFunction::LuaFunction(const std::string& functionName,const uint type)
 {
   try
@@ -58,6 +64,8 @@ LuaFunction::LuaFunction(const std::string& functionName,const uint type)
 
 
 
+/*! \brief Destructor. */
+
 LuaFunction::~LuaFunction()
 {
   try
@@ -73,6 +81,8 @@ LuaFunction::~LuaFunction()
 
 
 
+
+/*! \brief Print. */
 
 void LuaFunction::print(std::ostream& stream,uint level,uint optionFlags)
 {

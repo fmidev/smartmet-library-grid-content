@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes sqrt(x^2 + y^2) element-wise from two input grids. */
+// ====================================================================================
+
 class Function_hypotenuse : public Function
 {
   public:

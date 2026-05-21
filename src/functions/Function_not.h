@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the logical NOT of a grid field, returning 1 where the value is zero and 0 otherwise. */
+// ====================================================================================
+
 class Function_not : public Function
 {
   public:

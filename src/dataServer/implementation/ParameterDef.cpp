@@ -10,6 +10,8 @@ namespace DataServer
 
 
 
+/*! \brief Data Server: Constructor. */
+
 ParameterDef::ParameterDef()
 {
   try
@@ -49,6 +51,8 @@ ParameterDef::ParameterDef(const ParameterDef& def)
 
 
 
+
+/*! \brief Data Server: Constructor. */
 
 ParameterDef::ParameterDef(const std::string& paramStr)
 {
@@ -100,6 +104,8 @@ ParameterDef::ParameterDef(const std::string& paramStr)
 
 
 
+/*! \brief Data Server: Get name. */
+
 std::string ParameterDef::getName()
 {
   try
@@ -123,6 +129,8 @@ std::string ParameterDef::getName()
 
 
 
+
+/*! \brief Data Server: Set. */
 
 void ParameterDef::set(const std::string& paramStr)
 {
@@ -184,6 +192,8 @@ void ParameterDef::set(const std::string& paramStr)
 
 
 
+/*! \brief Data Server: Destructor. */
+
 ParameterDef::~ParameterDef()
 {
   try
@@ -200,6 +210,8 @@ ParameterDef::~ParameterDef()
 
 
 
+
+/*! \brief Data Server: Print. */
 
 void ParameterDef::print(std::ostream& stream,uint level,uint optionFlags)
 {

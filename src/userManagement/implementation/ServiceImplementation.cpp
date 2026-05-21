@@ -18,6 +18,8 @@ ServiceImplementation localUserManagement;
 
 
 
+/*! \brief Constructor. */
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -36,6 +38,8 @@ ServiceImplementation::ServiceImplementation()
 
 
 
+/*! \brief Destructor. */
+
 ServiceImplementation::~ServiceImplementation()
 {
 }
@@ -43,6 +47,8 @@ ServiceImplementation::~ServiceImplementation()
 
 
 
+
+/*! \brief Init. */
 
 void ServiceImplementation::init(const char *groupFilename,const char *userFilename)
 {
@@ -62,6 +68,8 @@ void ServiceImplementation::init(const char *groupFilename,const char *userFilen
 
 
 
+
+/*! \brief Update. */
 
 void ServiceImplementation::update()
 {
@@ -86,6 +94,8 @@ void ServiceImplementation::update()
 
 
 
+
+/*! \brief Update groups. */
 
 void ServiceImplementation::updateGroups()
 {
@@ -169,6 +179,8 @@ void ServiceImplementation::updateGroups()
 
 
 
+
+/*! \brief Update users. */
 
 void ServiceImplementation::updateUsers()
 {
@@ -278,6 +290,8 @@ void ServiceImplementation::updateUsers()
 
 
 
+/*! \brief Shutdown. */
+
 void ServiceImplementation::shutdown()
 {
 }
@@ -285,6 +299,8 @@ void ServiceImplementation::shutdown()
 
 
 
+
+/*! \brief Protected hook: add user. */
 
 int ServiceImplementation::_addUser(T::SessionId sessionId,UserInfo& userInfo)
 {
@@ -311,6 +327,8 @@ int ServiceImplementation::_addUser(T::SessionId sessionId,UserInfo& userInfo)
 
 
 
+/*! \brief Protected hook: delete user. */
+
 int ServiceImplementation::_deleteUser(T::SessionId sessionId,uint userId)
 {
   FUNCTION_TRACE
@@ -334,6 +352,8 @@ int ServiceImplementation::_deleteUser(T::SessionId sessionId,uint userId)
 
 
 
+
+/*! \brief Protected hook: update user info. */
 
 int ServiceImplementation::_updateUserInfo(T::SessionId sessionId,UserInfo& userInfo)
 {
@@ -359,6 +379,8 @@ int ServiceImplementation::_updateUserInfo(T::SessionId sessionId,UserInfo& user
 
 
 
+/*! \brief Protected hook: get user attribute. */
+
 int ServiceImplementation::_getUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
   FUNCTION_TRACE
@@ -383,6 +405,8 @@ int ServiceImplementation::_getUserAttribute(T::SessionId sessionId,uint userId,
 
 
 
+/*! \brief Protected hook: get user attributes. */
+
 int ServiceImplementation::_getUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -404,6 +428,8 @@ int ServiceImplementation::_getUserAttributes(T::SessionId sessionId,uint userId
 
 
 
+
+/*! \brief Protected hook: get user info. */
 
 int ServiceImplementation::_getUserInfo(T::SessionId sessionId,uint userId,UserInfo& userInfo)
 {
@@ -428,6 +454,8 @@ int ServiceImplementation::_getUserInfo(T::SessionId sessionId,uint userId,UserI
 
 
 
+
+/*! \brief Protected hook: get user info by username. */
 
 int ServiceImplementation::_getUserInfoByUsername(T::SessionId sessionId,const char *username,UserInfo& userInfo)
 {
@@ -458,6 +486,8 @@ int ServiceImplementation::_getUserInfoByUsername(T::SessionId sessionId,const c
 
 
 
+/*! \brief Protected hook: set user attribute. */
+
 int ServiceImplementation::_setUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   FUNCTION_TRACE
@@ -480,6 +510,8 @@ int ServiceImplementation::_setUserAttribute(T::SessionId sessionId,uint userId,
 
 
 
+/*! \brief Protected hook: set user attributes. */
+
 int ServiceImplementation::_setUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -500,6 +532,8 @@ int ServiceImplementation::_setUserAttributes(T::SessionId sessionId,uint userId
 }
 
 
+
+/*! \brief Protected hook: delete user attribute. */
 
 int ServiceImplementation::_deleteUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName)
 {
@@ -523,6 +557,8 @@ int ServiceImplementation::_deleteUserAttribute(T::SessionId sessionId,uint user
 
 
 
+/*! \brief Protected hook: delete user attribute group. */
+
 int ServiceImplementation::_deleteUserAttributeGroup(T::SessionId sessionId,uint userId,const char *attributeGroup)
 {
   FUNCTION_TRACE
@@ -544,6 +580,8 @@ int ServiceImplementation::_deleteUserAttributeGroup(T::SessionId sessionId,uint
 
 
 
+
+/*! \brief Protected hook: delete user attributes. */
 
 int ServiceImplementation::_deleteUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the apparent temperature (feels-like index) from wind, humidity, temperature, and radiation. */
+// ====================================================================================
+
 class Function_feelsLike : public Function
 {
   public:

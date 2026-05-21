@@ -8,6 +8,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 Alias::Alias()
 {
   try
@@ -40,6 +42,8 @@ Alias::Alias(const Alias& alias)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 Alias::~Alias()
 {
   try
@@ -55,6 +59,8 @@ Alias::~Alias()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void Alias::print(std::ostream& stream,uint level,uint optionFlags)
 {

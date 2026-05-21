@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the element-wise product of an ensemble of grids (multiplies all members together). */
+// ====================================================================================
+
 class Function_mul : public Function
 {
   public:

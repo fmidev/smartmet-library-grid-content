@@ -19,6 +19,8 @@ namespace T
 
 
 
+/*! \brief Qsort comparator for FileInfo using comparison method 1. */
+
 int fileInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -34,6 +36,8 @@ int fileInfo_compare_1(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for FileInfo using comparison method 2. */
+
 int fileInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -48,6 +52,8 @@ int fileInfo_compare_2(const void *_val1,const void *_val2)
 
 
 
+
+/*! \brief Default constructor for FileInfoList. */
 
 FileInfoList::FileInfoList()
 {
@@ -72,6 +78,8 @@ FileInfoList::FileInfoList()
 
 
 
+
+/*! \brief Copy constructor for FileInfoList. */
 
 FileInfoList::FileInfoList(FileInfoList& fileInfoList)
 {
@@ -116,6 +124,8 @@ FileInfoList::FileInfoList(FileInfoList& fileInfoList)
 
 
 
+/*! \brief Destructor for FileInfoList. */
+
 FileInfoList::~FileInfoList()
 {
   FUNCTION_TRACE
@@ -147,6 +157,8 @@ FileInfoList::~FileInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for FileInfoList. */
 
 FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
 {
@@ -200,6 +212,8 @@ FileInfoList& FileInfoList::operator=(FileInfoList& fileInfoList)
 
 
 
+/*! \brief Add a FileInfo record to the list. */
+
 void FileInfoList::addFileInfo(FileInfo *fileInfo)
 {
   FUNCTION_TRACE
@@ -250,6 +264,8 @@ void FileInfoList::addFileInfo(FileInfo *fileInfo)
 
 
 
+/*! \brief Add all entries from another FileInfoList. */
+
 void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -267,6 +283,8 @@ void FileInfoList::addFileInfoList(FileInfoList& fileInfoList)
 
 
 
+
+/*! \brief Add all entries from another FileInfoList without acquiring the lock. */
 
 void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
 {
@@ -376,6 +394,8 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
 
 
 
+/*! \brief Remove all entries from the list. */
+
 void FileInfoList::clear()
 {
   FUNCTION_TRACE
@@ -407,6 +427,8 @@ void FileInfoList::clear()
 
 
 
+/*! \brief Increase the capacity of the underlying storage. */
+
 void FileInfoList::increaseSize(uint newSize)
 {
   FUNCTION_TRACE
@@ -424,6 +446,8 @@ void FileInfoList::increaseSize(uint newSize)
 
 
 
+
+/*! \brief Increase the capacity of the underlying storage without acquiring the lock. */
 
 void FileInfoList::increaseSizeNoLock(uint newSize)
 {
@@ -470,6 +494,8 @@ void FileInfoList::increaseSizeNoLock(uint newSize)
 
 
 
+/*! \brief Return the FileInfo matching the given file id. */
+
 FileInfo* FileInfoList::getFileInfoById(T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -501,6 +527,8 @@ FileInfo* FileInfoList::getFileInfoById(T::FileId fileId)
 
 
 
+
+/*! \brief Copy the FileInfo matching the given file id into the output structure. */
 
 bool FileInfoList::getFileInfoById(T::FileId fileId,FileInfo& fileInfo)
 {
@@ -537,6 +565,8 @@ bool FileInfoList::getFileInfoById(T::FileId fileId,FileInfo& fileInfo)
 
 
 
+/*! \brief Return the FileInfo matching the given file id without locking. */
+
 FileInfo* FileInfoList::getFileInfoByIdNoLock(T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -567,6 +597,8 @@ FileInfo* FileInfoList::getFileInfoByIdNoLock(T::FileId fileId)
 
 
 
+/*! \brief Flag the entry matching the given file id as deleted. */
+
 uint FileInfoList::markDeletedById(T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -591,6 +623,8 @@ uint FileInfoList::markDeletedById(T::FileId fileId)
 
 
 
+
+/*! \brief Flag every entry in the list as deleted. */
 
 uint FileInfoList::markDeleted()
 {
@@ -622,6 +656,8 @@ uint FileInfoList::markDeleted()
 
 
 
+
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
 
 uint FileInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
@@ -657,6 +693,8 @@ uint FileInfoList::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Flag entries whose generation id matches the given value as deleted. */
+
 uint FileInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -689,6 +727,8 @@ uint FileInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 
 
 
+
+/*! \brief Flag entries whose source id matches the given value as deleted. */
 
 uint FileInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
@@ -724,6 +764,8 @@ uint FileInfoList::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
+
 uint FileInfoList::markDeletedByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -758,6 +800,8 @@ uint FileInfoList::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return the index of the entry closest to the given FileInfo. */
+
 int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -778,6 +822,8 @@ int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
 
 
 
+
+/*! \brief Return the index of the entry closest to the given FileInfo without locking. */
 
 int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo)
 {
@@ -855,6 +901,8 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
 
 
 
+/*! \brief Return the FileInfo matching the given filename. */
+
 FileInfo* FileInfoList::getFileInfoByName(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -886,6 +934,8 @@ FileInfo* FileInfoList::getFileInfoByName(const std::string& filename)
 
 
 
+
+/*! \brief Copy the FileInfo matching the given filename into the output structure. */
 
 bool FileInfoList::getFileInfoByName(const std::string& filename,FileInfo& fileInfo)
 {
@@ -921,6 +971,8 @@ bool FileInfoList::getFileInfoByName(const std::string& filename,FileInfo& fileI
 
 
 
+/*! \brief Return the FileInfo at the given list index. */
+
 FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -933,9 +985,6 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
     if (index > mLength)
       return nullptr;
 
-    //if (mArray[index] == nullptr || (mArray[index]->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
-    //  return nullptr;
-
     return mArray[index];
   }
   catch (...)
@@ -946,6 +995,8 @@ FileInfo* FileInfoList::getFileInfoByIndex(uint index)
 
 
 
+
+/*! \brief Copy the entire list into the given target list, replacing its contents. */
 
 void FileInfoList::getFileInfoList(FileInfoList& fileInfoList)
 {
@@ -963,6 +1014,8 @@ void FileInfoList::getFileInfoList(FileInfoList& fileInfoList)
 
 
 
+
+/*! \brief Append the entire list into the given target list without clearing it. */
 
 void FileInfoList::getFileInfoListNoClear(FileInfoList& fileInfoList)
 {
@@ -995,6 +1048,8 @@ void FileInfoList::getFileInfoListNoClear(FileInfoList& fileInfoList)
 
 
 
+/*! \brief Copy a paginated slice of the list starting from the given file id. */
+
 void FileInfoList::getFileInfoList(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -1011,6 +1066,8 @@ void FileInfoList::getFileInfoList(T::FileId startFileId,int maxRecords,FileInfo
 
 
 
+
+/*! \brief Append a paginated slice of the list starting from the given file id without clearing the target. */
 
 void FileInfoList::getFileInfoListNoClear(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -1084,6 +1141,8 @@ void FileInfoList::getFileInfoListNoClear(T::FileId startFileId,int maxRecords,F
 
 
 
+/*! \brief Append all entries matching the given producer id to the target list. */
+
 void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -1118,6 +1177,8 @@ void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,FileInfo
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given producer id. */
 
 void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -1193,6 +1254,8 @@ void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,T::FileI
 
 
 
+/*! \brief Return a hash value computed from the entire list contents. */
+
 std::size_t FileInfoList::getHash()
 {
   FUNCTION_TRACE
@@ -1225,6 +1288,8 @@ std::size_t FileInfoList::getHash()
 
 
 
+
+/*! \brief Return a hash value computed from entries matching the given producer id. */
 
 std::size_t FileInfoList::getHashByProducerId(T::ProducerId producerId)
 {
@@ -1259,6 +1324,8 @@ std::size_t FileInfoList::getHashByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Return a hash value computed from entries matching the given generation id. */
+
 std::size_t FileInfoList::getHashByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1291,6 +1358,8 @@ std::size_t FileInfoList::getHashByGenerationId(T::GenerationId generationId)
 
 
 
+
+/*! \brief Append all entries matching the given generation id to the target list. */
 
 void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,FileInfoList& fileInfoList)
 {
@@ -1326,6 +1395,8 @@ void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,Fi
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given generation id. */
 
 void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -1402,6 +1473,8 @@ void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,T:
 
 
 
+/*! \brief Append all entries matching the given source id to the target list. */
+
 void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -1436,6 +1509,8 @@ void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoList& 
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given source id. */
 
 void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -1511,6 +1586,8 @@ void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId star
 
 
 
+/*! \brief Return the number of entries matching the given producer id. */
+
 uint FileInfoList::getFileInfoCountByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1541,6 +1618,8 @@ uint FileInfoList::getFileInfoCountByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Return the number of entries matching the given generation id. */
 
 uint FileInfoList::getFileInfoCountByGenerationId(T::GenerationId generationId)
 {
@@ -1573,6 +1652,8 @@ uint FileInfoList::getFileInfoCountByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Return the number of entries matching the given source id. */
+
 uint FileInfoList::getFileInfoCountBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1604,6 +1685,8 @@ uint FileInfoList::getFileInfoCountBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Return the FileInfo at the given list index without bounds checking. */
+
 FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 {
   FUNCTION_TRACE
@@ -1619,6 +1702,8 @@ FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Return the number of entries in the list. */
 
 uint FileInfoList::getLength()
 {
@@ -1636,6 +1721,8 @@ uint FileInfoList::getLength()
 
 
 
+
+/*! \brief Delete the entry matching the given file id. */
 
 bool FileInfoList::deleteFileInfoById(T::FileId fileId)
 {
@@ -1679,6 +1766,8 @@ bool FileInfoList::deleteFileInfoById(T::FileId fileId)
 
 
 
+/*! \brief Delete the entry matching the given filename. */
+
 bool FileInfoList::deleteFileInfoByName(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -1719,6 +1808,8 @@ bool FileInfoList::deleteFileInfoByName(const std::string& filename)
 
 
 
+
+/*! \brief Delete all entries whose producer id matches the given value. */
 
 uint FileInfoList::deleteFileInfoByProducerId(T::ProducerId producerId)
 {
@@ -1764,6 +1855,8 @@ uint FileInfoList::deleteFileInfoByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Remove all entries previously flagged for deletion. */
+
 uint FileInfoList::deleteMarkedFiles()
 {
   FUNCTION_TRACE
@@ -1806,6 +1899,8 @@ uint FileInfoList::deleteMarkedFiles()
 
 
 
+
+/*! \brief Delete all entries whose generation id matches the given value. */
 
 uint FileInfoList::deleteFileInfoByGenerationId(T::GenerationId generationId)
 {
@@ -1850,6 +1945,8 @@ uint FileInfoList::deleteFileInfoByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Delete all entries whose generation id is in the given set. */
+
 uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -1893,6 +1990,8 @@ uint FileInfoList::deleteFileInfoByGenerationIdList(std::set<T::GenerationId>& g
 
 
 
+/*! \brief Delete the entry at the given list index. */
+
 bool FileInfoList::deleteFileInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -1929,6 +2028,8 @@ bool FileInfoList::deleteFileInfoByIndex(uint index)
 
 
 
+
+/*! \brief Delete all entries whose source id matches the given value. */
 
 uint FileInfoList::deleteFileInfoBySourceId(T::SourceId sourceId)
 {
@@ -1974,6 +2075,8 @@ uint FileInfoList::deleteFileInfoBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Delete all entries whose storage id matches the given value. */
+
 uint FileInfoList::deleteFileInfoByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -2017,6 +2120,8 @@ uint FileInfoList::deleteFileInfoByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Delete all entries whose file id is in the given set. */
 
 uint FileInfoList::deleteFileInfoByFileIdList(std::set<T::FileId>& fileIdList)
 {
@@ -2062,6 +2167,8 @@ uint FileInfoList::deleteFileInfoByFileIdList(std::set<T::FileId>& fileIdList)
 
 
 
+/*! \brief Set the pointer to the modification mutex used by the list. */
+
 void FileInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 {
   FUNCTION_TRACE
@@ -2082,6 +2189,8 @@ void FileInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 
 
 
+/*! \brief Return a pointer to the internal modification mutex. */
+
 ModificationLock* FileInfoList::getModificationLockPtr()
 {
   FUNCTION_TRACE
@@ -2098,6 +2207,8 @@ ModificationLock* FileInfoList::getModificationLockPtr()
 
 
 
+
+/*! \brief Acquire the internal mutex protecting the list. */
 
 void FileInfoList::lock()
 {
@@ -2116,6 +2227,8 @@ void FileInfoList::lock()
 
 
 
+/*! \brief Release the internal mutex protecting the list. */
+
 void FileInfoList::unlock()
 {
   FUNCTION_TRACE
@@ -2133,6 +2246,8 @@ void FileInfoList::unlock()
 
 
 
+/*! \brief Return whether contained objects are owned and released by the list. */
+
 bool FileInfoList::getReleaseObjects()
 {
   FUNCTION_TRACE
@@ -2148,6 +2263,8 @@ bool FileInfoList::getReleaseObjects()
 
 
 
+
+/*! \brief Set whether contained objects are owned and released by the list. */
 
 void FileInfoList::setReleaseObjects(bool releaseObjects)
 {
@@ -2166,6 +2283,8 @@ void FileInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+/*! \brief Enable or disable internal locking on the list. */
+
 void FileInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
@@ -2182,6 +2301,8 @@ void FileInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
+
+/*! \brief Set the comparison method used for sorting the list. */
 
 void FileInfoList::setComparisonMethod(uint comparisonMethod)
 {
@@ -2202,6 +2323,8 @@ void FileInfoList::setComparisonMethod(uint comparisonMethod)
 
 
 
+
+/*! \brief Sort the list using the given comparison method. */
 
 void FileInfoList::sort(uint comparisonMethod)
 {
@@ -2235,6 +2358,8 @@ void FileInfoList::sort(uint comparisonMethod)
 
 
 
+
+/*! \brief Return the most recent file deletion time for the given generation id. */
 
 time_t FileInfoList::getLastFileDeletionTimeByGenerationId(T::GenerationId generationId)
 {
@@ -2271,6 +2396,8 @@ time_t FileInfoList::getLastFileDeletionTimeByGenerationId(T::GenerationId gener
 
 
 
+/*! \brief Write the list contents to the named file. */
+
 void FileInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -2287,6 +2414,8 @@ void FileInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Write the list contents to the named file with the given file mode. */
 
 void FileInfoList::writeToFile(const std::string& filename,const char *filemode)
 {
@@ -2318,6 +2447,8 @@ void FileInfoList::writeToFile(const std::string& filename,const char *filemode)
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void FileInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

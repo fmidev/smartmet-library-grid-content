@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the arc sine (in radians) of each grid value element-wise. */
+// ====================================================================================
+
 class Function_asin : public Function
 {
   public:

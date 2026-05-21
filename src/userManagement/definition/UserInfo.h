@@ -11,9 +11,16 @@ namespace SmartMet
 namespace UserManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;
-typedef std::map<std::string,AttributeList> AttributeGroupList;
+typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
+typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
 
+// ====================================================================================
+/*! \brief Record describing a registered user with credentials, groups, permissions, and attributes.
+ *
+ *  Stores identity information (username, full name, password hash), membership in
+ *  named user groups, a set of permission strings, validity window (start/end times),
+ *  status, and a map of named attribute groups for arbitrary extensible user state. */
+// ====================================================================================
 
 class UserInfo
 {
@@ -70,23 +77,23 @@ class UserInfo
 
   protected:
 
-    uint                  mUserId;
-    std::string           mUsername;
-    std::string           mPassword;
-    std::string           mFullName;
-    std::set<std::string> mUserGroups;
-    std::set<std::string> mUserPermissions;
-    time_t                mStartTime;
-    time_t                mEndTime;
-    uchar                 mStatus;
+    uint                  mUserId;            //!< Unique numeric identifier for this user.
+    std::string           mUsername;          //!< Login name (unique within the user store).
+    std::string           mPassword;          //!< Password hash or credential string.
+    std::string           mFullName;          //!< Human-readable display name.
+    std::set<std::string> mUserGroups;        //!< Set of group names this user belongs to.
+    std::set<std::string> mUserPermissions;   //!< Set of permission strings granted to this user.
+    time_t                mStartTime;         //!< Epoch time from which this user account is valid.
+    time_t                mEndTime;           //!< Epoch time after which this user account expires (0 = never).
+    uchar                 mStatus;            //!< Account status code (active, locked, …).
 
-    AttributeGroupList    mAttributeGroups;
-    ModificationLock      mModificationLock;
+    AttributeGroupList    mAttributeGroups;   //!< Named groups of key-value attributes for extensible user data.
+    ModificationLock      mModificationLock;  //!< Lock protecting concurrent attribute access.
 };
 
 
-typedef std::shared_ptr<UserInfo> UserInfo_sptr;
-typedef std::map<uint,UserInfo_sptr> UserInfo_sptr_map;
+typedef std::shared_ptr<UserInfo> UserInfo_sptr;                    //!< Shared pointer to a UserInfo record.
+typedef std::map<uint,UserInfo_sptr> UserInfo_sptr_map;             //!< Map from user id to UserInfo shared pointer.
 
 
 

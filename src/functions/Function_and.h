@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the logical AND of two grid fields, returning 1 where both are non-zero. */
+// ====================================================================================
+
 class Function_and : public Function
 {
   public:

@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor: creates an empty value record list. */
+
 ValueRecordList::ValueRecordList()
 {
   try
@@ -22,6 +24,8 @@ ValueRecordList::ValueRecordList()
 
 
 
+
+/*! \brief Copy constructor: deep-copies all value records from the source list. */
 
 ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 {
@@ -44,6 +48,8 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 
 
+
+/*! \brief Builds a value record list from content info entries with given coordinate and interpolation parameters. */
 
 ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
 {
@@ -73,6 +79,8 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
 
 
 
+/*! \brief Destructor: deletes all owned value records. */
+
 ValueRecordList::~ValueRecordList()
 {
   try
@@ -95,6 +103,8 @@ ValueRecordList::~ValueRecordList()
 
 
 
+
+/*! \brief Assignment operator: clears self then deep-copies the source list. */
 
 ValueRecordList& ValueRecordList::operator=(ValueRecordList& valueRecordList)
 {
@@ -122,6 +132,8 @@ ValueRecordList& ValueRecordList::operator=(ValueRecordList& valueRecordList)
 
 
 
+/*! \brief Appends a value record (takes ownership) to the list. */
+
 void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
 {
   try
@@ -137,6 +149,8 @@ void ValueRecordList::addValueRecord(ValueRecord *valueRecord)
 
 
 
+
+/*! \brief Deletes all value records and empties the list. */
 
 void ValueRecordList::clear()
 {
@@ -161,6 +175,8 @@ void ValueRecordList::clear()
 
 
 
+/*! \brief Returns the value record at the given index, or nullptr if out of range. */
+
 ValueRecord* ValueRecordList::getValueRecordByIndex(uint index) const
 {
   try
@@ -179,6 +195,8 @@ ValueRecord* ValueRecordList::getValueRecordByIndex(uint index) const
 
 
 
+/*! \brief Returns the number of records in the list. */
+
 uint ValueRecordList::getLength() const
 {
   try
@@ -194,6 +212,8 @@ uint ValueRecordList::getLength() const
 
 
 
+
+/*! \brief Prints the list and all contained value records to the given stream. */
 
 void ValueRecordList::print(std::ostream& stream,uint level,uint optionFlags) const
 {

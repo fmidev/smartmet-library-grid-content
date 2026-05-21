@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_streamDir::Function_streamDir()
 {
   try
@@ -22,6 +24,8 @@ Function_streamDir::Function_streamDir()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_streamDir::Function_streamDir(const Function_streamDir& function)
 :Function(function)
@@ -38,6 +42,8 @@ Function_streamDir::Function_streamDir(const Function_streamDir& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_streamDir::~Function_streamDir()
 {
   try
@@ -51,6 +57,8 @@ Function_streamDir::~Function_streamDir()
 }
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_streamDir::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -85,6 +93,8 @@ float Function_streamDir::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -118,6 +128,8 @@ double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -166,6 +178,8 @@ void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -211,6 +225,8 @@ void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_streamDir::duplicate()
 {
   try
@@ -225,6 +241,8 @@ Function* Function_streamDir::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_streamDir::print(std::ostream& stream,uint level,uint optionFlags)
 {

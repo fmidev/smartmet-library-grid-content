@@ -14,6 +14,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for ProducerInfoList. */
+
 ProducerInfoList::ProducerInfoList()
 {
   FUNCTION_TRACE
@@ -30,6 +32,8 @@ ProducerInfoList::ProducerInfoList()
 
 
 
+
+/*! \brief Copy constructor that duplicates all non-deleted producers from the source list. */
 
 ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
 {
@@ -59,6 +63,8 @@ ProducerInfoList::ProducerInfoList(ProducerInfoList& producerInfoList)
 
 
 
+/*! \brief Destructor that releases all owned ProducerInfo entries. */
+
 ProducerInfoList::~ProducerInfoList()
 {
   FUNCTION_TRACE
@@ -81,6 +87,8 @@ ProducerInfoList::~ProducerInfoList()
 
 
 
+
+/*! \brief Assignment operator that replaces contents with duplicates from the source list. */
 
 ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList)
 {
@@ -113,6 +121,8 @@ ProducerInfoList& ProducerInfoList::operator=(ProducerInfoList& producerInfoList
 
 
 
+/*! \brief Append a producer record if no entry with the same id or name already exists. */
+
 void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
 {
   FUNCTION_TRACE
@@ -141,6 +151,8 @@ void ProducerInfoList::addProducerInfo(ProducerInfo *producerInfo)
 
 
 
+/*! \brief Delete every producer record and empty the list. */
+
 void ProducerInfoList::clear()
 {
   FUNCTION_TRACE
@@ -162,6 +174,8 @@ void ProducerInfoList::clear()
 
 
 
+
+/*! \brief Remove the producer record with the given producer id. */
 
 bool ProducerInfoList::deleteProducerInfoById(T::ProducerId producerId)
 {
@@ -191,6 +205,8 @@ bool ProducerInfoList::deleteProducerInfoById(T::ProducerId producerId)
 
 
 
+
+/*! \brief Remove all producer records that originate from the given source. */
 
 uint ProducerInfoList::deleteProducerInfoListBySourceId(T::SourceId sourceId)
 {
@@ -222,6 +238,8 @@ uint ProducerInfoList::deleteProducerInfoListBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Remove all producer records belonging to the given storage. */
+
 uint ProducerInfoList::deleteProducerInfoListByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -251,6 +269,8 @@ uint ProducerInfoList::deleteProducerInfoListByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Remove producer records previously flagged for deletion. */
 
 uint ProducerInfoList::deleteMarkedProducers()
 {
@@ -282,6 +302,8 @@ uint ProducerInfoList::deleteMarkedProducers()
 
 
 
+/*! \brief Flag the producer with the given id as deleted without removing it. */
+
 uint ProducerInfoList::markDeletedById(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -305,6 +327,8 @@ uint ProducerInfoList::markDeletedById(T::ProducerId producerId)
 
 
 
+
+/*! \brief Flag all producers originating from the given source as deleted. */
 
 uint ProducerInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
@@ -335,6 +359,8 @@ uint ProducerInfoList::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Flag all producers belonging to the given storage as deleted. */
+
 uint ProducerInfoList::markDeletedByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -364,6 +390,8 @@ uint ProducerInfoList::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return a pointer to the non-deleted producer with the given id, or nullptr. */
+
 ProducerInfo* ProducerInfoList::getProducerInfoById(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -388,6 +416,8 @@ ProducerInfo* ProducerInfoList::getProducerInfoById(T::ProducerId producerId)
 
 
 
+
+/*! \brief Copy the producer with the given id into the output parameter. */
 
 bool ProducerInfoList::getProducerInfoById(T::ProducerId producerId,ProducerInfo& producerInfo)
 {
@@ -417,6 +447,8 @@ bool ProducerInfoList::getProducerInfoById(T::ProducerId producerId,ProducerInfo
 
 
 
+/*! \brief Return a pointer to the producer matching the given name (case insensitive). */
+
 ProducerInfo* ProducerInfoList::getProducerInfoByName(const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -441,6 +473,8 @@ ProducerInfo* ProducerInfoList::getProducerInfoByName(const std::string& produce
 
 
 
+
+/*! \brief Copy the producer matching the given name into the output parameter. */
 
 bool ProducerInfoList::getProducerInfoByName(const std::string& producerName,ProducerInfo& producerInfo)
 {
@@ -469,6 +503,8 @@ bool ProducerInfoList::getProducerInfoByName(const std::string& producerName,Pro
 
 
 
+
+/*! \brief Compute a hash over the contents of the producer list. */
 
 std::size_t ProducerInfoList::getHash()
 {
@@ -502,6 +538,8 @@ std::size_t ProducerInfoList::getHash()
 
 
 
+
+/*! \brief Compute a hash over the producers belonging to the given storage. */
 
 std::size_t ProducerInfoList::getHashByStorageId(T::StorageId storageId)
 {
@@ -537,6 +575,8 @@ std::size_t ProducerInfoList::getHashByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return the producer at the given position with bounds checking. */
+
 ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -558,6 +598,8 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndex(uint index)
 
 
 
+/*! \brief Return the producer at the given position without performing index validation. */
+
 ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
 {
   FUNCTION_TRACE
@@ -574,6 +616,8 @@ ProducerInfo* ProducerInfoList::getProducerInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Copy all producers from the given source into the output list. */
 
 void ProducerInfoList::getProducerInfoListBySourceId(T::SourceId sourceId,ProducerInfoList& producerInfoList)
 {
@@ -602,6 +646,8 @@ void ProducerInfoList::getProducerInfoListBySourceId(T::SourceId sourceId,Produc
 
 
 
+/*! \brief Return the number of producer records currently held. */
+
 uint ProducerInfoList::getLength()
 {
   FUNCTION_TRACE
@@ -618,6 +664,8 @@ uint ProducerInfoList::getLength()
 
 
 
+
+/*! \brief Reorder the list so producer entries are sorted alphabetically by name. */
 
 void ProducerInfoList::sortByName()
 {
@@ -656,6 +704,8 @@ void ProducerInfoList::sortByName()
 
 
 
+/*! \brief Acquire the modification lock for exclusive access. */
+
 void ProducerInfoList::lock()
 {
   FUNCTION_TRACE
@@ -672,6 +722,8 @@ void ProducerInfoList::lock()
 
 
 
+
+/*! \brief Release the modification lock. */
 
 void ProducerInfoList::unlock()
 {
@@ -690,6 +742,8 @@ void ProducerInfoList::unlock()
 
 
 
+/*! \brief Enable or disable use of the internal modification lock. */
+
 void ProducerInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
@@ -705,6 +759,8 @@ void ProducerInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
+
+/*! \brief Write the list contents to the given file in CSV form. */
 
 void ProducerInfoList::writeToFile(const std::string& filename)
 {
@@ -737,6 +793,8 @@ void ProducerInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Print the contents of the list to the given stream. */
 
 void ProducerInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

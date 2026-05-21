@@ -12,8 +12,15 @@ namespace T
 {
 
 
-typedef std::vector<GenerationInfo*> GenerationInfo_pvec;
+typedef std::vector<GenerationInfo*> GenerationInfo_pvec;  //!< Convenience vector of GenerationInfo pointers.
 
+// ====================================================================================
+/*! \brief Sorted, indexed container of GenerationInfo pointers with thread-safe access.
+ *
+ *  GenerationInfoList maintains generation records in a heap-allocated sorted array and
+ *  provides lookup by generation id, name, analysis time, and producer id. It is the
+ *  primary in-memory registry for model run metadata within the Content Server cache. */
+// ====================================================================================
 
 class GenerationInfoList
 {
@@ -89,16 +96,16 @@ class GenerationInfoList
 
   protected:
 
-    GenerationInfoPtr   *mArray;
-    uint                mSize;
-    uint                mLength;
-    ModificationLock    mModificationLock;
-    ModificationLock*   mModificationLockPtr;
-    bool                mReleaseObjects;
-    uint                mComparisonMethod;
+    GenerationInfoPtr   *mArray;             //!< Heap-allocated array of GenerationInfo pointers.
+    uint                mSize;              //!< Allocated capacity of mArray.
+    uint                mLength;            //!< Number of valid entries currently stored.
+    ModificationLock    mModificationLock;  //!< Owned modification lock used when no external lock is set.
+    ModificationLock*   mModificationLockPtr; //!< Pointer to the active modification lock (may be external).
+    bool                mReleaseObjects;    //!< If true, destructor deletes the pointed-to GenerationInfo objects.
+    uint                mComparisonMethod;  //!< Current sort order (one of GenerationInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;
+typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;  //!< Shared-ownership pointer to a GenerationInfoList.
 
 
 }

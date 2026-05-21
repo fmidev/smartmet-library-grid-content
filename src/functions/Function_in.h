@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Tests whether each grid value falls inside a specified [min, max] range, returning 1 or 0. */
+// ====================================================================================
+
 class Function_in : public Function
 {
   public:

@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_windDir::Function_windDir()
 {
   try
@@ -22,6 +24,8 @@ Function_windDir::Function_windDir()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_windDir::Function_windDir(const Function_windDir& function)
 :Function(function)
@@ -38,6 +42,8 @@ Function_windDir::Function_windDir(const Function_windDir& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_windDir::~Function_windDir()
 {
   try
@@ -51,6 +57,8 @@ Function_windDir::~Function_windDir()
 }
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_windDir::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -85,6 +93,8 @@ float Function_windDir::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_windDir::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -118,6 +128,8 @@ double Function_windDir::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -166,6 +178,8 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -211,6 +225,8 @@ void Function_windDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_windDir::duplicate()
 {
   try
@@ -225,6 +241,8 @@ Function* Function_windDir::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_windDir::print(std::ostream& stream,uint level,uint optionFlags)
 {

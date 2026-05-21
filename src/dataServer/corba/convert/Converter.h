@@ -19,6 +19,14 @@ namespace Corba
 
 
 
+// ====================================================================================
+/*! \brief Bidirectional type converter between DataServer C++ types and CORBA IDL types.
+ *
+ *  All methods are static; the class is used as a utility namespace.  Each
+ *  overloaded convert() pair handles one (T:: ↔ C::) type mapping required
+ *  by the CORBA client and server interface. */
+// ====================================================================================
+
 class Converter
 {
   public:

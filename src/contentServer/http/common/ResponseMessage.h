@@ -11,7 +11,13 @@ namespace SmartMet
 namespace T
 {
 
-
+// ====================================================================================
+/*! \brief Serialisable key-value message used to encode an HTTP ContentServer response.
+ *
+ *  Mirrors the structure of RequestMessage for the response direction.  The server
+ *  side fills in result values line by line; the HTTP client then reads them back
+ *  using getLineByKey() to reconstruct strongly-typed return values. */
+// ====================================================================================
 class ResponseMessage
 {
   public:
@@ -52,10 +58,10 @@ class ResponseMessage
 
   protected:
 
-     std::vector<std::string> mLines;
+     std::vector<std::string> mLines;      //!< Ordered list of serialised lines (optionally key=value formatted).
 
-     uint           mLinePos;
-     char           mLine[10000];
+     uint           mLinePos;             //!< Current write position within mLine during character-by-character assembly.
+     char           mLine[10000];         //!< Temporary buffer used while assembling an incoming line via addChar().
 
 };
 

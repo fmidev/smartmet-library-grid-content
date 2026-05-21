@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the logical OR of two grid fields, returning 1 where either is non-zero. */
+// ====================================================================================
+
 class Function_or : public Function
 {
   public:

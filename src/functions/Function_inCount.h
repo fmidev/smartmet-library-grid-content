@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Counts how many ensemble members have a value inside the specified [min, max] range. */
+// ====================================================================================
+
 class Function_inCount : public Function
 {
   public:

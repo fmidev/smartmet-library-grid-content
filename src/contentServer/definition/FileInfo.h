@@ -10,6 +10,14 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Metadata record describing a grid data file registered in the Content Server.
+ *
+ *  FileInfo stores the location, format, and lifecycle attributes of a single file
+ *  (GRIB, NetCDF, or QueryData) that has been registered with the Content Server. It
+ *  tracks the server type and protocol so that DataServer implementations can open
+ *  files from local filesystems, S3 buckets, or HTTP endpoints transparently. */
+// ====================================================================================
 
 class FileInfo
 {
@@ -70,17 +78,17 @@ class FileInfo
      * to open the file and register its content to the content server. */
     uint            mFlags;
 
-    T::StorageId    mStorageId;
+    T::StorageId    mStorageId;        //!< Storage partition identifier.
 
-    T::SourceId     mSourceId;
+    T::SourceId     mSourceId;         //!< Source system from which the file was ingested.
 
-    time_t          mModificationTime;
+    time_t          mModificationTime; //!< Timestamp of the last modification of this record.
 
-    time_t          mDeletionTime;
+    time_t          mDeletionTime;     //!< Timestamp after which the file may be removed (0 = never).
 
-    UInt64          mSize;
+    UInt64          mSize;             //!< File size in bytes.
 
-    uchar           mStatus;
+    uchar           mStatus;           //!< Lifecycle status (see FileInfo::ServerType for analogous codes).
 
     /* The FileInfo records can be sorted in different ways when they are stored
      * into the FileInfoList object. That's why the FileInfo class contains
@@ -95,45 +103,49 @@ class FileInfo
      * stays in correct order.
      */
 
+    /*! \brief Sorting-key constants controlling FileInfoList sort order. */
     class ComparisonMethod
     {
       public:
-        static const uint none              = 0;    // No comparison
-        static const T::FileId fileId            = 1;    // Comparison according to the file id
-        static const uint fileName          = 2;    // Comparison according to the file name
+        static const uint none              = 0;    //!< No comparison / unsorted.
+        static const T::FileId fileId       = 1;    //!< Sort by numeric file id.
+        static const uint fileName          = 2;    //!< Sort lexicographically by file name.
     };
 
+    /*! \brief Bitmask flags describing file lifecycle and caching state. */
     class Flags
     {
       public:
-        static const uint UnusedFlag            = 1;
-        static const uint DeletedFile           = 4;     // The file is deleted
-        static const uint LocalCacheRecommended = 8;     // The file shoud be cached locally if possible
-        static const uint LocalCacheInUse       = 16;    // The file is cached locally
+        static const uint UnusedFlag            = 1;   //!< Reserved for future use.
+        static const uint DeletedFile           = 4;   //!< The file is logically deleted.
+        static const uint LocalCacheRecommended = 8;   //!< The file should be cached locally if possible.
+        static const uint LocalCacheInUse       = 16;  //!< The file is currently cached locally.
     };
 
+    /*! \brief Identifies the storage technology hosting the file. */
     class ServerType
     {
       public:
-        static const uint Unknown          = 0;
-        static const uint Filesys          = 1;    // Local file system
-        static const uint S3               = 2;    // S3
-        static const uint THREDDS          = 3;    // THREDDS data server
-        static const uint HTTPD            = 4;    // HTTPD
+        static const uint Unknown          = 0; //!< Unknown or not set.
+        static const uint Filesys          = 1; //!< Local file system.
+        static const uint S3               = 2; //!< Amazon S3 or compatible object storage.
+        static const uint THREDDS          = 3; //!< THREDDS data server.
+        static const uint HTTPD            = 4; //!< Generic HTTP server.
     };
 
+    /*! \brief Network protocol used to retrieve the file. */
     class Protocol
     {
       public:
-        static const uint None             = 0;
-        static const uint HTTP             = 1;
-        static const uint HTTPS            = 2;
+        static const uint None             = 0; //!< No network protocol (local access).
+        static const uint HTTP             = 1; //!< Plain HTTP.
+        static const uint HTTPS            = 2; //!< HTTPS.
     };
 
 };
 
 
-typedef FileInfo* FileInfoPtr;
+typedef FileInfo* FileInfoPtr;  //!< Non-owning pointer to a FileInfo record.
 
 
 

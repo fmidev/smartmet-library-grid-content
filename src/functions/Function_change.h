@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Detects grid points where a value has changed between two time steps, returning 1 or 0. */
+// ====================================================================================
+
 class Function_change : public Function
 {
   public:

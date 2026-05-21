@@ -123,6 +123,8 @@ static void* queryServer_updateThread(void *arg)
 
 
 
+/*! \brief Query Server: Constructor. */
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -202,6 +204,8 @@ ServiceImplementation::ServiceImplementation()
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ServiceImplementation::~ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -220,6 +224,8 @@ ServiceImplementation::~ServiceImplementation()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void ServiceImplementation::init(
     ContentServer::ServiceInterface* contentServerPtr,
@@ -371,6 +377,8 @@ void ServiceImplementation::init(
 
 
 
+/*! \brief Query Server: Init content cache. */
+
 void ServiceImplementation::initContentCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds)
 {
   try
@@ -387,6 +395,8 @@ void ServiceImplementation::initContentCache(std::size_t maxRecordsPerThread,uin
 
 
 
+
+/*! \brief Query Server: Init content search cache. */
 
 void ServiceImplementation::initContentSearchCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds)
 {
@@ -405,6 +415,8 @@ void ServiceImplementation::initContentSearchCache(std::size_t maxRecordsPerThre
 
 
 
+
+/*! \brief Query Server: Get state attributes. */
 
 void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -446,6 +458,8 @@ void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode>
 
 
 
+/*! \brief Query Server: Get cache stats. */
+
 void ServiceImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   try
@@ -475,6 +489,8 @@ void ServiceImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistic
 
 
 
+/*! \brief Query Server: Set land cover. */
+
 void ServiceImplementation::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
   try
@@ -491,6 +507,8 @@ void ServiceImplementation::setLandCover(std::shared_ptr<Fmi::LandCover> landCov
 
 
 
+
+/*! \brief Query Server: Set dem. */
 
 void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
@@ -509,6 +527,8 @@ void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 
 
+/*! \brief Query Server: Shutdown. */
+
 void ServiceImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -525,6 +545,8 @@ void ServiceImplementation::shutdown()
 
 
 
+
+/*! \brief Query Server: Get producer info by name. */
 
 bool ServiceImplementation::getProducerInfoByName(const std::string& name,T::ProducerInfo& info)
 {
@@ -554,6 +576,8 @@ bool ServiceImplementation::getProducerInfoByName(const std::string& name,T::Pro
 
 
 
+/*! \brief Query Server: Get generation time range by producer and generation id. */
+
 void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -572,6 +596,8 @@ void ServiceImplementation::getGenerationTimeRangeByProducerAndGenerationId(T::P
 
 
 
+
+/*! \brief Query Server: Get generation info list by producer id. */
 
 CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::ProducerId producerId,UInt64 producerHash,bool acceptNotReadyGenerations)
 {
@@ -646,6 +672,8 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::Prod
 
 
 
+/*! \brief Query Server: Protected hook: execute query. */
+
 int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
 {
   FUNCTION_TRACE
@@ -702,6 +730,8 @@ int ServiceImplementation::_executeQuery(T::SessionId sessionId, Query& query)
 
 
 
+/*! \brief Query Server: Protected hook: get producer list. */
+
 int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& producerList)
 {
   FUNCTION_TRACE
@@ -732,6 +762,8 @@ int ServiceImplementation::_getProducerList(T::SessionId sessionId, string_vec& 
 
 
 
+
+/*! \brief Query Server: Load producer file. */
 
 void ServiceImplementation::loadProducerFile()
 {
@@ -848,6 +880,8 @@ void ServiceImplementation::loadProducerFile()
 
 
 
+/*! \brief Query Server: Load unit conversion file. */
+
 void ServiceImplementation::loadUnitConversionFile()
 {
   FUNCTION_TRACE
@@ -924,6 +958,8 @@ void ServiceImplementation::loadUnitConversionFile()
 
 
 
+
+/*! \brief Query Server: Load height conversion file. */
 
 void ServiceImplementation::loadHeightConversionFile()
 {
@@ -1019,6 +1055,8 @@ void ServiceImplementation::loadHeightConversionFile()
 
 
 
+/*! \brief Query Server: Get geometry id list by coordinates. */
+
 void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& producers,T::AreaCoordinates& coordinates, std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -1051,6 +1089,8 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
 
 
 
+
+/*! \brief Query Server: Get geometry id list by coordinates. */
 
 void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& coordinates, std::set<T::GeometryId>& geometryIdList)
 {
@@ -1104,6 +1144,8 @@ void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint g
 
 
 
+
+/*! \brief Query Server: Get geometry id list by geometry id. */
 
 void ServiceImplementation::getGeometryIdListByGeometryId(T::GeometryId gridGeometryId,std::set<T::GeometryId>& geometryIdList)
 {
@@ -1206,6 +1248,8 @@ void ServiceImplementation::getGeometryIdListByGeometryId(T::GeometryId gridGeom
 
 
 
+/*! \brief Query Server: Get parameter function info. */
+
 bool ServiceImplementation::getParameterFunctionInfo(const std::string& paramStr, std::string& function,std::string& functionParams)
 {
   FUNCTION_TRACE
@@ -1260,6 +1304,8 @@ bool ServiceImplementation::getParameterFunctionInfo(const std::string& paramStr
 
 
 
+
+/*! \brief Query Server: Get function params. */
 
 bool ServiceImplementation::getFunctionParams(const std::string& functionParamsStr, FunctionParam_vec& functionParams)
 {
@@ -1385,6 +1431,8 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
 
 
 
+/*! \brief Query Server: Get parameter mappings. */
+
 void ServiceImplementation::getParameterMappings(const std::string& producerName,T::ProducerId producerId,const std::string& parameterName,std::size_t parameterHash,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec_sptr& mappings)
 {
   try
@@ -1446,6 +1494,8 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
 
 
 
+
+/*! \brief Query Server: Get parameter mappings. */
 
 void ServiceImplementation::getParameterMappings(
     const std::string& producerName,
@@ -1519,6 +1569,8 @@ void ServiceImplementation::getParameterMappings(
 
 
 
+/*! \brief Query Server: Get parameter string info. */
+
 void ServiceImplementation::getParameterStringInfo(
     const std::string& param,
     char fieldSeparator,
@@ -1562,6 +1614,8 @@ void ServiceImplementation::getParameterStringInfo(
 
 
 
+
+/*! \brief Query Server: Get parameter string info. */
 
 void ServiceImplementation::getParameterStringInfo(
     const std::string& param,
@@ -1717,6 +1771,8 @@ void ServiceImplementation::getParameterStringInfo(
 
 
 
+/*! \brief Query Server: Get alias. */
+
 bool ServiceImplementation::getAlias(const std::string& name, std::string& alias)
 {
   FUNCTION_TRACE
@@ -1731,6 +1787,8 @@ bool ServiceImplementation::getAlias(const std::string& name, std::string& alias
 }
 
 
+
+/*! \brief Query Server: Is geometry valid. */
 
 bool ServiceImplementation::isGeometryValid(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath)
 {
@@ -1757,6 +1815,8 @@ bool ServiceImplementation::isGeometryValid(int geometryId,std::vector<std::vect
 
 
 
+
+/*! \brief Query Server: Is geometry ready. */
 
 bool ServiceImplementation::isGeometryReady(T::GenerationId generationId,int geometryId,T::ParamLevelId levelId)
 {
@@ -1792,6 +1852,8 @@ bool ServiceImplementation::isGeometryReady(T::GenerationId generationId,int geo
 
 
 
+
+/*! \brief Query Server: Parse function. */
 
 bool ServiceImplementation::parseFunction(
     Query& query,
@@ -1949,6 +2011,8 @@ bool ServiceImplementation::parseFunction(
 
 
 
+/*! \brief Query Server: Get producers. */
+
 void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
 {
   FUNCTION_TRACE
@@ -1994,6 +2058,8 @@ void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
 
 
 
+/*! \brief Query Server: Get producers. */
+
 void ServiceImplementation::getProducers(const std::string& producerName, Producer_vec& producers)
 {
   FUNCTION_TRACE
@@ -2017,6 +2083,8 @@ void ServiceImplementation::getProducers(const std::string& producerName, Produc
 
 
 
+
+/*! \brief Query Server: Update query parameters. */
 
 void ServiceImplementation::updateQueryParameters(Query& query)
 {
@@ -2101,6 +2169,8 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
 
 
+
+/*! \brief Query Server: Post process query. */
 
 void ServiceImplementation::postProcessQuery(Query& query)
 {
@@ -2207,6 +2277,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
 
 
 
+
+/*! \brief Query Server: Execute query functions vector. */
 
 void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 {
@@ -2452,6 +2524,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
 
 
+
+/*! \brief Query Server: Execute query functions. */
 
 void ServiceImplementation::executeQueryFunctions(Query& query)
 {
@@ -2848,6 +2922,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
 
 
+/*! \brief Query Server: Execute time range query. */
+
 int ServiceImplementation::executeTimeRangeQuery(Query& query)
 {
   FUNCTION_TRACE
@@ -3196,6 +3272,8 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
 
 
+
+/*! \brief Query Server: Execute time step query. */
 
 int ServiceImplementation::executeTimeStepQuery(Query& query)
 {
@@ -3676,6 +3754,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
 
 
+/*! \brief Query Server: Protected hook: get values by grid point. */
+
 int ServiceImplementation::_getValuesByGridPoint(
     T::SessionId sessionId,
     T::ContentInfoList& contentInfoList,
@@ -3717,6 +3797,8 @@ int ServiceImplementation::_getValuesByGridPoint(
 
 
 
+/*! \brief Query Server: Conversion function. */
+
 bool ServiceImplementation::conversionFunction(const std::string& conversionFunction, std::string& function, std::vector<std::string>& functionParams)
 {
   try
@@ -3741,6 +3823,8 @@ bool ServiceImplementation::conversionFunction(const std::string& conversionFunc
 
 
 
+
+/*! \brief Query Server: Execute conversion. */
 
 void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
@@ -3840,6 +3924,8 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
+
+/*! \brief Query Server: Execute conversion. */
 
 void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
 {
@@ -3941,6 +4027,8 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
+/*! \brief Query Server: Execute conversion. */
+
 void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::GridValueList& valueList)
 {
   try
@@ -3989,6 +4077,8 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 
 
+
+/*! \brief Query Server: Get content list by parameter generation id and forecast time. */
 
 int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::ProducerId producerId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
 {
@@ -4272,6 +4362,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
 
 
+
+/*! \brief Query Server: Get special values. */
 
 bool ServiceImplementation::getSpecialValues(
     Query& query,
@@ -4559,6 +4651,8 @@ bool ServiceImplementation::getSpecialValues(
 
 
 
+
+/*! \brief Query Server: Get value vectors. */
 
 bool ServiceImplementation::getValueVectors(
     Query& query,
@@ -5088,6 +5182,8 @@ bool ServiceImplementation::getValueVectors(
 
 
 
+
+/*! \brief Query Server: Get grid files. */
 
 bool ServiceImplementation::getGridFiles(
     Query& query,
@@ -5947,6 +6043,8 @@ bool ServiceImplementation::getGridFiles(
 
 
 
+/*! \brief Query Server: Get content list. */
+
 time_t ServiceImplementation::getContentList(
     T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
@@ -6051,6 +6149,8 @@ time_t ServiceImplementation::getContentList(
 
 
 
+
+/*! \brief Query Server: Get point values by height. */
 
 bool ServiceImplementation::getPointValuesByHeight(
     Query& query,
@@ -6371,6 +6471,8 @@ bool ServiceImplementation::getPointValuesByHeight(
 
 
 
+/*! \brief Query Server: Get value vectors by height. */
+
 bool ServiceImplementation::getValueVectorsByHeight(
     Query& query,
     T::CoordinateType coordinateType,
@@ -6612,6 +6714,8 @@ bool ServiceImplementation::getValueVectorsByHeight(
 
 
 #if 0  // Working
+
+/*! \brief Query Server: Get value vectors by height. */
 
 bool ServiceImplementation::getValueVectorsByHeight(
     Query& query,
@@ -6950,6 +7054,8 @@ bool ServiceImplementation::getValueVectorsByHeight(
 
 
 
+/*! \brief Query Server: Get level interpolation method. */
+
 short ServiceImplementation::getLevelInterpolationMethod(T::ParamLevelId paramLevelId,short levelInterpolationMethod,uint flags)
 {
   try
@@ -6986,6 +7092,8 @@ short ServiceImplementation::getLevelInterpolationMethod(T::ParamLevelId paramLe
 
 
 
+
+/*! \brief Query Server: Get point values. */
 
 bool ServiceImplementation::getPointValues(
     Query& query,
@@ -7280,6 +7388,8 @@ bool ServiceImplementation::getPointValues(
 
 
 
+/*! \brief Query Server: Get circle values. */
+
 bool ServiceImplementation::getCircleValues(
     Query& query,
     QueryParameter& qParam,
@@ -7569,6 +7679,8 @@ bool ServiceImplementation::getCircleValues(
 
 
 
+
+/*! \brief Query Server: Get polygon values. */
 
 bool ServiceImplementation::getPolygonValues(
     Query& query,
@@ -7973,6 +8085,8 @@ bool ServiceImplementation::getPolygonValues(
 
 
 
+/*! \brief Query Server: Get streamline values. */
+
 bool ServiceImplementation::getStreamlineValues(
     Query& query,
     QueryParameter& qParam,
@@ -8309,6 +8423,8 @@ bool ServiceImplementation::getStreamlineValues(
 
 
 
+
+/*! \brief Query Server: Get isoline values. */
 
 bool ServiceImplementation::getIsolineValues(
     Query& query,
@@ -8667,6 +8783,8 @@ bool ServiceImplementation::getIsolineValues(
 
 
 
+
+/*! \brief Query Server: Get isoband values. */
 
 bool ServiceImplementation::getIsobandValues(
     Query& query,
@@ -9033,6 +9151,8 @@ bool ServiceImplementation::getIsobandValues(
 
 
 
+/*! \brief Query Server: Get vertical value vectors. */
+
 bool ServiceImplementation::getVerticalValueVectors(
     Query& query,
     QueryParameter& qParam,
@@ -9282,6 +9402,8 @@ bool ServiceImplementation::getVerticalValueVectors(
 
 
 
+
+/*! \brief Query Server: Get grid values. */
 
 void ServiceImplementation::getGridValues(
     Query& query,
@@ -10000,6 +10122,8 @@ void ServiceImplementation::getGridValues(
 
 
 
+/*! \brief Query Server: Get grid values. */
+
 void ServiceImplementation::getGridValues(
     Query& query,
     QueryParameter& qParam,
@@ -10646,6 +10770,8 @@ void ServiceImplementation::getGridValues(
 
 
 
+/*! \brief Query Server: Get additional values. */
+
 void ServiceImplementation::getAdditionalValues(
     const std::string& parameterName,
     uchar coordinateType,
@@ -11030,6 +11156,8 @@ void ServiceImplementation::getAdditionalValues(
 
 
 
+/*! \brief Query Server: Get additional value. */
+
 T::ParamValue ServiceImplementation::getAdditionalValue(
     const std::string& parameterName,
     time_t forecastTime,
@@ -11119,6 +11247,8 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
 
 
 
+
+/*! \brief Query Server: Get closest levels by height. */
 
 bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T::GenerationId generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,double x,double y,int height,HeightRec& rec)
 {
@@ -11316,6 +11446,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
 
 
 
+/*! \brief Query Server: Get closest levels by height. */
+
 bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& contentInfoList,uchar coordinateType,double x,double y,int height,int& level1,float& height1,int& level2,float& height2)
 {
   FUNCTION_TRACE
@@ -11431,6 +11563,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
 
 
 
+
+/*! \brief Query Server: Get closest levels by height. */
 
 bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& contentInfoList,uchar coordinateType,std::vector<T::Coordinate>& coordinates,uint coordinateIndex,std::size_t coordinateHash,int height,int& level1,float& height1,int& level2,float& height2)
 {
@@ -11625,6 +11759,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
 
 
 
+
+/*! \brief Query Server: Get closest levels by height. */
 
 bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T::GenerationId generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,std::vector<T::Coordinate>& coordinates,int height,HeightRec_vec& recs)
 {
@@ -11847,6 +11983,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
 
 
 
+/*! \brief Query Server: Check producer map updates. */
+
 void ServiceImplementation::checkProducerMapUpdates()
 {
   FUNCTION_TRACE
@@ -11898,6 +12036,8 @@ void ServiceImplementation::checkProducerMapUpdates()
 
 
 
+/*! \brief Query Server: Check generation updates. */
+
 void ServiceImplementation::checkGenerationUpdates()
 {
   FUNCTION_TRACE
@@ -11934,6 +12074,8 @@ void ServiceImplementation::checkGenerationUpdates()
 
 
 
+/*! \brief Query Server: Check producer file updates. */
+
 void ServiceImplementation::checkProducerFileUpdates()
 {
   FUNCTION_TRACE
@@ -11960,6 +12102,8 @@ void ServiceImplementation::checkProducerFileUpdates()
 
 
 
+
+/*! \brief Query Server: Check parameter mapping updates. */
 
 void ServiceImplementation::checkParameterMappingUpdates()
 {
@@ -11989,6 +12133,8 @@ void ServiceImplementation::checkParameterMappingUpdates()
 
 
 
+
+/*! \brief Query Server: Update processing. */
 
 void ServiceImplementation::updateProcessing()
 {
@@ -12132,6 +12278,8 @@ void ServiceImplementation::updateProcessing()
 
 
 
+
+/*! \brief Query Server: Start update processing. */
 
 void ServiceImplementation::startUpdateProcessing()
 {

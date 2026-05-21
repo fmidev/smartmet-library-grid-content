@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for FileAndContent. */
+
 FileAndContent::FileAndContent()
 {
   try
@@ -23,6 +25,8 @@ FileAndContent::FileAndContent()
 
 
 
+
+/*! \brief Copy constructor for FileAndContent. */
 
 FileAndContent::FileAndContent(const FileAndContent& fileAndContent)
 {
@@ -41,6 +45,8 @@ FileAndContent::FileAndContent(const FileAndContent& fileAndContent)
 
 
 
+/*! \brief Destructor for FileAndContent. */
+
 FileAndContent::~FileAndContent()
 {
   try
@@ -57,6 +63,8 @@ FileAndContent::~FileAndContent()
 
 
 
+/*! \brief Return a deep copy of this record. */
+
 FileAndContent* FileAndContent::duplicate()
 {
   try
@@ -72,6 +80,8 @@ FileAndContent* FileAndContent::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void FileAndContent::print(std::ostream& stream,uint level,uint optionFlags)
 {

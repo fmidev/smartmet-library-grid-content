@@ -9,6 +9,8 @@ namespace Functions
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_sin::Function_sin()
 {
   try
@@ -23,6 +25,8 @@ Function_sin::Function_sin()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_sin::Function_sin(const Function_sin& function)
 :Function(function)
@@ -40,6 +44,8 @@ Function_sin::Function_sin(const Function_sin& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_sin::~Function_sin()
 {
   try
@@ -55,6 +61,8 @@ Function_sin::~Function_sin()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_sin::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -79,6 +87,8 @@ float Function_sin::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_sin::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -105,6 +115,8 @@ double Function_sin::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_sin::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -138,6 +150,8 @@ void Function_sin::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_sin::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -168,6 +182,8 @@ void Function_sin::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_sin::duplicate()
 {

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the tangent of each grid value (input in radians) element-wise. */
+// ====================================================================================
+
 class Function_tan : public Function
 {
   public:

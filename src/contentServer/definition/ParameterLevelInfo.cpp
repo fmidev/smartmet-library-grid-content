@@ -8,6 +8,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for ParameterLevelInfo. */
+
 ParameterLevelInfo::ParameterLevelInfo()
 {
   try
@@ -25,6 +27,8 @@ ParameterLevelInfo::ParameterLevelInfo()
 
 
 
+
+/*! \brief Copy constructor for ParameterLevelInfo. */
 
 ParameterLevelInfo::ParameterLevelInfo(const ParameterLevelInfo& levelInfo)
 {
@@ -44,6 +48,8 @@ ParameterLevelInfo::ParameterLevelInfo(const ParameterLevelInfo& levelInfo)
 
 
 
+
+/*! \brief Construct ParameterLevelInfo from the given parameter key and level fields. */
 
 ParameterLevelInfo::ParameterLevelInfo(T::ParamKeyType parameterKeyType,
                    T::ParamId parameterKey,
@@ -67,6 +73,8 @@ ParameterLevelInfo::ParameterLevelInfo(T::ParamKeyType parameterKeyType,
 
 
 
+/*! \brief Destructor for ParameterLevelInfo. */
+
 ParameterLevelInfo::~ParameterLevelInfo()
 {
   try
@@ -82,6 +90,8 @@ ParameterLevelInfo::~ParameterLevelInfo()
 
 
 
+
+/*! \brief Copy assignment operator for ParameterLevelInfo. */
 
 ParameterLevelInfo& ParameterLevelInfo::operator=(const ParameterLevelInfo& levelInfo)
 {
@@ -107,6 +117,8 @@ ParameterLevelInfo& ParameterLevelInfo::operator=(const ParameterLevelInfo& leve
 
 
 
+/*! \brief Return a deep copy of this ParameterLevelInfo. */
+
 ParameterLevelInfo* ParameterLevelInfo::duplicate()
 {
   try
@@ -121,6 +133,8 @@ ParameterLevelInfo* ParameterLevelInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

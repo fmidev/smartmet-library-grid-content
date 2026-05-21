@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for GeometryInfo. */
+
 GeometryInfo::GeometryInfo()
 {
   try
@@ -34,6 +36,8 @@ GeometryInfo::GeometryInfo()
 
 
 
+/*! \brief Copy constructor for GeometryInfo. */
+
 GeometryInfo::GeometryInfo(const GeometryInfo& geometryInfo)
 {
   try
@@ -58,6 +62,8 @@ GeometryInfo::GeometryInfo(const GeometryInfo& geometryInfo)
 
 
 
+
+/*! \brief Construct GeometryInfo from a CSV-formatted string. */
 
 GeometryInfo::GeometryInfo(const char *csv)
 {
@@ -85,6 +91,8 @@ GeometryInfo::GeometryInfo(const char *csv)
 
 
 
+/*! \brief Destructor for GeometryInfo. */
+
 GeometryInfo::~GeometryInfo()
 {
   try
@@ -100,6 +108,8 @@ GeometryInfo::~GeometryInfo()
 
 
 
+
+/*! \brief Copy assignment operator for GeometryInfo. */
 
 GeometryInfo& GeometryInfo::operator=(const GeometryInfo& geometryInfo)
 {
@@ -130,6 +140,8 @@ GeometryInfo& GeometryInfo::operator=(const GeometryInfo& geometryInfo)
 
 
 
+/*! \brief Return this record formatted as a CSV row. */
+
 std::string GeometryInfo::getCsv()
 {
   try
@@ -159,6 +171,8 @@ std::string GeometryInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string GeometryInfo::getCsvHeader()
 {
   try
@@ -175,6 +189,8 @@ std::string GeometryInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void GeometryInfo::setCsv(const char *csv)
 {
@@ -227,6 +243,8 @@ void GeometryInfo::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void GeometryInfo::setCsv(const std::string& csv)
 {
   try
@@ -242,6 +260,8 @@ void GeometryInfo::setCsv(const std::string& csv)
 
 
 
+
+/*! \brief Compare two records according to the selected comparison method. */
 
 int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo)
 {
@@ -283,6 +303,8 @@ int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo)
 
 
 
+/*! \brief Return a deep copy of this GeometryInfo. */
+
 GeometryInfo* GeometryInfo::duplicate()
 {
   try
@@ -298,6 +320,8 @@ GeometryInfo* GeometryInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void GeometryInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

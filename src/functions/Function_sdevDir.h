@@ -8,7 +8,9 @@ namespace SmartMet
 namespace Functions
 {
 
-// Standard deviation
+// ====================================================================================
+/*! \brief Computes the circular standard deviation of directional angles over an ensemble of grids. */
+// ====================================================================================
 
 class Function_sdevDir : public Function
 {

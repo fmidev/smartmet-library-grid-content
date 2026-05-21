@@ -12,7 +12,14 @@ namespace SmartMet
 namespace T
 {
 
-
+// ====================================================================================
+/*! \brief Serialisable key-value message used to encode an HTTP ContentServer request.
+ *
+ *  Lines are stored as plain strings and may optionally carry a key prefix so that
+ *  the server side can locate named parameters by key.  The HTTP client populates a
+ *  RequestMessage before sending it and the HTTP server deserialises it with the
+ *  getLineByKey() family of methods. */
+// ====================================================================================
 class RequestMessage
 {
   public:
@@ -53,7 +60,7 @@ class RequestMessage
 
   protected:
 
-     std::vector<std::string> mLines;
+     std::vector<std::string> mLines;  //!< Ordered list of serialised lines (optionally key=value formatted).
 };
 
 

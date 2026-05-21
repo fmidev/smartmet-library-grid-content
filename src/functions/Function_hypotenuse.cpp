@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_hypotenuse::Function_hypotenuse()
 {
   try
@@ -22,6 +24,8 @@ Function_hypotenuse::Function_hypotenuse()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_hypotenuse::Function_hypotenuse(const Function_hypotenuse& function)
 :Function(function)
@@ -38,6 +42,8 @@ Function_hypotenuse::Function_hypotenuse(const Function_hypotenuse& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_hypotenuse::~Function_hypotenuse()
 {
   try
@@ -53,6 +59,8 @@ Function_hypotenuse::~Function_hypotenuse()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -79,6 +87,8 @@ float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -104,6 +114,8 @@ double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -147,6 +159,8 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -187,6 +201,8 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_hypotenuse::duplicate()
 {
   try
@@ -201,6 +217,8 @@ Function* Function_hypotenuse::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_hypotenuse::print(std::ostream& stream,uint level,uint optionFlags)
 {

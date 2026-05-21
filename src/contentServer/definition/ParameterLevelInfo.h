@@ -8,6 +8,14 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Identifies a parameter-level combination using an abstract parameter key.
+ *
+ *  ParameterLevelInfo combines a parameter key type and key value with a level type
+ *  and level value to uniquely address a single grid field dimension. It is used when
+ *  querying content without restricting to a specific parameter identification scheme
+ *  (FMI id, GRIB1, GRIB2, etc.). */
+// ====================================================================================
 
 class ParameterLevelInfo
 {
@@ -28,10 +36,10 @@ class ParameterLevelInfo
     ParameterLevelInfo*  duplicate();
     void                 print(std::ostream& stream,uint level,uint optionFlags);
 
-    T::ParamKeyType      mParameterKeyType;
-    T::ParamId           mParameterKey;
-    T::ParamLevelId      mParameterLevelId;
-    T::ParamLevel        mLevel;
+    T::ParamKeyType      mParameterKeyType;   //!< Scheme identifying how mParameterKey should be interpreted.
+    T::ParamId           mParameterKey;       //!< Parameter identifier within the scheme given by mParameterKeyType.
+    T::ParamLevelId      mParameterLevelId;   //!< Vertical level type identifier.
+    T::ParamLevel        mLevel;              //!< Numeric vertical level value.
 };
 
 

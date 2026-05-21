@@ -10,6 +10,12 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// ====================================================================================
+/*! \brief Manages a hot-reloading collection of AliasFile objects.
+ *
+ *  Aggregates multiple AliasFile instances and dispatches alias lookups across all
+ *  of them in order.  checkUpdates() periodically re-reads changed alias files. */
+// ====================================================================================
 
 class AliasFileCollection
 {
@@ -30,12 +36,12 @@ class AliasFileCollection
 
   protected:
 
-    AliasFile_vec     mAliasFileList;
-    string_vec        mFilenames;
-    ModificationLock  mModificationLock;
-    time_t            mLastCheck;
-    uint              mCheckInterval;
-    bool              mDuplicatesAllowed;
+    AliasFile_vec     mAliasFileList;      //!< Loaded AliasFile instances, one per filename.
+    string_vec        mFilenames;          //!< Paths of the alias files managed by this collection.
+    ModificationLock  mModificationLock;   //!< Lock protecting the file list during updates.
+    time_t            mLastCheck;          //!< Timestamp of the last modification-check pass.
+    uint              mCheckInterval;      //!< Minimum seconds between successive modification checks.
+    bool              mDuplicatesAllowed;  //!< Propagated to each AliasFile at construction time.
 };
 
 

@@ -13,8 +13,16 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::map<std::string,ParameterMapping_vec> MappingSearch;
-typedef std::shared_ptr<MappingSearch> MappingSearch_sptr;
+typedef std::map<std::string,ParameterMapping_vec> MappingSearch;        //!< Map from parameter name to matching ParameterMapping records.
+typedef std::shared_ptr<MappingSearch> MappingSearch_sptr;               //!< Shared pointer to a MappingSearch map.
+
+// ====================================================================================
+/*! \brief Loads and indexes a file of ParameterMapping definitions.
+ *
+ *  Reads mapping records from a text file and builds forward and reverse search
+ *  indexes.  checkUpdates() hot-reloads when the file changes on disk.  Multiple
+ *  getMappings() overloads allow filtering by producer, geometry, and level. */
+// ====================================================================================
 
 class ParameterMappingFile
 {
@@ -42,16 +50,16 @@ class ParameterMappingFile
 
     virtual void          loadFile();
 
-    std::string           mFilename;
-    time_t                mLastModified;
-    MappingSearch_sptr    mMappingSearch;
-    MappingSearch_sptr    mMappingReverseSearch;
-    ModificationLock      mModificationLock;
-    ThreadLock            mFileReadLock;
+    std::string           mFilename;              //!< Path to the parameter mapping file on disk.
+    time_t                mLastModified;          //!< File mtime at last load, used for change detection.
+    MappingSearch_sptr    mMappingSearch;         //!< Forward index: parameter name → ParameterMapping records.
+    MappingSearch_sptr    mMappingReverseSearch;  //!< Reverse index: parameter key → ParameterMapping records.
+    ModificationLock      mModificationLock;      //!< Lock protecting index replacement during hot-reload.
+    ThreadLock            mFileReadLock;          //!< Mutex serialising file I/O during reload.
 };
 
 
-typedef std::vector<ParameterMappingFile> ParamMappingFile_vec;
+typedef std::vector<ParameterMappingFile> ParamMappingFile_vec;  //!< Ordered collection of ParameterMappingFile objects.
 
 
 }  // namespace QueryServer

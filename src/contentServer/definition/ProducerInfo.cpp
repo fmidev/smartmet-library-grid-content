@@ -11,6 +11,8 @@ namespace T
 
 
 
+/*! \brief Default constructor for ProducerInfo. */
+
 ProducerInfo::ProducerInfo()
 {
   try
@@ -31,6 +33,8 @@ ProducerInfo::ProducerInfo()
 
 
 
+
+/*! \brief Copy constructor for ProducerInfo. */
 
 ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
 {
@@ -57,6 +61,8 @@ ProducerInfo::ProducerInfo(const ProducerInfo& producerInfo)
 
 
 
+/*! \brief Construct ProducerInfo from a CSV-formatted string. */
+
 ProducerInfo::ProducerInfo(const char *csv)
 {
   try
@@ -78,6 +84,8 @@ ProducerInfo::ProducerInfo(const char *csv)
 
 
 
+/*! \brief Destructor for ProducerInfo. */
+
 ProducerInfo::~ProducerInfo()
 {
   try
@@ -93,6 +101,8 @@ ProducerInfo::~ProducerInfo()
 
 
 
+
+/*! \brief Copy assignment operator for ProducerInfo. */
 
 ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
 {
@@ -124,6 +134,8 @@ ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
 
 
 
+/*! \brief Return this record formatted as a CSV row. */
+
 std::string ProducerInfo::getCsv()
 {
   try
@@ -151,6 +163,8 @@ std::string ProducerInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string ProducerInfo::getCsvHeader()
 {
   try
@@ -167,6 +181,8 @@ std::string ProducerInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void ProducerInfo::setCsv(const char *csv)
 {
@@ -219,6 +235,8 @@ void ProducerInfo::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void ProducerInfo::setCsv(const std::string& csv)
 {
   try
@@ -235,6 +253,8 @@ void ProducerInfo::setCsv(const std::string& csv)
 
 
 
+/*! \brief Return a deep copy of this ProducerInfo. */
+
 ProducerInfo* ProducerInfo::duplicate()
 {
   try
@@ -250,6 +270,8 @@ ProducerInfo* ProducerInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

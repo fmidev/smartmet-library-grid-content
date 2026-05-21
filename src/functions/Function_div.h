@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Divides every grid value by a constant divisor. */
+// ====================================================================================
+
 class Function_div : public Function
 {
   public:

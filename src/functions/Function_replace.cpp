@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_replace::Function_replace()
 {
   try
@@ -22,6 +24,8 @@ Function_replace::Function_replace()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_replace::Function_replace(const Function_replace& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_replace::Function_replace(const Function_replace& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_replace::~Function_replace()
 {
   try
@@ -54,6 +60,8 @@ Function_replace::~Function_replace()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_replace::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -85,6 +93,8 @@ float Function_replace::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_replace::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -114,6 +124,8 @@ double Function_replace::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -157,6 +169,8 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -198,6 +212,8 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_replace::duplicate()
 {

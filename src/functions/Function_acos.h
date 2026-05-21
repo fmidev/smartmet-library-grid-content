@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the arc cosine (in radians) of each grid value element-wise. */
+// ====================================================================================
+
 class Function_acos : public Function
 {
   public:

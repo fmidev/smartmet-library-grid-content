@@ -17,6 +17,14 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Sorted, indexed container of ContentInfo pointers with thread-safe access.
+ *
+ *  ContentInfoList stores a dynamic array of ContentInfo pointers and keeps them
+ *  sorted according to a configurable comparison method so that binary-search lookups
+ *  are available. The class provides rich query methods covering parameter id/name,
+ *  generation, geometry, forecast time, and source filtering. */
+// ====================================================================================
 
 class ContentInfoList
 {
@@ -69,10 +77,6 @@ class ContentInfoList
 
     ContentInfo*        getContentInfoByIndex(uint index) const;
     ContentInfo*        getContentInfoByIndexNoCheck(uint index);
-    //ContentInfo*        getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex);
-    //ContentInfo*        getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx);
-    //ContentInfo*        getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex);
-    //ContentInfo*        getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx);
     bool                getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo);
     ContentInfo*        getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
 
@@ -115,8 +119,6 @@ class ContentInfoList
     void                getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList);
     void                getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList);
 
-    //void                getContentInfoListByRequestCounterKey(UInt64 key,ContentInfoList& contentInfoList);
-
     void                getContentListByForecastTime(const std::string& forecastTime,T::ContentInfoList& contentInfoList);
     void                getContentListByForecastTime(time_t forecastTimeUTC,T::ContentInfoList& contentInfoList);
 
@@ -127,7 +129,6 @@ class ContentInfoList
     void                getContentInfoListByProducerId(T::ProducerId producerId,ContentInfoList& contentInfoList);
     void                getContentInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
     int                 getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo);
-    //int                 getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo);
     void                getContentInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
 
     void                getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList);
@@ -183,13 +184,13 @@ class ContentInfoList
 
   protected:
 
-    ContentInfoPtr      *mArray;
-    uint                mSize;
-    uint                mLength;
-    ModificationLock    mModificationLock;
-    ModificationLock*   mModificationLockPtr;
-    bool                mReleaseObjects;
-    uint                mComparisonMethod;
+    ContentInfoPtr      *mArray;             //!< Heap-allocated array of ContentInfo pointers.
+    uint                mSize;              //!< Allocated capacity of mArray.
+    uint                mLength;            //!< Number of valid entries currently stored.
+    ModificationLock    mModificationLock;  //!< Owned modification lock used when no external lock is set.
+    ModificationLock*   mModificationLockPtr; //!< Pointer to the active modification lock (may be external).
+    bool                mReleaseObjects;    //!< If true, destructor deletes the pointed-to ContentInfo objects.
+    uint                mComparisonMethod;  //!< Current sort order (one of ContentInfo::ComparisonMethod constants).
 
   public:
 

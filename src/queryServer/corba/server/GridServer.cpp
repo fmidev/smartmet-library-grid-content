@@ -29,6 +29,8 @@ static void* GridServer_maintenanceThread(void *arg)
 
 
 
+/*! \brief Query Server: Constructor. */
+
 GridServer::GridServer(const char *address,const char *port)
 {
   try
@@ -94,6 +96,8 @@ GridServer::GridServer(const char *address,const char *port)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 GridServer::~GridServer()
 {
   try
@@ -110,6 +114,8 @@ GridServer::~GridServer()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void GridServer::init(ContentServer::ServiceInterface *contentServiceInterface,DataServer::ServiceInterface *dataServiceInterface,QueryServer::ServiceInterface *queryServiceInterface)
 {
@@ -193,6 +199,8 @@ void GridServer::init(ContentServer::ServiceInterface *contentServiceInterface,D
 
 
 
+/*! \brief Query Server: Shutdown. */
+
 void GridServer::shutdown()
 {
   try
@@ -209,6 +217,8 @@ void GridServer::shutdown()
 
 
 
+/*! \brief Query Server: Start. */
+
 void GridServer::start()
 {
   try
@@ -223,6 +233,8 @@ void GridServer::start()
 
 
 
+
+/*! \brief Query Server: Run. */
 
 void GridServer::run()
 {
@@ -264,6 +276,8 @@ void GridServer::run()
 
 
 
+/*! \brief Query Server: Get content service ior. */
+
 std::string GridServer::getContentServiceIor()
 {
   try
@@ -280,6 +294,8 @@ std::string GridServer::getContentServiceIor()
 
 
 
+/*! \brief Query Server: Get data service ior. */
+
 std::string GridServer::getDataServiceIor()
 {
   try
@@ -295,6 +311,8 @@ std::string GridServer::getDataServiceIor()
 
 
 
+
+/*! \brief Query Server: Get query service ior. */
 
 std::string GridServer::getQueryServiceIor()
 {

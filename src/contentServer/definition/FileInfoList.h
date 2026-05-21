@@ -12,6 +12,13 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Sorted, indexed container of FileInfo pointers with thread-safe access.
+ *
+ *  FileInfoList stores file metadata records in a heap-allocated array and keeps them
+ *  sorted so that binary-search lookups by file id or file name are efficient. It
+ *  supports partitioned queries by producer, generation, and source id. */
+// ====================================================================================
 
 class FileInfoList
 {
@@ -88,13 +95,13 @@ class FileInfoList
 
   protected:
 
-    FileInfoPtr        *mArray;
-    uint               mSize;
-    uint               mLength;
-    bool               mReleaseObjects;
-    ModificationLock   mModificationLock;
-    ModificationLock*  mModificationLockPtr;
-    uint               mComparisonMethod;
+    FileInfoPtr        *mArray;             //!< Heap-allocated array of FileInfo pointers.
+    uint               mSize;              //!< Allocated capacity of mArray.
+    uint               mLength;            //!< Number of valid entries currently stored.
+    bool               mReleaseObjects;    //!< If true, destructor deletes the pointed-to FileInfo objects.
+    ModificationLock   mModificationLock;  //!< Owned modification lock used when no external lock is set.
+    ModificationLock*  mModificationLockPtr; //!< Pointer to the active modification lock (may be external).
+    uint               mComparisonMethod;  //!< Current sort order (one of FileInfo::ComparisonMethod constants).
 };
 
 

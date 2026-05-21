@@ -13,6 +13,12 @@ namespace QueryServer
 namespace Corba
 {
 
+// ====================================================================================
+/*! \brief Standalone CORBA server that publishes a single QueryServer service endpoint.
+ *
+ *  Binds an ORB to the given address and port, activates the ServerInterface servant,
+ *  and runs the request loop in a dedicated background thread. */
+// ====================================================================================
 
 class Server
 {
@@ -29,16 +35,16 @@ class Server
 
   protected:
 
-    CORBA::ORB_var                  mOrb;
-    PortableServer::POA_var         mRootPoa;
-    PortableServer::POA_var         mPoa;
-    PortableServer::POAManager_var  mPman;
-    ServerInterface                 mCorbaInterface;
-    QueryServer::ServiceInterface*  mServiceInterface;
-    std::string                     mServiceIor;
-    std::string                     mAddress;
-    std::string                     mPort;
-    pthread_t                       mThread;
+    CORBA::ORB_var                  mOrb;              //!< CORBA ORB instance.
+    PortableServer::POA_var         mRootPoa;          //!< Root Portable Object Adapter.
+    PortableServer::POA_var         mPoa;              //!< Child POA used to activate the servant.
+    PortableServer::POAManager_var  mPman;             //!< POA manager that controls request processing.
+    ServerInterface                 mCorbaInterface;   //!< CORBA servant wrapping the local service.
+    QueryServer::ServiceInterface*  mServiceInterface; //!< Local QueryServer service implementation.
+    std::string                     mServiceIor;       //!< IOR string published after servant activation.
+    std::string                     mAddress;          //!< Network address the ORB listens on.
+    std::string                     mPort;             //!< Port number the ORB listens on.
+    pthread_t                       mThread;           //!< Background thread running the ORB event loop.
 
 };
 

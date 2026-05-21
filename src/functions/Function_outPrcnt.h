@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the percentage of ensemble members whose value falls outside the specified [min, max] range. */
+// ====================================================================================
+
 class Function_outPrcnt : public Function
 {
   public:

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Rounds every grid value to a specified number of decimal places. */
+// ====================================================================================
+
 class Function_round : public Function
 {
   public:

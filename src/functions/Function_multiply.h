@@ -8,7 +8,9 @@ namespace SmartMet
 namespace Functions
 {
 
-// The function multiplies each input parameter by the value 'multiplyer'.
+// ====================================================================================
+/*! \brief Multiplies every grid value by a constant scalar factor. */
+// ====================================================================================
 
 class Function_multiply : public Function
 {
@@ -30,7 +32,7 @@ class Function_multiply : public Function
 
   protected:
 
-    double          mMultiplyer;
+    double          mMultiplyer;  //!< Constant factor applied to each grid value.
 };
 
 

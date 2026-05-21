@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Tests equality of two grid values element-wise, returning 1 where equal and 0 otherwise. */
+// ====================================================================================
+
 class Function_eq : public Function
 {
   public:

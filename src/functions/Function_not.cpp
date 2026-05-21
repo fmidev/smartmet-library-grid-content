@@ -9,6 +9,8 @@ namespace Functions
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_not::Function_not()
 {
   try
@@ -23,6 +25,8 @@ Function_not::Function_not()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_not::Function_not(const Function_not& function)
 :Function(function)
@@ -40,6 +44,8 @@ Function_not::Function_not(const Function_not& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_not::~Function_not()
 {
   try
@@ -55,6 +61,8 @@ Function_not::~Function_not()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_not::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -84,6 +92,8 @@ float Function_not::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_not::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -115,6 +125,8 @@ double Function_not::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -154,6 +166,8 @@ void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -190,6 +204,8 @@ void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_not::duplicate()
 {

@@ -10,6 +10,8 @@ namespace Functions
 #define PI 3.1415926535898
 
 
+/*! \brief Function: Constructor. */
+
 Function_sdevDir::Function_sdevDir()
 {
   try
@@ -24,6 +26,8 @@ Function_sdevDir::Function_sdevDir()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_sdevDir::Function_sdevDir(const Function_sdevDir& function)
 :Function(function)
@@ -41,6 +45,8 @@ Function_sdevDir::Function_sdevDir(const Function_sdevDir& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_sdevDir::~Function_sdevDir()
 {
   try
@@ -56,6 +62,8 @@ Function_sdevDir::~Function_sdevDir()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_sdevDir::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -86,6 +94,8 @@ float Function_sdevDir::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_sdevDir::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -118,6 +128,8 @@ double Function_sdevDir::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -160,6 +172,8 @@ void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -199,6 +213,8 @@ void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_sdevDir::duplicate()
 {

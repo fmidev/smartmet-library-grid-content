@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Counts the number of valid (non-missing) values across an ensemble of grids element-wise. */
+// ====================================================================================
+
 class Function_valid : public Function
 {
   public:

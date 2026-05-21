@@ -10,6 +10,13 @@ namespace SmartMet
 namespace SessionManagement
 {
 
+// ====================================================================================
+/*! \brief In-memory implementation of the SessionManagement ServiceInterface.
+ *
+ *  Stores sessions in a std::map protected by a ModificationLock.  A global
+ *  instance (localSessionManagement) is provided for use within a single process. */
+// ====================================================================================
+
 class ServiceImplementation : public ServiceInterface
 {
   public:
@@ -35,8 +42,8 @@ class ServiceImplementation : public ServiceInterface
      virtual int    _deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList);
 
 
-     SessionInfo_sptr_map mSessions;
-     ModificationLock     mModificationLock;
+     SessionInfo_sptr_map mSessions;          //!< In-memory map of active sessions keyed by session id.
+     ModificationLock     mModificationLock;  //!< Lock protecting concurrent access to mSessions.
 };
 
 extern ServiceImplementation localSessionManagement;

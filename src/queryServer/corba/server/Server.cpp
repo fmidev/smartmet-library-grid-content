@@ -29,6 +29,8 @@ static void* Server_maintenanceThread(void *arg)
 
 
 
+/*! \brief Query Server: Constructor. */
+
 Server::Server(const char *address,const char *port)
 {
   try
@@ -92,6 +94,8 @@ Server::Server(const char *address,const char *port)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 Server::~Server()
 {
   try
@@ -108,6 +112,8 @@ Server::~Server()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void Server::init(QueryServer::ServiceInterface *serviceInterface)
 {
@@ -160,6 +166,8 @@ void Server::init(QueryServer::ServiceInterface *serviceInterface)
 
 
 
+/*! \brief Query Server: Shutdown. */
+
 void Server::shutdown()
 {
   try
@@ -176,6 +184,8 @@ void Server::shutdown()
 
 
 
+/*! \brief Query Server: Start. */
+
 void Server::start()
 {
   try
@@ -190,6 +200,8 @@ void Server::start()
 
 
 
+
+/*! \brief Query Server: Run. */
 
 void Server::run()
 {
@@ -230,6 +242,8 @@ void Server::run()
 
 
 
+
+/*! \brief Query Server: Get service ior. */
 
 std::string Server::getServiceIor()
 {

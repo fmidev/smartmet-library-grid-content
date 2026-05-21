@@ -13,6 +13,10 @@ const double degreesToRadiansMultiplier = 0.0174532925199;
 const double radiansToDegreesMultiplier = 57.2957795131;
 
 
+// ====================================================================================
+/*! \brief Abstract base class for all grid mathematical and meteorological functions. */
+// ====================================================================================
+
 class Function
 {
   public:
@@ -37,8 +41,8 @@ class Function
 };
 
 
-typedef Function* FunctionPtr;
-typedef std::vector<FunctionPtr> FunctionPtr_vec;
+typedef Function* FunctionPtr;          //!< Non-owning pointer to a Function.
+typedef std::vector<FunctionPtr> FunctionPtr_vec;  //!< Ordered list of non-owning Function pointers.
 
 
 }  // namespace Functions

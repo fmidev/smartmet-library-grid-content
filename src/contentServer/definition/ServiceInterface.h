@@ -31,17 +31,31 @@ namespace SmartMet
 namespace ContentServer
 {
 
+/*! \brief Identifies the active Content Server backend implementation. */
 enum class Implementation
 {
-  Interface = 0,
-  Redis = 1,
-  Cache = 2,
-  CorbaClient = 3,
-  HttpClient = 4,
-  Memory = 5,
-  Postgres = 6
+  Interface   = 0, //!< Base interface (no storage; used for proxies that delegate).
+  Redis       = 1, //!< Persistent Redis backend via hiredis.
+  Cache       = 2, //!< In-memory cache that synchronises from a master source via events.
+  CorbaClient = 3, //!< Remote access proxy using CORBA.
+  HttpClient  = 4, //!< Remote access proxy using HTTP.
+  Memory      = 5, //!< Lightweight pure in-memory backend without event monitoring.
+  Postgres    = 6  //!< Persistent PostgreSQL backend via libpq.
 };
 
+// ====================================================================================
+/*! \brief Abstract base class defining the full Content Server API.
+ *
+ *  ServiceInterface declares ~100 virtual service methods covering the complete
+ *  lifecycle management of producers, generations, geometries, files, content records,
+ *  and change events. Concrete backend implementations (Redis, Cache, PostgreSQL, CORBA
+ *  client, HTTP client, Memory) override the protected underscore-prefixed variants
+ *  while the public methods add uniform cross-cutting behaviour such as logging and
+ *  timing.
+ *
+ *  Callers obtain a pointer to ServiceInterface and are therefore decoupled from the
+ *  actual storage or transport mechanism in use. */
+// ====================================================================================
 
 class ServiceInterface
 {
@@ -63,8 +77,6 @@ class ServiceInterface
      virtual void   setEnabled(bool enabled);
      virtual bool   isReady();
      virtual bool   isEnabled();
-
-     //virtual std::string&   getSourceInfo();
 
      virtual int    clear(T::SessionId sessionId);
      virtual int    reload(T::SessionId sessionId);

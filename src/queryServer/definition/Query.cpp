@@ -12,6 +12,8 @@ namespace QueryServer
 
 
 
+/*! \brief Query Server: Constructor. */
+
 Query::Query()
 {
   try
@@ -74,6 +76,8 @@ Query::Query(const Query& query)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 Query::~Query()
 {
   try
@@ -89,6 +93,8 @@ Query::~Query()
 
 
 
+
+/*! \brief Query Server: Get hash. */
 
 std::size_t Query::getHash()
 {
@@ -147,6 +153,8 @@ std::size_t Query::getHash()
 
 
 
+/*! \brief Query Server: Parameter in query. */
+
 bool Query::parameterInQuery(const std::string& param)
 {
   try
@@ -167,6 +175,8 @@ bool Query::parameterInQuery(const std::string& param)
 
 
 
+
+/*! \brief Query Server: Get values per time step. */
 
 uint Query::getValuesPerTimeStep()
 {
@@ -194,6 +204,8 @@ uint Query::getValuesPerTimeStep()
 
 
 
+/*! \brief Query Server: Get query parameter ptr. */
+
 QueryParameter* Query::getQueryParameterPtr(const std::string& param)
 {
   try
@@ -215,6 +227,8 @@ QueryParameter* Query::getQueryParameterPtr(const std::string& param)
 
 
 
+/*! \brief Query Server: Get query parameter ptr. */
+
 QueryParameter* Query::getQueryParameterPtr(uint id)
 {
   try
@@ -235,6 +249,8 @@ QueryParameter* Query::getQueryParameterPtr(uint id)
 
 
 
+
+/*! \brief Query Server: Get result producer id list. */
 
 void Query::getResultProducerIdList(std::set<T::ProducerId>& producerIdList)
 {
@@ -258,6 +274,8 @@ void Query::getResultProducerIdList(std::set<T::ProducerId>& producerIdList)
 
 
 
+
+/*! \brief Query Server: Remove temporary parameters. */
 
 void Query::removeTemporaryParameters()
 {
@@ -283,6 +301,8 @@ void Query::removeTemporaryParameters()
 
 
 
+/*! \brief Query Server: Remove aggregation values. */
+
 void Query::removeAggregationValues()
 {
   try
@@ -303,6 +323,8 @@ void Query::removeAggregationValues()
 
 
 
+
+/*! \brief Query Server: Remove aggregation times. */
 
 void Query::removeAggregationTimes()
 {
@@ -327,6 +349,8 @@ void Query::removeAggregationTimes()
 
 
 
+/*! \brief Query Server: Remove internal aggregation values. */
+
 void Query::removeInternalAggregationValues()
 {
   try
@@ -350,6 +374,8 @@ void Query::removeInternalAggregationValues()
 
 
 
+/*! \brief Query Server: Update forecast time list. */
+
 void Query::updateForecastTimeList()
 {
   try
@@ -367,6 +393,8 @@ void Query::updateForecastTimeList()
 
 }
 
+
+/*! \brief Query Server: Print. */
 
 void Query::print(std::ostream& stream,uint level,uint optionFlags)
 {

@@ -8,11 +8,9 @@ namespace SmartMet
 namespace Functions
 {
 
-// The function adds the value 'valueToAdd" into each input parameter. For
-// example if the input parameters represent temperature in Kelvins, then
-// we can easily create a conversion functio "Kelvins => Celsius" by setting
-// valueToAdd = -273.15.
-
+// ====================================================================================
+/*! \brief Adds a constant scalar offset to every grid value (e.g. Kelvin to Celsius). */
+// ====================================================================================
 
 class Function_add : public Function
 {
@@ -34,7 +32,7 @@ class Function_add : public Function
 
   protected:
 
-    double            mValueToAdd;
+    double            mValueToAdd;  //!< Scalar offset added to each grid value.
 };
 
 

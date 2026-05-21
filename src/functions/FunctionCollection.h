@@ -9,8 +9,12 @@ namespace SmartMet
 namespace Functions
 {
 
-typedef std::unordered_map<std::string,FunctionPtr> FunctionList;
+typedef std::unordered_map<std::string,FunctionPtr> FunctionList;  //!< Map of function name to Function instance pointer.
 
+
+// ====================================================================================
+/*! \brief Registry that maps function names to Function instances and dispatches calls. */
+// ====================================================================================
 
 class FunctionCollection
 {
@@ -38,7 +42,7 @@ class FunctionCollection
 
   protected:
 
-    FunctionList        mFunctionList;
+    FunctionList        mFunctionList;  //!< Registered functions keyed by name.
 };
 
 

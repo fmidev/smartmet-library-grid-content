@@ -29,6 +29,8 @@ static void* Server_maintenanceThread(void *arg)
 
 
 
+/*! \brief Data Server: Constructor. */
+
 Server::Server(const char *address,const char *port)
 {
   try
@@ -89,6 +91,8 @@ Server::Server(const char *address,const char *port)
 
 
 
+/*! \brief Data Server: Destructor. */
+
 Server::~Server()
 {
   try
@@ -106,6 +110,8 @@ Server::~Server()
 
 
 
+
+/*! \brief Data Server: Init. */
 
 void Server::init(DataServer::ServiceInterface *serviceInterface)
 {
@@ -158,6 +164,8 @@ void Server::init(DataServer::ServiceInterface *serviceInterface)
 
 
 
+/*! \brief Data Server: Shutdown. */
+
 void Server::shutdown()
 {
   try
@@ -173,6 +181,8 @@ void Server::shutdown()
 
 
 
+/*! \brief Data Server: Start. */
+
 void Server::start()
 {
   try
@@ -187,6 +197,8 @@ void Server::start()
 
 
 
+
+/*! \brief Data Server: Run. */
 
 void Server::run()
 {
@@ -227,6 +239,8 @@ void Server::run()
 
 
 
+
+/*! \brief Data Server: Get service ior. */
 
 std::string Server::getServiceIor()
 {

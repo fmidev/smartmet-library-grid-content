@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_windV::Function_windV()
 {
   try
@@ -22,6 +24,8 @@ Function_windV::Function_windV()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_windV::Function_windV(const Function_windV& function)
 :Function(function)
@@ -38,6 +42,8 @@ Function_windV::Function_windV(const Function_windV& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_windV::~Function_windV()
 {
   try
@@ -51,6 +57,8 @@ Function_windV::~Function_windV()
 }
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_windV::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -82,6 +90,8 @@ float Function_windV::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_windV::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -112,6 +122,8 @@ double Function_windV::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -157,6 +169,8 @@ void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -200,6 +214,8 @@ void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_windV::duplicate()
 {
   try
@@ -214,6 +230,8 @@ Function* Function_windV::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_windV::print(std::ostream& stream,uint level,uint optionFlags)
 {

@@ -6,6 +6,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for FileListStorage. */
+
 FileListStorage::FileListStorage()
 {
   try
@@ -24,6 +26,8 @@ FileListStorage::FileListStorage()
 
 
 
+
+/*! \brief Copy constructor for FileListStorage. */
 
 FileListStorage::FileListStorage(FileListStorage& fileListStorage)
 {
@@ -44,6 +48,8 @@ FileListStorage::FileListStorage(FileListStorage& fileListStorage)
 
 
 
+/*! \brief Destructor for FileListStorage. */
+
 FileListStorage::~FileListStorage()
 {
   try
@@ -59,6 +65,8 @@ FileListStorage::~FileListStorage()
 
 
 
+
+/*! \brief Add a FileInfo record into the appropriate sub-list. */
 
 void FileListStorage::addFileInfo(FileInfo *fileInfo)
 {
@@ -79,6 +87,8 @@ void FileListStorage::addFileInfo(FileInfo *fileInfo)
 
 
 
+/*! \brief Remove all entries from every sub-list. */
+
 void FileListStorage::clear()
 {
   try
@@ -94,6 +104,8 @@ void FileListStorage::clear()
 
 
 
+
+/*! \brief Delete the entry matching the given file id. */
 
 bool FileListStorage::deleteFileInfoById(T::FileId fileId)
 {
@@ -111,6 +123,8 @@ bool FileListStorage::deleteFileInfoById(T::FileId fileId)
 
 
 
+/*! \brief Delete all entries whose producer id matches the given value. */
+
 uint FileListStorage::deleteFileInfoByProducerId(T::ProducerId producerId)
 {
   try
@@ -127,6 +141,8 @@ uint FileListStorage::deleteFileInfoByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Delete all entries whose generation id matches the given value. */
+
 uint FileListStorage::deleteFileInfoByGenerationId(T::GenerationId generationId)
 {
   try
@@ -142,6 +158,8 @@ uint FileListStorage::deleteFileInfoByGenerationId(T::GenerationId generationId)
 
 
 
+
+/*! \brief Delete the entry at the given global index. */
 
 bool FileListStorage::deleteFileInfoByIndex(uint index)
 {
@@ -167,6 +185,8 @@ bool FileListStorage::deleteFileInfoByIndex(uint index)
 
 
 
+/*! \brief Delete the entry matching the given filename. */
+
 bool FileListStorage::deleteFileInfoByName(const std::string& filename)
 {
   try
@@ -187,6 +207,8 @@ bool FileListStorage::deleteFileInfoByName(const std::string& filename)
 
 
 
+/*! \brief Delete all entries whose source id matches the given value. */
+
 uint FileListStorage::deleteFileInfoBySourceId(T::SourceId sourceId)
 {
   try
@@ -202,6 +224,8 @@ uint FileListStorage::deleteFileInfoBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Delete all entries whose storage id matches the given value. */
 
 uint FileListStorage::deleteFileInfoByStorageId(T::StorageId storageId)
 {
@@ -225,6 +249,8 @@ uint FileListStorage::deleteFileInfoByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Remove all entries previously flagged for deletion. */
+
 uint FileListStorage::deleteMarkedFiles()
 {
   try
@@ -244,6 +270,8 @@ uint FileListStorage::deleteMarkedFiles()
 
 
 
+/*! \brief Return the FileInfo matching the given file id. */
+
 FileInfo* FileListStorage::getFileInfoById(T::FileId fileId)
 {
   try
@@ -260,6 +288,8 @@ FileInfo* FileListStorage::getFileInfoById(T::FileId fileId)
 
 
 
+/*! \brief Copy the FileInfo matching the given file id into the output structure. */
+
 bool FileListStorage::getFileInfoById(T::FileId fileId,FileInfo& fileInfo)
 {
   try
@@ -275,6 +305,8 @@ bool FileListStorage::getFileInfoById(T::FileId fileId,FileInfo& fileInfo)
 
 
 
+
+/*! \brief Return the FileInfo matching the given filename. */
 
 FileInfo* FileListStorage::getFileInfoByName(const std::string& filename)
 {
@@ -297,6 +329,8 @@ FileInfo* FileListStorage::getFileInfoByName(const std::string& filename)
 
 
 
+/*! \brief Copy the FileInfo matching the given filename into the output structure. */
+
 bool FileListStorage::getFileInfoByName(const std::string& filename,FileInfo& fileInfo)
 {
   try
@@ -316,6 +350,8 @@ bool FileListStorage::getFileInfoByName(const std::string& filename,FileInfo& fi
 
 
 
+
+/*! \brief Return the FileInfo at the given global index. */
 
 FileInfo* FileListStorage::getFileInfoByIndex(uint index)
 {
@@ -341,6 +377,8 @@ FileInfo* FileListStorage::getFileInfoByIndex(uint index)
 
 
 
+/*! \brief Return the number of entries matching the given producer id. */
+
 uint FileListStorage::getFileInfoCountByProducerId(T::ProducerId producerId)
 {
   try
@@ -356,6 +394,8 @@ uint FileListStorage::getFileInfoCountByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Return the number of entries matching the given generation id. */
 
 uint FileListStorage::getFileInfoCountByGenerationId(T::GenerationId generationId)
 {
@@ -373,6 +413,8 @@ uint FileListStorage::getFileInfoCountByGenerationId(T::GenerationId generationI
 
 
 
+/*! \brief Return the number of entries matching the given source id. */
+
 uint FileListStorage::getFileInfoCountBySourceId(T::SourceId sourceId)
 {
   try
@@ -388,6 +430,8 @@ uint FileListStorage::getFileInfoCountBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Copy the entire combined list into the given target list. */
 
 void FileListStorage::getFileInfoList(FileInfoList& fileInfoList)
 {
@@ -406,6 +450,8 @@ void FileListStorage::getFileInfoList(FileInfoList& fileInfoList)
 
 
 
+
+/*! \brief Copy a paginated slice of the combined list starting from the given file id. */
 
 void FileListStorage::getFileInfoList(T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -433,6 +479,8 @@ void FileListStorage::getFileInfoList(T::FileId startFileId,int maxRecords,FileI
 
 
 
+/*! \brief Append all entries matching the given producer id to the target list. */
+
 void FileListStorage::getFileInfoListByProducerId(T::ProducerId producerId,FileInfoList& fileInfoList)
 {
   try
@@ -448,6 +496,8 @@ void FileListStorage::getFileInfoListByProducerId(T::ProducerId producerId,FileI
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given producer id. */
 
 void FileListStorage::getFileInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -465,6 +515,8 @@ void FileListStorage::getFileInfoListByProducerId(T::ProducerId producerId,T::Fi
 
 
 
+/*! \brief Append all entries matching the given generation id to the target list. */
+
 void FileListStorage::getFileInfoListByGenerationId(T::GenerationId generationId,FileInfoList& fileInfoList)
 {
   try
@@ -480,6 +532,8 @@ void FileListStorage::getFileInfoListByGenerationId(T::GenerationId generationId
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given generation id. */
 
 void FileListStorage::getFileInfoListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
@@ -497,6 +551,8 @@ void FileListStorage::getFileInfoListByGenerationId(T::GenerationId generationId
 
 
 
+/*! \brief Append all entries matching the given source id to the target list. */
+
 void FileListStorage::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoList& fileInfoList)
 {
   try
@@ -513,6 +569,8 @@ void FileListStorage::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoLis
 
 
 
+/*! \brief Append a paginated slice of entries matching the given source id. */
+
 void FileListStorage::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,FileInfoList& fileInfoList)
 {
   try
@@ -528,6 +586,8 @@ void FileListStorage::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId s
 
 
 
+
+/*! \brief Return a hash value computed from all entries across the storage. */
 
 std::size_t FileListStorage::getHash()
 {
@@ -548,6 +608,8 @@ std::size_t FileListStorage::getHash()
 
 
 
+/*! \brief Return a hash value for entries belonging to the given storage id. */
+
 std::size_t FileListStorage::getHashByStorageId(T::StorageId storageId)
 {
   try
@@ -567,6 +629,8 @@ std::size_t FileListStorage::getHashByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Return a hash value for entries belonging to the given producer id. */
+
 std::size_t FileListStorage::getHashByProducerId(T::ProducerId producerId)
 {
   try
@@ -583,6 +647,8 @@ std::size_t FileListStorage::getHashByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Return a hash value for entries belonging to the given generation id. */
+
 std::size_t FileListStorage::getHashByGenerationId(T::GenerationId generationId)
 {
   try
@@ -598,6 +664,8 @@ std::size_t FileListStorage::getHashByGenerationId(T::GenerationId generationId)
 
 
 
+
+/*! \brief Return the total number of entries across all sub-lists. */
 
 uint FileListStorage::getLength()
 {
@@ -618,6 +686,8 @@ uint FileListStorage::getLength()
 
 
 
+/*! \brief Flag every entry across the storage as deleted. */
+
 uint FileListStorage::markDeleted()
 {
   try
@@ -637,6 +707,8 @@ uint FileListStorage::markDeleted()
 
 
 
+/*! \brief Flag the entry matching the given file id as deleted. */
+
 uint FileListStorage::markDeletedById(T::FileId fileId)
 {
   try
@@ -652,6 +724,8 @@ uint FileListStorage::markDeletedById(T::FileId fileId)
 
 
 
+
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
 
 uint FileListStorage::markDeletedByProducerId(T::ProducerId producerId)
 {
@@ -669,6 +743,8 @@ uint FileListStorage::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Flag entries whose generation id matches the given value as deleted. */
+
 uint FileListStorage::markDeletedByGenerationId(T::GenerationId generationId)
 {
   try
@@ -685,6 +761,8 @@ uint FileListStorage::markDeletedByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Flag entries whose source id matches the given value as deleted. */
+
 uint FileListStorage::markDeletedBySourceId(T::SourceId sourceId)
 {
   try
@@ -700,6 +778,8 @@ uint FileListStorage::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
 
 uint FileListStorage::markDeletedByStorageId(T::StorageId storageId)
 {
@@ -724,6 +804,8 @@ uint FileListStorage::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Print the storage contents to the given stream. */
+
 void FileListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -740,6 +822,8 @@ void FileListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
+
+/*! \brief Return the sub-list index for the given producer id. */
 
 uint FileListStorage::getProducerStorageIndex(T::ProducerId producerId)
 {
@@ -766,6 +850,8 @@ uint FileListStorage::getProducerStorageIndex(T::ProducerId producerId)
 
 
 
+/*! \brief Return the sub-list index for the given source id. */
+
 uint FileListStorage::getSourceStorageIndex(T::SourceId sourceId)
 {
   try
@@ -789,6 +875,8 @@ uint FileListStorage::getSourceStorageIndex(T::SourceId sourceId)
 
 
 
+
+/*! \brief Return the sub-list index for the given file id. */
 
 uint FileListStorage::getFileStorageIndex(T::FileId fileId)
 {
@@ -814,6 +902,8 @@ uint FileListStorage::getFileStorageIndex(T::FileId fileId)
 
 
 
+
+/*! \brief Return the sub-list index for the given generation id. */
 
 uint FileListStorage::getGenerationStorageIndex(T::GenerationId generationId)
 {

@@ -17,6 +17,14 @@ namespace SmartMet
 namespace Lua
 {
 
+// ====================================================================================
+/*! \brief Loads and evaluates a single LuaJIT script file and manages concurrent execution.
+ *
+ *  Maintains a pool of NUM_OF_LUA_HANDLES independent Lua states so that multiple
+ *  threads can invoke functions concurrently without serialisation. Supports
+ *  hot-reload: checkUpdates() re-reads the file when the mtime changes. */
+// ====================================================================================
+
 class LuaFile
 {
   public:
@@ -75,16 +83,23 @@ class LuaFile
     void              loadFile();
     void              loadFunctionList(uint type);
 
-    std::string       mFilename;
-    LuaFunction_map   mFunctions;
-    void*             mLuaState[NUM_OF_LUA_HANDLES];
-    UInt64            mStateKey[NUM_OF_LUA_HANDLES];
-    UInt64            mStateKeyCounter;
-    time_t            mLastModified;
-    ModificationLock  mModificationLock;
-    ModificationLock  mStateModificationLock;
+    std::string       mFilename;             //!< Path to the Lua script file on disk.
+    LuaFunction_map   mFunctions;            //!< Map of function names to their LuaFunction descriptors.
+    void*             mLuaState[NUM_OF_LUA_HANDLES];   //!< Pool of independent Lua states for concurrent execution.
+    UInt64            mStateKey[NUM_OF_LUA_HANDLES];   //!< Checkout keys associated with each Lua state slot.
+    UInt64            mStateKeyCounter;      //!< Monotonically increasing counter used to generate unique state keys.
+    time_t            mLastModified;         //!< File modification time at the last load, used for change detection.
+    ModificationLock  mModificationLock;     //!< Lock protecting the function map and file-reload operations.
+    ModificationLock  mStateModificationLock; //!< Lock protecting checkout/release of Lua state slots.
 };
 
+
+// ====================================================================================
+/*! \brief RAII wrapper that checks out a Lua state from a LuaFile and releases it on destruction.
+ *
+ *  Acquire an instance on the stack before calling any executeFunctionCallN method to
+ *  obtain a thread-local Lua state handle. */
+// ====================================================================================
 
 class LuaHandle
 {
@@ -108,12 +123,12 @@ class LuaHandle
 
   protected:
 
-    LuaFile    *mLuaFile;
-    void  *mState;
-    UInt64   mKey;
+    LuaFile    *mLuaFile;  //!< Owning LuaFile whose state pool is used.
+    void  *mState;         //!< Raw lua_State pointer for the checked-out slot.
+    UInt64   mKey;         //!< Unique key used to return this slot to the pool.
 };
 
-typedef std::vector<LuaFile> LuaFile_vec;
+typedef std::vector<LuaFile> LuaFile_vec;  //!< Ordered collection of LuaFile objects.
 
 
 }  // namespace Lua

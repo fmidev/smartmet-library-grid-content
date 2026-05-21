@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for GenerationInfo. */
+
 GenerationInfo::GenerationInfo()
 {
   try
@@ -35,6 +37,8 @@ GenerationInfo::GenerationInfo()
 
 
 
+
+/*! \brief Copy constructor for GenerationInfo. */
 
 GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
 {
@@ -66,6 +70,8 @@ GenerationInfo::GenerationInfo(const GenerationInfo& generationInfo)
 
 
 
+/*! \brief Construct GenerationInfo from a CSV-formatted string. */
+
 GenerationInfo::GenerationInfo(const char *csv)
 {
   try
@@ -94,6 +100,8 @@ GenerationInfo::GenerationInfo(const char *csv)
 
 
 
+/*! \brief Destructor for GenerationInfo. */
+
 GenerationInfo::~GenerationInfo()
 {
   try
@@ -109,6 +117,8 @@ GenerationInfo::~GenerationInfo()
 
 
 
+
+/*! \brief Copy assignment operator for GenerationInfo. */
 
 GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
 {
@@ -145,6 +155,8 @@ GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
 
 
 
+/*! \brief Return this record formatted as a CSV row. */
+
 std::string GenerationInfo::getCsv()
 {
   try
@@ -180,6 +192,8 @@ std::string GenerationInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string GenerationInfo::getCsvHeader()
 {
   try
@@ -196,6 +210,8 @@ std::string GenerationInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void GenerationInfo::setCsv(const char *csv)
 {
@@ -258,6 +274,8 @@ void GenerationInfo::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void GenerationInfo::setCsv(const std::string& csv)
 {
   try
@@ -273,6 +291,8 @@ void GenerationInfo::setCsv(const std::string& csv)
 
 
 
+
+/*! \brief Compare two records according to the selected comparison method. */
 
 int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo)
 {
@@ -321,6 +341,8 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
 
 
 
+/*! \brief Return a deep copy of this GenerationInfo. */
+
 GenerationInfo* GenerationInfo::duplicate()
 {
   try
@@ -336,6 +358,8 @@ GenerationInfo* GenerationInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

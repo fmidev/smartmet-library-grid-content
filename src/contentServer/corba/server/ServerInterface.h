@@ -18,7 +18,13 @@ namespace ContentServer
 namespace Corba
 {
 
-
+// ====================================================================================
+/*! \brief CORBA servant that exposes a ContentServer ServiceInterface over the network.
+ *
+ *  Inherits from the omniORB-generated skeleton class and delegates every inbound
+ *  CORBA call to the local ServiceInterface set via init().  Type conversions between
+ *  IDL types and C++ domain types are performed by the Converter helper class. */
+// ====================================================================================
 class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterface
 {
   public:
@@ -158,7 +164,7 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
 
   protected:
 
-    ContentServer::ServiceInterface *mService;
+    ContentServer::ServiceInterface *mService;  //!< Non-owning pointer to the local service implementation.
 };
 
 
