@@ -16,6 +16,8 @@ namespace DataServer
 
 
 
+/*! \brief Data Server: Constructor. */
+
 GridFileManager::GridFileManager()
 {
   FUNCTION_TRACE
@@ -32,6 +34,8 @@ GridFileManager::GridFileManager()
 
 
 
+
+/*! \brief Data Server: Destructor. */
 
 GridFileManager::~GridFileManager()
 {
@@ -50,6 +54,8 @@ GridFileManager::~GridFileManager()
 
 
 
+/*! \brief Data Server: Init. */
+
 void GridFileManager::init(T::SessionId serverSessionId,ContentServer::ServiceInterface* contentServer)
 {
   FUNCTION_TRACE
@@ -67,6 +73,8 @@ void GridFileManager::init(T::SessionId serverSessionId,ContentServer::ServiceIn
 
 
 
+
+/*! \brief Data Server: Add file. */
 
 void GridFileManager::addFile(GRID::GridFile *gridFile)
 {
@@ -92,6 +100,8 @@ void GridFileManager::addFile(GRID::GridFile *gridFile)
 
 
 
+/*! \brief Data Server: Clear. */
+
 void GridFileManager::clear()
 {
   FUNCTION_TRACE
@@ -109,6 +119,8 @@ void GridFileManager::clear()
 
 
 
+
+/*! \brief Data Server: Delete file. */
 
 void GridFileManager::deleteFile(GRID::GridFile *gridFile)
 {
@@ -128,6 +140,8 @@ void GridFileManager::deleteFile(GRID::GridFile *gridFile)
 
 
 
+/*! \brief Data Server: Delete file by id. */
+
 void GridFileManager::deleteFileById(T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -145,6 +159,8 @@ void GridFileManager::deleteFileById(T::FileId fileId)
 
 
 
+
+/*! \brief Data Server: Delete files by producer id. */
 
 void GridFileManager::deleteFilesByProducerId(T::ProducerId producerId)
 {
@@ -177,6 +193,8 @@ void GridFileManager::deleteFilesByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Data Server: Delete files by generation id. */
+
 void GridFileManager::deleteFilesByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -208,6 +226,8 @@ void GridFileManager::deleteFilesByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Data Server: Delete files by source id. */
+
 void GridFileManager::deleteFilesBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -237,6 +257,8 @@ void GridFileManager::deleteFilesBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Data Server: Delete files by storage id. */
 
 void GridFileManager::deleteFilesByStorageId(T::StorageId storageId)
 {
@@ -271,6 +293,8 @@ void GridFileManager::deleteFilesByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Data Server: Delete files by access time. */
+
 void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
 {
   FUNCTION_TRACE
@@ -304,6 +328,8 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
 
 
 
+/*! \brief Data Server: Delete files by check time. */
+
 void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
 {
   FUNCTION_TRACE
@@ -334,6 +360,8 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
 
 
 
+
+/*! \brief Data Server: Delete files by deletion time. */
 
 void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
 {
@@ -366,6 +394,8 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
 
 
 
+/*! \brief Data Server: Get file by id. */
+
 GRID::GridFile_sptr GridFileManager::getFileById(T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -394,6 +424,8 @@ GRID::GridFile_sptr GridFileManager::getFileById(T::FileId fileId)
 
 
 
+
+/*! \brief Data Server: Get files to be cached. */
 
 void GridFileManager::getFilesToBeCached(std::map<T::FileId,std::string>& filenames)
 {
@@ -430,6 +462,8 @@ void GridFileManager::getFilesToBeCached(std::map<T::FileId,std::string>& filena
 
 
 
+/*! \brief Data Server: Get files in cache. */
+
 void GridFileManager::getFilesInCache(std::map<T::FileId,std::string>& filenames)
 {
   FUNCTION_TRACE
@@ -454,6 +488,8 @@ void GridFileManager::getFilesInCache(std::map<T::FileId,std::string>& filenames
 
 
 
+
+/*! \brief Data Server: Get request counters. */
 
 void GridFileManager::getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles)
 {
@@ -487,6 +523,8 @@ void GridFileManager::getRequestCounters(GRID::RequestCounters& requestCounters,
 
 
 
+/*! \brief Data Server: Reset request counters. */
+
 void GridFileManager::resetRequestCounters()
 {
   FUNCTION_TRACE
@@ -509,6 +547,8 @@ void GridFileManager::resetRequestCounters()
 
 
 
+
+/*! \brief Data Server: Get file by id no mapping. */
 
 GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(T::FileId fileId)
 {
@@ -538,6 +578,8 @@ GRID::GridFile_sptr GridFileManager::getFileByIdNoMapping(T::FileId fileId)
 
 
 
+/*! \brief Data Server: Get file count. */
+
 std::size_t GridFileManager::getFileCount()
 {
   FUNCTION_TRACE
@@ -554,6 +596,8 @@ std::size_t GridFileManager::getFileCount()
 
 
 
+
+/*! \brief Data Server: Get state attributes. */
 
 void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -598,6 +642,8 @@ void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> paren
 
 
 
+/*! \brief Data Server: Print. */
+
 void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 {
   FUNCTION_TRACE
@@ -621,6 +667,8 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
+/*! \brief Data Server: Delete file no lock. */
+
 void GridFileManager::deleteFileNoLock(T::FileId fileId,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
@@ -643,6 +691,8 @@ void GridFileManager::deleteFileNoLock(T::FileId fileId,bool sentMessageToConten
 
 
 
+/*! \brief Data Server: Delete files no lock. */
+
 void GridFileManager::deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
@@ -662,6 +712,8 @@ void GridFileManager::deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool 
 
 
 
+
+/*! \brief Data Server: Delete files no lock. */
 
 void GridFileManager::deleteFilesNoLock(std::set<T::FileId>& fileIdList,bool sentMessageToContentServer)
 {

@@ -17,24 +17,38 @@ namespace ContentServer
 
 #define CONTENT_LIST_COUNT 2
 
-typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;
+typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;  //!< Map from generation id to a set of forecast time strings.
 
+// ====================================================================================
+/*! \brief Snapshot of all indexed metadata used for lock-free read queries.
+ *
+ *  Two instances are maintained and swapped atomically so that readers never block
+ *  writers during a content update cycle. */
+// ====================================================================================
 class SearchStructure
 {
   public:
-    T::ProducerInfoList    mProducerInfoList;
-    T::GenerationInfoList  mGenerationInfoList;
-    T::GeometryInfoList    mGeometryInfoList;
-    T::FileInfoList        mFileInfoList;
-    T::FileInfoList        mFileInfoListByName;
-    T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
+    T::ProducerInfoList    mProducerInfoList;    //!< Indexed producer records.
+    T::GenerationInfoList  mGenerationInfoList;  //!< Indexed generation records.
+    T::GeometryInfoList    mGeometryInfoList;    //!< Indexed geometry records.
+    T::FileInfoList        mFileInfoList;        //!< File records indexed by file id.
+    T::FileInfoList        mFileInfoListByName;  //!< File records indexed by filename.
+    T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];  //!< Double-buffered content records.
 };
 
 //using SearchStructure_sptr = boost::atomic_shared_ptr<SearchStructure>;
-using SearchStructure_sptr = std::shared_ptr<SearchStructure>;
+using SearchStructure_sptr = std::shared_ptr<SearchStructure>;  //!< Shared pointer to a SearchStructure snapshot.
 
 
-
+// ====================================================================================
+/*! \brief In-memory content server cache that stays in sync with a master backend.
+ *
+ *  Mirrors the full content registry (producers, generations, geometries, files and
+ *  content records) in RAM.  A background thread polls a master ServiceInterface
+ *  (typically RedisImplementation) for change events and applies incremental updates.
+ *  All read queries are served entirely from the in-memory structures without touching
+ *  the master, giving sub-millisecond latency. */
+// ====================================================================================
 class CacheImplementation : public ServiceInterface
 {
   public:
@@ -49,7 +63,6 @@ class CacheImplementation : public ServiceInterface
     virtual void    setContentSwap(bool enabled,uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime);
     virtual void    setContentUpdateInterval(uint intervalInSec);
     virtual void    shutdown();
-    //std::string&    getSourceInfo();
 
     virtual void    getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
     virtual void    getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
@@ -259,59 +272,59 @@ class CacheImplementation : public ServiceInterface
 
     virtual void    updateContent();
 
-    bool                   mReloadActivated;
-    bool                   mShutdownRequested;
-    bool                   mUpdateInProgress;
-    bool                   mRequestForwardEnabled;
-    T::SessionId           mSessionId;
-    T::SessionId           mDataServerSessionId;
-    T::EventId             mLastProcessedEventId;
-    T::FileInfoList        mFileInfoList;
-    T::ProducerInfoList    mProducerInfoList;
-    T::GenerationInfoList  mGenerationInfoList;
-    T::GeometryInfoList    mGeometryInfoList;
-    T::ContentInfoList     mContentInfoList;
-    T::EventInfoList       mEventInfoList;
-    time_t                 mStartTime;
-    pthread_t              mThread;
-    ThreadLock             mEventProcessingLock;
-    ModificationLock       mModificationLock;
-    ModificationLock       mSearchModificationLock;
-    ServiceInterface*      mContentStorage;
-    time_t                 mContentStorageStartTime;
-    time_t                 mContentChangeTime;
-    bool                   mSaveEnabled;
-    std::string            mSaveDir;
-    uint                   mFileDeleteCounter;
-    uint                   mContentDeleteCounter;
-    uint                   mProducerDeleteCounter;
-    uint                   mGenerationDeleteCounter;
-    uint                   mGeometryDeleteCounter;
-    uint                   mProducerCount;
-    uint                   mGenerationCount;
-    uint                   mGeometryCount;
-    uint                   mFileCount;
-    uint                   mContentCount;
-    uint                   mActiveSearchStructure;
-    SearchStructure*       mSearchStructurePtr[2];
-    std::size_t            mSsProducerHash;
-    std::size_t            mSsGenerationHash;
-    std::size_t            mSsGeometryHash;
-    std::size_t            mSsFileHash;
-    std::size_t            mSsContentHash;
-    std::size_t            mContentSourceHash;
-    bool                   mContentUpdateRequired;
-    time_t                 mContentUpdateTime;
-    uint                   mContentUpdateInterval;
-    bool                   mContentSwapEnabled;
-    uint                   mContentSwapCounter;
-    ContentTimeCache       mContentTimeCache;
-    ModificationLock       mContentTimeCache_modificationLock;
-    std::set<uint>         mCachedFiles;
-    uint                   mCachedFiles_waitTime;
-    uint                   mCachedFiles_totalWaitTime;
-    uint                   mCachedFiles_maxWaitTime;
-    uint                   mCachedFiles_maxFirstWaitTime;
+    bool                   mReloadActivated;              //!< True when a full reload from master has been triggered.
+    bool                   mShutdownRequested;            //!< True after shutdown() has been called.
+    bool                   mUpdateInProgress;             //!< True while a bulk content update is running.
+    bool                   mRequestForwardEnabled;        //!< When true, write operations are forwarded to the master storage.
+    T::SessionId           mSessionId;                    //!< Session identifier used for master queries.
+    T::SessionId           mDataServerSessionId;          //!< Session identifier passed to the data server.
+    T::EventId             mLastProcessedEventId;         //!< Highest event id already applied to the cache.
+    T::FileInfoList        mFileInfoList;                 //!< Cached file records.
+    T::ProducerInfoList    mProducerInfoList;             //!< Cached producer records.
+    T::GenerationInfoList  mGenerationInfoList;           //!< Cached generation records.
+    T::GeometryInfoList    mGeometryInfoList;             //!< Cached geometry records.
+    T::ContentInfoList     mContentInfoList;              //!< Cached content records.
+    T::EventInfoList       mEventInfoList;                //!< Local copy of the event log.
+    time_t                 mStartTime;                    //!< Unix timestamp of cache initialisation.
+    pthread_t              mThread;                       //!< Handle of the background event-processing thread.
+    ThreadLock             mEventProcessingLock;          //!< Prevents concurrent event-processing runs.
+    ModificationLock       mModificationLock;             //!< Guards mutable list members during updates.
+    ModificationLock       mSearchModificationLock;       //!< Guards the active search-structure pointer swap.
+    ServiceInterface*      mContentStorage;               //!< Non-owning pointer to the master content backend.
+    time_t                 mContentStorageStartTime;      //!< Start time of the master storage, used to detect restarts.
+    time_t                 mContentChangeTime;            //!< Time of the most recent content change.
+    bool                   mSaveEnabled;                  //!< True if periodic persistence to disk is enabled.
+    std::string            mSaveDir;                      //!< Directory used for persistent snapshots.
+    uint                   mFileDeleteCounter;            //!< Running count of file deletions since last reload.
+    uint                   mContentDeleteCounter;         //!< Running count of content deletions since last reload.
+    uint                   mProducerDeleteCounter;        //!< Running count of producer deletions since last reload.
+    uint                   mGenerationDeleteCounter;      //!< Running count of generation deletions since last reload.
+    uint                   mGeometryDeleteCounter;        //!< Running count of geometry deletions since last reload.
+    uint                   mProducerCount;                //!< Total number of cached producers.
+    uint                   mGenerationCount;              //!< Total number of cached generations.
+    uint                   mGeometryCount;                //!< Total number of cached geometries.
+    uint                   mFileCount;                    //!< Total number of cached files.
+    uint                   mContentCount;                 //!< Total number of cached content records.
+    uint                   mActiveSearchStructure;        //!< Index (0 or 1) of the currently active SearchStructure.
+    SearchStructure*       mSearchStructurePtr[2];        //!< Double-buffered search structures for lock-free reads.
+    std::size_t            mSsProducerHash;               //!< Hash of the producer list used to detect changes.
+    std::size_t            mSsGenerationHash;             //!< Hash of the generation list used to detect changes.
+    std::size_t            mSsGeometryHash;               //!< Hash of the geometry list used to detect changes.
+    std::size_t            mSsFileHash;                   //!< Hash of the file list used to detect changes.
+    std::size_t            mSsContentHash;                //!< Hash of the content list used to detect changes.
+    std::size_t            mContentSourceHash;            //!< Hash of the master content source, used to detect full reloads.
+    bool                   mContentUpdateRequired;        //!< True when a content refresh is pending.
+    time_t                 mContentUpdateTime;            //!< Time of the last content update.
+    uint                   mContentUpdateInterval;        //!< Minimum seconds between successive content updates.
+    bool                   mContentSwapEnabled;           //!< True when double-buffered search-structure swapping is active.
+    uint                   mContentSwapCounter;           //!< Counter used to throttle search-structure swaps.
+    ContentTimeCache       mContentTimeCache;             //!< Per-generation cache of available forecast time strings.
+    ModificationLock       mContentTimeCache_modificationLock;  //!< Guards mContentTimeCache during updates.
+    std::set<uint>         mCachedFiles;                  //!< Set of file ids whose content is explicitly cached.
+    uint                   mCachedFiles_waitTime;         //!< Current wait time before rechecking a cached file.
+    uint                   mCachedFiles_totalWaitTime;    //!< Accumulated wait time for all cached files.
+    uint                   mCachedFiles_maxWaitTime;      //!< Maximum allowed wait time between cached-file rechecks.
+    uint                   mCachedFiles_maxFirstWaitTime; //!< Maximum wait time before the first recheck of a cached file.
 };
 
 

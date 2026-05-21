@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Tests whether each grid value is less than or equal to a threshold, returning 1 or 0. */
+// ====================================================================================
+
 class Function_lte : public Function
 {
   public:

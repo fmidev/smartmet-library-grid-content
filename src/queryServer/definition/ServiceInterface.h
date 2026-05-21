@@ -22,6 +22,15 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// ====================================================================================
+/*! \brief Abstract base class for the QueryServer service layer.
+ *
+ *  Declares the public API for executing parameter queries combining ContentServer
+ *  metadata and DataServer grid values.  Concrete backends (ServiceImplementation,
+ *  CORBA client, …) override the protected _-prefixed methods; the public methods
+ *  add cross-cutting concerns before delegating to the protected implementations. */
+// ====================================================================================
+
 class ServiceInterface
 {
   public:
@@ -70,9 +79,9 @@ class ServiceInterface
 
      virtual int    _getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values);
 
-     bool           mEnabled;
-     Log            *mDebugLog;
-     Log            *mProcessingLog;
+     bool           mEnabled;         //!< When false, all service calls return SERVICE_DISABLED immediately.
+     Log            *mDebugLog;        //!< Optional log for verbose debug output.
+     Log            *mProcessingLog;   //!< Optional log for request timing and statistics.
 };
 
 

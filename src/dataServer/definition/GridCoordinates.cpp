@@ -10,6 +10,8 @@ namespace T
 
 
 
+/*! \brief Default constructor: initializes empty grid coordinate set. */
+
 GridCoordinates::GridCoordinates()
 {
   try
@@ -31,6 +33,8 @@ GridCoordinates::GridCoordinates()
 
 
 
+
+/*! \brief Copy constructor: clones the given GridCoordinates instance. */
 
 GridCoordinates::GridCoordinates(GridCoordinates& gridCoordinates)
 {
@@ -55,6 +59,8 @@ GridCoordinates::GridCoordinates(GridCoordinates& gridCoordinates)
 
 
 
+/*! \brief Destructor. */
+
 GridCoordinates::~GridCoordinates()
 {
   try
@@ -70,6 +76,8 @@ GridCoordinates::~GridCoordinates()
 
 
 
+
+/*! \brief Prints the grid coordinate fields and first entries to the given stream. */
 
 void GridCoordinates::print(std::ostream& stream,uint level,uint optionFlags)
 {

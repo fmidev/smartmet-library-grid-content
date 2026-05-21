@@ -9,6 +9,8 @@ namespace Functions
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_and::Function_and()
 {
   try
@@ -23,6 +25,8 @@ Function_and::Function_and()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_and::Function_and(const Function_and& function)
 :Function(function)
@@ -40,6 +44,8 @@ Function_and::Function_and(const Function_and& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_and::~Function_and()
 {
   try
@@ -55,6 +61,8 @@ Function_and::~Function_and()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_and::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -84,6 +92,8 @@ float Function_and::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_and::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -111,6 +121,8 @@ double Function_and::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -157,6 +169,8 @@ void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -200,6 +214,8 @@ void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_and::duplicate()
 {

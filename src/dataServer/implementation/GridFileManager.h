@@ -14,6 +14,15 @@ namespace DataServer
 {
 
 
+// ====================================================================================
+/*! \brief Thread-safe registry of open memory-mapped grid files.
+ *
+ *  Maintains a map from numeric file identifiers to shared grid-file handles.
+ *  Files are added when the DataServer first needs to access them and removed
+ *  when they age out or are explicitly deleted.  All public methods are
+ *  protected by an internal ModificationLock. */
+// ====================================================================================
+
 class GridFileManager
 {
   public:
@@ -52,10 +61,10 @@ class GridFileManager
 
   private:
 
-    ModificationLock                                  mModificationLock;
-    std::unordered_map<T::FileId,GRID::GridFile_sptr> mFileList;
-    ContentServer::ServiceInterface*                  mContentServer;
-    T::SessionId                                      mServerSessionId;
+    ModificationLock                                  mModificationLock;   //!< Guards all access to mFileList.
+    std::unordered_map<T::FileId,GRID::GridFile_sptr> mFileList;           //!< Map from file identifier to open grid file handle.
+    ContentServer::ServiceInterface*                  mContentServer;      //!< Non-owning pointer to the ContentServer used for file metadata lookups.
+    T::SessionId                                      mServerSessionId;    //!< Session identifier used for ContentServer calls.
 };
 
 

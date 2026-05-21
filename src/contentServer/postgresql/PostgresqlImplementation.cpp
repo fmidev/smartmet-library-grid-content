@@ -20,6 +20,8 @@ namespace ContentServer
 
 
 
+/*! \brief Constructs the PostgreSQL ContentServer implementation with default state. */
+
 PostgresqlImplementation::PostgresqlImplementation()
 {
   FUNCTION_TRACE
@@ -43,6 +45,8 @@ PostgresqlImplementation::PostgresqlImplementation()
 
 
 
+/*! \brief Destroys the implementation and closes the PostgreSQL connection. */
+
 PostgresqlImplementation::~PostgresqlImplementation()
 {
   FUNCTION_TRACE
@@ -64,6 +68,8 @@ PostgresqlImplementation::~PostgresqlImplementation()
 
 
 
+
+/*! \brief Initializes the implementation with connection strings and creates tables if allowed. */
 
 void PostgresqlImplementation::init(const char *primaryConnectionString,const char *secondaryConnectionString,bool tableCreationAllowed)
 {
@@ -95,6 +101,8 @@ void PostgresqlImplementation::init(const char *primaryConnectionString,const ch
 
 
 
+
+/*! \brief Creates the PostgreSQL tables used by the content server if they do not exist. */
 
 void PostgresqlImplementation::createTables()
 {
@@ -312,6 +320,8 @@ void PostgresqlImplementation::createTables()
 
 
 
+/*! \brief Opens a PostgreSQL connection using the configured connection strings. */
+
 int PostgresqlImplementation::openConnection()
 {
   FUNCTION_TRACE
@@ -359,6 +369,8 @@ int PostgresqlImplementation::openConnection()
 
 
 
+/*! \brief Closes the active PostgreSQL connection. */
+
 void PostgresqlImplementation::closeConnection()
 {
   FUNCTION_TRACE
@@ -380,6 +392,8 @@ void PostgresqlImplementation::closeConnection()
 
 
 
+/*! \brief Requests shutdown of the implementation. */
+
 void PostgresqlImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -397,6 +411,8 @@ void PostgresqlImplementation::shutdown()
 
 
 
+/*! \brief Returns true if the given session id is currently valid. */
+
 bool PostgresqlImplementation::isSessionValid(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -413,6 +429,8 @@ bool PostgresqlImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
+
+/*! \brief Returns true if the PostgreSQL connection is alive and usable. */
 
 bool PostgresqlImplementation::isConnectionValid()
 {
@@ -433,6 +451,8 @@ bool PostgresqlImplementation::isConnectionValid()
 
 
 
+
+/*! \brief PostgreSQL backend: clears all content data from the database. */
 
 int PostgresqlImplementation::_clear(T::SessionId sessionId)
 {
@@ -506,6 +526,8 @@ int PostgresqlImplementation::_clear(T::SessionId sessionId)
 
 
 
+/*! \brief PostgreSQL backend: reloads cached state from the database. */
+
 int PostgresqlImplementation::_reload(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -525,6 +547,8 @@ int PostgresqlImplementation::_reload(T::SessionId sessionId)
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the latest content change time. */
 
 int PostgresqlImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
@@ -547,6 +571,8 @@ int PostgresqlImplementation::_getContentChangeTime(T::SessionId sessionId,time_
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a producer record into the database. */
 
 int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -622,6 +648,8 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
 
 
 
+/*! \brief PostgreSQL backend: deletes a producer matching the given id. */
+
 int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -655,6 +683,8 @@ int PostgresqlImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief PostgreSQL backend: deletes a producer matching the given name. */
 
 int PostgresqlImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -691,6 +721,8 @@ int PostgresqlImplementation::_deleteProducerInfoByName(T::SessionId sessionId,c
 
 
 
+/*! \brief PostgreSQL backend: deletes all producers matching the given source id. */
+
 int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -721,6 +753,8 @@ int PostgresqlImplementation::_deleteProducerInfoListBySourceId(T::SessionId ses
 
 
 
+/*! \brief PostgreSQL backend: queries the producer table for info matching the given id. */
+
 int PostgresqlImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -746,6 +780,8 @@ int PostgresqlImplementation::_getProducerInfoById(T::SessionId sessionId,T::Pro
 
 
 
+/*! \brief PostgreSQL backend: queries the producer table for info matching the given name. */
+
 int PostgresqlImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -770,6 +806,8 @@ int PostgresqlImplementation::_getProducerInfoByName(T::SessionId sessionId,cons
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the full list of producers. */
 
 int PostgresqlImplementation::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
@@ -797,6 +835,8 @@ int PostgresqlImplementation::_getProducerInfoList(T::SessionId sessionId,T::Pro
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for producers matching the given parameter. */
 
 int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -862,6 +902,8 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for producers matching the given source id. */
+
 int PostgresqlImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -888,6 +930,8 @@ int PostgresqlImplementation::_getProducerInfoListBySourceId(T::SessionId sessio
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the number of producers. */
 
 int PostgresqlImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -917,6 +961,8 @@ int PostgresqlImplementation::_getProducerInfoCount(T::SessionId sessionId,uint&
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the list of producer name and geometry pairs. */
 
 int PostgresqlImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -969,6 +1015,8 @@ int PostgresqlImplementation::_getProducerNameAndGeometryList(T::SessionId sessi
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the parameter list of producers. */
 
 int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -1165,6 +1213,8 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
 
 
 
+/*! \brief PostgreSQL backend: updates a producer record in the database. */
+
 int PostgresqlImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -1218,6 +1268,8 @@ int PostgresqlImplementation::_setProducerInfo(T::SessionId sessionId,T::Produce
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a generation record into the database. */
 
 int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -1308,6 +1360,8 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
 
 
 
+/*! \brief PostgreSQL backend: deletes a generation matching the given id. */
+
 int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1341,6 +1395,8 @@ int PostgresqlImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T
 
 
 
+
+/*! \brief PostgreSQL backend: deletes a generation matching the given name. */
 
 int PostgresqlImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -1377,6 +1433,8 @@ int PostgresqlImplementation::_deleteGenerationInfoByName(T::SessionId sessionId
 
 
 
+/*! \brief PostgreSQL backend: deletes generations whose ids are in the given list. */
+
 int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -1408,6 +1466,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId ses
 
 
 
+
+/*! \brief PostgreSQL backend: deletes generations matching the given producer id. */
 
 int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -1443,6 +1503,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerId(T::SessionId
 
 
 
+/*! \brief PostgreSQL backend: deletes generations matching the given producer name. */
+
 int PostgresqlImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -1477,6 +1539,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListByProducerName(T::Session
 
 
 
+/*! \brief PostgreSQL backend: deletes generations matching the given source id. */
+
 int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1508,6 +1572,8 @@ int PostgresqlImplementation::_deleteGenerationInfoListBySourceId(T::SessionId s
 
 
 
+/*! \brief PostgreSQL backend: queries the generation table for info matching the given id. */
+
 int PostgresqlImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1533,6 +1599,8 @@ int PostgresqlImplementation::_getGenerationInfoById(T::SessionId sessionId,T::G
 
 
 
+/*! \brief PostgreSQL backend: queries the generation table for info matching the given name. */
+
 int PostgresqlImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1557,6 +1625,8 @@ int PostgresqlImplementation::_getGenerationInfoByName(T::SessionId sessionId,co
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the full list of generations. */
 
 int PostgresqlImplementation::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
@@ -1585,6 +1655,8 @@ int PostgresqlImplementation::_getGenerationInfoList(T::SessionId sessionId,T::G
 
 
 
+/*! \brief PostgreSQL backend: queries the database for generations matching the given geometry id. */
+
 int PostgresqlImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1611,6 +1683,8 @@ int PostgresqlImplementation::_getGenerationInfoListByGeometryId(T::SessionId se
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for generations matching the given producer id. */
 
 int PostgresqlImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
@@ -1643,6 +1717,8 @@ int PostgresqlImplementation::_getGenerationInfoListByProducerId(T::SessionId se
 
 
 
+/*! \brief PostgreSQL backend: queries the database for generations matching the given producer name. */
+
 int PostgresqlImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1674,6 +1750,8 @@ int PostgresqlImplementation::_getGenerationInfoListByProducerName(T::SessionId 
 
 
 
+/*! \brief PostgreSQL backend: queries the database for generations matching the given source id. */
+
 int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1700,6 +1778,8 @@ int PostgresqlImplementation::_getGenerationInfoListBySourceId(T::SessionId sess
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the last generation by producer id and status. */
 
 int PostgresqlImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -1737,6 +1817,8 @@ int PostgresqlImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Ses
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the last generation by producer name and status. */
+
 int PostgresqlImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1773,6 +1855,8 @@ int PostgresqlImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::S
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the number of generations. */
+
 int PostgresqlImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -1801,6 +1885,8 @@ int PostgresqlImplementation::_getGenerationInfoCount(T::SessionId sessionId,uin
 
 
 
+
+/*! \brief PostgreSQL backend: updates the status of the generation matching the given id. */
 
 int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
@@ -1855,6 +1941,8 @@ int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionI
 
 
 
+/*! \brief PostgreSQL backend: updates the status of the generation matching the given name. */
+
 int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   FUNCTION_TRACE
@@ -1908,6 +1996,8 @@ int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessio
 
 
 
+
+/*! \brief PostgreSQL backend: updates a generation record in the database. */
 
 int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -1978,6 +2068,8 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a geometry record into the database. */
 
 int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -2054,6 +2146,8 @@ int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::Geometr
 
 
 
+/*! \brief PostgreSQL backend: deletes a geometry matching the given identifiers. */
+
 int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   FUNCTION_TRACE
@@ -2095,6 +2189,8 @@ int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::
 
 
 
+/*! \brief PostgreSQL backend: deletes geometries matching the given generation id. */
+
 int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -2133,6 +2229,8 @@ int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId
 
 
 
+
+/*! \brief PostgreSQL backend: deletes geometries matching the given producer id. */
 
 int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -2173,6 +2271,8 @@ int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId s
 
 
 
+/*! \brief PostgreSQL backend: deletes geometries matching the given source id. */
+
 int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2211,6 +2311,8 @@ int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId ses
 
 
 
+
+/*! \brief PostgreSQL backend: queries the geometry table for info matching the given identifiers. */
 
 int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
@@ -2292,6 +2394,8 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Gen
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the full list of geometries. */
 
 int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
@@ -2376,6 +2480,8 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
 
 
 
+/*! \brief PostgreSQL backend: queries the database for geometries matching the given generation id. */
+
 int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2458,6 +2564,8 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for geometries matching the given producer id. */
 
 int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
@@ -2542,6 +2650,8 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
 
 
 
+/*! \brief PostgreSQL backend: queries the database for geometries matching the given source id. */
+
 int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2625,6 +2735,8 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the number of geometries. */
+
 int PostgresqlImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2653,6 +2765,8 @@ int PostgresqlImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint&
 
 
 
+
+/*! \brief PostgreSQL backend: updates a geometry record in the database. */
 
 int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -2711,6 +2825,8 @@ int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::Geometr
 
 
 
+/*! \brief PostgreSQL backend: updates the status of the geometry matching the given identifiers. */
+
 int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   FUNCTION_TRACE
@@ -2760,6 +2876,8 @@ int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,
 
 
 
+/*! \brief PostgreSQL backend: inserts a file record into the database. */
+
 int PostgresqlImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2788,6 +2906,8 @@ int PostgresqlImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& f
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a file record together with its content list into the database. */
 
 int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
@@ -2826,6 +2946,8 @@ int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a list of files together with their content into the database. */
 
 int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
@@ -2899,6 +3021,8 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
 
 
 
+/*! \brief PostgreSQL backend: deletes a file matching the given id. */
+
 int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -2932,6 +3056,8 @@ int PostgresqlImplementation::_deleteFileInfoById(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief PostgreSQL backend: deletes a file matching the given filename. */
 
 int PostgresqlImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -2970,6 +3096,8 @@ int PostgresqlImplementation::_deleteFileInfoByName(T::SessionId sessionId,const
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given producer id. */
+
 int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -3004,6 +3132,8 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerId(T::SessionId sessi
 
 
 
+
+/*! \brief PostgreSQL backend: deletes files matching the given producer name. */
 
 int PostgresqlImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -3040,6 +3170,8 @@ int PostgresqlImplementation::_deleteFileInfoListByProducerName(T::SessionId ses
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given generation id. */
+
 int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -3074,6 +3206,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationId(T::SessionId ses
 
 
 
+
+/*! \brief PostgreSQL backend: deletes files matching the given generation id and forecast time. */
 
 int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,const std::string& forecastTime)
 {
@@ -3135,6 +3269,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given forecast time list. */
+
 int PostgresqlImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -3177,6 +3313,8 @@ int PostgresqlImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given generation name. */
+
 int PostgresqlImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -3211,6 +3349,8 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationName(T::SessionId s
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given source id. */
+
 int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -3240,6 +3380,8 @@ int PostgresqlImplementation::_deleteFileInfoListBySourceId(T::SessionId session
 
 
 
+
+/*! \brief PostgreSQL backend: deletes files whose ids are in the given list. */
 
 int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
@@ -3277,6 +3419,8 @@ int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the file table for info matching the given id. */
+
 int PostgresqlImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -3302,6 +3446,8 @@ int PostgresqlImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId 
 
 
 
+/*! \brief PostgreSQL backend: queries the file table for info matching the given filename. */
+
 int PostgresqlImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -3326,6 +3472,8 @@ int PostgresqlImplementation::_getFileInfoByName(T::SessionId sessionId,const st
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for a paged list of files starting at the given id. */
 
 int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3353,6 +3501,8 @@ int PostgresqlImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId 
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for files whose ids are in the given list. */
 
 int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
@@ -3390,6 +3540,8 @@ int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionI
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given producer id. */
+
 int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3420,6 +3572,8 @@ int PostgresqlImplementation::_getFileInfoListByProducerId(T::SessionId sessionI
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for files matching the given producer name. */
 
 int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3452,6 +3606,8 @@ int PostgresqlImplementation::_getFileInfoListByProducerName(T::SessionId sessio
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given generation id. */
+
 int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3482,6 +3638,8 @@ int PostgresqlImplementation::_getFileInfoListByGenerationId(T::SessionId sessio
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for files matching the given generation name. */
 
 int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3514,6 +3672,8 @@ int PostgresqlImplementation::_getFileInfoListByGenerationName(T::SessionId sess
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given source id. */
+
 int PostgresqlImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3540,6 +3700,8 @@ int PostgresqlImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the total number of files. */
 
 int PostgresqlImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -3570,6 +3732,8 @@ int PostgresqlImplementation::_getFileInfoCount(T::SessionId sessionId,uint& cou
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the number of files matching the given producer id. */
+
 int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
@@ -3596,6 +3760,8 @@ int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId session
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the number of files matching the given generation id. */
 
 int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
@@ -3624,6 +3790,8 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the number of files matching the given source id. */
+
 int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
@@ -3650,6 +3818,8 @@ int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId
 
 
 
+
+/*! \brief PostgreSQL backend: updates a file record in the database. */
 
 int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -3714,6 +3884,8 @@ int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& f
 
 
 
+/*! \brief PostgreSQL backend: inserts an event record into the database. */
+
 int PostgresqlImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -3739,6 +3911,8 @@ int PostgresqlImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo&
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the latest event info. */
 
 int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -3847,6 +4021,8 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
 
 
 
+/*! \brief PostgreSQL backend: queries the database for a paged list of events starting at the given id. */
+
 int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
@@ -3941,6 +4117,8 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the number of stored events. */
+
 int PostgresqlImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3970,6 +4148,8 @@ int PostgresqlImplementation::_getEventInfoCount(T::SessionId sessionId,uint& co
 
 
 
+/*! \brief PostgreSQL backend: inserts a content record into the database. */
+
 int PostgresqlImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -3997,6 +4177,8 @@ int PostgresqlImplementation::_addContentInfo(T::SessionId sessionId,T::ContentI
 
 
 
+
+/*! \brief PostgreSQL backend: updates a content record in the database. */
 
 int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -4071,6 +4253,8 @@ int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentI
 
 
 
+/*! \brief PostgreSQL backend: inserts a list of content records into the database. */
+
 int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4110,6 +4294,8 @@ int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentI
 
 
 
+/*! \brief PostgreSQL backend: deletes a content record matching the given file id and message index. */
+
 int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -4143,6 +4329,8 @@ int PostgresqlImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileI
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given file id. */
 
 int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
@@ -4179,6 +4367,8 @@ int PostgresqlImplementation::_deleteContentListByFileId(T::SessionId sessionId,
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given filename. */
+
 int PostgresqlImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
@@ -4213,6 +4403,8 @@ int PostgresqlImplementation::_deleteContentListByFileName(T::SessionId sessionI
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given producer id. */
 
 int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -4249,6 +4441,8 @@ int PostgresqlImplementation::_deleteContentListByProducerId(T::SessionId sessio
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given producer name. */
+
 int PostgresqlImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -4282,6 +4476,8 @@ int PostgresqlImplementation::_deleteContentListByProducerName(T::SessionId sess
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given generation id. */
 
 int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -4318,6 +4514,8 @@ int PostgresqlImplementation::_deleteContentListByGenerationId(T::SessionId sess
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given generation name. */
+
 int PostgresqlImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -4353,6 +4551,8 @@ int PostgresqlImplementation::_deleteContentListByGenerationName(T::SessionId se
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given source id. */
+
 int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -4384,6 +4584,8 @@ int PostgresqlImplementation::_deleteContentListBySourceId(T::SessionId sessionI
 
 
 
+/*! \brief PostgreSQL backend: queries the content table for info matching the given file id and message index. */
+
 int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -4408,6 +4610,8 @@ int PostgresqlImplementation::_getContentInfo(T::SessionId sessionId,T::FileId f
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for a paged list of content records. */
 
 int PostgresqlImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -4436,6 +4640,8 @@ int PostgresqlImplementation::_getContentList(T::SessionId sessionId,T::FileId s
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given file id. */
+
 int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4462,6 +4668,8 @@ int PostgresqlImplementation::_getContentListByFileId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records whose file ids are in the given list. */
 
 int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -4496,6 +4704,8 @@ int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given filename. */
+
 int PostgresqlImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4528,6 +4738,8 @@ int PostgresqlImplementation::_getContentListByFileName(T::SessionId sessionId,c
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given producer id. */
+
 int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4559,6 +4771,8 @@ int PostgresqlImplementation::_getContentListByProducerId(T::SessionId sessionId
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given producer name. */
+
 int PostgresqlImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4589,6 +4803,8 @@ int PostgresqlImplementation::_getContentListByProducerName(T::SessionId session
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given generation id. */
 
 int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4622,6 +4838,8 @@ int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId session
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given generation name. */
+
 int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4652,6 +4870,8 @@ int PostgresqlImplementation::_getContentListByGenerationName(T::SessionId sessi
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records by generation id and time range. */
 
 int PostgresqlImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
@@ -4684,6 +4904,8 @@ int PostgresqlImplementation::_getContentListByGenerationIdAndTimeRange(T::Sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records by generation name and time range. */
+
 int PostgresqlImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4715,6 +4937,8 @@ int PostgresqlImplementation::_getContentListByGenerationNameAndTimeRange(T::Ses
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given source id. */
+
 int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4741,6 +4965,8 @@ int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given parameter. */
 
 int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4789,6 +5015,8 @@ int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the parameter and generation id. */
 
 int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4842,6 +5070,8 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::Sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the parameter and generation name. */
+
 int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4894,6 +5124,8 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::Ses
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the parameter and producer id. */
+
 int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4945,6 +5177,8 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::Session
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the parameter, generation id and forecast time. */
 
 int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -5020,6 +5254,8 @@ int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastT
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the parameter and producer name. */
+
 int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5072,6 +5308,8 @@ int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::Sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the content level list by generation, geometry and level id. */
+
 int PostgresqlImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -5106,6 +5344,8 @@ int PostgresqlImplementation::_getContentLevelListByGenerationGeometryAndLevelId
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the content level list by parameter, generation, geometry and level id. */
+
 int PostgresqlImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -5139,6 +5379,8 @@ int PostgresqlImplementation::_getContentLevelListByParameterGenerationGeometryA
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records that fail integrity validation. */
 
 int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
@@ -5212,6 +5454,8 @@ int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId ses
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the content geometry id list by generation id. */
+
 int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -5246,6 +5490,8 @@ int PostgresqlImplementation::_getContentGeometryIdListByGenerationId(T::Session
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the content parameter list by generation id. */
 
 int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -5306,6 +5552,8 @@ int PostgresqlImplementation::_getContentParamListByGenerationId(T::SessionId se
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the content parameter key list by generation id. */
+
 int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -5340,6 +5588,8 @@ int PostgresqlImplementation::_getContentParamKeyListByGenerationId(T::SessionId
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the content time list by generation id. */
 
 int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -5376,6 +5626,8 @@ int PostgresqlImplementation::_getContentTimeListByGenerationId(T::SessionId ses
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the content time list by generation and geometry id. */
+
 int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -5409,6 +5661,8 @@ int PostgresqlImplementation::_getContentTimeListByGenerationAndGeometryId(T::Se
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the content time list by producer id. */
 
 int PostgresqlImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
@@ -5445,6 +5699,8 @@ int PostgresqlImplementation::_getContentTimeListByProducerId(T::SessionId sessi
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the generation id, geometry id and forecast time list. */
+
 int PostgresqlImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -5473,6 +5729,8 @@ int PostgresqlImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::S
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the total number of content records. */
+
 int PostgresqlImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -5500,6 +5758,8 @@ int PostgresqlImplementation::_getContentCount(T::SessionId sessionId,uint& coun
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the level info list. */
 
 int PostgresqlImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
@@ -5534,6 +5794,8 @@ int PostgresqlImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelI
 // *****************************************************************************************************************************************
 
 
+
+/*! \brief PostgreSQL backend: executes a count SQL query and returns the result. */
 
 uint PostgresqlImplementation::getCount(const char *sql)
 {
@@ -5575,6 +5837,8 @@ uint PostgresqlImplementation::getCount(const char *sql)
 
 
 
+
+/*! \brief PostgreSQL backend: deletes the producer with the given id and optionally cascades to related data. */
 
 int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
@@ -5680,6 +5944,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
 
 
 
+/*! \brief PostgreSQL backend: deletes producers matching the given source id and optionally cascades to related data. */
+
 int PostgresqlImplementation::deleteProducerListBySourceId(T::SourceId sourceId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -5709,6 +5975,8 @@ int PostgresqlImplementation::deleteProducerListBySourceId(T::SourceId sourceId,
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the producer matching the given id. */
 
 int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
@@ -5774,6 +6042,8 @@ int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::Produc
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the producer matching the given name. */
 
 int PostgresqlImplementation::getProducerByName(std::string producerName,T::ProducerInfo& producerInfo)
 {
@@ -5841,6 +6111,8 @@ int PostgresqlImplementation::getProducerByName(std::string producerName,T::Prod
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the full list of producers. */
+
 int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -5906,6 +6178,8 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for producers matching the given source id. */
 
 int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
@@ -5974,6 +6248,8 @@ int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the generation matching the given id. */
 
 int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
@@ -6053,6 +6329,8 @@ int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the generation matching the given name. */
+
 int PostgresqlImplementation::getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -6130,6 +6408,8 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the full list of generations. */
 
 int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generationInfoList)
 {
@@ -6211,6 +6491,8 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
 
 
 
+/*! \brief PostgreSQL backend: queries the database for generations matching the given geometry id. */
+
 int PostgresqlImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -6229,6 +6511,8 @@ int PostgresqlImplementation::getGenerationListByGeometryId(T::GeometryId geomet
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for generations matching the given producer id. */
 
 int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
@@ -6312,6 +6596,8 @@ int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId produc
 
 
 
+/*! \brief PostgreSQL backend: queries the database for generations matching the given source id. */
+
 int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -6393,6 +6679,8 @@ int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T
 
 
 
+
+/*! \brief PostgreSQL backend: deletes the generation with the given id and optionally cascades to related data. */
 
 int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
@@ -6481,6 +6769,8 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a file record into the database. */
 
 int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
 {
@@ -6575,6 +6865,8 @@ int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a list of file records into the database. */
 
 int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
 {
@@ -6731,6 +7023,8 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
 
 
 
+/*! \brief PostgreSQL backend: deletes generations matching the given producer id and optionally cascades to related data. */
+
 int PostgresqlImplementation::deleteGenerationListByProducerId(T::ProducerId producerId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -6761,6 +7055,8 @@ int PostgresqlImplementation::deleteGenerationListByProducerId(T::ProducerId pro
 
 
 
+/*! \brief PostgreSQL backend: deletes generations matching the given source id and optionally cascades to related data. */
+
 int PostgresqlImplementation::deleteGenerationListBySourceId(T::SourceId sourceId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -6790,6 +7086,8 @@ int PostgresqlImplementation::deleteGenerationListBySourceId(T::SourceId sourceI
 
 
 
+
+/*! \brief PostgreSQL backend: deletes the file with the given id and optionally its content. */
 
 int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent)
 {
@@ -6856,6 +7154,8 @@ int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent
 
 
 
+
+/*! \brief PostgreSQL backend: deletes files matching the given generation id and optionally their content. */
 
 int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId generationId,bool deleteContent)
 {
@@ -6924,6 +7224,8 @@ int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId gener
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given list of generation ids and optionally their content. */
+
 int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -6946,6 +7248,8 @@ int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<T::Gener
 
 
 
+
+/*! \brief PostgreSQL backend: deletes files matching the given producer id and optionally their content. */
 
 int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerId,bool deleteContent)
 {
@@ -7015,6 +7319,8 @@ int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerI
 
 
 
+/*! \brief PostgreSQL backend: deletes files matching the given source id and optionally their content. */
+
 int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool deleteContent)
 {
   FUNCTION_TRACE
@@ -7083,6 +7389,8 @@ int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the file matching the given id. */
 
 int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo)
 {
@@ -7163,6 +7471,8 @@ int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the file matching the given name. */
+
 int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -7240,6 +7550,8 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for a paged list of files starting at the given id. */
 
 int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -7326,6 +7638,8 @@ int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given generation id. */
+
 int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -7411,6 +7725,8 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given list of generation ids. */
+
 int PostgresqlImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -7487,6 +7803,8 @@ int PostgresqlImplementation::getFileListByGenerationIdList(std::set<T::Generati
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for files matching the given producer id. */
 
 int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -7573,6 +7891,8 @@ int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T
 
 
 
+/*! \brief PostgreSQL backend: queries the database for files matching the given source id. */
+
 int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -7657,6 +7977,8 @@ int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::File
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a content record into the database. */
 
 int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
 {
@@ -7773,6 +8095,8 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a list of content records into the database. */
 
 int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList)
 {
@@ -7893,6 +8217,8 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
 
 
 
+/*! \brief PostgreSQL backend: deletes a content record matching the given file id and message index. */
+
 int PostgresqlImplementation::deleteContent(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -7925,6 +8251,8 @@ int PostgresqlImplementation::deleteContent(T::FileId fileId,T::MessageIndex mes
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given file id. */
 
 int PostgresqlImplementation::deleteContentByFileId(T::FileId fileId)
 {
@@ -7959,6 +8287,8 @@ int PostgresqlImplementation::deleteContentByFileId(T::FileId fileId)
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given producer id. */
+
 int PostgresqlImplementation::deleteContentByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -7991,6 +8321,8 @@ int PostgresqlImplementation::deleteContentByProducerId(T::ProducerId producerId
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given generation id. */
 
 int PostgresqlImplementation::deleteContentByGenerationId(T::GenerationId generationId)
 {
@@ -8025,6 +8357,8 @@ int PostgresqlImplementation::deleteContentByGenerationId(T::GenerationId genera
 
 
 
+/*! \brief PostgreSQL backend: deletes content records matching the given list of generation ids. */
+
 int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -8049,6 +8383,8 @@ int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<T::Genera
 
 
 
+
+/*! \brief PostgreSQL backend: deletes content records matching the given source id. */
 
 int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
 {
@@ -8082,6 +8418,8 @@ int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief PostgreSQL backend: updates a content record in the database. */
 
 int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
 {
@@ -8124,6 +8462,8 @@ int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for the content record matching the given file id and message index. */
 
 int PostgresqlImplementation::getContent(T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -8224,6 +8564,8 @@ int PostgresqlImplementation::getContent(T::FileId fileId,T::MessageIndex messag
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for a paged list of content records. */
 
 int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -8339,6 +8681,8 @@ int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex s
 
 
 
+/*! \brief PostgreSQL backend: queries the database for the list of generation time and geometry pairs. */
+
 int PostgresqlImplementation::getGenerationTimeAndGeometryList(std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -8410,6 +8754,8 @@ int PostgresqlImplementation::getGenerationTimeAndGeometryList(std::set<std::str
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given generation id. */
 
 int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -8521,6 +8867,8 @@ int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generatio
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given list of generation ids. */
 
 int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -8644,6 +8992,8 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::Generatio
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id. */
 
 int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ContentInfoList& contentInfoList)
 {
@@ -8782,6 +9132,8 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and time range. */
 
 int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
@@ -8933,6 +9285,8 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and generation. */
+
 int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -9081,6 +9435,8 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and producer. */
 
 int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
@@ -9231,6 +9587,8 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given generation id and time range. */
+
 int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::GenerationId generationId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -9339,6 +9697,8 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::Generation
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given forecast time list. */
 
 int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList)
 {
@@ -9476,6 +9836,8 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given producer id. */
+
 int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -9586,6 +9948,8 @@ int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T:
 
 
 
+
+/*! \brief PostgreSQL backend: queries the database for content records matching the given source id. */
 
 int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -9698,6 +10062,8 @@ int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileI
 
 
 
+/*! \brief PostgreSQL backend: queries the database for content records matching the given file id. */
+
 int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -9807,6 +10173,8 @@ int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfo
 
 
 
+/*! \brief PostgreSQL backend: inserts an event row into the database and returns the new event id. */
+
 T::EventId PostgresqlImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags,const char *eventData)
 {
   FUNCTION_TRACE
@@ -9878,6 +10246,8 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,UInt64 id1,UInt64 i
 
 
 
+
+/*! \brief PostgreSQL backend: inserts a list of event records into the database. */
 
 int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
 {
@@ -9973,6 +10343,8 @@ int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
 
 
 
+
+/*! \brief PostgreSQL backend: truncates old event rows from the event table. */
 
 void PostgresqlImplementation::truncateEvents()
 {

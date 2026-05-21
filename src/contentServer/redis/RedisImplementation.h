@@ -11,6 +11,14 @@ namespace SmartMet
 namespace ContentServer
 {
 
+// ====================================================================================
+/*! \brief ContentServer backend that stores all metadata in a Redis key-value store.
+ *
+ *  Uses hiredis to connect to a primary Redis instance and optionally a secondary
+ *  (replica) instance for read fallback.  Supports distributed locking via Redis
+ *  commands and emits change events consumed by CacheImplementation.  This is the
+ *  canonical persistent backend in a standard SmartMet Server deployment. */
+// ====================================================================================
 class RedisImplementation : public ServiceInterface
 {
   public:
@@ -236,7 +244,6 @@ class RedisImplementation : public ServiceInterface
      int            getContentByGenerationIdAndTimeRange(T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
      int            getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList);
      int            getContentByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
-     //int            getContentByRequestCounterKey(UInt64 key,T::ContentInfoList& contentInfoList);
      int            getContentBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByParameterId(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ContentInfoList& contentInfoList);
      int            getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
@@ -252,21 +259,21 @@ class RedisImplementation : public ServiceInterface
      void           getFilenames(std::map<std::string,T::FileId>& fileList);
 
 
-     redisContext*  mContext;
-     std::string    mTablePrefix;
-     time_t         mStartTime;
-     T::EventInfo   mLastEvent;
-     std::string    mRedisAddress;
-     int            mRedisPort;
-     std::string    mRedisSecondaryAddress;
-     int            mRedisSecondaryPort;
-     std::string    mFunction;
-     uint           mLine;
-     bool           mShutdownRequested;
-     bool           mDatabaseLockEnabled;
-     bool           mReloadRequired;
-     ThreadLock     mThreadLock;
-     time_t         mContentChangeTime;
+     redisContext*  mContext;                //!< Active hiredis connection context.
+     std::string    mTablePrefix;           //!< Prefix prepended to all Redis key names.
+     time_t         mStartTime;             //!< Unix timestamp when the implementation was initialised.
+     T::EventInfo   mLastEvent;             //!< Most recently written event, used for continuity checks.
+     std::string    mRedisAddress;          //!< Hostname or IP of the primary Redis instance.
+     int            mRedisPort;             //!< Port of the primary Redis instance.
+     std::string    mRedisSecondaryAddress; //!< Hostname or IP of the optional secondary Redis instance.
+     int            mRedisSecondaryPort;    //!< Port of the optional secondary Redis instance.
+     std::string    mFunction;              //!< Name of the currently executing function, used for lock diagnostics.
+     uint           mLine;                  //!< Source line of the current lock acquisition, used for diagnostics.
+     bool           mShutdownRequested;     //!< True after shutdown() has been called.
+     bool           mDatabaseLockEnabled;   //!< True if distributed Redis locking is used for write operations.
+     bool           mReloadRequired;        //!< True if the cache should perform a full reload on startup.
+     ThreadLock     mThreadLock;            //!< Serialises concurrent Redis operations.
+     time_t         mContentChangeTime;     //!< Time of the most recent content change.
 };
 
 

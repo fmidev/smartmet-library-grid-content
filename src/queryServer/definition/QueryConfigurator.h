@@ -9,6 +9,13 @@ namespace SmartMet
 namespace QueryServer
 {
 
+// ====================================================================================
+/*! \brief Populates a Query object from a flat AttributeList of key-value pairs.
+ *
+ *  Translates HTTP-style request attributes (producer, time range, location, etc.)
+ *  into the structured fields of a Query and its QueryParameter list.  Used by
+ *  plugins to translate incoming HTTP requests into QueryServer calls. */
+// ====================================================================================
 
 class QueryConfigurator
 {

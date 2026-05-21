@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Subtracts a constant scalar from every grid value. */
+// ====================================================================================
+
 class Function_sub : public Function
 {
   public:

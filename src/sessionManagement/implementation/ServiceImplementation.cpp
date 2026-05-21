@@ -18,6 +18,8 @@ ServiceImplementation localSessionManagement;
 
 
 
+/*! \brief Constructor. */
+
 ServiceImplementation::ServiceImplementation()
 {
   FUNCTION_TRACE
@@ -33,12 +35,16 @@ ServiceImplementation::ServiceImplementation()
 
 
 
+/*! \brief Destructor. */
+
 ServiceImplementation::~ServiceImplementation()
 {
 }
 
 
 
+
+/*! \brief Shutdown. */
 
 void ServiceImplementation::shutdown()
 {
@@ -55,6 +61,8 @@ void ServiceImplementation::shutdown()
 
 
 
+
+/*! \brief Protected hook: create session. */
 
 int ServiceImplementation::_createSession(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
@@ -80,6 +88,8 @@ int ServiceImplementation::_createSession(T::SessionId sessionId,SessionInfo& se
 
 
 
+/*! \brief Protected hook: delete session. */
+
 int ServiceImplementation::_deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
@@ -98,6 +108,8 @@ int ServiceImplementation::_deleteSession(T::SessionId sessionId,T::SessionId re
 
 
 
+
+/*! \brief Protected hook: delete expired sessions. */
 
 int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 {
@@ -138,6 +150,8 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 
 
 
+/*! \brief Protected hook: update session access time. */
+
 int ServiceImplementation::_updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
@@ -160,6 +174,8 @@ int ServiceImplementation::_updateSessionAccessTime(T::SessionId sessionId,T::Se
 
 
 
+
+/*! \brief Protected hook: update session info. */
 
 int ServiceImplementation::_updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo)
 {
@@ -184,6 +200,8 @@ int ServiceImplementation::_updateSessionInfo(T::SessionId sessionId,SessionInfo
 
 
 
+
+/*! \brief Protected hook: get session attribute. */
 
 int ServiceImplementation::_getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
@@ -210,6 +228,8 @@ int ServiceImplementation::_getSessionAttribute(T::SessionId sessionId,T::Sessio
 
 
 
+/*! \brief Protected hook: get session attributes. */
+
 int ServiceImplementation::_getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -233,6 +253,8 @@ int ServiceImplementation::_getSessionAttributes(T::SessionId sessionId,T::Sessi
 
 
 
+/*! \brief Protected hook: get session info. */
+
 int ServiceImplementation::_getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
 {
   FUNCTION_TRACE
@@ -254,6 +276,8 @@ int ServiceImplementation::_getSessionInfo(T::SessionId sessionId,T::SessionId r
 
 
 
+
+/*! \brief Protected hook: set session attribute. */
 
 int ServiceImplementation::_setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
@@ -278,6 +302,8 @@ int ServiceImplementation::_setSessionAttribute(T::SessionId sessionId,T::Sessio
 
 
 
+/*! \brief Protected hook: set session attributes. */
+
 int ServiceImplementation::_setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
@@ -299,6 +325,8 @@ int ServiceImplementation::_setSessionAttributes(T::SessionId sessionId,T::Sessi
 
 
 
+
+/*! \brief Protected hook: delete session attribute. */
 
 int ServiceImplementation::_deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
 {
@@ -323,6 +351,8 @@ int ServiceImplementation::_deleteSessionAttribute(T::SessionId sessionId,T::Ses
 
 
 
+/*! \brief Protected hook: delete session attribute group. */
+
 int ServiceImplementation::_deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup)
 {
   FUNCTION_TRACE
@@ -345,6 +375,8 @@ int ServiceImplementation::_deleteSessionAttributeGroup(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Protected hook: delete session attributes. */
 
 int ServiceImplementation::_deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {

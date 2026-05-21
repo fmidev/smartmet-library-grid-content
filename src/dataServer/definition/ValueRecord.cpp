@@ -10,6 +10,8 @@ namespace T
 
 
 
+/*! \brief Default constructor: zero-initializes value record fields. */
+
 ValueRecord::ValueRecord()
 {
   try
@@ -33,6 +35,8 @@ ValueRecord::ValueRecord()
 
 
 
+/*! \brief Copy constructor: clones the given ValueRecord instance. */
+
 ValueRecord::ValueRecord(ValueRecord& valueRecord)
 {
   try
@@ -55,6 +59,8 @@ ValueRecord::ValueRecord(ValueRecord& valueRecord)
 
 
 
+/*! \brief Destructor. */
+
 ValueRecord::~ValueRecord()
 {
   try
@@ -70,6 +76,8 @@ ValueRecord::~ValueRecord()
 
 
 
+
+/*! \brief Prints all value record fields to the given stream. */
 
 void ValueRecord::print(std::ostream& stream,uint level,uint optionFlags)
 {

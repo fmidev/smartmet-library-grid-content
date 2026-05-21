@@ -46,6 +46,8 @@ namespace Corba
 
 
 
+/*! \brief Data Server: Constructor. */
+
 ClientImplementation::ClientImplementation()
 {
   try
@@ -64,6 +66,8 @@ ClientImplementation::ClientImplementation()
 
 
 
+/*! \brief Data Server: Destructor. */
+
 ClientImplementation::~ClientImplementation()
 {
   try
@@ -79,6 +83,8 @@ ClientImplementation::~ClientImplementation()
 
 
 
+
+/*! \brief Data Server: Init. */
 
 void ClientImplementation::init(std::string serviceIor)
 {
@@ -112,6 +118,8 @@ void ClientImplementation::init(std::string serviceIor)
 
 
 
+/*! \brief Data Server: Protected hook: get grid coordinates. */
+
 int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
 {
   try
@@ -134,6 +142,8 @@ int ClientImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId f
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid latlon coordinates by geometry. */
 
 int ClientImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
 {
@@ -164,6 +174,8 @@ int ClientImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid data. */
+
 int ClientImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
 {
   try
@@ -186,6 +198,8 @@ int ClientImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,T
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid attribute list. */
 
 int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
 {
@@ -210,6 +224,8 @@ int ClientImplementation::_getGridAttributeList(T::SessionId sessionId,T::FileId
 
 
 
+/*! \brief Data Server: Protected hook: get grid properties. */
+
 int ClientImplementation::_getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
 {
   try
@@ -231,6 +247,8 @@ int ClientImplementation::_getGridProperties(T::SessionId sessionId,T::FileId fi
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid file count. */
 
 int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 {
@@ -254,6 +272,8 @@ int ClientImplementation::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid message bytes. */
 
 int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
 {
@@ -283,6 +303,8 @@ int ClientImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId 
 
 
 
+/*! \brief Data Server: Protected hook: get property values by coordinates. */
+
 int ClientImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
 {
   try
@@ -309,6 +331,8 @@ int ClientImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionId
 
 
 
+/*! \brief Data Server: Protected hook: get grid value by point. */
+
 int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
@@ -333,6 +357,8 @@ int ClientImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId 
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value by level and point. */
 
 int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
@@ -359,6 +385,8 @@ int ClientImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T:
 
 
 
+/*! \brief Data Server: Protected hook: get grid value by time and point. */
+
 int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
   try
@@ -383,6 +411,8 @@ int ClientImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value by time level and point. */
 
 int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
 {
@@ -409,6 +439,8 @@ int ClientImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId sessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by circle. */
+
 int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -433,6 +465,8 @@ int ClientImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::Fi
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by level and circle. */
 
 int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -459,6 +493,8 @@ int ClientImplementation::_getGridValueListByLevelAndCircle(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time and circle. */
+
 int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -484,6 +520,8 @@ int ClientImplementation::_getGridValueListByTimeAndCircle(T::SessionId sessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time level and circle. */
+
 int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -508,6 +546,8 @@ int ClientImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by point list. */
 
 int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -537,6 +577,8 @@ int ClientImplementation::_getGridValueListByPointList(T::SessionId sessionId,T:
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by level and point list. */
+
 int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -564,6 +606,8 @@ int ClientImplementation::_getGridValueListByLevelAndPointList(T::SessionId sess
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time and point list. */
 
 int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -593,6 +637,8 @@ int ClientImplementation::_getGridValueListByTimeAndPointList(T::SessionId sessi
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time level and point list. */
+
 int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -620,6 +666,8 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId 
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by polygon. */
 
 int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -649,6 +697,8 @@ int ClientImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by level and polygon. */
+
 int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -676,6 +726,8 @@ int ClientImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessio
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time and polygon. */
 
 int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -705,6 +757,8 @@ int ClientImplementation::_getGridValueListByTimeAndPolygon(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time level and polygon. */
+
 int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -732,6 +786,8 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId se
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by polygon path. */
 
 int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -761,6 +817,8 @@ int ClientImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by level and polygon path. */
+
 int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -788,6 +846,8 @@ int ClientImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId se
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value list by time and polygon path. */
 
 int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
@@ -817,6 +877,8 @@ int ClientImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId ses
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by time level and polygon path. */
+
 int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -845,6 +907,8 @@ int ClientImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::SessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid value list by rectangle. */
+
 int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
 {
   try
@@ -869,6 +933,8 @@ int ClientImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector. */
 
 int ClientImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -895,6 +961,8 @@ int ClientImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId f
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by level. */
+
 int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -920,6 +988,8 @@ int ClientImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time. */
+
 int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -944,6 +1014,8 @@ int ClientImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::Fi
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by level and coordinate list. */
 
 int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -978,6 +1050,8 @@ int ClientImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Session
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time and coordinate list. */
+
 int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -1011,6 +1085,8 @@ int ClientImplementation::_getGridValueVectorByTimeAndCoordinateList(T::SessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by level and geometry. */
+
 int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -1041,6 +1117,8 @@ int ClientImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by time and geometry. */
 
 int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1073,6 +1151,8 @@ int ClientImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId sess
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by coordinate list. */
+
 int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -1100,6 +1180,8 @@ int ClientImplementation::_getGridValueVectorByCoordinateList(T::SessionId sessi
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by geometry. */
 
 int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1132,6 +1214,8 @@ int ClientImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,T
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by rectangle. */
+
 int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -1156,6 +1240,8 @@ int ClientImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId,
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by point. */
 
 int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
 {
@@ -1182,6 +1268,8 @@ int ClientImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Data Server: Protected hook: get grid value vector by time and level. */
+
 int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
   try
@@ -1206,6 +1294,8 @@ int ClientImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId session
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by time level and geometry. */
 
 int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1237,6 +1327,8 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid value vector by time level and coordinate list. */
 
 int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
 {
@@ -1270,6 +1362,8 @@ int ClientImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands. */
 
 int ClientImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1306,6 +1400,8 @@ int ClientImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId file
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by geometry. */
+
 int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1340,6 +1436,8 @@ int ClientImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by grid. */
 
 int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1378,6 +1476,8 @@ int ClientImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileI
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by level. */
+
 int ClientImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1412,6 +1512,8 @@ int ClientImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by time. */
 
 int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1448,6 +1550,8 @@ int ClientImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::FileI
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by level and geometry. */
+
 int ClientImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1483,6 +1587,8 @@ int ClientImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time and geometry. */
+
 int ClientImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1517,6 +1623,8 @@ int ClientImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId session
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by level and grid. */
 
 int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1555,6 +1663,8 @@ int ClientImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time and grid. */
+
 int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1592,6 +1702,8 @@ int ClientImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time and level. */
+
 int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1627,6 +1739,8 @@ int ClientImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid isobands by time level and geometry. */
+
 int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1661,6 +1775,8 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId se
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isobands by time level and grid. */
 
 int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1698,6 +1814,8 @@ int ClientImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and level. */
+
 int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1730,6 +1848,8 @@ int ClientImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by time level and geometry. */
 
 int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1764,6 +1884,8 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId se
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines. */
+
 int ClientImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1797,6 +1919,8 @@ int ClientImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId file
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by geometry. */
+
 int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1829,6 +1953,8 @@ int ClientImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by grid. */
 
 int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1865,6 +1991,8 @@ int ClientImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileI
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by level. */
+
 int ClientImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1897,6 +2025,8 @@ int ClientImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::File
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by time. */
 
 int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -1931,6 +2061,8 @@ int ClientImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::FileI
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by level and geometry. */
+
 int ClientImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1964,6 +2096,8 @@ int ClientImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and geometry. */
+
 int ClientImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -1996,6 +2130,8 @@ int ClientImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId session
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by level and grid. */
 
 int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -2032,6 +2168,8 @@ int ClientImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,
 
 
 
+/*! \brief Data Server: Protected hook: get grid isolines by time and grid. */
+
 int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
   try
@@ -2066,6 +2204,8 @@ int ClientImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid isolines by time level and grid. */
 
 int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
 {
@@ -2102,6 +2242,8 @@ int ClientImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessio
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines. */
+
 int ClientImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2133,6 +2275,8 @@ int ClientImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId f
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by geometry. */
+
 int ClientImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2163,6 +2307,8 @@ int ClientImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by grid. */
 
 int ClientImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -2197,6 +2343,8 @@ int ClientImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::Fi
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by level. */
+
 int ClientImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2228,6 +2376,8 @@ int ClientImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by level and geometry. */
+
 int ClientImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2258,6 +2408,8 @@ int ClientImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by level and grid. */
 
 int ClientImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -2292,6 +2444,8 @@ int ClientImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time. */
+
 int ClientImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2323,6 +2477,8 @@ int ClientImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::Fi
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time and geometry. */
+
 int ClientImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2353,6 +2509,8 @@ int ClientImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId sess
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time and grid. */
 
 int ClientImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -2387,6 +2545,8 @@ int ClientImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionI
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time and level. */
+
 int ClientImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2418,6 +2578,8 @@ int ClientImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId session
 
 
 
+/*! \brief Data Server: Protected hook: get grid streamlines by time level and geometry. */
+
 int ClientImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
   try
@@ -2448,6 +2610,8 @@ int ClientImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId
 
 
 
+
+/*! \brief Data Server: Protected hook: get grid streamlines by time level and grid. */
 
 int ClientImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
 {
@@ -2481,6 +2645,8 @@ int ClientImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId ses
 
 
 
+
+/*! \brief Data Server: Protected hook: get multiple grid values. */
 
 int ClientImplementation::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
 {

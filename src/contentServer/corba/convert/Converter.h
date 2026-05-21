@@ -28,7 +28,13 @@ namespace Corba
 {
 
 
-
+// ====================================================================================
+/*! \brief Static helper class that marshals C++ domain types to and from CORBA IDL types.
+ *
+ *  Every public method is a static overloaded convert() that converts a single object
+ *  or list in one direction.  No state is held; the class exists purely to namespace
+ *  the conversion functions. */
+// ====================================================================================
 class Converter
 {
   public:

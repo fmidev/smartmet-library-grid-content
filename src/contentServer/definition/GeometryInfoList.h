@@ -12,8 +12,15 @@ namespace T
 {
 
 
-typedef std::vector<GeometryInfo*> GeometryInfo_pvec;
+typedef std::vector<GeometryInfo*> GeometryInfo_pvec;  //!< Convenience vector of GeometryInfo pointers.
 
+// ====================================================================================
+/*! \brief Sorted, indexed container of GeometryInfo pointers with thread-safe access.
+ *
+ *  GeometryInfoList stores geometry-generation association records in a sorted
+ *  heap-allocated array and supports lookup and enumeration by generation id,
+ *  producer id, and source id. */
+// ====================================================================================
 
 class GeometryInfoList
 {
@@ -71,16 +78,16 @@ class GeometryInfoList
 
   protected:
 
-    GeometryInfoPtr     *mArray;
-    uint                mSize;
-    uint                mLength;
-    ModificationLock    mModificationLock;
-    ModificationLock*   mModificationLockPtr;
-    bool                mReleaseObjects;
-    uint                mComparisonMethod;
+    GeometryInfoPtr     *mArray;             //!< Heap-allocated array of GeometryInfo pointers.
+    uint                mSize;              //!< Allocated capacity of mArray.
+    uint                mLength;            //!< Number of valid entries currently stored.
+    ModificationLock    mModificationLock;  //!< Owned modification lock used when no external lock is set.
+    ModificationLock*   mModificationLockPtr; //!< Pointer to the active modification lock (may be external).
+    bool                mReleaseObjects;    //!< If true, destructor deletes the pointed-to GeometryInfo objects.
+    uint                mComparisonMethod;  //!< Current sort order (one of GeometryInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GeometryInfoList> GeometryInfoList_sptr;
+typedef std::shared_ptr<GeometryInfoList> GeometryInfoList_sptr;  //!< Shared-ownership pointer to a GeometryInfoList.
 
 
 }

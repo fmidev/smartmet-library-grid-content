@@ -8,6 +8,14 @@ namespace SmartMet
 namespace Lua
 {
 
+// ====================================================================================
+/*! \brief Manages a hot-reloading collection of LuaFile objects.
+ *
+ *  Aggregates multiple LuaFile instances and dispatches function lookups and
+ *  execution calls across them.  checkUpdates() periodically re-reads changed
+ *  script files so that new function definitions take effect without a restart. */
+// ====================================================================================
+
 class LuaFileCollection
 {
   public:
@@ -61,11 +69,11 @@ class LuaFileCollection
 
   protected:
 
-    string_vec        mFilenames;
-    LuaFile_vec       mLuaFileList;
-    ModificationLock  mModificationLock;
-    time_t            mLastCheck;
-    uint              mCheckInterval;
+    string_vec        mFilenames;        //!< Paths of the Lua script files managed by this collection.
+    LuaFile_vec       mLuaFileList;      //!< Loaded LuaFile instances, one per filename entry.
+    ModificationLock  mModificationLock; //!< Lock protecting the file list during hot-reload.
+    time_t            mLastCheck;        //!< Timestamp of the last modification-check pass.
+    uint              mCheckInterval;    //!< Minimum seconds between successive modification checks.
 };
 
 

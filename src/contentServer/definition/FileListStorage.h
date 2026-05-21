@@ -13,6 +13,15 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Abstract storage back-end that shards FileInfo records across multiple
+ *         FileInfoList buckets.
+ *
+ *  FileListStorage distributes file records over up to MAX_CONTENT_SOURCES
+ *  FileInfoList instances so that structural changes to different file id ranges can
+ *  proceed with reduced lock contention. It mirrors the sharding strategy used by
+ *  ContentListStorage for content records. */
+// ====================================================================================
 
 class FileListStorage
 {
@@ -68,8 +77,8 @@ class FileListStorage
     uint           getProducerStorageIndex(T::ProducerId producerId);
     uint           getSourceStorageIndex(T::SourceId sourceId);
 
-    FileInfoList      mFileLists[MAX_CONTENT_SOURCES];
-    ModificationLock  mModificationLock;
+    FileInfoList      mFileLists[MAX_CONTENT_SOURCES]; //!< Array of sharded file partitions.
+    ModificationLock  mModificationLock;               //!< Lock protecting shard-selection and structural changes.
 };
 
 

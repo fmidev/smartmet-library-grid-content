@@ -11,6 +11,13 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Thread-safe doubly-linked list of EventInfo records with optional size cap.
+ *
+ *  EventInfoList maintains a bounded FIFO of Content Server change events using the
+ *  intrusive next/prev pointers of EventInfo. Consumers can retrieve events by
+ *  starting event id, enabling incremental polling by cache implementations. */
+// ====================================================================================
 
 class EventInfoList
 {
@@ -40,11 +47,11 @@ class EventInfoList
 
   protected:
 
-    EventInfo       *firstItem;
-    EventInfo       *lastItem;
-    uint            mLength;
-    uint            mMaxLength;
-    ThreadLock      mThreadLock;
+    EventInfo       *firstItem;   //!< Pointer to the oldest event in the list.
+    EventInfo       *lastItem;    //!< Pointer to the most recent event in the list.
+    uint            mLength;      //!< Current number of events stored.
+    uint            mMaxLength;   //!< Maximum allowed list length (0 = unlimited); oldest events are dropped when exceeded.
+    ThreadLock      mThreadLock;  //!< Mutex protecting all list operations.
 };
 
 

@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_streamU::Function_streamU()
 {
   try
@@ -22,6 +24,8 @@ Function_streamU::Function_streamU()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_streamU::Function_streamU(const Function_streamU& function)
 :Function(function)
@@ -38,6 +42,8 @@ Function_streamU::Function_streamU(const Function_streamU& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_streamU::~Function_streamU()
 {
   try
@@ -51,6 +57,8 @@ Function_streamU::~Function_streamU()
 }
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_streamU::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -82,6 +90,8 @@ float Function_streamU::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_streamU::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -112,6 +122,8 @@ double Function_streamU::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_streamU::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -157,6 +169,8 @@ void Function_streamU::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_streamU::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -200,6 +214,8 @@ void Function_streamU::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 
 
+/*! \brief Function: Duplicate. */
+
 Function* Function_streamU::duplicate()
 {
   try
@@ -214,6 +230,8 @@ Function* Function_streamU::duplicate()
 
 
 
+
+/*! \brief Function: Print. */
 
 void Function_streamU::print(std::ostream& stream,uint level,uint optionFlags)
 {

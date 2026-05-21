@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_mode::Function_mode()
 {
   try
@@ -22,6 +24,8 @@ Function_mode::Function_mode()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_mode::Function_mode(const Function_mode& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_mode::Function_mode(const Function_mode& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_mode::~Function_mode()
 {
   try
@@ -54,6 +60,8 @@ Function_mode::~Function_mode()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -110,6 +118,8 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -164,6 +174,8 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -232,6 +244,8 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -297,6 +311,8 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_mode::duplicate()
 {

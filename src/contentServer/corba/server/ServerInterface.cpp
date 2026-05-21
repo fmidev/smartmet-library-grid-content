@@ -17,6 +17,8 @@ namespace Corba
 
 
 
+/*! \brief Content Server: Constructor. */
+
 ServerInterface::ServerInterface()
 {
   FUNCTION_TRACE
@@ -34,6 +36,8 @@ ServerInterface::ServerInterface()
 
 
 
+/*! \brief Content Server: Destructor. */
+
 ServerInterface::~ServerInterface()
 {
   FUNCTION_TRACE
@@ -50,6 +54,8 @@ ServerInterface::~ServerInterface()
 
 
 
+
+/*! \brief Content Server: Init. */
 
 void ServerInterface::init(ContentServer::ServiceInterface *service)
 {
@@ -170,6 +176,8 @@ SmartMet::C::Result ServerInterface::ServerInterface::addProducerInfo(SmartMet::
 
 
 
+/*! \brief Content Server: Set producer info. */
+
 SmartMet::C::Result ServerInterface::setProducerInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -219,6 +227,8 @@ SmartMet::C::Result ServerInterface::ServerInterface::deleteProducerInfoById(Sma
 
 
 
+/*! \brief Content Server: Delete producer info by name. */
+
 SmartMet::C::Result ServerInterface::deleteProducerInfoByName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
@@ -241,6 +251,8 @@ SmartMet::C::Result ServerInterface::deleteProducerInfoByName(SmartMet::C::Sessi
 
 
 
+/*! \brief Content Server: Delete producer info list by source id. */
+
 SmartMet::C::Result ServerInterface::deleteProducerInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -262,6 +274,8 @@ SmartMet::C::Result ServerInterface::deleteProducerInfoListBySourceId(SmartMet::
 
 
 
+
+/*! \brief Content Server: Get producer info by id. */
 
 SmartMet::C::Result ServerInterface::getProducerInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ProducerInfo_out producerInfo)
 {
@@ -294,6 +308,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoById(SmartMet::C::SessionId 
 
 
 
+/*! \brief Content Server: Get producer info by name. */
+
 SmartMet::C::Result ServerInterface::getProducerInfoByName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::ProducerInfo_out producerInfo)
 {
   FUNCTION_TRACE
@@ -324,6 +340,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoByName(SmartMet::C::SessionI
 
 
 
+
+/*! \brief Content Server: Get producer info list. */
 
 SmartMet::C::Result ServerInterface::getProducerInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
@@ -356,6 +374,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoList(SmartMet::C::SessionId 
 
 
 
+/*! \brief Content Server: Get producer info list by parameter. */
+
 SmartMet::C::Result ServerInterface::getProducerInfoListByParameter(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
   FUNCTION_TRACE
@@ -386,6 +406,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoListByParameter(SmartMet::C:
 
 
 
+
+/*! \brief Content Server: Get producer info list by source id. */
 
 SmartMet::C::Result ServerInterface::getProducerInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::ProducerInfoList_out producerInfoList)
 {
@@ -418,6 +440,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoListBySourceId(SmartMet::C::
 
 
 
+/*! \brief Content Server: Get producer info count. */
+
 SmartMet::C::Result ServerInterface::getProducerInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -447,6 +471,8 @@ SmartMet::C::Result ServerInterface::getProducerInfoCount(SmartMet::C::SessionId
 
 
 
+
+/*! \brief Content Server: Get producer name and geometry list. */
 
 SmartMet::C::Result ServerInterface::getProducerNameAndGeometryList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out list)
 {
@@ -479,6 +505,8 @@ SmartMet::C::Result ServerInterface::getProducerNameAndGeometryList(SmartMet::C:
 
 
 
+/*! \brief Content Server: Get producer parameter list. */
+
 SmartMet::C::Result ServerInterface::getProducerParameterList(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType sourceParameterKeyType, SmartMet::C::ParameterKeyType targetParameterKeyType, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
@@ -510,6 +538,8 @@ SmartMet::C::Result ServerInterface::getProducerParameterList(SmartMet::C::Sessi
 
 
 
+/*! \brief Content Server: Get producer parameter list by producer id. */
+
 SmartMet::C::Result ServerInterface::getProducerParameterListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ParameterKeyType sourceParameterKeyType, SmartMet::C::ParameterKeyType targetParameterKeyType, SmartMet::C::StringList_out list)
 {
   FUNCTION_TRACE
@@ -540,6 +570,8 @@ SmartMet::C::Result ServerInterface::getProducerParameterListByProducerId(SmartM
 
 
 
+/*! \brief Content Server: Add generation info. */
+
 SmartMet::C::Result ServerInterface::addGenerationInfo(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -569,6 +601,8 @@ SmartMet::C::Result ServerInterface::addGenerationInfo(SmartMet::C::SessionId se
 
 
 
+/*! \brief Content Server: Set generation info. */
+
 SmartMet::C::Result ServerInterface::setGenerationInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -594,6 +628,8 @@ SmartMet::C::Result ServerInterface::setGenerationInfo(SmartMet::C::SessionId se
 
 
 
+/*! \brief Content Server: Delete generation info by id. */
+
 SmartMet::C::Result ServerInterface::deleteGenerationInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -616,6 +652,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoById(SmartMet::C::Sessi
 
 
 
+/*! \brief Content Server: Delete generation info by name. */
+
 SmartMet::C::Result ServerInterface::deleteGenerationInfoByName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
@@ -637,6 +675,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoByName(SmartMet::C::Ses
 
 
 
+
+/*! \brief Content Server: Delete generation info list by id list. */
 
 SmartMet::C::Result ServerInterface::deleteGenerationInfoListByIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::GenerationIdList& generationIdList)
 {
@@ -665,6 +705,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoListByIdList(SmartMet::
 
 
 
+/*! \brief Content Server: Delete generation info list by producer id. */
+
 SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -687,6 +729,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerId(SmartM
 
 
 
+/*! \brief Content Server: Delete generation info list by producer name. */
+
 SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
@@ -707,6 +751,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoListByProducerName(Smar
 
 
 
+
+/*! \brief Content Server: Delete generation info list by source id. */
 
 SmartMet::C::Result ServerInterface::deleteGenerationInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
@@ -729,6 +775,8 @@ SmartMet::C::Result ServerInterface::deleteGenerationInfoListBySourceId(SmartMet
 
 
 
+
+/*! \brief Content Server: Get generation id geometry id and forecast time list. */
 
 SmartMet::C::Result ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out list)
 {
@@ -759,6 +807,8 @@ SmartMet::C::Result ServerInterface::getGenerationIdGeometryIdAndForecastTimeLis
 
 
 
+
+/*! \brief Content Server: Get generation info by id. */
 
 SmartMet::C::Result ServerInterface::getGenerationInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GenerationInfo_out generationInfo)
 {
@@ -791,6 +841,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoById(SmartMet::C::SessionI
 
 
 
+/*! \brief Content Server: Get generation info by name. */
+
 SmartMet::C::Result ServerInterface::getGenerationInfoByName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
@@ -821,6 +873,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoByName(SmartMet::C::Sessio
 
 
 
+
+/*! \brief Content Server: Get generation info list. */
 
 SmartMet::C::Result ServerInterface::getGenerationInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
@@ -853,6 +907,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoList(SmartMet::C::SessionI
 
 
 
+/*! \brief Content Server: Get generation info list by geometry id. */
+
 SmartMet::C::Result ServerInterface::getGenerationInfoListByGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryId geometryId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
@@ -883,6 +939,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByGeometryId(SmartMet:
 
 
 
+
+/*! \brief Content Server: Get generation info list by producer id. */
 
 SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
@@ -915,6 +973,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerId(SmartMet:
 
 
 
+/*! \brief Content Server: Get generation info list by producer name. */
+
 SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
   FUNCTION_TRACE
@@ -945,6 +1005,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerName(SmartMe
 
 
 
+
+/*! \brief Content Server: Get generation info list by source id. */
 
 SmartMet::C::Result ServerInterface::getGenerationInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::GenerationInfoList_out generationInfoList)
 {
@@ -977,6 +1039,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListBySourceId(SmartMet::C
 
 
 
+/*! \brief Content Server: Get last generation info by producer id and status. */
+
 SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerIdAndStatus(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::Status generationStatus, SmartMet::C::GenerationInfo_out generationInfo)
 {
   FUNCTION_TRACE
@@ -1007,6 +1071,8 @@ SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerIdAndStatus(
 
 
 
+
+/*! \brief Content Server: Get last generation info by producer name and status. */
 
 SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerNameAndStatus(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::Status generationStatus, SmartMet::C::GenerationInfo_out generationInfo)
 {
@@ -1039,6 +1105,8 @@ SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerNameAndStatu
 
 
 
+/*! \brief Content Server: Get generation info count. */
+
 SmartMet::C::Result ServerInterface::getGenerationInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -1068,6 +1136,8 @@ SmartMet::C::Result ServerInterface::getGenerationInfoCount(SmartMet::C::Session
 
 
 
+/*! \brief Content Server: Set generation info status by id. */
+
 SmartMet::C::Result ServerInterface::setGenerationInfoStatusById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
@@ -1091,6 +1161,8 @@ SmartMet::C::Result ServerInterface::setGenerationInfoStatusById(SmartMet::C::Se
 
 
 
+/*! \brief Content Server: Set generation info status by name. */
+
 SmartMet::C::Result ServerInterface::setGenerationInfoStatusByName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
@@ -1113,6 +1185,8 @@ SmartMet::C::Result ServerInterface::setGenerationInfoStatusByName(SmartMet::C::
 
 
 
+
+/*! \brief Content Server: Add geometry info. */
 
 SmartMet::C::Result ServerInterface::addGeometryInfo(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryInfo& geometryInfo)
 {
@@ -1143,6 +1217,8 @@ SmartMet::C::Result ServerInterface::addGeometryInfo(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Content Server: Delete geometry info by id. */
+
 SmartMet::C::Result ServerInterface::deleteGeometryInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId)
 {
   FUNCTION_TRACE
@@ -1164,6 +1240,8 @@ SmartMet::C::Result ServerInterface::deleteGeometryInfoById(SmartMet::C::Session
 
 
 
+
+/*! \brief Content Server: Delete geometry info list by generation id. */
 
 SmartMet::C::Result ServerInterface::deleteGeometryInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
@@ -1187,6 +1265,8 @@ SmartMet::C::Result ServerInterface::deleteGeometryInfoListByGenerationId(SmartM
 
 
 
+/*! \brief Content Server: Delete geometry info list by producer id. */
+
 SmartMet::C::Result ServerInterface::deleteGeometryInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1209,6 +1289,8 @@ SmartMet::C::Result ServerInterface::deleteGeometryInfoListByProducerId(SmartMet
 
 
 
+/*! \brief Content Server: Delete geometry info list by source id. */
+
 SmartMet::C::Result ServerInterface::deleteGeometryInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1230,6 +1312,8 @@ SmartMet::C::Result ServerInterface::deleteGeometryInfoListBySourceId(SmartMet::
 
 
 
+
+/*! \brief Content Server: Get geometry info by id. */
 
 SmartMet::C::Result ServerInterface::getGeometryInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::GeometryInfo& geometryInfo)
 {
@@ -1262,6 +1346,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoById(SmartMet::C::SessionId 
 
 
 
+/*! \brief Content Server: Get geometry info list. */
+
 SmartMet::C::Result ServerInterface::getGeometryInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1293,6 +1379,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoList(SmartMet::C::SessionId 
 
 
 
+/*! \brief Content Server: Get geometry info list by generation id. */
+
 SmartMet::C::Result ServerInterface::getGeometryInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1322,6 +1410,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListByGenerationId(SmartMet:
 
 
 
+
+/*! \brief Content Server: Get geometry info list by producer id. */
 
 SmartMet::C::Result ServerInterface::getGeometryInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
@@ -1353,6 +1443,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListByProducerId(SmartMet::C
 
 
 
+/*! \brief Content Server: Get geometry info list by source id. */
+
 SmartMet::C::Result ServerInterface::getGeometryInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::GeometryInfoList_out geometryInfoList)
 {
   FUNCTION_TRACE
@@ -1382,6 +1474,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListBySourceId(SmartMet::C::
 
 
 
+
+/*! \brief Content Server: Get geometry info count. */
 
 SmartMet::C::Result ServerInterface::getGeometryInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
@@ -1413,6 +1507,8 @@ SmartMet::C::Result ServerInterface::getGeometryInfoCount(SmartMet::C::SessionId
 
 
 
+/*! \brief Content Server: Set geometry info. */
+
 SmartMet::C::Result ServerInterface::setGeometryInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -1438,6 +1534,8 @@ SmartMet::C::Result ServerInterface::setGeometryInfo(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Content Server: Set geometry info status by id. */
+
 SmartMet::C::Result ServerInterface::setGeometryInfoStatusById(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::Status status)
 {
   FUNCTION_TRACE
@@ -1458,6 +1556,8 @@ SmartMet::C::Result ServerInterface::setGeometryInfoStatusById(SmartMet::C::Sess
 
 
 
+
+/*! \brief Content Server: Add file info. */
 
 SmartMet::C::Result ServerInterface::addFileInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileInfo& fileInfo)
 {
@@ -1488,6 +1588,8 @@ SmartMet::C::Result ServerInterface::addFileInfo(SmartMet::C::SessionId sessionI
 
 
 
+/*! \brief Content Server: Set file info. */
+
 SmartMet::C::Result ServerInterface::setFileInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -1512,6 +1614,8 @@ SmartMet::C::Result ServerInterface::setFileInfo(SmartMet::C::SessionId sessionI
 
 
 
+
+/*! \brief Content Server: Add file info with content list. */
 
 SmartMet::C::Result ServerInterface::addFileInfoWithContentList(SmartMet::C::SessionId sessionId, SmartMet::C::FileInfo& fileInfo, SmartMet::C::ContentInfoList& contentInfoList)
 {
@@ -1548,6 +1652,8 @@ SmartMet::C::Result ServerInterface::addFileInfoWithContentList(SmartMet::C::Ses
 
 
 
+/*! \brief Content Server: Add file info list with content. */
+
 SmartMet::C::Result ServerInterface::addFileInfoListWithContent(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestFlags, SmartMet::C::FileContentList& fileContentList)
 {
   FUNCTION_TRACE
@@ -1580,6 +1686,8 @@ SmartMet::C::Result ServerInterface::addFileInfoListWithContent(SmartMet::C::Ses
 
 
 
+/*! \brief Content Server: Delete file info by id. */
+
 SmartMet::C::Result ServerInterface::deleteFileInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId)
 {
   FUNCTION_TRACE
@@ -1601,6 +1709,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoById(SmartMet::C::SessionId s
 
 
 
+
+/*! \brief Content Server: Delete file info by name. */
 
 SmartMet::C::Result ServerInterface::deleteFileInfoByName(SmartMet::C::SessionId sessionId, const char* filename)
 {
@@ -1624,6 +1734,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoByName(SmartMet::C::SessionId
 
 
 
+/*! \brief Content Server: Delete file info list by producer id. */
+
 SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1645,6 +1757,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerId(SmartMet::C:
 
 
 
+
+/*! \brief Content Server: Delete file info list by producer name. */
 
 SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
@@ -1668,6 +1782,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByProducerName(SmartMet::
 
 
 
+/*! \brief Content Server: Delete file info list by generation id. */
+
 SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1686,6 +1802,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationId(SmartMet::
   }
 }
 
+
+/*! \brief Content Server: Delete file info list by generation id and forecast time. */
 
 SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationIdAndForecastTime(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::Timestamp forecastTime)
 {
@@ -1708,6 +1826,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationIdAndForecast
 
 
 
+
+/*! \brief Content Server: Delete file info list by forecast time list. */
 
 SmartMet::C::Result ServerInterface::deleteFileInfoListByForecastTimeList(SmartMet::C::SessionId sessionId, const SmartMet::C::ForecastTimeInfoList& forecastTimeList)
 {
@@ -1736,6 +1856,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByForecastTimeList(SmartM
 
 
 
+/*! \brief Content Server: Delete file info list by generation name. */
+
 SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
@@ -1758,6 +1880,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByGenerationName(SmartMet
 
 
 
+/*! \brief Content Server: Delete file info list by source id. */
+
 SmartMet::C::Result ServerInterface::deleteFileInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1779,6 +1903,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListBySourceId(SmartMet::C::S
 
 
 
+
+/*! \brief Content Server: Delete file info list by file id list. */
 
 SmartMet::C::Result ServerInterface::deleteFileInfoListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList)
 {
@@ -1806,6 +1932,8 @@ SmartMet::C::Result ServerInterface::deleteFileInfoListByFileIdList(SmartMet::C:
 
 
 
+
+/*! \brief Content Server: Get file info by id. */
 
 SmartMet::C::Result ServerInterface::getFileInfoById(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::FileInfo_out fileInfo)
 {
@@ -1838,6 +1966,8 @@ SmartMet::C::Result ServerInterface::getFileInfoById(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Content Server: Get file info by name. */
+
 SmartMet::C::Result ServerInterface::getFileInfoByName(SmartMet::C::SessionId sessionId, const char* filename, SmartMet::C::FileInfo_out fileInfo)
 {
   FUNCTION_TRACE
@@ -1869,6 +1999,8 @@ SmartMet::C::Result ServerInterface::getFileInfoByName(SmartMet::C::SessionId se
 
 
 
+/*! \brief Content Server: Get file info list. */
+
 SmartMet::C::Result ServerInterface::getFileInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -1899,6 +2031,8 @@ SmartMet::C::Result ServerInterface::getFileInfoList(SmartMet::C::SessionId sess
 
 
 
+
+/*! \brief Content Server: Get file info list by file id list. */
 
 SmartMet::C::Result ServerInterface::getFileInfoListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList, SmartMet::C::FileInfoList_out fileInfoList)
 {
@@ -1934,6 +2068,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListByFileIdList(SmartMet::C::Se
 
 
 
+/*! \brief Content Server: Get file info list by producer id. */
+
 SmartMet::C::Result ServerInterface::getFileInfoListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -1965,6 +2101,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListByProducerId(SmartMet::C::Se
 
 
 
+/*! \brief Content Server: Get file info list by producer name. */
+
 SmartMet::C::Result ServerInterface::getFileInfoListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -1994,6 +2132,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListByProducerName(SmartMet::C::
 
 
 
+
+/*! \brief Content Server: Get file info list by generation id. */
 
 SmartMet::C::Result ServerInterface::getFileInfoListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
@@ -2026,6 +2166,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListByGenerationId(SmartMet::C::
 
 
 
+/*! \brief Content Server: Get file info list by generation name. */
+
 SmartMet::C::Result ServerInterface::getFileInfoListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
   FUNCTION_TRACE
@@ -2056,6 +2198,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListByGenerationName(SmartMet::C
 
 
 
+
+/*! \brief Content Server: Get file info list by source id. */
 
 SmartMet::C::Result ServerInterface::getFileInfoListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::FileId startFileId, SmartMet::C::Int32 maxRecords, SmartMet::C::FileInfoList_out fileInfoList)
 {
@@ -2088,6 +2232,8 @@ SmartMet::C::Result ServerInterface::getFileInfoListBySourceId(SmartMet::C::Sess
 
 
 
+/*! \brief Content Server: Get file info count. */
+
 SmartMet::C::Result ServerInterface::getFileInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -2117,6 +2263,8 @@ SmartMet::C::Result ServerInterface::getFileInfoCount(SmartMet::C::SessionId ses
 
 
 
+
+/*! \brief Content Server: Get file info count by producer id. */
 
 SmartMet::C::Result ServerInterface::getFileInfoCountByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::UInt32& count)
 {
@@ -2148,6 +2296,8 @@ SmartMet::C::Result ServerInterface::getFileInfoCountByProducerId(SmartMet::C::S
 
 
 
+/*! \brief Content Server: Get file info count by generation id. */
+
 SmartMet::C::Result ServerInterface::getFileInfoCountByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -2177,6 +2327,8 @@ SmartMet::C::Result ServerInterface::getFileInfoCountByGenerationId(SmartMet::C:
 
 
 
+
+/*! \brief Content Server: Get file info count by source id. */
 
 SmartMet::C::Result ServerInterface::getFileInfoCountBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::UInt32& count)
 {
@@ -2208,6 +2360,8 @@ SmartMet::C::Result ServerInterface::getFileInfoCountBySourceId(SmartMet::C::Ses
 
 
 
+/*! \brief Content Server: Add event info. */
+
 SmartMet::C::Result ServerInterface::addEventInfo(SmartMet::C::SessionId sessionId, SmartMet::C::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2236,6 +2390,8 @@ SmartMet::C::Result ServerInterface::addEventInfo(SmartMet::C::SessionId session
 
 
 
+
+/*! \brief Content Server: Get last event info. */
 
 SmartMet::C::Result ServerInterface::getLastEventInfo(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestingServerId, SmartMet::C::EventInfo_out eventInfo)
 {
@@ -2268,6 +2424,8 @@ SmartMet::C::Result ServerInterface::getLastEventInfo(SmartMet::C::SessionId ses
 
 
 
+/*! \brief Content Server: Get event info list. */
+
 SmartMet::C::Result ServerInterface::getEventInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32 requestingServerId, SmartMet::C::EventId startEventId, SmartMet::C::Int32 maxRecords, SmartMet::C::EventInfoList_out eventInfoList)
 {
   FUNCTION_TRACE
@@ -2299,6 +2457,8 @@ SmartMet::C::Result ServerInterface::getEventInfoList(SmartMet::C::SessionId ses
 
 
 
+/*! \brief Content Server: Get event info count. */
+
 SmartMet::C::Result ServerInterface::getEventInfoCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -2329,6 +2489,8 @@ SmartMet::C::Result ServerInterface::getEventInfoCount(SmartMet::C::SessionId se
 
 
 
+/*! \brief Content Server: Add content info. */
+
 SmartMet::C::Result ServerInterface::addContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2358,6 +2520,8 @@ SmartMet::C::Result ServerInterface::addContentInfo(SmartMet::C::SessionId sessi
 
 
 
+/*! \brief Content Server: Set content info. */
+
 SmartMet::C::Result ServerInterface::setContentInfo(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -2382,6 +2546,8 @@ SmartMet::C::Result ServerInterface::setContentInfo(SmartMet::C::SessionId sessi
 
 
 
+
+/*! \brief Content Server: Add content list. */
 
 SmartMet::C::Result ServerInterface::addContentList(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfoList& contentInfoList)
 {
@@ -2412,6 +2578,8 @@ SmartMet::C::Result ServerInterface::addContentList(SmartMet::C::SessionId sessi
 
 
 
+/*! \brief Content Server: Delete content info. */
+
 SmartMet::C::Result ServerInterface::deleteContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -2433,6 +2601,8 @@ SmartMet::C::Result ServerInterface::deleteContentInfo(SmartMet::C::SessionId se
 
 
 
+
+/*! \brief Content Server: Delete content list by file id. */
 
 SmartMet::C::Result ServerInterface::deleteContentListByFileId(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId)
 {
@@ -2456,6 +2626,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByFileId(SmartMet::C::Sess
 
 
 
+/*! \brief Content Server: Delete content list by file name. */
+
 SmartMet::C::Result ServerInterface::deleteContentListByFileName(SmartMet::C::SessionId sessionId, const char* filename)
 {
   FUNCTION_TRACE
@@ -2476,6 +2648,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByFileName(SmartMet::C::Se
 
 
 
+
+/*! \brief Content Server: Delete content list by producer id. */
 
 SmartMet::C::Result ServerInterface::deleteContentListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId)
 {
@@ -2499,6 +2673,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByProducerId(SmartMet::C::
 
 
 
+/*! \brief Content Server: Delete content list by producer name. */
+
 SmartMet::C::Result ServerInterface::deleteContentListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName)
 {
   FUNCTION_TRACE
@@ -2520,6 +2696,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByProducerName(SmartMet::C
 
 
 
+
+/*! \brief Content Server: Delete content list by generation id. */
 
 SmartMet::C::Result ServerInterface::deleteContentListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId)
 {
@@ -2543,6 +2721,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByGenerationId(SmartMet::C
 
 
 
+/*! \brief Content Server: Delete content list by generation name. */
+
 SmartMet::C::Result ServerInterface::deleteContentListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName)
 {
   FUNCTION_TRACE
@@ -2565,6 +2745,8 @@ SmartMet::C::Result ServerInterface::deleteContentListByGenerationName(SmartMet:
 
 
 
+/*! \brief Content Server: Delete content list by source id. */
+
 SmartMet::C::Result ServerInterface::deleteContentListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2586,6 +2768,8 @@ SmartMet::C::Result ServerInterface::deleteContentListBySourceId(SmartMet::C::Se
 
 
 
+
+/*! \brief Content Server: Get content info. */
 
 SmartMet::C::Result ServerInterface::getContentInfo(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::MessageIndex messageIndex, SmartMet::C::ContentInfo_out contentInfo)
 {
@@ -2618,6 +2802,8 @@ SmartMet::C::Result ServerInterface::getContentInfo(SmartMet::C::SessionId sessi
 
 
 
+/*! \brief Content Server: Get content list. */
+
 SmartMet::C::Result ServerInterface::getContentList(SmartMet::C::SessionId sessionId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2649,6 +2835,8 @@ SmartMet::C::Result ServerInterface::getContentList(SmartMet::C::SessionId sessi
 
 
 
+/*! \brief Content Server: Get content list by file id. */
+
 SmartMet::C::Result ServerInterface::getContentListByFileId(SmartMet::C::SessionId sessionId, SmartMet::C::FileId fileId, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2679,6 +2867,8 @@ SmartMet::C::Result ServerInterface::getContentListByFileId(SmartMet::C::Session
 
 
 
+
+/*! \brief Content Server: Get content list by file id list. */
 
 SmartMet::C::Result ServerInterface::getContentListByFileIdList(SmartMet::C::SessionId sessionId, const SmartMet::C::FileIdList& fileIdList, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -2714,6 +2904,8 @@ SmartMet::C::Result ServerInterface::getContentListByFileIdList(SmartMet::C::Ses
 
 
 
+/*! \brief Content Server: Get content list by file name. */
+
 SmartMet::C::Result ServerInterface::getContentListByFileName(SmartMet::C::SessionId sessionId, const char* filename, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2744,6 +2936,8 @@ SmartMet::C::Result ServerInterface::getContentListByFileName(SmartMet::C::Sessi
 
 
 
+
+/*! \brief Content Server: Get content list by producer id. */
 
 SmartMet::C::Result ServerInterface::getContentListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -2776,6 +2970,8 @@ SmartMet::C::Result ServerInterface::getContentListByProducerId(SmartMet::C::Ses
 
 
 
+/*! \brief Content Server: Get content list by producer name. */
+
 SmartMet::C::Result ServerInterface::getContentListByProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2806,6 +3002,8 @@ SmartMet::C::Result ServerInterface::getContentListByProducerName(SmartMet::C::S
 
 
 
+
+/*! \brief Content Server: Get content list by generation id. */
 
 SmartMet::C::Result ServerInterface::getContentListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -2838,6 +3036,8 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationId(SmartMet::C::S
 
 
 
+/*! \brief Content Server: Get content list by generation name. */
+
 SmartMet::C::Result ServerInterface::getContentListByGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2868,6 +3068,8 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationName(SmartMet::C:
 
 
 
+
+/*! \brief Content Server: Get content list by generation id and time range. */
 
 SmartMet::C::Result ServerInterface::getContentListByGenerationIdAndTimeRange(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -2900,6 +3102,8 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationIdAndTimeRange(Sm
 
 
 
+/*! \brief Content Server: Get content list by generation name and time range. */
+
 SmartMet::C::Result ServerInterface::getContentListByGenerationNameAndTimeRange(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2930,6 +3134,8 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationNameAndTimeRange(
 
 
 
+
+/*! \brief Content Server: Get content list by source id. */
 
 SmartMet::C::Result ServerInterface::getContentListBySourceId(SmartMet::C::SessionId sessionId, SmartMet::C::SourceId sourceId, SmartMet::C::FileId startFileId, SmartMet::C::MessageIndex startMessageIndex, SmartMet::C::Int32 maxRecords, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -2962,6 +3168,8 @@ SmartMet::C::Result ServerInterface::getContentListBySourceId(SmartMet::C::Sessi
 
 
 
+/*! \brief Content Server: Get content list by parameter. */
+
 SmartMet::C::Result ServerInterface::getContentListByParameter(SmartMet::C::SessionId sessionId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -2992,6 +3200,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameter(SmartMet::C::Sess
 
 
 
+
+/*! \brief Content Server: Get content list by parameter and generation id. */
 
 SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -3024,6 +3234,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationId(Sm
 
 
 
+/*! \brief Content Server: Get content list by parameter and generation name. */
+
 SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationName(SmartMet::C::SessionId sessionId, const char* generationName, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -3054,6 +3266,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationName(
 
 
 
+
+/*! \brief Content Server: Get content list by parameter and producer id. */
 
 SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -3086,6 +3300,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerId(Smar
 
 
 
+/*! \brief Content Server: Get content list by parameter and producer name. */
+
 SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerName(SmartMet::C::SessionId sessionId, const char* producerName, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level minLevel, SmartMet::C::Level maxLevel, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp startTime, SmartMet::C::Timestamp endTime, SmartMet::C::UInt32 requestFlags, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -3116,6 +3332,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerName(Sm
 
 
 
+
+/*! \brief Content Server: Get content list by parameter generation id and forecast time. */
 
 SmartMet::C::Result ServerInterface::getContentListByParameterGenerationIdAndForecastTime(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::Level level, SmartMet::C::ForecastType forecastType, SmartMet::C::ForecastType forecastNumber, SmartMet::C::GeometryId geometryId, SmartMet::C::Timestamp forecastTime, SmartMet::C::ContentInfoList_out contentInfoList)
 {
@@ -3148,6 +3366,8 @@ SmartMet::C::Result ServerInterface::getContentListByParameterGenerationIdAndFor
 
 
 
+/*! \brief Content Server: Get content list of invalid integrity. */
+
 SmartMet::C::Result ServerInterface::getContentListOfInvalidIntegrity(SmartMet::C::SessionId sessionId, SmartMet::C::ContentInfoList_out contentInfoList)
 {
   FUNCTION_TRACE
@@ -3178,6 +3398,8 @@ SmartMet::C::Result ServerInterface::getContentListOfInvalidIntegrity(SmartMet::
 
 
 
+
+/*! \brief Content Server: Get content geometry id list by generation id. */
 
 SmartMet::C::Result ServerInterface::getContentGeometryIdListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryIdList_out geometryIdList)
 {
@@ -3211,6 +3433,8 @@ SmartMet::C::Result ServerInterface::getContentGeometryIdListByGenerationId(Smar
 
 
 
+/*! \brief Content Server: Get content param list by generation id. */
+
 SmartMet::C::Result ServerInterface::getContentParamListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ContentInfoList_out contentParamList)
 {
   FUNCTION_TRACE
@@ -3241,6 +3465,8 @@ SmartMet::C::Result ServerInterface::getContentParamListByGenerationId(SmartMet:
 
 
 
+
+/*! \brief Content Server: Get content param key list by generation id. */
 
 SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
@@ -3273,6 +3499,8 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationId(SmartM
 
 
 
+/*! \brief Content Server: Get content param key list by generation and geometry id. */
+
 SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationAndGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
   FUNCTION_TRACE
@@ -3303,6 +3531,8 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationAndGeomet
 
 
 
+
+/*! \brief Content Server: Get content param key list by generation geometry and level id. */
 
 SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::ParameterKeyType parameterKeyType, SmartMet::C::StringList_out paramKeyList)
 {
@@ -3335,6 +3565,8 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationGeometryA
 
 
 
+/*! \brief Content Server: Get content time list by generation id. */
+
 SmartMet::C::Result ServerInterface::getContentTimeListByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
@@ -3365,6 +3597,8 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationId(SmartMet::
 
 
 
+
+/*! \brief Content Server: Get content time range by producer and generation id. */
 
 SmartMet::C::Result ServerInterface::getContentTimeRangeByProducerAndGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp& startTime, SmartMet::C::Timestamp& endTime)
 {
@@ -3399,6 +3633,8 @@ SmartMet::C::Result ServerInterface::getContentTimeRangeByProducerAndGenerationI
 
 
 
+/*! \brief Content Server: Get content time range by generation id. */
+
 SmartMet::C::Result ServerInterface::getContentTimeRangeByGenerationId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::Timestamp& startTime, SmartMet::C::Timestamp& endTime)
 {
   FUNCTION_TRACE
@@ -3431,6 +3667,8 @@ SmartMet::C::Result ServerInterface::getContentTimeRangeByGenerationId(SmartMet:
 
 
 
+/*! \brief Content Server: Get content time list by generation and geometry id. */
+
 SmartMet::C::Result ServerInterface::getContentTimeListByGenerationAndGeometryId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
@@ -3460,6 +3698,8 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationAndGeometryId
 
 
 
+
+/*! \brief Content Server: Get content time list by generation geometry and level id. */
 
 SmartMet::C::Result ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::TimeStringList_out contentTimeList)
 {
@@ -3492,6 +3732,8 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationGeometryAndLe
 
 
 
+/*! \brief Content Server: Get content level list by generation geometry and level id. */
+
 SmartMet::C::Result ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, SmartMet::C::LevelId levelId, SmartMet::C::LevelList_out contentLevelList)
 {
   FUNCTION_TRACE
@@ -3522,6 +3764,8 @@ SmartMet::C::Result ServerInterface::getContentLevelListByGenerationGeometryAndL
 
 
 
+
+/*! \brief Content Server: Get content level list by parameter generation geometry and level id. */
 
 SmartMet::C::Result ServerInterface::getContentLevelListByParameterGenerationGeometryAndLevelId(SmartMet::C::SessionId sessionId, SmartMet::C::GenerationId generationId, SmartMet::C::GeometryId geometryId, const char* parameterKey, SmartMet::C::LevelId levelId, SmartMet::C::LevelList_out contentLevelList)
 {
@@ -3554,6 +3798,8 @@ SmartMet::C::Result ServerInterface::getContentLevelListByParameterGenerationGeo
 
 
 
+/*! \brief Content Server: Get content time list by producer id. */
+
 SmartMet::C::Result ServerInterface::getContentTimeListByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::TimeStringList_out contentTimeList)
 {
   FUNCTION_TRACE
@@ -3585,6 +3831,8 @@ SmartMet::C::Result ServerInterface::getContentTimeListByProducerId(SmartMet::C:
 
 
 
+/*! \brief Content Server: Get content count. */
+
 SmartMet::C::Result ServerInterface::getContentCount(SmartMet::C::SessionId sessionId, SmartMet::C::UInt32& count)
 {
   FUNCTION_TRACE
@@ -3615,6 +3863,8 @@ SmartMet::C::Result ServerInterface::getContentCount(SmartMet::C::SessionId sess
 
 
 
+/*! \brief Content Server: Get hash by producer id. */
+
 SmartMet::C::Result ServerInterface::getHashByProducerId(SmartMet::C::SessionId sessionId, SmartMet::C::ProducerId producerId, SmartMet::C::Hash& hash)
 {
   FUNCTION_TRACE
@@ -3644,6 +3894,8 @@ SmartMet::C::Result ServerInterface::getHashByProducerId(SmartMet::C::SessionId 
 
 
 
+
+/*! \brief Content Server: Get level info list. */
 
 SmartMet::C::Result ServerInterface::getLevelInfoList(SmartMet::C::SessionId sessionId, SmartMet::C::LevelInfoList_out levelInfoList)
 {

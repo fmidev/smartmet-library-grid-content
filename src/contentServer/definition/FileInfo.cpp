@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for FileInfo. */
+
 FileInfo::FileInfo()
 {
   try
@@ -36,6 +38,8 @@ FileInfo::FileInfo()
 
 
 
+
+/*! \brief Copy constructor for FileInfo. */
 
 FileInfo::FileInfo(const FileInfo& fileInfo)
 {
@@ -67,6 +71,8 @@ FileInfo::FileInfo(const FileInfo& fileInfo)
 
 
 
+/*! \brief Construct FileInfo from the given producer, generation, type, filename, and source id. */
+
 FileInfo::FileInfo(T::ProducerId producerId,T::GenerationId generationId,uchar type,const std::string& filename,T::SourceId sourceId)
 {
   try
@@ -95,6 +101,8 @@ FileInfo::FileInfo(T::ProducerId producerId,T::GenerationId generationId,uchar t
 
 
 
+
+/*! \brief Construct FileInfo from a CSV-formatted string. */
 
 FileInfo::FileInfo(const char *csv)
 {
@@ -125,6 +133,8 @@ FileInfo::FileInfo(const char *csv)
 
 
 
+/*! \brief Destructor for FileInfo. */
+
 FileInfo::~FileInfo()
 {
   try
@@ -140,6 +150,8 @@ FileInfo::~FileInfo()
 
 
 
+
+/*! \brief Copy assignment operator for FileInfo. */
 
 FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
 {
@@ -175,6 +187,8 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
 
 
 
+/*! \brief Return this record formatted as a CSV row. */
+
 std::string FileInfo::getCsv()
 {
   try
@@ -209,6 +223,8 @@ std::string FileInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string FileInfo::getCsvHeader()
 {
   try
@@ -225,6 +241,8 @@ std::string FileInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void FileInfo::setCsv(const char *csv)
 {
@@ -287,6 +305,8 @@ void FileInfo::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this record from a CSV row std::string. */
+
 void FileInfo::setCsv(const std::string& csv)
 {
   try
@@ -302,6 +322,8 @@ void FileInfo::setCsv(const std::string& csv)
 
 
 
+
+/*! \brief Compare two records according to the selected comparison method. */
 
 int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo)
 {
@@ -333,6 +355,8 @@ int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo)
 
 
 
+/*! \brief Return a deep copy of this FileInfo. */
+
 FileInfo* FileInfo::duplicate()
 {
   try
@@ -348,6 +372,8 @@ FileInfo* FileInfo::duplicate()
 
 
 
+
+/*! \brief Print the record contents to the given stream. */
 
 void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

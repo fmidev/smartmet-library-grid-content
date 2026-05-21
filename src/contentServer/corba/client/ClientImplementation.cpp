@@ -51,6 +51,8 @@ namespace Corba
 
 
 
+/*! \brief Content Server: Constructor. */
+
 ClientImplementation::ClientImplementation()
 {
   try
@@ -71,6 +73,8 @@ ClientImplementation::ClientImplementation()
 
 
 
+/*! \brief Content Server: Destructor. */
+
 ClientImplementation::~ClientImplementation()
 {
   try
@@ -86,6 +90,8 @@ ClientImplementation::~ClientImplementation()
 
 
 
+
+/*! \brief Content Server: Init. */
 
 void ClientImplementation::init(const std::string& serviceIor)
 {
@@ -121,6 +127,8 @@ void ClientImplementation::init(const std::string& serviceIor)
 
 
 
+/*! \brief Content Server: Get id. */
+
 uint ClientImplementation::getId()
 {
   try
@@ -136,6 +144,8 @@ uint ClientImplementation::getId()
 
 
 
+
+/*! \brief Content Server: Set id. */
 
 void ClientImplementation::setId(uint id)
 {
@@ -153,6 +163,8 @@ void ClientImplementation::setId(uint id)
 
 
 
+/*! \brief Content Server: Get last access time. */
+
 time_t ClientImplementation::getLastAccessTime()
 {
   try
@@ -168,6 +180,8 @@ time_t ClientImplementation::getLastAccessTime()
 
 
 
+
+/*! \brief Content Server: Set last access time. */
 
 void ClientImplementation::setLastAccessTime(time_t accessTime)
 {
@@ -185,6 +199,8 @@ void ClientImplementation::setLastAccessTime(time_t accessTime)
 
 
 
+/*! \brief Content Server: Get last error time. */
+
 time_t ClientImplementation::getLastErrorTime()
 {
   try
@@ -201,6 +217,8 @@ time_t ClientImplementation::getLastErrorTime()
 
 
 
+/*! \brief Content Server: Set last error time. */
+
 void ClientImplementation::setLastErrorTime(time_t errorTime)
 {
   try
@@ -216,6 +234,8 @@ void ClientImplementation::setLastErrorTime(time_t errorTime)
 
 
 
+
+/*! \brief Content Server: Protected hook: clear. */
 
 int ClientImplementation::_clear(T::SessionId sessionId)
 {
@@ -236,6 +256,8 @@ int ClientImplementation::_clear(T::SessionId sessionId)
 
 
 
+/*! \brief Content Server: Protected hook: reload. */
+
 int ClientImplementation::_reload(T::SessionId sessionId)
 {
   try
@@ -254,6 +276,8 @@ int ClientImplementation::_reload(T::SessionId sessionId)
 
 
 
+
+/*! \brief Content Server: Protected hook: get content change time. */
 
 int ClientImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
@@ -278,6 +302,8 @@ int ClientImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& c
 
 
 
+
+/*! \brief Content Server: Protected hook: add producer info. */
 
 int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerInfo& producerInfo)
 {
@@ -304,6 +330,8 @@ int ClientImplementation::_addProducerInfo(T::SessionId sessionId, T::ProducerIn
 
 
 
+/*! \brief Content Server: Protected hook: delete producer info by id. */
+
 int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, T::ProducerId producerId)
 {
   try
@@ -322,6 +350,8 @@ int ClientImplementation::_deleteProducerInfoById(T::SessionId sessionId, T::Pro
 
 
 
+
+/*! \brief Content Server: Protected hook: delete producer info by name. */
 
 int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -342,6 +372,8 @@ int ClientImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
 
 
 
+/*! \brief Content Server: Protected hook: delete producer info list by source id. */
+
 int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
@@ -360,6 +392,8 @@ int ClientImplementation::_deleteProducerInfoListBySourceId(T::SessionId session
 
 
 
+
+/*! \brief Content Server: Protected hook: get producer info by id. */
 
 int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, T::ProducerId producerId, T::ProducerInfo& producerInfo)
 {
@@ -385,6 +419,8 @@ int ClientImplementation::_getProducerInfoById(T::SessionId sessionId, T::Produc
 
 
 
+/*! \brief Content Server: Protected hook: get producer info by name. */
+
 int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, const std::string& producerName, T::ProducerInfo& producerInfo)
 {
   try
@@ -408,6 +444,8 @@ int ClientImplementation::_getProducerInfoByName(T::SessionId sessionId, const s
 
 
 
+
+/*! \brief Content Server: Protected hook: get producer info list. */
 
 int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::ProducerInfoList& producerInfoList)
 {
@@ -433,6 +471,8 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId, T::Produc
 
 
 
+/*! \brief Content Server: Protected hook: get producer info list by parameter. */
+
 int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
   try
@@ -456,6 +496,8 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: get producer info list by source id. */
 
 int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
@@ -481,6 +523,8 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
 
 
 
+/*! \brief Content Server: Protected hook: get producer info count. */
+
 int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
   try
@@ -504,6 +548,8 @@ int ClientImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& cou
 
 
 
+
+/*! \brief Content Server: Protected hook: get producer name and geometry list. */
 
 int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -529,6 +575,8 @@ int ClientImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId
 
 
 
+/*! \brief Content Server: Protected hook: get producer parameter list. */
+
 int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   try
@@ -552,6 +600,8 @@ int ClientImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
 
 
 
+
+/*! \brief Content Server: Protected hook: get producer parameter list by producer id. */
 
 int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -577,6 +627,8 @@ int ClientImplementation::_getProducerParameterListByProducerId(T::SessionId ses
 
 
 
+/*! \brief Content Server: Protected hook: set producer info. */
+
 int ClientImplementation::_setProducerInfo(T::SessionId sessionId, T::ProducerInfo& producerInfo)
 {
   try
@@ -598,6 +650,8 @@ int ClientImplementation::_setProducerInfo(T::SessionId sessionId, T::ProducerIn
 
 
 
+
+/*! \brief Content Server: Protected hook: add generation info. */
 
 int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::GenerationInfo& generationInfo)
 {
@@ -624,6 +678,8 @@ int ClientImplementation::_addGenerationInfo(T::SessionId sessionId, T::Generati
 
 
 
+/*! \brief Content Server: Protected hook: delete generation info by id. */
+
 int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, T::GenerationId generationId)
 {
   try
@@ -643,6 +699,8 @@ int ClientImplementation::_deleteGenerationInfoById(T::SessionId sessionId, T::G
 
 
 
+/*! \brief Content Server: Protected hook: delete generation info by name. */
+
 int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
   try
@@ -661,6 +719,8 @@ int ClientImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
 
 
 
+
+/*! \brief Content Server: Protected hook: delete generation info list by id list. */
 
 int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
@@ -684,6 +744,8 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
 
 
+/*! \brief Content Server: Protected hook: delete generation info list by producer id. */
+
 int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
@@ -702,6 +764,8 @@ int ClientImplementation::_deleteGenerationInfoListByProducerId(T::SessionId ses
 
 
 
+
+/*! \brief Content Server: Protected hook: delete generation info list by producer name. */
 
 int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -722,6 +786,8 @@ int ClientImplementation::_deleteGenerationInfoListByProducerName(T::SessionId s
 
 
 
+/*! \brief Content Server: Protected hook: delete generation info list by source id. */
+
 int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
@@ -740,6 +806,8 @@ int ClientImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessi
 
 
 
+
+/*! \brief Content Server: Protected hook: get generation id geometry id and forecast time list. */
 
 int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -763,6 +831,8 @@ int ClientImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
 
 
 
+
+/*! \brief Content Server: Protected hook: get generation info by id. */
 
 int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, T::GenerationId generationId, T::GenerationInfo& generationInfo)
 {
@@ -788,6 +858,8 @@ int ClientImplementation::_getGenerationInfoById(T::SessionId sessionId, T::Gene
 
 
 
+/*! \brief Content Server: Protected hook: get generation info by name. */
+
 int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   try
@@ -811,6 +883,8 @@ int ClientImplementation::_getGenerationInfoByName(T::SessionId sessionId,const 
 
 
 
+
+/*! \brief Content Server: Protected hook: get generation info list. */
 
 int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::GenerationInfoList& generationInfoList)
 {
@@ -836,6 +910,8 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId, T::Gene
 
 
 
+/*! \brief Content Server: Protected hook: get generation info list by geometry id. */
+
 int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   try
@@ -859,6 +935,8 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
 
 
+
+/*! \brief Content Server: Protected hook: get generation info list by producer id. */
 
 int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::GenerationInfoList& generationInfoList)
 {
@@ -884,6 +962,8 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
 
 
 
+/*! \brief Content Server: Protected hook: get generation info list by producer name. */
+
 int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
   try
@@ -907,6 +987,8 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
 
 
 
+
+/*! \brief Content Server: Protected hook: get generation info list by source id. */
 
 int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::GenerationInfoList& generationInfoList)
 {
@@ -932,6 +1014,8 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
 
 
 
+/*! \brief Content Server: Protected hook: get last generation info by producer id and status. */
+
 int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   try
@@ -955,6 +1039,8 @@ int ClientImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::Session
 
 
 
+
+/*! \brief Content Server: Protected hook: get last generation info by producer name and status. */
 
 int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -980,6 +1066,8 @@ int ClientImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessi
 
 
 
+/*! \brief Content Server: Protected hook: get generation info count. */
+
 int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   try
@@ -1004,6 +1092,8 @@ int ClientImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& c
 
 
 
+/*! \brief Content Server: Protected hook: set generation info. */
+
 int ClientImplementation::_setGenerationInfo(T::SessionId sessionId, T::GenerationInfo& generationInfo)
 {
   try
@@ -1026,6 +1116,8 @@ int ClientImplementation::_setGenerationInfo(T::SessionId sessionId, T::Generati
 
 
 
+/*! \brief Content Server: Protected hook: set generation info status by id. */
+
 int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   try
@@ -1045,6 +1137,8 @@ int ClientImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T:
 
 
 
+/*! \brief Content Server: Protected hook: set generation info status by name. */
+
 int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
   try
@@ -1063,6 +1157,8 @@ int ClientImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,
 
 
 
+
+/*! \brief Content Server: Protected hook: add geometry info. */
 
 int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
@@ -1089,6 +1185,8 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
+/*! \brief Content Server: Protected hook: delete geometry info by id. */
+
 int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   try
@@ -1107,6 +1205,8 @@ int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::Gene
 
 
 
+
+/*! \brief Content Server: Protected hook: delete geometry info list by generation id. */
 
 int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -1127,6 +1227,8 @@ int ClientImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId ses
 
 
 
+/*! \brief Content Server: Protected hook: delete geometry info list by producer id. */
+
 int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   try
@@ -1146,6 +1248,8 @@ int ClientImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessi
 
 
 
+/*! \brief Content Server: Protected hook: delete geometry info list by source id. */
+
 int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   try
@@ -1164,6 +1268,8 @@ int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 
 
+
+/*! \brief Content Server: Protected hook: get geometry info by id. */
 
 int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
@@ -1189,6 +1295,8 @@ int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generat
 
 
 
+/*! \brief Content Server: Protected hook: get geometry info list. */
+
 int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
   try
@@ -1212,6 +1320,8 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
 
 
 
+
+/*! \brief Content Server: Protected hook: get geometry info list by generation id. */
 
 int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
@@ -1237,6 +1347,8 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Content Server: Protected hook: get geometry info list by producer id. */
+
 int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
   try
@@ -1261,6 +1373,8 @@ int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
 
 
 
+/*! \brief Content Server: Protected hook: get geometry info list by source id. */
+
 int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   try
@@ -1284,6 +1398,8 @@ int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Content Server: Protected hook: get geometry info count. */
 
 int ClientImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -1313,6 +1429,8 @@ int ClientImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& cou
 
 
 
+/*! \brief Content Server: Protected hook: set geometry info. */
+
 int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   try
@@ -1335,6 +1453,8 @@ int ClientImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 
 
+/*! \brief Content Server: Protected hook: set geometry info status by id. */
+
 int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
   try
@@ -1353,6 +1473,8 @@ int ClientImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::G
 
 
 
+
+/*! \brief Content Server: Protected hook: add file info. */
 
 int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& fileInfo)
 {
@@ -1378,6 +1500,8 @@ int ClientImplementation::_addFileInfo(T::SessionId sessionId, T::FileInfo& file
 
 
 
+
+/*! \brief Content Server: Protected hook: add file info with content list. */
 
 int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
@@ -1410,6 +1534,8 @@ int ClientImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
+/*! \brief Content Server: Protected hook: add file info list with content. */
+
 int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   try
@@ -1438,6 +1564,8 @@ int ClientImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
 
 
+/*! \brief Content Server: Protected hook: delete file info by id. */
+
 int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, T::FileId fileId)
 {
   try
@@ -1456,6 +1584,8 @@ int ClientImplementation::_deleteFileInfoById(T::SessionId sessionId, T::FileId 
 
 
 
+
+/*! \brief Content Server: Protected hook: delete file info by name. */
 
 int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -1476,6 +1606,8 @@ int ClientImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std
 
 
 
+/*! \brief Content Server: Protected hook: delete file info list by producer id. */
+
 int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId)
 {
   try
@@ -1494,6 +1626,8 @@ int ClientImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: delete file info list by producer name. */
 
 int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -1514,6 +1648,8 @@ int ClientImplementation::_deleteFileInfoListByProducerName(T::SessionId session
 
 
 
+/*! \brief Content Server: Protected hook: delete file info list by generation id. */
+
 int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId, T::GenerationId generationId)
 {
   try
@@ -1533,6 +1669,8 @@ int ClientImplementation::_deleteFileInfoListByGenerationId(T::SessionId session
 
 
 
+/*! \brief Content Server: Protected hook: delete file info list by generation id and forecast time. */
+
 int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   try
@@ -1551,6 +1689,8 @@ int ClientImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Se
 
 
 
+
+/*! \brief Content Server: Protected hook: delete file info list by forecast time list. */
 
 int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
@@ -1575,6 +1715,8 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
 
 
 
+/*! \brief Content Server: Protected hook: delete file info list by generation name. */
+
 int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   try
@@ -1594,6 +1736,8 @@ int ClientImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessi
 
 
 
+/*! \brief Content Server: Protected hook: delete file info list by source id. */
+
 int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId)
 {
   try
@@ -1612,6 +1756,8 @@ int ClientImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId, 
 
 
 
+
+/*! \brief Content Server: Protected hook: delete file info list by file id list. */
 
 int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
@@ -1633,6 +1779,8 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info by id. */
 
 int ClientImplementation::_getFileInfoById(T::SessionId sessionId, T::FileId fileId, T::FileInfo& fileInfo)
 {
@@ -1658,6 +1806,8 @@ int ClientImplementation::_getFileInfoById(T::SessionId sessionId, T::FileId fil
 
 
 
+/*! \brief Content Server: Protected hook: get file info by name. */
+
 int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   try
@@ -1682,6 +1832,8 @@ int ClientImplementation::_getFileInfoByName(T::SessionId sessionId,const std::s
 
 
 
+/*! \brief Content Server: Protected hook: get file info list. */
+
 int ClientImplementation::_getFileInfoList(T::SessionId sessionId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -1705,6 +1857,8 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId, T::FileId sta
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info list by file id list. */
 
 int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
@@ -1732,6 +1886,8 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
 
 
+/*! \brief Content Server: Protected hook: get file info list by producer id. */
+
 int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -1755,6 +1911,8 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId, T
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info list by producer name. */
 
 int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -1780,6 +1938,8 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
 
 
 
+/*! \brief Content Server: Protected hook: get file info list by generation id. */
+
 int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId, T::GenerationId generationId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -1803,6 +1963,8 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info list by generation name. */
 
 int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -1828,6 +1990,8 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
 
 
 
+/*! \brief Content Server: Protected hook: get file info list by source id. */
+
 int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::FileId startFileId, int maxRecords, T::FileInfoList& fileInfoList)
 {
   try
@@ -1851,6 +2015,8 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId, T::
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info count. */
 
 int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -1876,6 +2042,8 @@ int ClientImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Content Server: Protected hook: get file info count by producer id. */
+
 int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   try
@@ -1899,6 +2067,8 @@ int ClientImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Content Server: Protected hook: get file info count by generation id. */
 
 int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
@@ -1924,6 +2094,8 @@ int ClientImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId
 
 
 
+/*! \brief Content Server: Protected hook: get file info count by source id. */
+
 int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   try
@@ -1948,6 +2120,8 @@ int ClientImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::
 
 
 
+/*! \brief Content Server: Protected hook: set file info. */
+
 int ClientImplementation::_setFileInfo(T::SessionId sessionId, T::FileInfo& fileInfo)
 {
   try
@@ -1969,6 +2143,8 @@ int ClientImplementation::_setFileInfo(T::SessionId sessionId, T::FileInfo& file
 
 
 
+
+/*! \brief Content Server: Protected hook: add event info. */
 
 int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
@@ -1994,6 +2170,8 @@ int ClientImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
 
 
 
+
+/*! \brief Content Server: Protected hook: get last event info. */
 
 int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -2025,6 +2203,8 @@ int ClientImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 
 
+/*! \brief Content Server: Protected hook: get event info list. */
+
 int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint requestingServerId, T::EventId startEventId, int maxRecords, T::EventInfoList& eventInfoList)
 {
   try
@@ -2055,6 +2235,8 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId, uint request
 
 
 
+/*! \brief Content Server: Protected hook: get event info count. */
+
 int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   try
@@ -2078,6 +2260,8 @@ int ClientImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Content Server: Protected hook: add content info. */
 
 int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo& contentInfo)
 {
@@ -2104,6 +2288,8 @@ int ClientImplementation::_addContentInfo(T::SessionId sessionId, T::ContentInfo
 
 
 
+/*! \brief Content Server: Protected hook: add content list. */
+
 int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfoList& contentInfoList)
 {
   try
@@ -2129,6 +2315,8 @@ int ClientImplementation::_addContentList(T::SessionId sessionId, T::ContentInfo
 
 
 
+/*! \brief Content Server: Protected hook: delete content info. */
+
 int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
   try
@@ -2147,6 +2335,8 @@ int ClientImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fi
 
 
 
+
+/*! \brief Content Server: Protected hook: delete content list by file id. */
 
 int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
@@ -2167,6 +2357,8 @@ int ClientImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Content Server: Protected hook: delete content list by file name. */
+
 int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
   try
@@ -2185,6 +2377,8 @@ int ClientImplementation::_deleteContentListByFileName(T::SessionId sessionId,co
 
 
 
+
+/*! \brief Content Server: Protected hook: delete content list by producer id. */
 
 int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId, T::ProducerId producerId)
 {
@@ -2205,6 +2399,8 @@ int ClientImplementation::_deleteContentListByProducerId(T::SessionId sessionId,
 
 
 
+/*! \brief Content Server: Protected hook: delete content list by producer name. */
+
 int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   try
@@ -2222,6 +2418,8 @@ int ClientImplementation::_deleteContentListByProducerName(T::SessionId sessionI
 
 
 
+
+/*! \brief Content Server: Protected hook: delete content list by generation id. */
 
 int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionId, T::GenerationId generationId)
 {
@@ -2242,6 +2440,8 @@ int ClientImplementation::_deleteContentListByGenerationId(T::SessionId sessionI
 
 
 
+/*! \brief Content Server: Protected hook: delete content list by generation name. */
+
 int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   try
@@ -2261,6 +2461,8 @@ int ClientImplementation::_deleteContentListByGenerationName(T::SessionId sessio
 
 
 
+/*! \brief Content Server: Protected hook: delete content list by source id. */
+
 int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, T::SourceId sourceId)
 {
   try
@@ -2279,6 +2481,8 @@ int ClientImplementation::_deleteContentListBySourceId(T::SessionId sessionId, T
 
 
 
+
+/*! \brief Content Server: Protected hook: get content info. */
 
 int ClientImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -2304,6 +2508,8 @@ int ClientImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileI
 
 
 
+/*! \brief Content Server: Protected hook: get content list. */
+
 int ClientImplementation::_getContentList(T::SessionId sessionId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
@@ -2328,6 +2534,8 @@ int ClientImplementation::_getContentList(T::SessionId sessionId, T::FileId star
 
 
 
+/*! \brief Content Server: Protected hook: get content list by file id. */
+
 int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, T::FileId fileId, T::ContentInfoList& contentInfoList)
 {
   try
@@ -2351,6 +2559,8 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId, T::Fil
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by file id list. */
 
 int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -2378,6 +2588,8 @@ int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
 
 
 
+/*! \brief Content Server: Protected hook: get content list by file name. */
+
 int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2400,6 +2612,8 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by producer id. */
 
 int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, T::ProducerId producerId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
@@ -2424,6 +2638,8 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId, T:
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by producer name. */
 
 int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -2452,6 +2668,8 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 
 
+/*! \brief Content Server: Protected hook: get content list by generation id. */
+
 int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2475,6 +2693,8 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by generation name. */
 
 int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -2500,6 +2720,8 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
 
 
 
+/*! \brief Content Server: Protected hook: get content list by generation id and time range. */
+
 int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2523,6 +2745,8 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by generation name and time range. */
 
 int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -2548,6 +2772,8 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
 
 
 
+/*! \brief Content Server: Protected hook: get content list by source id. */
+
 int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, T::SourceId sourceId, T::FileId startFileId, T::MessageIndex startMessageIndex, int maxRecords, T::ContentInfoList& contentInfoList)
 {
   try
@@ -2571,6 +2797,8 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId, T::S
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by parameter. */
 
 int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -2596,6 +2824,8 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 
 
+/*! \brief Content Server: Protected hook: get content list by parameter and generation id. */
+
 int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2620,6 +2850,8 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 
 
+/*! \brief Content Server: Protected hook: get content list by parameter and generation name. */
+
 int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2642,6 +2874,8 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by parameter and producer id. */
 
 int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -2667,6 +2901,8 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 
 
+/*! \brief Content Server: Protected hook: get content list by parameter and producer name. */
+
 int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2690,6 +2926,8 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: get content list by parameter generation id and forecast time. */
 
 int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -2715,6 +2953,8 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
 
 
+/*! \brief Content Server: Protected hook: get content list of invalid integrity. */
+
 int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   try
@@ -2739,6 +2979,8 @@ int ClientImplementation::_getContentListOfInvalidIntegrity(T::SessionId session
 
 
 
+/*! \brief Content Server: Protected hook: get content geometry id list by generation id. */
+
 int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   try
@@ -2761,6 +3003,8 @@ int ClientImplementation::_getContentGeometryIdListByGenerationId(T::SessionId s
 
 
 
+
+/*! \brief Content Server: Protected hook: get content param list by generation id. */
 
 int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -2786,6 +3030,8 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Content Server: Protected hook: get content param key list by generation id. */
+
 int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
@@ -2809,6 +3055,8 @@ int ClientImplementation::_getContentParamKeyListByGenerationId(T::SessionId ses
 
 
 
+
+/*! \brief Content Server: Protected hook: get content param key list by generation and geometry id. */
 
 int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -2834,6 +3082,8 @@ int ClientImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Se
 
 
 
+/*! \brief Content Server: Protected hook: get content param key list by generation geometry and level id. */
+
 int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   try
@@ -2858,6 +3108,8 @@ int ClientImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(
 
 
 
+/*! \brief Content Server: Protected hook: get content time list by generation id. */
+
 int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
   try
@@ -2880,6 +3132,8 @@ int ClientImplementation::_getContentTimeListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Content Server: Protected hook: get content time range by producer and generation id. */
 
 int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -2908,6 +3162,8 @@ int ClientImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
 
 
 
+/*! \brief Content Server: Protected hook: get content time range by generation id. */
+
 int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
@@ -2935,6 +3191,8 @@ int ClientImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessio
 
 
 
+/*! \brief Content Server: Protected hook: get content time list by generation and geometry id. */
+
 int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   try
@@ -2958,6 +3216,8 @@ int ClientImplementation::_getContentTimeListByGenerationAndGeometryId(T::Sessio
 
 
 
+
+/*! \brief Content Server: Protected hook: get content level list by generation geometry and level id. */
 
 int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
@@ -2983,6 +3243,8 @@ int ClientImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::
 
 
 
+/*! \brief Content Server: Protected hook: get content level list by parameter generation geometry and level id. */
+
 int ClientImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   try
@@ -3006,6 +3268,8 @@ int ClientImplementation::_getContentLevelListByParameterGenerationGeometryAndLe
 
 
 
+
+/*! \brief Content Server: Protected hook: get content time list by generation geometry and level id. */
 
 int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
@@ -3031,6 +3295,8 @@ int ClientImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::S
 
 
 
+/*! \brief Content Server: Protected hook: get content time list by producer id. */
+
 int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   try
@@ -3054,6 +3320,8 @@ int ClientImplementation::_getContentTimeListByProducerId(T::SessionId sessionId
 
 
 
+
+/*! \brief Content Server: Protected hook: get content count. */
 
 int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
@@ -3079,6 +3347,8 @@ int ClientImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Content Server: Protected hook: set content info. */
+
 int ClientImplementation::_setContentInfo(T::SessionId sessionId, T::ContentInfo& contentInfo)
 {
   try
@@ -3100,6 +3370,8 @@ int ClientImplementation::_setContentInfo(T::SessionId sessionId, T::ContentInfo
 
 
 
+
+/*! \brief Content Server: Protected hook: get hash by producer id. */
 
 int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
@@ -3124,6 +3396,8 @@ int ClientImplementation::_getHashByProducerId(T::SessionId sessionId,T::Produce
 
 
 
+
+/*! \brief Content Server: Protected hook: get level info list. */
 
 int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {

@@ -8,14 +8,14 @@ namespace T
 {
 
 
+/*! \brief Default constructor for LevelInfo. */
+
 LevelInfo::LevelInfo()
 {
   try
   {
     mProducerId = 0;
     mFmiParameterLevelId = 0;
-    //mGrib1ParameterLevelId = 0;
-    //mGrib2ParameterLevelId = 0;
     mParameterLevel = 0;
   }
   catch (...)
@@ -28,6 +28,8 @@ LevelInfo::LevelInfo()
 
 
 
+/*! \brief Copy constructor for LevelInfo. */
+
 LevelInfo::LevelInfo(const LevelInfo& levelInfo)
 {
   try
@@ -35,8 +37,6 @@ LevelInfo::LevelInfo(const LevelInfo& levelInfo)
     mProducerId = levelInfo.mProducerId;
     mFmiParameterName = levelInfo.mFmiParameterName;
     mFmiParameterLevelId = levelInfo.mFmiParameterLevelId;
-    //mGrib1ParameterLevelId = levelInfo.mGrib1ParameterLevelId;
-    //mGrib2ParameterLevelId = levelInfo.mGrib2ParameterLevelId;
     mParameterLevel = levelInfo.mParameterLevel;
   }
   catch (...)
@@ -49,6 +49,8 @@ LevelInfo::LevelInfo(const LevelInfo& levelInfo)
 
 
 
+/*! \brief Construct LevelInfo from the given producer, parameter name, level id, and level. */
+
 LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::ParamLevelId fmiParameterLevelId,T::ParamLevel parameterLevel)
 {
   try
@@ -56,8 +58,6 @@ LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::Pa
     mProducerId = producerId;
     mFmiParameterName = fmiParameterName;
     mFmiParameterLevelId = fmiParameterLevelId;
-    //mGrib1ParameterLevelId = grib1ParameterLevelId;
-    //mGrib2ParameterLevelId = grib2ParameterLevelId;
     mParameterLevel = parameterLevel;
   }
   catch (...)
@@ -69,6 +69,8 @@ LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::Pa
 
 
 
+
+/*! \brief Destructor for LevelInfo. */
 
 LevelInfo::~LevelInfo()
 {
@@ -86,6 +88,8 @@ LevelInfo::~LevelInfo()
 
 
 
+/*! \brief Copy assignment operator for LevelInfo. */
+
 LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
 {
   try
@@ -96,8 +100,6 @@ LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
     mProducerId = levelInfo.mProducerId;
     mFmiParameterName = levelInfo.mFmiParameterName;
     mFmiParameterLevelId = levelInfo.mFmiParameterLevelId;
-    //mGrib1ParameterLevelId = levelInfo.mGrib1ParameterLevelId;
-    //mGrib2ParameterLevelId = levelInfo.mGrib2ParameterLevelId;
     mParameterLevel = levelInfo.mParameterLevel;
 
     return *this;
@@ -111,6 +113,8 @@ LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
 
 
 
+/*! \brief Return this record formatted as a CSV row. */
+
 std::string LevelInfo::getCsv()
 {
   try
@@ -119,8 +123,6 @@ std::string LevelInfo::getCsv()
     snprintf(st,sizeof(st),"%u;%u;;;%d",
         mProducerId,
         mFmiParameterLevelId,
-        //mGrib1ParameterLevelId,
-        //mGrib2ParameterLevelId,
         mParameterLevel);
 
     return std::string(st);
@@ -134,6 +136,8 @@ std::string LevelInfo::getCsv()
 
 
 
+
+/*! \brief Return the CSV header row describing the fields. */
 
 std::string LevelInfo::getCsvHeader()
 {
@@ -151,6 +155,8 @@ std::string LevelInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this record from a CSV row C string. */
 
 void LevelInfo::setCsv(const char *csv)
 {
@@ -182,8 +188,6 @@ void LevelInfo::setCsv(const char *csv)
       mProducerId = toUInt32(field[0]);
       mFmiParameterName = field[1];
       mFmiParameterLevelId = toUInt8(field[2]);
-      //mGrib1ParameterLevelId = toUInt8(field[3]);
-      //mGrib2ParameterLevelId = toUInt8(field[4]);
       mParameterLevel = toInt32(field[5]);
     }
   }
@@ -196,6 +200,8 @@ void LevelInfo::setCsv(const char *csv)
 
 
 
+
+/*! \brief Populate this record from a CSV row std::string. */
 
 void LevelInfo::setCsv(const std::string& csv)
 {
@@ -213,6 +219,8 @@ void LevelInfo::setCsv(const std::string& csv)
 
 
 
+/*! \brief Return a deep copy of this LevelInfo. */
+
 LevelInfo* LevelInfo::duplicate()
 {
   try
@@ -228,6 +236,8 @@ LevelInfo* LevelInfo::duplicate()
 
 
 
+/*! \brief Print the record contents to the given stream. */
+
 void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -236,8 +246,6 @@ void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mProducerId            = " << mProducerId << "\n";
     stream << space(level) << "- mFmiParameterName      = " << mFmiParameterName << "\n";
     stream << space(level) << "- mFmiParameterLevelId   = " << C_INT(mFmiParameterLevelId) << "\n";
-    //stream << space(level) << "- mGrib1ParameterLevelId = " << C_INT(mGrib1ParameterLevelId) << "\n";
-    //stream << space(level) << "- mGrib2ParameterLevelId = " << C_INT(mGrib2ParameterLevelId) << "\n";
     stream << space(level) << "- mParameterLevel        = " << mParameterLevel << "\n";
   }
   catch (...)

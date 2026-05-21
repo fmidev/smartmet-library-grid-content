@@ -11,7 +11,14 @@ namespace ContentServer
 namespace HTTP
 {
 
-
+// ====================================================================================
+/*! \brief HTTP server endpoint that dispatches incoming requests to a local ContentServer.
+ *
+ *  Receives a RequestMessage from the HTTP transport layer, inspects the command name,
+ *  and routes the call to the matching protected handler method.  Each handler
+ *  deserialises parameters from the request, invokes the local ServiceInterface, and
+ *  serialises the result into the ResponseMessage. */
+// ====================================================================================
 class ServerInterface
 {
   public:
@@ -163,7 +170,7 @@ class ServerInterface
 
   protected:
 
-    ContentServer::ServiceInterface *mService;
+    ContentServer::ServiceInterface *mService;  //!< Non-owning pointer to the local service implementation.
 };
 
 

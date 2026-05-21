@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_avg::Function_avg()
 {
   try
@@ -22,6 +24,8 @@ Function_avg::Function_avg()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_avg::Function_avg(const Function_avg& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_avg::Function_avg(const Function_avg& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_avg::~Function_avg()
 {
   try
@@ -54,6 +60,8 @@ Function_avg::~Function_avg()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_avg::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -85,6 +93,8 @@ float Function_avg::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_avg::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -118,6 +128,8 @@ double Function_avg::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -159,6 +171,8 @@ void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -197,6 +211,8 @@ void Function_avg::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_avg::duplicate()
 {

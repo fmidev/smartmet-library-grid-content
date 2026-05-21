@@ -6,6 +6,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 QueryStreamer::QueryStreamer()
 {
   try
@@ -24,6 +26,8 @@ QueryStreamer::QueryStreamer()
 
 
 
+/*! \brief Query Server: Destructor. */
+
 QueryStreamer::~QueryStreamer()
 {
 }
@@ -31,6 +35,8 @@ QueryStreamer::~QueryStreamer()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
 {
@@ -50,6 +56,8 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
 
 
 
+/*! \brief Query Server: Add query. */
+
 void QueryStreamer::addQuery(Query& query)
 {
   try
@@ -66,6 +74,8 @@ void QueryStreamer::addQuery(Query& query)
 
 
 
+
+/*! \brief Query Server: Get chunk. */
 
 std::string QueryStreamer::getChunk()
 {

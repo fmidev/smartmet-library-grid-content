@@ -10,6 +10,8 @@ namespace T
 
 
 
+/*! \brief Default constructor for EventInfo. */
+
 EventInfo::EventInfo()
 {
   try
@@ -35,6 +37,8 @@ EventInfo::EventInfo()
 
 
 
+
+/*! \brief Copy constructor for EventInfo. */
 
 EventInfo::EventInfo(const EventInfo& dataEventInfo)
 {
@@ -63,6 +67,8 @@ EventInfo::EventInfo(const EventInfo& dataEventInfo)
 
 
 
+/*! \brief Construct EventInfo from the given event fields. */
+
 EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags,const char *eventData)
 {
   try
@@ -90,6 +96,8 @@ EventInfo::EventInfo(time_t serverTime,EventId eventId,uint eventType,UInt64 id1
 
 
 
+/*! \brief Construct EventInfo from a CSV-formatted string. */
+
 EventInfo::EventInfo(const char *csv)
 {
   try
@@ -115,6 +123,8 @@ EventInfo::EventInfo(const char *csv)
 
 
 
+/*! \brief Destructor for EventInfo. */
+
 EventInfo::~EventInfo()
 {
   try
@@ -130,6 +140,8 @@ EventInfo::~EventInfo()
 
 
 
+
+/*! \brief Copy assignment operator for EventInfo. */
 
 EventInfo& EventInfo::operator=(const EventInfo& dataEventInfo)
 {
@@ -160,6 +172,8 @@ EventInfo& EventInfo::operator=(const EventInfo& dataEventInfo)
 
 
 
+/*! \brief Return this event formatted as a CSV row. */
+
 std::string EventInfo::getCsv()
 {
   try
@@ -185,6 +199,8 @@ std::string EventInfo::getCsv()
 
 
 
+/*! \brief Return the CSV header row describing the fields. */
+
 std::string EventInfo::getCsvHeader()
 {
   try
@@ -201,6 +217,8 @@ std::string EventInfo::getCsvHeader()
 
 
 
+
+/*! \brief Populate this event from a CSV row C string. */
 
 void EventInfo::setCsv(const char *csv)
 {
@@ -250,6 +268,8 @@ void EventInfo::setCsv(const char *csv)
 
 
 
+/*! \brief Populate this event from a CSV row std::string. */
+
 void EventInfo::setCsv(const std::string& csv)
 {
   try
@@ -266,6 +286,8 @@ void EventInfo::setCsv(const std::string& csv)
 
 
 
+/*! \brief Return a deep copy of this EventInfo. */
+
 EventInfo* EventInfo::duplicate()
 {
   try
@@ -281,6 +303,8 @@ EventInfo* EventInfo::duplicate()
 
 
 
+
+/*! \brief Print the event contents to the given stream. */
 
 void EventInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

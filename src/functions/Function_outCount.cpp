@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_outCount::Function_outCount()
 {
   try
@@ -22,6 +24,8 @@ Function_outCount::Function_outCount()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_outCount::Function_outCount(const Function_outCount& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_outCount::Function_outCount(const Function_outCount& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_outCount::~Function_outCount()
 {
   try
@@ -54,6 +60,8 @@ Function_outCount::~Function_outCount()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_outCount::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -86,6 +94,8 @@ float Function_outCount::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_outCount::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -116,6 +126,8 @@ double Function_outCount::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -156,6 +168,8 @@ void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -193,6 +207,8 @@ void Function_outCount::executeFunctionCall9(uint columns,uint rows,std::vector<
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_outCount::duplicate()
 {

@@ -15,7 +15,13 @@ namespace ContentServer
 namespace HTTP
 {
 
-
+// ====================================================================================
+/*! \brief HTTP client proxy that forwards all ContentServer calls to a remote REST endpoint.
+ *
+ *  Serialises each ServiceInterface call into a RequestMessage, sends it via libcurl
+ *  to the configured server URL, and deserialises the ResponseMessage to reconstruct
+ *  the return values.  Used as an alternative remote-access proxy to the CORBA client. */
+// ====================================================================================
 class ClientImplementation : public ContentServer::ServiceInterface
 {
   public:
@@ -167,8 +173,8 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
      virtual void   sendRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
-     std::string    mUrl;
-     CURL*          curl;
+     std::string    mUrl;   //!< Base URL of the remote HTTP content server.
+     CURL*          curl;   //!< Reusable libcurl easy handle for all requests.
 
 };
 

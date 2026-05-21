@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_limit::Function_limit()
 {
   try
@@ -22,6 +24,8 @@ Function_limit::Function_limit()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_limit::Function_limit(const Function_limit& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_limit::Function_limit(const Function_limit& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_limit::~Function_limit()
 {
   try
@@ -54,6 +60,8 @@ Function_limit::~Function_limit()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_limit::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -81,6 +89,8 @@ float Function_limit::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_limit::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -106,6 +116,8 @@ double Function_limit::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_limit::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -144,6 +156,8 @@ void Function_limit::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_limit::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -179,6 +193,8 @@ void Function_limit::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_limit::duplicate()
 {

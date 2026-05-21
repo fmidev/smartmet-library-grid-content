@@ -8,7 +8,9 @@ namespace SmartMet
 namespace Functions
 {
 
-// Shifted median
+// ====================================================================================
+/*! \brief Computes the sorted (shifted) median of an ensemble of grids element-wise. */
+// ====================================================================================
 
 class Function_smedian : public Function
 {

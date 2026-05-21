@@ -11,6 +11,14 @@ namespace T
 {
 
 
+// ====================================================================================
+/*! \brief An ordered collection of single-point value request/result records.
+ *
+ *  Used by getMultipleGridValues() to batch many single-point lookups across
+ *  potentially different grid messages in a single service call.  The list
+ *  owns the ValueRecord objects it contains. */
+// ====================================================================================
+
 class ValueRecordList
 {
   public:
@@ -29,7 +37,7 @@ class ValueRecordList
 
   protected:
 
-     std::vector<ValueRecord*>  mList;
+     std::vector<ValueRecord*>  mList;  //!< Owned list of value records.
 };
 
 

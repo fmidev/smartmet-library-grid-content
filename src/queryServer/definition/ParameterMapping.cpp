@@ -10,6 +10,8 @@ namespace QueryServer
 
 
 
+/*! \brief Query Server: Constructor. */
+
 ParameterMapping::ParameterMapping()
 {
   try
@@ -69,6 +71,8 @@ ParameterMapping::ParameterMapping(const ParameterMapping& mapping)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ParameterMapping::~ParameterMapping()
 {
   try
@@ -84,6 +88,8 @@ ParameterMapping::~ParameterMapping()
 
 
 
+
+/*! \brief Query Server: Get hash. */
 
 std::size_t ParameterMapping::getHash()
 {
@@ -118,6 +124,8 @@ std::size_t ParameterMapping::getHash()
 
 
 
+/*! \brief Query Server: Get key hash. */
+
 std::size_t ParameterMapping::getKeyHash()
 {
   try
@@ -138,6 +146,8 @@ std::size_t ParameterMapping::getKeyHash()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
 {

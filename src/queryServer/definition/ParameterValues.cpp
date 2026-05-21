@@ -8,6 +8,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 ParameterValues::ParameterValues()
 {
   try
@@ -79,6 +81,8 @@ ParameterValues::ParameterValues(const ParameterValues& parameterValues)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ParameterValues::~ParameterValues()
 {
   try
@@ -94,6 +98,8 @@ ParameterValues::~ParameterValues()
 
 
 
+
+/*! \brief Query Server: Clear. */
 
 void ParameterValues::clear()
 {
@@ -130,6 +136,8 @@ void ParameterValues::clear()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void ParameterValues::print(std::ostream& stream,uint level,uint optionFlags)
 {

@@ -17,6 +17,16 @@ namespace T
 
 #define MAX_CONTENT_SOURCES 10
 
+// ====================================================================================
+/*! \brief Abstract storage back-end that shards ContentInfo records across multiple
+ *         ContentInfoList buckets.
+ *
+ *  ContentListStorage distributes content records over up to MAX_CONTENT_SOURCES
+ *  ContentInfoList instances, each acting as an independent sorted partition. The
+ *  shard is selected by file id, generation id, producer id, or source id depending
+ *  on the operation, which limits lock contention when many threads update or query
+ *  content simultaneously. */
+// ====================================================================================
 
 class ContentListStorage
 {
@@ -76,8 +86,8 @@ class ContentListStorage
     uint                getSourceStorageIndex(T::SourceId sourceId);
 
 
-    ContentInfoList     mContentLists[MAX_CONTENT_SOURCES];
-    ModificationLock    mModificationLock;
+    ContentInfoList     mContentLists[MAX_CONTENT_SOURCES]; //!< Array of sharded content partitions.
+    ModificationLock    mModificationLock;                  //!< Lock protecting shard-selection and structural changes.
 
 };
 

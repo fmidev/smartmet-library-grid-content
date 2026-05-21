@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the median value of an ensemble of grids element-wise. */
+// ====================================================================================
+
 class Function_median : public Function
 {
   public:

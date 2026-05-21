@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Replaces a specific grid value with a different value wherever it appears. */
+// ====================================================================================
+
 class Function_replace : public Function
 {
   public:

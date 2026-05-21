@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the arc tangent (in radians) of each grid value element-wise. */
+// ====================================================================================
+
 class Function_atan : public Function
 {
   public:

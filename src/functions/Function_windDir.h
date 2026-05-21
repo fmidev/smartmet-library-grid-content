@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes meteorological wind direction (degrees from north) from U and V wind components. */
+// ====================================================================================
+
 class Function_windDir : public Function
 {
   public:

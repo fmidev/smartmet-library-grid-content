@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the cosine of each grid value (input in radians) element-wise. */
+// ====================================================================================
+
 class Function_cos : public Function
 {
   public:

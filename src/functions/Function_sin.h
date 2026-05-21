@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the sine of each grid value (input in radians) element-wise. */
+// ====================================================================================
+
 class Function_sin : public Function
 {
   public:

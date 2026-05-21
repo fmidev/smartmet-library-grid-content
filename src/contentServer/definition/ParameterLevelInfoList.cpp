@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for ParameterLevelInfoList. */
+
 ParameterLevelInfoList::ParameterLevelInfoList()
 {
   try
@@ -23,6 +25,8 @@ ParameterLevelInfoList::ParameterLevelInfoList()
 
 
 
+
+/*! \brief Copy constructor for ParameterLevelInfoList. */
 
 ParameterLevelInfoList::ParameterLevelInfoList(ParameterLevelInfoList& parameterLevelInfoList)
 {
@@ -46,6 +50,8 @@ ParameterLevelInfoList::ParameterLevelInfoList(ParameterLevelInfoList& parameter
 
 
 
+/*! \brief Destructor for ParameterLevelInfoList. */
+
 ParameterLevelInfoList::~ParameterLevelInfoList()
 {
   try
@@ -66,6 +72,8 @@ ParameterLevelInfoList::~ParameterLevelInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for ParameterLevelInfoList. */
 
 ParameterLevelInfoList& ParameterLevelInfoList::operator=(ParameterLevelInfoList& parameterLevelInfoList)
 {
@@ -95,6 +103,8 @@ ParameterLevelInfoList& ParameterLevelInfoList::operator=(ParameterLevelInfoList
 
 
 
+/*! \brief Add a ParameterLevelInfo record to the list. */
+
 void ParameterLevelInfoList::addParameterLevelInfo(ParameterLevelInfo* parameterLevelInfo)
 {
   try
@@ -110,6 +120,8 @@ void ParameterLevelInfoList::addParameterLevelInfo(ParameterLevelInfo* parameter
 
 
 
+
+/*! \brief Remove all entries from the list. */
 
 void ParameterLevelInfoList::clear()
 {
@@ -131,6 +143,8 @@ void ParameterLevelInfoList::clear()
 
 
 
+/*! \brief Return the ParameterLevelInfo at the given list index. */
+
 ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndex(uint index)
 {
   try
@@ -149,6 +163,8 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndex(uint in
 
 
 
+/*! \brief Return the ParameterLevelInfo at the given list index without bounds checking. */
+
 ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(uint index)
 {
   try
@@ -163,6 +179,8 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(
 
 
 
+
+/*! \brief Return the ParameterLevelInfo matching the given parameter key and level fields. */
 
 ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
                         T::ParamKeyType parameterKeyType,
@@ -196,6 +214,8 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
 
 
 
+/*! \brief Return the number of entries in the list. */
+
 uint ParameterLevelInfoList::getLength()
 {
   try
@@ -211,6 +231,8 @@ uint ParameterLevelInfoList::getLength()
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void ParameterLevelInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

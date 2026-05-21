@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_add::Function_add()
 {
   try
@@ -23,6 +25,8 @@ Function_add::Function_add()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_add::Function_add(double valueToAdd)
 {
@@ -40,6 +44,8 @@ Function_add::Function_add(double valueToAdd)
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_add::Function_add(const Function_add& function)
 :Function(function)
 {
@@ -56,6 +62,8 @@ Function_add::Function_add(const Function_add& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_add::~Function_add()
 {
   try
@@ -71,6 +79,8 @@ Function_add::~Function_add()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_add::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -96,6 +106,8 @@ float Function_add::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_add::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -119,6 +131,8 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -160,6 +174,8 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -198,6 +214,8 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_add::duplicate()
 {

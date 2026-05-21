@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Clamps every grid value to a specified [min, max] range. */
+// ====================================================================================
+
 class Function_limit : public Function
 {
   public:

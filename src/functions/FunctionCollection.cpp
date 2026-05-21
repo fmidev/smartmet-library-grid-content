@@ -7,6 +7,8 @@ namespace SmartMet
 namespace Functions
 {
 
+/*! \brief Function: Constructor. */
+
 FunctionCollection::FunctionCollection()
 {
   try
@@ -21,6 +23,8 @@ FunctionCollection::FunctionCollection()
 
 
 
+
+/*! \brief Function: Destructor. */
 
 FunctionCollection::~FunctionCollection()
 {
@@ -42,6 +46,8 @@ FunctionCollection::~FunctionCollection()
 
 
 
+/*! \brief Function: Add function. */
+
 void FunctionCollection::addFunction(const char *functionName,FunctionPtr function)
 {
   try
@@ -58,6 +64,8 @@ void FunctionCollection::addFunction(const char *functionName,FunctionPtr functi
 
 
 
+
+/*! \brief Function: Add function. */
 
 void FunctionCollection::addFunction(const std::string& functionName,FunctionPtr function)
 {
@@ -83,6 +91,8 @@ void FunctionCollection::addFunction(const std::string& functionName,FunctionPtr
 
 
 
+/*! \brief Function: Get function. */
+
 FunctionPtr FunctionCollection::getFunction(const std::string& functionName)
 {
   try
@@ -103,6 +113,8 @@ FunctionPtr FunctionCollection::getFunction(const std::string& functionName)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float FunctionCollection::executeFunctionCall1(const std::string& functionName,std::vector<float>& parameters)
 {
@@ -128,6 +140,8 @@ float FunctionCollection::executeFunctionCall1(const std::string& functionName,s
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double FunctionCollection::executeFunctionCall1(const std::string& functionName,std::vector<double>& parameters)
 {
   try
@@ -151,6 +165,8 @@ double FunctionCollection::executeFunctionCall1(const std::string& functionName,
 
 
 
+
+/*! \brief Function: Execute function call4. */
 
 void FunctionCollection::executeFunctionCall4(const std::string& functionName,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
@@ -176,6 +192,8 @@ void FunctionCollection::executeFunctionCall4(const std::string& functionName,ui
 
 
 
+/*! \brief Function: Execute function call4. */
+
 void FunctionCollection::executeFunctionCall4(const std::string& functionName,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
   try
@@ -199,6 +217,8 @@ void FunctionCollection::executeFunctionCall4(const std::string& functionName,ui
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void FunctionCollection::executeFunctionCall9(const std::string& functionName,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -224,6 +244,8 @@ void FunctionCollection::executeFunctionCall9(const std::string& functionName,ui
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void FunctionCollection::executeFunctionCall9(const std::string& functionName,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -246,6 +268,8 @@ void FunctionCollection::executeFunctionCall9(const std::string& functionName,ui
 
 
 
+
+/*! \brief Function: Print. */
 
 void FunctionCollection::print(std::ostream& stream,uint level,uint optionFlags)
 {

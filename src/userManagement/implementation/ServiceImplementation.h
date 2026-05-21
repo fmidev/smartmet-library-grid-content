@@ -11,9 +11,16 @@ namespace SmartMet
 namespace UserManagement
 {
 
-typedef std::set<std::string> GroupPermissions;
-typedef std::map<std::string,GroupPermissions> GroupPermissionList;
+typedef std::set<std::string> GroupPermissions;              //!< Set of permission strings for one user group.
+typedef std::map<std::string,GroupPermissions> GroupPermissionList;  //!< Map from group name to its GroupPermissions.
 
+// ====================================================================================
+/*! \brief In-memory implementation of the UserManagement ServiceInterface.
+ *
+ *  Loads user and group definitions from files and stores them in memory.  The
+ *  update() method hot-reloads changed files.  A global instance
+ *  (localUserManagement) is provided for single-process use. */
+// ====================================================================================
 
 class ServiceImplementation : public ServiceInterface
 {
@@ -43,15 +50,15 @@ class ServiceImplementation : public ServiceInterface
      virtual void   updateGroups();
      virtual void   updateUsers();
 
-     time_t                     mLastUpdateCheckTime;
-     time_t                     mGroups_modificationTime;
-     std::string                mGroupFilename;
-     GroupPermissionList        mGroups;
-     time_t                     mUsers_modificationTime;
-     std::string                mUserFilename;
-     UserInfo_sptr_map          mUsers;
-     std::map<std::string,uint> mUsernameToUserId;
-     ModificationLock           mModificationLock;
+     time_t                     mLastUpdateCheckTime;       //!< Epoch time of the last file-modification check.
+     time_t                     mGroups_modificationTime;   //!< Mtime of the group file at the last successful load.
+     std::string                mGroupFilename;             //!< Path to the group definitions file.
+     GroupPermissionList        mGroups;                    //!< Loaded group-to-permissions map.
+     time_t                     mUsers_modificationTime;    //!< Mtime of the user file at the last successful load.
+     std::string                mUserFilename;              //!< Path to the user definitions file.
+     UserInfo_sptr_map          mUsers;                     //!< In-memory map of users keyed by user id.
+     std::map<std::string,uint> mUsernameToUserId;          //!< Secondary index from username to user id.
+     ModificationLock           mModificationLock;          //!< Lock protecting concurrent access to mUsers and mGroups.
 
 };
 

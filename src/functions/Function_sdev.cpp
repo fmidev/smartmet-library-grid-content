@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_sdev::Function_sdev()
 {
   try
@@ -22,6 +24,8 @@ Function_sdev::Function_sdev()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_sdev::Function_sdev(const Function_sdev& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_sdev::Function_sdev(const Function_sdev& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_sdev::~Function_sdev()
 {
   try
@@ -54,6 +60,8 @@ Function_sdev::~Function_sdev()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_sdev::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -93,6 +101,8 @@ float Function_sdev::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_sdev::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -134,6 +144,8 @@ double Function_sdev::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -182,6 +194,8 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -227,6 +241,8 @@ void Function_sdev::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_sdev::duplicate()
 {

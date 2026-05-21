@@ -19,6 +19,8 @@ namespace T
 {
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 1. */
+
 int contentInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -32,6 +34,8 @@ int contentInfo_compare_1(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 2. */
 
 int contentInfo_compare_2(const void *_val1,const void *_val2)
 {
@@ -47,6 +51,8 @@ int contentInfo_compare_2(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 3. */
+
 int contentInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -60,6 +66,8 @@ int contentInfo_compare_3(const void *_val1,const void *_val2)
 }
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 4. */
+
 int contentInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -72,6 +80,8 @@ int contentInfo_compare_4(const void *_val1,const void *_val2)
   return 0;
 }
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 5. */
 
 int contentInfo_compare_5(const void *_val1,const void *_val2)
 {
@@ -87,6 +97,8 @@ int contentInfo_compare_5(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 6. */
+
 int contentInfo_compare_6(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -101,6 +113,8 @@ int contentInfo_compare_6(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 7. */
+
 int contentInfo_compare_7(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -114,6 +128,8 @@ int contentInfo_compare_7(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 8. */
 
 int contentInfo_compare_8(const void *_val1,const void *_val2)
 {
@@ -130,6 +146,8 @@ int contentInfo_compare_8(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 9. */
+
 int contentInfo_compare_9(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -143,6 +161,8 @@ int contentInfo_compare_9(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 10. */
 
 int contentInfo_compare_10(const void *_val1,const void *_val2)
 {
@@ -159,6 +179,8 @@ int contentInfo_compare_10(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 11. */
+
 int contentInfo_compare_11(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -172,6 +194,8 @@ int contentInfo_compare_11(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 12. */
 
 int contentInfo_compare_12(const void *_val1,const void *_val2)
 {
@@ -187,6 +211,8 @@ int contentInfo_compare_12(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 13. */
+
 int contentInfo_compare_13(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -200,6 +226,8 @@ int contentInfo_compare_13(const void *_val1,const void *_val2)
 }
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 14. */
+
 int contentInfo_compare_14(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -212,6 +240,8 @@ int contentInfo_compare_14(const void *_val1,const void *_val2)
   return 0;
 }
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 15. */
 
 int contentInfo_compare_15(const void *_val1,const void *_val2)
 {
@@ -227,6 +257,8 @@ int contentInfo_compare_15(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 16. */
+
 int contentInfo_compare_16(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -241,6 +273,8 @@ int contentInfo_compare_16(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 17. */
+
 int contentInfo_compare_17(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -254,6 +288,8 @@ int contentInfo_compare_17(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for ContentInfo using comparison method 18. */
 
 int contentInfo_compare_18(const void *_val1,const void *_val2)
 {
@@ -270,6 +306,8 @@ int contentInfo_compare_18(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 19. */
+
 int contentInfo_compare_19(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -284,6 +322,8 @@ int contentInfo_compare_19(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for ContentInfo using comparison method 20. */
+
 int contentInfo_compare_20(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -297,6 +337,8 @@ int contentInfo_compare_20(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Default constructor for ContentInfoList. */
 
 ContentInfoList::ContentInfoList()
 {
@@ -320,6 +362,8 @@ ContentInfoList::ContentInfoList()
 
 
 
+
+/*! \brief Copy constructor for ContentInfoList (non-const source). */
 
 ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
 {
@@ -362,6 +406,8 @@ ContentInfoList::ContentInfoList(ContentInfoList& contentInfoList)
 
 
 
+/*! \brief Copy constructor for ContentInfoList. */
+
 ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -398,6 +444,8 @@ ContentInfoList::ContentInfoList(const ContentInfoList& contentInfoList)
 
 
 
+/*! \brief Destructor for ContentInfoList. */
+
 ContentInfoList::~ContentInfoList()
 {
   FUNCTION_TRACE
@@ -430,6 +478,8 @@ ContentInfoList::~ContentInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for ContentInfoList (non-const source). */
 
 ContentInfoList& ContentInfoList::operator=(ContentInfoList& contentInfoList)
 {
@@ -486,6 +536,8 @@ ContentInfoList& ContentInfoList::operator=(ContentInfoList& contentInfoList)
 
 
 
+/*! \brief Copy assignment operator for ContentInfoList. */
+
 ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -533,6 +585,8 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
 
 
 
+/*! \brief Replace the ContentInfo at the given index. */
+
 void ContentInfoList::setContentInfoByIndex(uint index,ContentInfo *contentInfo)
 {
   FUNCTION_TRACE
@@ -554,6 +608,8 @@ void ContentInfoList::setContentInfoByIndex(uint index,ContentInfo *contentInfo)
 
 
 
+
+/*! \brief Add a ContentInfo record to the list. */
 
 ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 {
@@ -627,6 +683,8 @@ ContentInfo* ContentInfoList::addContentInfo(ContentInfo *contentInfo)
 
 
 
+/*! \brief Add a ContentInfo record to the list without acquiring the lock. */
+
 inline ContentInfo* ContentInfoList::addContentInfoNoLock(ContentInfo *contentInfo)
 {
   FUNCTION_TRACE
@@ -696,6 +754,8 @@ inline ContentInfo* ContentInfoList::addContentInfoNoLock(ContentInfo *contentIn
 
 
 
+/*! \brief Add all entries from another ContentInfoList. */
+
 void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -713,6 +773,8 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 
 
 
+
+/*! \brief Add all entries from another ContentInfoList without acquiring the lock. */
 
 void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 {
@@ -840,6 +902,8 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
 
 
 
+/*! \brief Resize the underlying storage to the given size. */
+
 void ContentInfoList::setSize(uint newSize)
 {
   FUNCTION_TRACE
@@ -885,6 +949,8 @@ void ContentInfoList::setSize(uint newSize)
 
 
 
+/*! \brief Remove all entries from the list. */
+
 void ContentInfoList::clear()
 {
   FUNCTION_TRACE
@@ -919,6 +985,8 @@ void ContentInfoList::clear()
 
 
 
+
+/*! \brief Return whether the list contains duplicate forecast times. */
 
 bool ContentInfoList::containsSameForecastTimes()
 {
@@ -955,6 +1023,8 @@ bool ContentInfoList::containsSameForecastTimes()
 
 
 
+
+/*! \brief Delete all entries whose file id matches the given value. */
 
 uint ContentInfoList::deleteContentInfoByFileId(T::FileId fileId)
 {
@@ -998,6 +1068,8 @@ uint ContentInfoList::deleteContentInfoByFileId(T::FileId fileId)
 
 
 
+/*! \brief Remove all entries previously flagged for deletion. */
+
 uint ContentInfoList::deleteMarkedContent()
 {
   FUNCTION_TRACE
@@ -1040,6 +1112,8 @@ uint ContentInfoList::deleteMarkedContent()
 
 
 
+
+/*! \brief Flag entries whose file id matches the given value as deleted. */
 
 uint ContentInfoList::markDeletedByFileId(T::FileId fileId)
 {
@@ -1108,6 +1182,8 @@ uint ContentInfoList::markDeletedByFileId(T::FileId fileId)
 
 
 
+/*! \brief Flag the entry matching the given file id and message index as deleted. */
+
 uint ContentInfoList::markDeletedByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -1133,6 +1209,8 @@ uint ContentInfoList::markDeletedByFileIdAndMessageIndex(T::FileId fileId,T::Mes
 
 
 
+
+/*! \brief Flag every entry in the list as deleted. */
 
 uint ContentInfoList::markDeleted()
 {
@@ -1165,6 +1243,8 @@ uint ContentInfoList::markDeleted()
 
 
 
+
+/*! \brief Flag entries whose generation id matches the given value as deleted. */
 
 uint ContentInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 {
@@ -1201,6 +1281,8 @@ uint ContentInfoList::markDeletedByGenerationId(T::GenerationId generationId)
 
 
 
+/*! \brief Flag entries matching the given generation and geometry ids as deleted. */
+
 uint ContentInfoList::markDeletedByGenerationAndGeometryId(T::GenerationId generationId,T::GeometryId geometryId)
 {
   FUNCTION_TRACE
@@ -1234,6 +1316,8 @@ uint ContentInfoList::markDeletedByGenerationAndGeometryId(T::GenerationId gener
 
 
 
+
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
 
 uint ContentInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
@@ -1270,6 +1354,8 @@ uint ContentInfoList::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Flag entries whose source id matches the given value as deleted. */
+
 uint ContentInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1305,6 +1391,8 @@ uint ContentInfoList::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
+
 uint ContentInfoList::markDeletedByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -1339,6 +1427,8 @@ uint ContentInfoList::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Delete the entry matching the given ContentInfo. */
 
 uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
 {
@@ -1391,6 +1481,8 @@ uint ContentInfoList::deleteContentInfo(ContentInfo& contentInfo)
 
 
 
+/*! \brief Delete the entry matching the given file id and message index. */
+
 uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   FUNCTION_TRACE
@@ -1432,6 +1524,8 @@ uint ContentInfoList::deleteContentInfoByFileIdAndMessageIndex(T::FileId fileId,
 
 
 
+/*! \brief Delete all entries whose producer id matches the given value. */
+
 uint ContentInfoList::deleteContentInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1472,6 +1566,8 @@ uint ContentInfoList::deleteContentInfoByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Collect distinct level descriptors from the list into a LevelInfoList. */
 
 void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
 {
@@ -1517,6 +1613,8 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
 
 
 
+/*! \brief Delete all entries whose generation id matches the given value. */
+
 uint ContentInfoList::deleteContentInfoByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1557,6 +1655,8 @@ uint ContentInfoList::deleteContentInfoByGenerationId(T::GenerationId generation
 
 
 
+
+/*! \brief Delete all entries whose generation id is in the given set. */
 
 uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<T::GenerationId>& generationIdList)
 {
@@ -1599,6 +1699,8 @@ uint ContentInfoList::deleteContentInfoByGenerationIdList(std::set<T::Generation
 
 
 
+/*! \brief Delete entries matching the given generation and geometry ids. */
+
 uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(T::GenerationId generationId,T::GeometryId geometryId)
 {
   FUNCTION_TRACE
@@ -1640,6 +1742,8 @@ uint ContentInfoList::deleteContentInfoByGenerationAndGeometry(T::GenerationId g
 
 
 
+/*! \brief Delete entries matching the given generation, geometry, and forecast time string. */
+
 uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::GenerationId generationId,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
@@ -1657,6 +1761,8 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::Ge
 
 
 
+
+/*! \brief Delete entries matching the given generation, geometry, and forecast time. */
 
 uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::GenerationId generationId,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
@@ -1699,6 +1805,8 @@ uint ContentInfoList::deleteContentInfoByGenerationGeometryAndForecastTime(T::Ge
 
 
 
+/*! \brief Delete all entries whose source id matches the given value. */
+
 uint ContentInfoList::deleteContentInfoBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1739,6 +1847,8 @@ uint ContentInfoList::deleteContentInfoBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Delete all entries whose storage id matches the given value. */
 
 uint ContentInfoList::deleteContentInfoByStorageId(T::StorageId storageId)
 {
@@ -1781,6 +1891,8 @@ uint ContentInfoList::deleteContentInfoByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Delete all entries whose file id is in the given set. */
+
 uint ContentInfoList::deleteContentInfoByFileIdList(std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -1822,6 +1934,8 @@ uint ContentInfoList::deleteContentInfoByFileIdList(std::set<T::FileId>& fileIdL
 
 
 
+/*! \brief Keep only entries whose geometry id is in the given set. */
+
 void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -1858,6 +1972,8 @@ void ContentInfoList::keepContentInfoByGeometryIdList(std::set<T::GeometryId>& g
 
 
 
+
+/*! \brief Keep only entries whose geometry id matches the given value. */
 
 void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
 {
@@ -1896,6 +2012,8 @@ void ContentInfoList::keepContentInfoByGeometryId(T::GeometryId geometryId)
 
 
 
+/*! \brief Keep only entries whose producer id matches the given value. */
+
 void ContentInfoList::keepContentInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1932,6 +2050,8 @@ void ContentInfoList::keepContentInfoByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Keep only entries whose generation id matches the given value. */
 
 void ContentInfoList::keepContentInfoByGenerationId(T::GenerationId generationId)
 {
@@ -1970,6 +2090,8 @@ void ContentInfoList::keepContentInfoByGenerationId(T::GenerationId generationId
 
 
 
+/*! \brief Keep only entries whose source id matches the given value. */
+
 void ContentInfoList::keepContentInfoBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2005,6 +2127,8 @@ void ContentInfoList::keepContentInfoBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Keep only entries whose storage id matches the given value. */
 
 void ContentInfoList::keepContentInfoByStorageId(T::StorageId storageId)
 {
@@ -2042,6 +2166,8 @@ void ContentInfoList::keepContentInfoByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Append entries matching the given forecast time string to the target list. */
+
 void ContentInfoList::getContentListByForecastTime(const std::string& forecastTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2059,6 +2185,8 @@ void ContentInfoList::getContentListByForecastTime(const std::string& forecastTi
 
 
 
+
+/*! \brief Append entries matching the given forecast time to the target list. */
 
 void ContentInfoList::getContentListByForecastTime(time_t forecastTimeUTC,T::ContentInfoList& contentInfoList)
 {
@@ -2121,6 +2249,8 @@ void ContentInfoList::getContentListByForecastTime(time_t forecastTimeUTC,T::Con
 
 
 
+/*! \brief Return the index of the entry closest to the given ContentInfo. */
+
 int ContentInfoList::getClosestIndex(uint comparisonMethod,ContentInfo& contentInfo)
 {
   //FUNCTION_TRACE
@@ -2141,6 +2271,8 @@ int ContentInfoList::getClosestIndex(uint comparisonMethod,ContentInfo& contentI
 
 
 #if 0 // Moved to inline
+
+/*! \brief Return the index of the entry closest to the given ContentInfo without locking. */
 
 int ContentInfoList::getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
 {
@@ -2222,6 +2354,8 @@ int ContentInfoList::getClosestIndexNoLock(uint comparisonMethod,ContentInfo& co
 
 
 
+/*! \brief Return the entry matching the given file id and message index. */
+
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
 {
   //FUNCTION_TRACE
@@ -2239,6 +2373,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fi
 
 
 
+
+/*! \brief Return the entry matching the given file id and message index without locking. */
 
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
 {
@@ -2272,6 +2408,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::Fil
 
 
 
+/*! \brief Return the entry matching the given file id and message index, with its list index. */
+
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
 {
   //FUNCTION_TRACE
@@ -2290,6 +2428,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fi
 
 
 
+
+/*! \brief Return the entry matching the given file id and message index without locking, with its list index. */
 
 ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
 {
@@ -2322,6 +2462,8 @@ ContentInfo* ContentInfoList::getContentInfoByFileIdAndMessageIndexNoLock(T::Fil
 #endif
 
 
+
+/*! \brief Copy the entry matching the given file id and message index into the output ContentInfo. */
 
 bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo)
 {
@@ -2360,6 +2502,8 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::
 
 
 
+/*! \brief Return the ContentInfo at the given list index. */
+
 ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
 {
   //FUNCTION_TRACE
@@ -2384,6 +2528,8 @@ ContentInfo* ContentInfoList::getContentInfoByIndex(uint index) const
 
 
 
+/*! \brief Return the ContentInfo at the given list index without bounds checking. */
+
 ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 {
   //FUNCTION_TRACE
@@ -2400,6 +2546,8 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Return the first entry matching the given ParameterLevelInfo. */
 
 ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo)
 {
@@ -2437,6 +2585,8 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
 
 
 
+
+/*! \brief Append entries matching the given ParameterLevelInfo to the target list. */
 
 void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList)
 {
@@ -2481,6 +2631,8 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelIn
 
 
 
+/*! \brief Copy the entire list into the given target list, replacing its contents. */
+
 void ContentInfoList::getContentInfoList(ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2498,6 +2650,8 @@ void ContentInfoList::getContentInfoList(ContentInfoList& contentInfoList)
 
 
 
+
+/*! \brief Append the entire list into the given target list without clearing it. */
 
 void ContentInfoList::getContentInfoListNoClear(ContentInfoList& contentInfoList)
 {
@@ -2531,6 +2685,8 @@ void ContentInfoList::getContentInfoListNoClear(ContentInfoList& contentInfoList
 
 
 
+/*! \brief Copy a paginated slice of the list starting from the given file id and message index. */
+
 void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2548,6 +2704,8 @@ void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex s
 
 
 
+
+/*! \brief Append a paginated slice of the list starting from the given file id and message index. */
 
 void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -2665,6 +2823,8 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
 
 
 
+/*! \brief Collect distinct parameter keys for the given generation into the output set. */
+
 void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -2732,6 +2892,8 @@ void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId produce
 
 
 
+
+/*! \brief Collect distinct parameter keys for the given generation and geometry into the output set. */
 
 void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -2803,6 +2965,8 @@ void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(T::Produce
 
 
 
+/*! \brief Collect distinct parameter keys for the given generation, geometry, and level id. */
+
 void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -2872,6 +3036,8 @@ void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(T::Pr
 
 
 
+/*! \brief Collect distinct levels for the given generation, geometry, and level id. */
+
 void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -2918,6 +3084,8 @@ void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(T::Produ
 
 
 
+
+/*! \brief Collect distinct levels for the given parameter, generation, geometry, and level id. */
 
 void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
@@ -2967,6 +3135,8 @@ void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId
 
 
 
+
+/*! \brief Collect distinct geometry ids for the given generation. */
 
 void ContentInfoList::getContentGeometryIdListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
@@ -3025,6 +3195,8 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(T::ProducerId produ
 
 
 
+/*! \brief Collect distinct geometry ids across the entire list. */
+
 void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -3056,6 +3228,8 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
 
 
 
+/*! \brief Collect distinct generation ids associated with the given geometry id. */
+
 void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -3086,6 +3260,8 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
 
 
 
+
+/*! \brief Append entries matching the given file id to the target list. */
 
 void ContentInfoList::getContentInfoListByFileId(T::FileId fileId,ContentInfoList& contentInfoList)
 {
@@ -3153,6 +3329,8 @@ void ContentInfoList::getContentInfoListByFileId(T::FileId fileId,ContentInfoLis
 
 
 
+/*! \brief Append entries matching the given geometry id to the target list. */
+
 void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3186,40 +3364,7 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
 
 
 
-/*
-void ContentInfoList::getContentInfoListByRequestCounterKey(UInt64 key,ContentInfoList& contentInfoList)
-{
-  FUNCTION_TRACE
-  try
-  {
-    contentInfoList.clear();
-
-    if (mArray == nullptr ||  mLength == 0)
-      return;
-
-    AutoReadLock lock(mModificationLockPtr);
-
-    for (uint t=0; t<mLength; t++)
-    {
-      ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->getRequestCounterKey() == key)
-      {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
+/*! \brief Append entries matching the given forecast time string to the target list. */
 
 void ContentInfoList::getContentInfoListByForecastTime(const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
@@ -3238,6 +3383,8 @@ void ContentInfoList::getContentInfoListByForecastTime(const std::string& foreca
 
 
 
+
+/*! \brief Append entries matching the given forecast time to the target list. */
 
 void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -3304,6 +3451,8 @@ void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,Co
 
 
 
+/*! \brief Append entries matching the given FMI parameter id to the target list. */
+
 void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3337,6 +3486,8 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
 
 
 
+/*! \brief Append entries matching the given FMI parameter id and filters (string time range) to the target list. */
+
 void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3355,6 +3506,8 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
 
 
 
+
+/*! \brief Append entries matching the given FMI parameter id and filters (UTC time range) to the target list. */
 
 void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -3408,6 +3561,8 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
 
 
 
+/*! \brief Append entries matching the given generation, FMI parameter id, and filters (string time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3426,6 +3581,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
 
 
 
+
+/*! \brief Append entries matching the given generation, FMI parameter id, and filters (UTC time range). */
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -3550,6 +3707,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
 
 
 
+/*! \brief Append entries matching the given generation, FMI parameter id, and forecast time string. */
+
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3567,6 +3726,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
 
 
 
+
+/*! \brief Append entries matching the given generation, FMI parameter id, and forecast time UTC. */
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -3855,6 +4016,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
 
 
 
+/*! \brief Alternate search variant for matching the given generation, FMI parameter id, and forecast time string. */
+
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3872,6 +4035,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
 
 
 
+
+/*! \brief Alternate search variant for matching the given generation, FMI parameter id, and forecast time UTC. */
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -4175,6 +4340,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
 
 
 
+/*! \brief Append entries matching the given producer, FMI parameter id, and filters (string time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::ProducerId producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4192,6 +4359,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
 
 
 
+
+/*! \brief Append entries matching the given producer, FMI parameter id, and filters (UTC time range). */
 
 void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::ProducerId producerId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -4308,6 +4477,8 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
 
 
 
+/*! \brief Append entries matching the given FMI parameter name and filters (string time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4326,6 +4497,8 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
 
 
 
+
+/*! \brief Append entries matching the given FMI parameter name and filters (UTC time range). */
 
 void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -4378,6 +4551,8 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
 
 
 
+/*! \brief Return the entry matching the given generation, FMI parameter name, and forecast time string. */
+
 ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
@@ -4395,6 +4570,8 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T:
 
 
 
+
+/*! \brief Return the entry matching the given generation, FMI parameter name, and forecast time UTC. */
 
 ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
@@ -4451,6 +4628,8 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterNameAndGenerationId(T:
 
 
 
+/*! \brief Return the entry matching the given generation, FMI parameter id, and forecast time string. */
+
 ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime)
 {
   FUNCTION_TRACE
@@ -4468,6 +4647,8 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::P
 
 
 
+
+/*! \brief Return the entry matching the given generation, FMI parameter id, and forecast time UTC. */
 
 ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC)
 {
@@ -4524,6 +4705,8 @@ ContentInfo* ContentInfoList::getContentInfoByFmiParameterIdAndGenerationId(T::P
 
 
 
+/*! \brief Append entries matching the given generation, FMI parameter name, and forecast time string. */
+
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4541,6 +4724,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
 
 
 
+
+/*! \brief Append entries matching the given generation, FMI parameter name, and forecast time UTC. */
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -4829,6 +5014,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
 
 
 
+/*! \brief Alternate search variant for matching the given generation, FMI parameter name, and forecast time string. */
+
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4846,6 +5033,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
 
 
 
+
+/*! \brief Alternate search variant for matching the given generation, FMI parameter name, and forecast time UTC. */
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -5149,6 +5338,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
 
 
 
+/*! \brief Append entries matching the given generation, FMI parameter name, and filters (string time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5167,6 +5358,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
 
 
 
+
+/*! \brief Append entries matching the given generation, FMI parameter name, and filters (UTC time range). */
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -5292,6 +5485,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
 
 
 
+/*! \brief Append entries matching the given generation list, FMI parameter name, and filters (UTC time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::GenerationInfoList& generationList,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5391,6 +5586,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::G
 
 
 
+/*! \brief Append entries matching the given producer, FMI parameter name, and filters (string time range). */
+
 void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5409,6 +5606,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::Produ
 
 
 
+
+/*! \brief Append entries matching the given producer, FMI parameter name, and filters (UTC time range). */
 
 void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::ProducerId producerId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
 {
@@ -5497,6 +5696,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::Produ
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given producer id. */
 
 void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -5610,6 +5811,8 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
 
 
 
+/*! \brief Append all entries matching the given producer id to the target list. */
+
 void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5676,6 +5879,8 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,Co
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given generation id. */
 
 void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -5789,6 +5994,8 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
 
 
 
+/*! \brief Return a hash value computed from the entire list contents. */
+
 std::size_t ContentInfoList::getHash()
 {
   FUNCTION_TRACE
@@ -5821,6 +6028,8 @@ std::size_t ContentInfoList::getHash()
 
 
 
+
+/*! \brief Return a hash value computed from entries matching the given producer id. */
 
 std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
 {
@@ -5883,6 +6092,8 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given generation and geometry ids. */
 
 void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -5995,6 +6206,8 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
 
 
 
+/*! \brief Append entries matching the given generation id and string time range. */
+
 void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& startTime,const std::string& endTime,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -6013,6 +6226,8 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
 
 
 
+
+/*! \brief Append entries matching the given generation id and UTC time range. */
 
 void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t startTimeUTC,time_t endTimeUTC,ContentInfoList& contentInfoList)
 {
@@ -6073,6 +6288,8 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
 
 
 
+
+/*! \brief Append a paginated slice of entries matching the given source id. */
 
 void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
@@ -6186,6 +6403,8 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
 
 
 
+/*! \brief Collect distinct FMI parameter level ids for the given parameter id. */
+
 void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList)
 {
   FUNCTION_TRACE
@@ -6239,6 +6458,8 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiPa
 
 
 
+/*! \brief Collect distinct parameter levels for the given FMI level id. */
+
 void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId,std::set<T::ParamLevel>& paramLevelList)
 {
   FUNCTION_TRACE
@@ -6255,8 +6476,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterLevelId == paramLevelId)
       {
-        //if (paramLevelList.find(info->mParameterLevel) == paramLevelList.end())
-          paramLevelList.insert(info->mParameterLevel);
+        paramLevelList.insert(info->mParameterLevel);
       }
     }
   }
@@ -6269,6 +6489,8 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
 
 
 
+
+/*! \brief Collect ParameterLevelInfo entries for the given FMI parameter id. */
 
 void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ParameterLevelInfoList& parameterLevelInfoList)
 {
@@ -6308,6 +6530,8 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::FmiParamId fmiPar
 
 
 
+/*! \brief Collect distinct forecast time strings from the list. */
+
 void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6326,10 +6550,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
       {
         if (info != nullptr)
         {
-          //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
-          {
-            forecastTimeList.insert(info->getForecastTime());
-          }
+          forecastTimeList.insert(info->getForecastTime());
         }
       }
     }
@@ -6343,6 +6564,8 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
 
 
 
+
+/*! \brief Collect distinct forecast times (UTC) from the list. */
 
 void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
 {
@@ -6362,10 +6585,7 @@ void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
       {
         if (info != nullptr)
         {
-          //if (forecastTimeList.find(info->mForecastTimeUTC) == forecastTimeList.end())
-          {
-            forecastTimeList.insert(info->mForecastTimeUTC);
-          }
+          forecastTimeList.insert(info->mForecastTimeUTC);
         }
       }
     }
@@ -6379,6 +6599,8 @@ void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
 
 
 
+
+/*! \brief Collect distinct forecast time strings for the given generation id. */
 
 void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<std::string>& forecastTimeList)
 {
@@ -6438,6 +6660,8 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
 
 
 
+/*! \brief Collect distinct forecast times (UTC) for the given generation id. */
+
 void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6496,6 +6720,8 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
 
 
 
+/*! \brief Return the forecast time range for the given generation id. */
+
 void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   try
@@ -6511,6 +6737,8 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerI
 
 
 
+
+/*! \brief Return the forecast time range and content hash for the given generation id. */
 
 void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime,std::size_t& hash)
 {
@@ -6577,6 +6805,8 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerI
 
 
 
+/*! \brief Collect distinct forecast time strings for the given generation and geometry. */
+
 void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6615,10 +6845,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
           {
             if (info->mGeometryId == geometryId)
             {
-              //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
-              {
-                forecastTimeList.insert(info->getForecastTime());
-              }
+              forecastTimeList.insert(info->getForecastTime());
             }
           }
           else
@@ -6639,6 +6866,8 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
 
 
 
+
+/*! \brief Collect distinct forecast time strings for the given generation, geometry, and level id. */
 
 void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& forecastTimeList)
 {
@@ -6703,6 +6932,8 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
 
 
 
+/*! \brief Collect distinct forecast times (UTC) for the given generation and geometry. */
+
 void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6741,10 +6972,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
           {
             if (info->mGeometryId == geometryId)
             {
-              //if (forecastTimeList.find(info->mForecastTime) == forecastTimeList.end())
-              {
-                forecastTimeList.insert(info->mForecastTimeUTC);
-              }
+              forecastTimeList.insert(info->mForecastTimeUTC);
             }
           }
           else
@@ -6765,6 +6993,8 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
 
 
 
+
+/*! \brief Collect distinct forecast time strings for the given producer id. */
 
 void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,std::set<std::string>& forecastTimeList)
 {
@@ -6822,6 +7052,8 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
 
 
 
+/*! \brief Collect distinct forecast times (UTC) for the given producer id. */
+
 void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,std::set<time_t>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -6878,6 +7110,8 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
 
 
 
+/*! \brief Return the number of entries in the list. */
+
 uint ContentInfoList::getLength() const
 {
   //FUNCTION_TRACE
@@ -6894,6 +7128,8 @@ uint ContentInfoList::getLength() const
 
 
 
+
+/*! \brief Set the pointer to the modification mutex used by the list. */
 
 void ContentInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 {
@@ -6915,6 +7151,8 @@ void ContentInfoList::setModificationLockPtr(ModificationLock* modificationLockP
 
 
 
+/*! \brief Return a pointer to the internal modification mutex. */
+
 ModificationLock*  ContentInfoList::getModificationLockPtr()
 {
   FUNCTION_TRACE
@@ -6931,6 +7169,8 @@ ModificationLock*  ContentInfoList::getModificationLockPtr()
 
 
 
+
+/*! \brief Return the capacity of the underlying storage. */
 
 uint ContentInfoList::getSize() const
 {
@@ -6949,6 +7189,8 @@ uint ContentInfoList::getSize() const
 
 
 
+/*! \brief Acquire the internal mutex protecting the list. */
+
 void ContentInfoList::lock()
 {
   FUNCTION_TRACE
@@ -6964,6 +7206,8 @@ void ContentInfoList::lock()
 
 
 
+
+/*! \brief Release the internal mutex protecting the list. */
 
 void ContentInfoList::unlock()
 {
@@ -6982,6 +7226,8 @@ void ContentInfoList::unlock()
 
 
 
+/*! \brief Return whether contained objects are owned and released by the list. */
+
 bool ContentInfoList::getReleaseObjects()
 {
   FUNCTION_TRACE
@@ -6998,6 +7244,8 @@ bool ContentInfoList::getReleaseObjects()
 
 
 
+
+/*! \brief Set whether contained objects are owned and released by the list. */
 
 void ContentInfoList::setReleaseObjects(bool releaseObjects)
 {
@@ -7016,6 +7264,8 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+/*! \brief Return the comparison method used for sorting the list. */
+
 uint ContentInfoList::getComparisonMethod()
 {
   FUNCTION_TRACE
@@ -7033,6 +7283,8 @@ uint ContentInfoList::getComparisonMethod()
 
 
 
+/*! \brief Enable or disable internal locking on the list. */
+
 void ContentInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
@@ -7049,6 +7301,8 @@ void ContentInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
+
+/*! \brief Set the comparison method used for sorting the list. */
 
 void ContentInfoList::setComparisonMethod(uint comparisonMethod)
 {
@@ -7068,6 +7322,8 @@ void ContentInfoList::setComparisonMethod(uint comparisonMethod)
 
 
 
+
+/*! \brief Sort the list using the given comparison method. */
 
 void ContentInfoList::sort(uint comparisonMethod)
 {
@@ -7158,6 +7414,8 @@ void ContentInfoList::sort(uint comparisonMethod)
 
 
 
+/*! \brief Write the list contents to the named file. */
+
 void ContentInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -7174,6 +7432,8 @@ void ContentInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Write the list contents to the named file with the given file mode. */
 
 void ContentInfoList::writeToFile(const std::string& filename,const char *filemode)
 {
@@ -7208,6 +7468,8 @@ void ContentInfoList::writeToFile(const std::string& filename,const char *filemo
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

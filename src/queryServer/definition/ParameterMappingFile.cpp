@@ -11,6 +11,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 ParameterMappingFile::ParameterMappingFile()
   : mLastModified(0)
 {
@@ -25,6 +27,8 @@ ParameterMappingFile::ParameterMappingFile()
 
 
 
+
+/*! \brief Query Server: Constructor. */
 
 ParameterMappingFile::ParameterMappingFile(const std::string& filename)
   : mLastModified(0)
@@ -42,6 +46,8 @@ ParameterMappingFile::ParameterMappingFile(const std::string& filename)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ParameterMappingFile::~ParameterMappingFile()
 {
   try
@@ -58,6 +64,8 @@ ParameterMappingFile::~ParameterMappingFile()
 
 
 
+/*! \brief Query Server: Init. */
+
 void ParameterMappingFile::init()
 {
   try
@@ -73,6 +81,8 @@ void ParameterMappingFile::init()
 
 
 
+
+/*! \brief Query Server: Check updates. */
 
 bool ParameterMappingFile::checkUpdates()
 {
@@ -101,6 +111,8 @@ bool ParameterMappingFile::checkUpdates()
 
 
 
+/*! \brief Query Server: Get filename. */
+
 std::string ParameterMappingFile::getFilename()
 {
   try
@@ -116,6 +128,8 @@ std::string ParameterMappingFile::getFilename()
 
 
 
+
+/*! \brief Query Server: Get number of mappings. */
 
 uint ParameterMappingFile::getNumberOfMappings()
 {
@@ -141,6 +155,8 @@ uint ParameterMappingFile::getNumberOfMappings()
 
 
 
+
+/*! \brief Query Server: Get mapping. */
 
 ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 {
@@ -181,6 +197,8 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
 
 
 
+/*! \brief Query Server: Get mappings. */
+
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
@@ -220,6 +238,8 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+
+/*! \brief Query Server: Get mappings. */
 
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
@@ -267,6 +287,8 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+/*! \brief Query Server: Get mappings. */
+
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
   try
@@ -313,6 +335,8 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+
+/*! \brief Query Server: Get alias mappings. */
 
 void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitConversion_vec& unitConversions)
 {
@@ -363,6 +387,8 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
 
 
 
+
+/*! \brief Query Server: Get mappings. */
 
 void ParameterMappingFile::getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
 {
@@ -416,6 +442,8 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
 
 
+/*! \brief Query Server: Get mappings by param key. */
+
 void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,ParameterMapping_vec& mappings)
 {
   try
@@ -460,6 +488,8 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
 
 
 
+
+/*! \brief Query Server: Set parameter mappings. */
 
 void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
 {
@@ -510,6 +540,8 @@ void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
 
 
 
+
+/*! \brief Query Server: Load file. */
 
 void ParameterMappingFile::loadFile()
 {
@@ -662,6 +694,8 @@ void ParameterMappingFile::loadFile()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlags)
 {

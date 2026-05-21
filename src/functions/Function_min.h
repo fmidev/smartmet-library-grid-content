@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the element-wise minimum over an ensemble of grids. */
+// ====================================================================================
+
 class Function_min : public Function
 {
   public:

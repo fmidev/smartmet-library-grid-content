@@ -21,6 +21,8 @@ namespace ContentServer
 {
 
 
+/*! \brief Merge backend: thread entry point that invokes eventProcessingThread on the implementation. */
+
 static void* MergeImplementation_eventProcessingThread(void *arg)
 {
   try
@@ -39,12 +41,16 @@ static void* MergeImplementation_eventProcessingThread(void *arg)
 
 
 
+/*! \brief Merge backend: combine the storage index with an id to form a globally unique 32-bit id. */
+
 inline uint getNewId(uint contentStorageIndex,uint oldId)
 {
   uint id = (contentStorageIndex << 24) + (oldId & 0x00FFFFFF);
   return id;
 }
 
+
+/*! \brief Merge backend: combine the storage index with a producer id to form a global producer id. */
 
 inline T::ProducerId getNewProducerId(uint contentStorageIndex,T::ProducerId oldId)
 {
@@ -53,12 +59,16 @@ inline T::ProducerId getNewProducerId(uint contentStorageIndex,T::ProducerId old
 }
 
 
+/*! \brief Merge backend: combine the storage index with a generation id to form a global generation id. */
+
 inline T::GenerationId getNewGenerationId(uint contentStorageIndex,T::GenerationId oldId)
 {
   T::GenerationId id = ((UInt64)contentStorageIndex << 32) + (oldId & 0xFFFFFFFF);
   return id;
 }
 
+
+/*! \brief Merge backend: combine the storage index with a file id to form a global file id. */
 
 inline T::FileId getNewFileId(uint contentStorageIndex,T::FileId oldId)
 {
@@ -68,6 +78,8 @@ inline T::FileId getNewFileId(uint contentStorageIndex,T::FileId oldId)
 
 
 
+/*! \brief Merge backend: combine the storage index with a source id to form a global source id. */
+
 inline T::SourceId getNewSourceId(uint contentStorageIndex,T::SourceId oldId)
 {
   T::SourceId id = (contentStorageIndex << 24) + (oldId & 0x00FFFFFF);
@@ -75,6 +87,8 @@ inline T::SourceId getNewSourceId(uint contentStorageIndex,T::SourceId oldId)
 }
 
 
+
+/*! \brief Merge backend: default constructor initializing the merged view state. */
 
 MergeImplementation::MergeImplementation()
 {
@@ -128,6 +142,8 @@ MergeImplementation::MergeImplementation()
 
 
 
+/*! \brief Merge backend: destructor that requests shutdown and joins the event thread. */
+
 MergeImplementation::~MergeImplementation()
 {
   FUNCTION_TRACE
@@ -152,6 +168,8 @@ MergeImplementation::~MergeImplementation()
 
 
 
+/*! \brief Merge backend: collect cache statistics from the merged ContentServer instances. */
+
 void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   FUNCTION_TRACE
@@ -167,6 +185,8 @@ void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics)
 
 
 
+
+/*! \brief Merge backend: configure the implementation with the upstream content storages to merge. */
 
 void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSessionId,ContentServer_sptr_vec& contentStorages)
 {
@@ -233,6 +253,8 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
 
 
 
+/*! \brief Merge backend: return true once the initial merge across all upstream sources is complete. */
+
 bool MergeImplementation::isReady()
 {
   FUNCTION_TRACE
@@ -253,6 +275,8 @@ bool MergeImplementation::isReady()
 
 
 
+/*! \brief Merge backend: set how often content updates are pulled from the upstream sources. */
+
 void MergeImplementation::setContentUpdateInterval(uint intervalInSec)
 {
   FUNCTION_TRACE
@@ -269,6 +293,8 @@ void MergeImplementation::setContentUpdateInterval(uint intervalInSec)
 
 
 
+
+/*! \brief Merge backend: populate the attribute tree with the implementation's runtime state. */
 
 void MergeImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -307,6 +333,8 @@ void MergeImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
 
 
 
+/*! \brief Merge backend: configure swap-in wait times for the file cache. */
+
 void MergeImplementation::setContentSwap(uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime)
 {
   FUNCTION_TRACE
@@ -325,6 +353,8 @@ void MergeImplementation::setContentSwap(uint fileCacheMaxFirstWaitTime,uint fil
 
 
 
+/*! \brief Merge backend: cap the maximum number of retained event entries. */
+
 void MergeImplementation::setEventListMaxLength(uint maxLength)
 {
   FUNCTION_TRACE
@@ -341,27 +371,7 @@ void MergeImplementation::setEventListMaxLength(uint maxLength)
 
 
 
-/*
-std::string& MergeImplementation::getSourceInfo()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage)
-      return mContentStorage->getSourceInfo();
-
-    mSourceInfo = "No source";
-    return mSourceInfo;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
-
+/*! \brief Merge backend: spawn the background thread that consumes events from upstream sources. */
 
 void MergeImplementation::startEventProcessing()
 {
@@ -380,6 +390,8 @@ void MergeImplementation::startEventProcessing()
 
 
 
+/*! \brief Merge backend: request the implementation to stop background processing. */
+
 void MergeImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -396,6 +408,8 @@ void MergeImplementation::shutdown()
 
 
 
+
+/*! \brief Merge backend: return true if the given session id is currently valid. */
 
 bool MergeImplementation::isSessionValid(T::SessionId sessionId)
 {
@@ -417,6 +431,8 @@ bool MergeImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
+/*! \brief Merge backend: not implemented; mutation methods are read-only on the merged view. */
+
 int MergeImplementation::_clear(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -433,6 +449,8 @@ int MergeImplementation::_clear(T::SessionId sessionId)
 
 
 
+
+/*! \brief Merge backend: schedule a full reload of all upstream content storages. */
 
 int MergeImplementation::_reload(T::SessionId sessionId)
 {
@@ -458,6 +476,8 @@ int MergeImplementation::_reload(T::SessionId sessionId)
 
 
 
+
+/*! \brief Merge backend: read producers, generations, geometries, files and content from every upstream source. */
 
 void MergeImplementation::reloadData()
 {
@@ -522,6 +542,8 @@ void MergeImplementation::reloadData()
 
 
 
+/*! \brief Merge backend: return the most recent content change time across the merged sources. */
+
 int MergeImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
   FUNCTION_TRACE
@@ -544,6 +566,8 @@ int MergeImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& ch
 
 
 
+/*! \brief Merge backend: not implemented; producer additions go directly to the upstream sources. */
+
 int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -560,6 +584,8 @@ int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 
 
+
+/*! \brief Merge backend: not implemented; producer updates go directly to the upstream sources. */
 
 int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -578,6 +604,8 @@ int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 
 
+/*! \brief Merge backend: not implemented; deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -595,6 +623,8 @@ int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::Produ
 
 
 
+/*! \brief Merge backend: not implemented; deletion by name is handled by the upstream sources. */
+
 int MergeImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -611,6 +641,8 @@ int MergeImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const 
 
 
 
+
+/*! \brief Merge backend: copy the merged producer with the given id into the output parameter. */
 
 int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
@@ -648,6 +680,8 @@ int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
 
 
 
+/*! \brief Merge backend: not implemented; producer deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -664,6 +698,8 @@ int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
 
 
 
+
+/*! \brief Merge backend: copy the merged producer matching the name into the output parameter. */
 
 int MergeImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
@@ -701,6 +737,8 @@ int MergeImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
 
 
 
+/*! \brief Merge backend: return the merged list of producers across every upstream source. */
+
 int MergeImplementation::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -733,6 +771,8 @@ int MergeImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
 
 
 
+
+/*! \brief Merge backend: list merged producers offering data for the given parameter key. */
 
 int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -830,6 +870,8 @@ int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
 
 
+/*! \brief Merge backend: list merged producers originating from the given source. */
+
 int MergeImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -865,6 +907,8 @@ int MergeImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Merge backend: return the total number of merged producers. */
+
 int MergeImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -896,6 +940,8 @@ int MergeImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
 
 
 
+
+/*! \brief Merge backend: collect unique producer/geometry name pairs across the merged sources. */
 
 int MergeImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -943,6 +989,8 @@ int MergeImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
 
 
 
+
+/*! \brief Merge backend: list parameters across all merged producers translated between key types. */
 
 int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -1132,6 +1180,8 @@ int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
 
 
+/*! \brief Merge backend: list parameters offered by the given merged producer. */
+
 int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -1309,6 +1359,8 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
 
 
+/*! \brief Merge backend: not implemented; generation additions go directly to the upstream sources. */
+
 int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1325,6 +1377,8 @@ int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+
+/*! \brief Merge backend: not implemented; generation updates go directly to the upstream sources. */
 
 int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -1343,6 +1397,8 @@ int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1359,6 +1415,8 @@ int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Gen
 
 
 
+
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -1377,6 +1435,8 @@ int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,cons
 
 
 
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -1393,6 +1453,8 @@ int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
 
 
 
+
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -1411,6 +1473,8 @@ int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 
 
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -1428,6 +1492,8 @@ int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
 
 
+/*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1444,6 +1510,8 @@ int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
 
 
 
+
+/*! \brief Merge backend: list unique generation/geometry/forecast-time triplets across the merged sources. */
 
 int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -1485,6 +1553,8 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
 
 
 
+/*! \brief Merge backend: list merged generations that contain data for the given geometry. */
+
 int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1522,6 +1592,8 @@ int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
 
 
+/*! \brief Merge backend: copy the merged generation with the given id into the output parameter. */
+
 int MergeImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1557,6 +1629,8 @@ int MergeImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Genera
 
 
 
+
+/*! \brief Merge backend: copy the merged generation with the given name into the output parameter. */
 
 int MergeImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
@@ -1594,6 +1668,8 @@ int MergeImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
 
 
 
+/*! \brief Merge backend: return the merged list of generations across every upstream source. */
+
 int MergeImplementation::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1628,6 +1704,8 @@ int MergeImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
 
 
 
+/*! \brief Merge backend: list merged generations belonging to the given producer id. */
+
 int MergeImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1661,6 +1739,8 @@ int MergeImplementation::_getGenerationInfoListByProducerId(T::SessionId session
 
 
 
+
+/*! \brief Merge backend: list merged generations belonging to the named producer. */
 
 int MergeImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
@@ -1705,6 +1785,8 @@ int MergeImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
 
 
 
+/*! \brief Merge backend: list merged generations originating from the given source. */
+
 int MergeImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1739,6 +1821,8 @@ int MergeImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
 
 
 
+/*! \brief Merge backend: return the most recent merged generation matching the producer and status. */
+
 int MergeImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1771,6 +1855,8 @@ int MergeImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
 
 
 
+
+/*! \brief Merge backend: return the most recent merged generation matching the named producer and status. */
 
 int MergeImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
@@ -1805,6 +1891,8 @@ int MergeImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
 
 
 
+/*! \brief Merge backend: return the total number of merged generations. */
+
 int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -1837,6 +1925,8 @@ int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
 
 
 
+/*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
+
 int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   FUNCTION_TRACE
@@ -1853,6 +1943,8 @@ int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
 
 int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
@@ -1871,6 +1963,8 @@ int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
 
 
 
+/*! \brief Merge backend: not implemented; geometry additions go directly to the upstream sources. */
+
 int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -1886,6 +1980,8 @@ int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 
 
+
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
@@ -1904,6 +2000,8 @@ int MergeImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::Gener
 
 
 
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1920,6 +2018,8 @@ int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sess
 
 
 
+
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -1938,6 +2038,8 @@ int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessio
 
 
 
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1954,6 +2056,8 @@ int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionI
 
 
 
+
+/*! \brief Merge backend: copy the merged geometry identified by generation, geometry and level id. */
 
 int MergeImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
@@ -1990,6 +2094,8 @@ int MergeImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generati
 
 
 
+/*! \brief Merge backend: return the merged list of geometries across every upstream source. */
+
 int MergeImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2024,6 +2130,8 @@ int MergeImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
 
 
 
+/*! \brief Merge backend: list merged geometries attached to the given generation id. */
+
 int MergeImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2056,6 +2164,8 @@ int MergeImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Merge backend: list merged geometries belonging to the given producer id. */
 
 int MergeImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
@@ -2091,6 +2201,8 @@ int MergeImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
 
 
 
+/*! \brief Merge backend: list merged geometries originating from the given source. */
+
 int MergeImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2125,6 +2237,8 @@ int MergeImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Merge backend: return the total number of merged geometry records. */
+
 int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2157,6 +2271,8 @@ int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
 
 
 
+/*! \brief Merge backend: not implemented; geometry updates go directly to the upstream sources. */
+
 int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -2173,6 +2289,8 @@ int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 
 
+
+/*! \brief Merge backend: not implemented; geometry status changes go directly to the upstream sources. */
 
 int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
@@ -2191,6 +2309,8 @@ int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::Ge
 
 
 
+/*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
+
 int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2207,6 +2327,8 @@ int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+
+/*! \brief Merge backend: not implemented; file updates go directly to the upstream sources. */
 
 int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -2225,6 +2347,8 @@ int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+/*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
+
 int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2241,6 +2365,8 @@ int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 
 
+
+/*! \brief Merge backend: not implemented; bulk file additions go directly to the upstream sources. */
 
 int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
@@ -2259,6 +2385,8 @@ int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -2275,6 +2403,8 @@ int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fi
 
 
 
+
+/*! \brief Merge backend: not implemented; file deletion by name is handled by the upstream sources. */
 
 int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
@@ -2293,6 +2423,8 @@ int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -2309,6 +2441,8 @@ int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -2327,6 +2461,8 @@ int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -2343,6 +2479,8 @@ int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
+
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
@@ -2361,6 +2499,8 @@ int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
   FUNCTION_TRACE
@@ -2377,6 +2517,8 @@ int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 
 
+
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -2395,6 +2537,8 @@ int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2412,6 +2556,8 @@ int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -2428,6 +2574,8 @@ int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
 
 
 
+
+/*! \brief Merge backend: copy the merged file record with the given id into the output parameter. */
 
 int MergeImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
@@ -2465,6 +2613,8 @@ int MergeImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileI
 
 
 
+/*! \brief Merge backend: copy the merged file record with the given name into the output parameter. */
+
 int MergeImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2501,6 +2651,8 @@ int MergeImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
+/*! \brief Merge backend: return a page of merged file records starting at the given file id. */
+
 int MergeImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2534,6 +2686,8 @@ int MergeImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId start
 
 
 
+
+/*! \brief Merge backend: return merged file records for every id appearing in the given list. */
 
 int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
@@ -2581,6 +2735,8 @@ int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
 
 
+/*! \brief Merge backend: return a page of merged file records belonging to the given producer id. */
+
 int MergeImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2620,6 +2776,8 @@ int MergeImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Merge backend: return a page of merged file records belonging to the named producer. */
 
 int MergeImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2663,6 +2821,8 @@ int MergeImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
 
 
 
+/*! \brief Merge backend: return a page of merged file records belonging to the given generation id. */
+
 int MergeImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2696,6 +2856,8 @@ int MergeImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Merge backend: return a page of merged file records belonging to the named generation. */
 
 int MergeImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -2739,6 +2901,8 @@ int MergeImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
+/*! \brief Merge backend: return a page of merged file records originating from the given source. */
+
 int MergeImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -2773,6 +2937,8 @@ int MergeImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::So
 
 
 
+/*! \brief Merge backend: return the total number of merged file records. */
+
 int MergeImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2805,6 +2971,8 @@ int MergeImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Merge backend: count merged file records belonging to the given producer id. */
+
 int MergeImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
@@ -2835,6 +3003,8 @@ int MergeImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Merge backend: count merged file records belonging to the given generation id. */
 
 int MergeImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
@@ -2868,6 +3038,8 @@ int MergeImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
 
 
 
+/*! \brief Merge backend: count merged file records originating from the given source. */
+
 int MergeImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
@@ -2900,6 +3072,8 @@ int MergeImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
 
 
 
+/*! \brief Merge backend: helper that appends a typed event to the merged event log. */
+
 T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags)
 {
   FUNCTION_TRACE
@@ -2922,6 +3096,8 @@ T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
 
 
 
+/*! \brief Merge backend: not implemented; events are produced by the upstream sources. */
+
 int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -2938,6 +3114,8 @@ int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 
 
+
+/*! \brief Merge backend: return the most recent merged event visible to the requesting server. */
 
 int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -2970,6 +3148,8 @@ int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 
 
+
+/*! \brief Merge backend: return a page of merged event records starting at the given event id. */
 
 int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
@@ -3071,6 +3251,8 @@ int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
 
 
+/*! \brief Merge backend: return the number of event records in the merged log. */
+
 int MergeImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3092,6 +3274,8 @@ int MergeImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
+
 int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -3108,6 +3292,8 @@ int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 
 
+
+/*! \brief Merge backend: not implemented; content updates go directly to the upstream sources. */
 
 int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -3126,6 +3312,8 @@ int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 
 
+/*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
+
 int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3142,6 +3330,8 @@ int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
 
 
+
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
@@ -3160,6 +3350,8 @@ int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fil
 
 
 
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -3176,6 +3368,8 @@ int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::Fi
 
 
 
+
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
@@ -3194,6 +3388,8 @@ int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,con
 
 
 
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -3210,6 +3406,8 @@ int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -3228,6 +3426,8 @@ int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId
 
 
 
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -3244,6 +3444,8 @@ int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 
 
+
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
 int MergeImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -3262,6 +3464,8 @@ int MergeImplementation::_deleteContentListByGenerationName(T::SessionId session
 
 
 
+/*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
+
 int MergeImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -3278,6 +3482,8 @@ int MergeImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Merge backend: copy the merged content record identified by file id and message index. */
 
 int MergeImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -3321,6 +3527,8 @@ int MergeImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId
 
 
 
+/*! \brief Merge backend: return a page of merged content records starting at the given file/message position. */
+
 int MergeImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3356,6 +3564,8 @@ int MergeImplementation::_getContentList(T::SessionId sessionId,T::FileId startF
 
 
 
+/*! \brief Merge backend: return merged content records belonging to the given file id. */
+
 int MergeImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3389,6 +3599,8 @@ int MergeImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileI
 
 
 
+
+/*! \brief Merge backend: return merged content records for every file id in the given list. */
 
 int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -3435,6 +3647,8 @@ int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
 
 
+/*! \brief Merge backend: return merged content records belonging to the named file. */
+
 int MergeImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3477,6 +3691,8 @@ int MergeImplementation::_getContentListByFileName(T::SessionId sessionId,const 
 
 
 
+/*! \brief Merge backend: return a page of merged content records belonging to the given producer id. */
+
 int MergeImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3515,6 +3731,8 @@ int MergeImplementation::_getContentListByProducerId(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Merge backend: return a page of merged content records belonging to the named producer. */
 
 int MergeImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -3556,6 +3774,8 @@ int MergeImplementation::_getContentListByProducerName(T::SessionId sessionId,co
 
 
 
+
+/*! \brief Merge backend: return a page of merged content records belonging to the given generation id. */
 
 int MergeImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3604,6 +3824,8 @@ int MergeImplementation::_getContentListByGenerationId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Merge backend: return a page of merged content records belonging to the named generation. */
+
 int MergeImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3645,6 +3867,8 @@ int MergeImplementation::_getContentListByGenerationName(T::SessionId sessionId,
 
 
 
+
+/*! \brief Merge backend: return merged content records for a generation within the time range. */
 
 int MergeImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -3688,6 +3912,8 @@ int MergeImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
 
 
+/*! \brief Merge backend: return merged content records for the named generation within the time range. */
+
 int MergeImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3730,6 +3956,8 @@ int MergeImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
 
 
 
+/*! \brief Merge backend: return a page of merged content records originating from the given source. */
+
 int MergeImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3763,6 +3991,8 @@ int MergeImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
 
 
 
+
+/*! \brief Merge backend: return merged content records matching the parameter and filter criteria. */
 
 int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3838,6 +4068,8 @@ int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
+
+/*! \brief Merge backend: return merged content records matching the parameter filter within a single generation. */
 
 int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -3919,6 +4151,8 @@ int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
+/*! \brief Merge backend: return merged content records matching the parameter filter within a named generation. */
+
 int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3996,6 +4230,8 @@ int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
+
+/*! \brief Merge backend: return merged content records matching the parameter filter within a single producer. */
 
 int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4078,6 +4314,8 @@ int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
+/*! \brief Merge backend: return merged content records matching the parameter filter within a named producer. */
+
 int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4156,6 +4394,8 @@ int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+
+/*! \brief Merge backend: return merged content records bracketing the requested forecast time. */
 
 int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -4250,6 +4490,8 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
+/*! \brief Merge backend: return merged content records referencing missing producers, generations or files. */
+
 int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4314,6 +4556,8 @@ int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
 
 
+/*! \brief Merge backend: list distinct geometry ids appearing in merged content for the given generation. */
+
 int MergeImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -4344,6 +4588,8 @@ int MergeImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
 
 
 
+
+/*! \brief Merge backend: list unique parameter descriptors present in merged content for the given generation. */
 
 int MergeImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -4403,6 +4649,8 @@ int MergeImplementation::_getContentParamListByGenerationId(T::SessionId session
 
 
 
+/*! \brief Merge backend: list distinct parameter keys in merged content for a generation. */
+
 int MergeImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -4433,6 +4681,8 @@ int MergeImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
+
+/*! \brief Merge backend: list distinct parameter keys in merged content for a generation and geometry. */
 
 int MergeImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -4465,6 +4715,8 @@ int MergeImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
 
 
 
+/*! \brief Merge backend: list distinct parameter keys in merged content for a generation, geometry and level. */
+
 int MergeImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -4495,6 +4747,8 @@ int MergeImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T
 
 
 
+
+/*! \brief Merge backend: list distinct levels in merged content for a generation, geometry and level id. */
 
 int MergeImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
@@ -4527,6 +4781,8 @@ int MergeImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::S
 
 
 
+/*! \brief Merge backend: list merged levels available for a parameter within a generation and geometry. */
+
 int MergeImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -4556,6 +4812,8 @@ int MergeImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
 
 
 
+
+/*! \brief Merge backend: list forecast times appearing in merged content for the given generation. */
 
 int MergeImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -4607,6 +4865,8 @@ int MergeImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
 
 
+/*! \brief Merge backend: compute the time range spanned by merged content for a producer and generation. */
+
 int MergeImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -4645,6 +4905,8 @@ int MergeImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
 
 
 
+
+/*! \brief Merge backend: compute the time range spanned by merged content for the given generation. */
 
 int MergeImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -4685,6 +4947,8 @@ int MergeImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
 
 
 
+/*! \brief Merge backend: list forecast times in merged content for the generation and geometry. */
+
 int MergeImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4716,6 +4980,8 @@ int MergeImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
 
 
+
+/*! \brief Merge backend: list forecast times in merged content for the generation, geometry and level. */
 
 int MergeImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
@@ -4749,6 +5015,8 @@ int MergeImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::Se
 
 
 
+/*! \brief Merge backend: list forecast times appearing in merged content for the given producer. */
+
 int MergeImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -4775,6 +5043,8 @@ int MergeImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Merge backend: return the total number of merged content records. */
 
 int MergeImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
@@ -4807,6 +5077,8 @@ int MergeImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Merge backend: compute the content hash of the merged state for the given producer. */
 
 int MergeImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
@@ -4864,6 +5136,8 @@ int MergeImplementation::_getHashByProducerId(T::SessionId sessionId,T::Producer
 
 
 
+/*! \brief Merge backend: list distinct parameter-level descriptors across the merged content. */
+
 int MergeImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -4898,6 +5172,8 @@ int MergeImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
 
 
+/*! \brief Merge backend: refresh cached file entries for the supplied file ids. */
+
 int MergeImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -4923,6 +5199,8 @@ int MergeImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::F
 
 
 
+
+/*! \brief Merge backend: pull the producer list from the given upstream storage into the merged view. */
 
 void MergeImplementation::readProducerList(uint contentStorageIndex,ContentServer_sptr contentStorage)
 {
@@ -4972,6 +5250,8 @@ void MergeImplementation::readProducerList(uint contentStorageIndex,ContentServe
 
 
 
+
+/*! \brief Merge backend: pull the generation list from the given upstream storage into the merged view. */
 
 void MergeImplementation::readGenerationList(uint contentStorageIndex,ContentServer_sptr contentStorage)
 {
@@ -5026,6 +5306,8 @@ void MergeImplementation::readGenerationList(uint contentStorageIndex,ContentSer
 
 
 
+/*! \brief Merge backend: pull the geometry list from the given upstream storage into the merged view. */
+
 void MergeImplementation::readGeometryList(uint contentStorageIndex,ContentServer_sptr contentStorage)
 {
   FUNCTION_TRACE
@@ -5079,6 +5361,8 @@ void MergeImplementation::readGeometryList(uint contentStorageIndex,ContentServe
 
 
 
+
+/*! \brief Merge backend: pull the file list from the given upstream storage into the merged view. */
 
 void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sptr contentStorage)
 {
@@ -5146,6 +5430,8 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
 
 
 
+
+/*! \brief Merge backend: pull the content list from the given upstream storage into the merged view. */
 
 void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer_sptr contentStorage)
 {
@@ -5215,6 +5501,8 @@ void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer
 
 
 
+/*! \brief Merge backend: handle a clear event from the given upstream content storage. */
+
 void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5251,6 +5539,8 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
 
 
 
+/*! \brief Merge backend: handle a content server reload event by reimporting from the given storage. */
+
 void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5267,6 +5557,8 @@ void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::
 
 
 
+
+/*! \brief Merge backend: handle the start of an upstream update cycle. */
 
 void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5291,6 +5583,8 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
 
 
 
+
+/*! \brief Merge backend: handle the end of an upstream update cycle. */
 
 void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5328,6 +5622,8 @@ void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventI
 
 
 
+/*! \brief Merge backend: handle a producer-added event from an upstream content storage. */
+
 void MergeImplementation::event_producerAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5362,6 +5658,8 @@ void MergeImplementation::event_producerAdded(uint contentStorageIndex,T::EventI
 
 
 
+/*! \brief Merge backend: handle a producer-deleted event from an upstream content storage. */
+
 void MergeImplementation::event_producerDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5388,6 +5686,8 @@ void MergeImplementation::event_producerDeleted(uint contentStorageIndex,T::Even
 
 
 
+
+/*! \brief Merge backend: handle a producer-updated event from an upstream content storage. */
 
 void MergeImplementation::event_producerUpdated(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5425,6 +5725,8 @@ void MergeImplementation::event_producerUpdated(uint contentStorageIndex,T::Even
 
 
 
+/*! \brief Merge backend: handle bulk producer deletion by source id from an upstream content storage. */
+
 void MergeImplementation::event_producerListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5451,6 +5753,8 @@ void MergeImplementation::event_producerListDeletedBySourceId(uint contentStorag
 
 
 
+
+/*! \brief Merge backend: handle a generation-added event from an upstream content storage. */
 
 void MergeImplementation::event_generationAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5486,6 +5790,8 @@ void MergeImplementation::event_generationAdded(uint contentStorageIndex,T::Even
 
 
 
+/*! \brief Merge backend: handle a generation-deleted event from an upstream content storage. */
+
 void MergeImplementation::event_generationDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5516,6 +5822,8 @@ void MergeImplementation::event_generationDeleted(uint contentStorageIndex,T::Ev
 
 
 
+
+/*! \brief Merge backend: handle a generation-updated event from an upstream content storage. */
 
 void MergeImplementation::event_generationUpdated(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5553,6 +5861,8 @@ void MergeImplementation::event_generationUpdated(uint contentStorageIndex,T::Ev
 
 
 
+/*! \brief Merge backend: handle a generation status change event from an upstream content storage. */
+
 void MergeImplementation::event_generationStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5579,6 +5889,8 @@ void MergeImplementation::event_generationStatusChanged(uint contentStorageIndex
 
 
 
+/*! \brief Merge backend: handle bulk generation deletion by producer id from an upstream content storage. */
+
 void MergeImplementation::event_generationListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5604,6 +5916,8 @@ void MergeImplementation::event_generationListDeletedByProducerId(uint contentSt
 
 
 
+/*! \brief Merge backend: handle bulk generation deletion by source id from an upstream content storage. */
+
 void MergeImplementation::event_generationListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5628,6 +5942,8 @@ void MergeImplementation::event_generationListDeletedBySourceId(uint contentStor
 
 
 
+
+/*! \brief Merge backend: handle a geometry-added event from an upstream content storage. */
 
 void MergeImplementation::event_geometryAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5661,6 +5977,8 @@ void MergeImplementation::event_geometryAdded(uint contentStorageIndex,T::EventI
 
 
 
+/*! \brief Merge backend: handle a geometry-deleted event from an upstream content storage. */
+
 void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5681,6 +5999,8 @@ void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::Even
 
 
 
+
+/*! \brief Merge backend: handle a geometry status change event from an upstream content storage. */
 
 void MergeImplementation::event_geometryStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5706,6 +6026,8 @@ void MergeImplementation::event_geometryStatusChanged(uint contentStorageIndex,T
 
 
 
+
+/*! \brief Merge backend: handle a geometry-updated event from an upstream content storage. */
 
 void MergeImplementation::event_geometryUpdated(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5740,6 +6062,8 @@ void MergeImplementation::event_geometryUpdated(uint contentStorageIndex,T::Even
 
 
 
+/*! \brief Merge backend: handle bulk geometry deletion by producer id from an upstream content storage. */
+
 void MergeImplementation::event_geometryListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5762,6 +6086,8 @@ void MergeImplementation::event_geometryListDeletedByProducerId(uint contentStor
 
 
 
+/*! \brief Merge backend: handle bulk geometry deletion by generation id from an upstream content storage. */
+
 void MergeImplementation::event_geometryListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5782,6 +6108,8 @@ void MergeImplementation::event_geometryListDeletedByGenerationId(uint contentSt
 
 
 
+
+/*! \brief Merge backend: handle bulk geometry deletion by source id from an upstream content storage. */
 
 void MergeImplementation::event_geometryListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5804,6 +6132,8 @@ void MergeImplementation::event_geometryListDeletedBySourceId(uint contentStorag
 
 
 
+
+/*! \brief Merge backend: handle a file-added event from an upstream content storage. */
 
 void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -5968,6 +6298,8 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
 
 
 
+/*! \brief Merge backend: handle a file-deleted event from an upstream content storage. */
+
 void MergeImplementation::event_fileDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -5991,6 +6323,8 @@ void MergeImplementation::event_fileDeleted(uint contentStorageIndex,T::EventInf
 
 
 
+
+/*! \brief Merge backend: handle a file-updated event from an upstream content storage. */
 
 void MergeImplementation::event_fileUpdated(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -6073,6 +6407,8 @@ void MergeImplementation::event_fileUpdated(uint contentStorageIndex,T::EventInf
 
 
 
+/*! \brief Merge backend: handle bulk file deletion by producer id from an upstream content storage. */
+
 void MergeImplementation::event_fileListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6095,6 +6431,8 @@ void MergeImplementation::event_fileListDeletedByProducerId(uint contentStorageI
 
 
 
+
+/*! \brief Merge backend: handle bulk file deletion by generation id from an upstream content storage. */
 
 void MergeImplementation::event_fileListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -6120,6 +6458,8 @@ void MergeImplementation::event_fileListDeletedByGenerationId(uint contentStorag
 
 
 
+/*! \brief Merge backend: handle bulk file deletion by source id from an upstream content storage. */
+
 void MergeImplementation::event_fileListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6143,6 +6483,8 @@ void MergeImplementation::event_fileListDeletedBySourceId(uint contentStorageInd
 
 
 
+/*! \brief Merge backend: handle bulk content deletion by file id from an upstream content storage. */
+
 void MergeImplementation::event_contentListDeletedByFileId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6164,6 +6506,8 @@ void MergeImplementation::event_contentListDeletedByFileId(uint contentStorageIn
 
 
 
+
+/*! \brief Merge backend: handle bulk content deletion by producer id from an upstream content storage. */
 
 void MergeImplementation::event_contentListDeletedByProducerId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -6187,6 +6531,8 @@ void MergeImplementation::event_contentListDeletedByProducerId(uint contentStora
 
 
 
+/*! \brief Merge backend: handle bulk content deletion by source id from an upstream content storage. */
+
 void MergeImplementation::event_contentListDeletedBySourceId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6209,6 +6555,8 @@ void MergeImplementation::event_contentListDeletedBySourceId(uint contentStorage
 
 
 
+/*! \brief Merge backend: handle bulk content deletion by generation id from an upstream content storage. */
+
 void MergeImplementation::event_contentListDeletedByGenerationId(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6230,6 +6578,8 @@ void MergeImplementation::event_contentListDeletedByGenerationId(uint contentSto
 
 
 
+
+/*! \brief Merge backend: handle a content-added event from an upstream content storage. */
 
 void MergeImplementation::event_contentAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -6299,6 +6649,8 @@ void MergeImplementation::event_contentAdded(uint contentStorageIndex,T::EventIn
 
 
 
+/*! \brief Merge backend: handle a content-updated event from an upstream content storage. */
+
 void MergeImplementation::event_contentUpdated(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6324,6 +6676,8 @@ void MergeImplementation::event_contentUpdated(uint contentStorageIndex,T::Event
 
 
 
+/*! \brief Merge backend: handle a content-deleted event from an upstream content storage. */
+
 void MergeImplementation::event_contentDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6345,6 +6699,8 @@ void MergeImplementation::event_contentDeleted(uint contentStorageIndex,T::Event
 
 
 
+
+/*! \brief Merge backend: dispatch a single event to the appropriate type-specific event handler. */
 
 void MergeImplementation::processEvent(uint contentStorageIndex,T::EventInfo& eventInfo)
 {
@@ -6509,6 +6865,8 @@ void MergeImplementation::processEvent(uint contentStorageIndex,T::EventInfo& ev
 
 
 
+/*! \brief Merge backend: drain pending events from each upstream content storage and apply them. */
+
 void MergeImplementation::processEvents(bool eventThread)
 {
   // FUNCTION_TRACE
@@ -6659,6 +7017,8 @@ void MergeImplementation::processEvents(bool eventThread)
 
 
 
+/*! \brief Merge backend: main loop of the background thread that processes upstream events. */
+
 void MergeImplementation::eventProcessingThread()
 {
   FUNCTION_TRACE
@@ -6686,6 +7046,8 @@ void MergeImplementation::eventProcessingThread()
 
 
 
+
+/*! \brief Merge backend: pull the latest content changes from every upstream content storage. */
 
 void MergeImplementation::updateContent()
 {

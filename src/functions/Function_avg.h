@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the arithmetic mean of an ensemble of grids element-wise. */
+// ====================================================================================
+
 class Function_avg : public Function
 {
   public:

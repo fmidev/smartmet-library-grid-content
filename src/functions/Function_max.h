@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the element-wise maximum over an ensemble of grids. */
+// ====================================================================================
+
 class Function_max : public Function
 {
   public:

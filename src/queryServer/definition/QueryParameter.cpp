@@ -9,6 +9,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 QueryParameter::QueryParameter()
 {
   try
@@ -94,6 +96,8 @@ QueryParameter::QueryParameter(const QueryParameter& queryParameter)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 QueryParameter::~QueryParameter()
 {
   try
@@ -109,6 +113,8 @@ QueryParameter::~QueryParameter()
 
 
 
+
+/*! \brief Query Server: Get hash. */
 
 std::size_t QueryParameter::getHash()
 {
@@ -175,6 +181,8 @@ std::size_t QueryParameter::getHash()
 
 
 
+/*! \brief Query Server: Get value list size. */
+
 void QueryParameter::getValueListSize(int& columns,int& rows)
 {
   try
@@ -201,6 +209,8 @@ void QueryParameter::getValueListSize(int& columns,int& rows)
 
 
 
+
+/*! \brief Query Server: Get value list value. */
 
 T::ParamValue QueryParameter::getValueListValue(int col,int row)
 {
@@ -229,6 +239,8 @@ T::ParamValue QueryParameter::getValueListValue(int col,int row)
 
 
 
+/*! \brief Query Server: Get value list values by column range. */
+
 void QueryParameter::getValueListValuesByColumnRange(int startCol,int endCol,int row,std::vector<T::ParamValue>& values)
 {
   try
@@ -248,6 +260,8 @@ void QueryParameter::getValueListValuesByColumnRange(int startCol,int endCol,int
 
 
 
+/*! \brief Query Server: Get value list values by row range. */
+
 void QueryParameter::getValueListValuesByRowRange(int col,int startRow,int endRow,std::vector<T::ParamValue>& values)
 {
   try
@@ -266,6 +280,8 @@ void QueryParameter::getValueListValuesByRowRange(int col,int startRow,int endRo
 
 
 
+
+/*! \brief Query Server: Get value vectors by row range. */
 
 void QueryParameter::getValueVectorsByRowRange(int startRow,int endRow,std::vector<std::vector<T::ParamValue>>& valueVectors)
 {
@@ -287,6 +303,8 @@ void QueryParameter::getValueVectorsByRowRange(int startRow,int endRow,std::vect
 
 
 
+
+/*! \brief Query Server: Remove times. */
 
 void QueryParameter::removeTimes(std::set<time_t>& times)
 {
@@ -311,6 +329,8 @@ void QueryParameter::removeTimes(std::set<time_t>& times)
 
 
 
+/*! \brief Query Server: Remove aggregation values. */
+
 void QueryParameter::removeAggregationValues()
 {
   try
@@ -333,6 +353,8 @@ void QueryParameter::removeAggregationValues()
 
 
 
+
+/*! \brief Query Server: Remove internal aggregation values. */
 
 void QueryParameter::removeInternalAggregationValues()
 {
@@ -357,6 +379,8 @@ void QueryParameter::removeInternalAggregationValues()
 
 
 
+/*! \brief Query Server: Update forecast time list. */
+
 void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
 {
   try
@@ -376,6 +400,8 @@ void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
 
 
 
+
+/*! \brief Query Server: Get value list record. */
 
 T::GridValue* QueryParameter::getValueListRecord(int col,int row)
 {
@@ -398,6 +424,8 @@ T::GridValue* QueryParameter::getValueListRecord(int col,int row)
 
 
 
+/*! \brief Query Server: Duplicate. */
+
 QueryParameter* QueryParameter::duplicate()
 {
   try
@@ -413,6 +441,8 @@ QueryParameter* QueryParameter::duplicate()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
 {

@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the most frequently occurring value over an ensemble of grids element-wise. */
+// ====================================================================================
+
 class Function_mode : public Function
 {
   public:

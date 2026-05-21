@@ -15,6 +15,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 ServiceInterface::ServiceInterface()
 {
   FUNCTION_TRACE
@@ -34,6 +36,8 @@ ServiceInterface::ServiceInterface()
 
 
 
+/*! \brief Query Server: Destructor. */
+
 ServiceInterface::~ServiceInterface()
 {
   FUNCTION_TRACE
@@ -51,6 +55,8 @@ ServiceInterface::~ServiceInterface()
 
 
 
+/*! \brief Query Server: Get debug log. */
+
 Log* ServiceInterface::getDebugLog()
 {
   FUNCTION_TRACE
@@ -66,6 +72,8 @@ Log* ServiceInterface::getDebugLog()
 
 
 
+
+/*! \brief Query Server: Get processing log. */
 
 Log* ServiceInterface::getProcessingLog()
 {
@@ -84,6 +92,8 @@ Log* ServiceInterface::getProcessingLog()
 
 
 
+/*! \brief Query Server: Set debug log. */
+
 void ServiceInterface::setDebugLog(Log *debugLog)
 {
   FUNCTION_TRACE
@@ -101,6 +111,8 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 
 
+/*! \brief Query Server: Get cache stats. */
+
 void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   FUNCTION_TRACE
@@ -116,6 +128,8 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
 
 
 
+
+/*! \brief Query Server: Get state attributes. */
 
 void ServiceInterface::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -151,6 +165,8 @@ void ServiceInterface::getStateAttributes(std::shared_ptr<T::AttributeNode> pare
 
 
 
+/*! \brief Query Server: Set processing log. */
+
 void ServiceInterface::setProcessingLog(Log *processingLog)
 {
   FUNCTION_TRACE
@@ -168,6 +184,8 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 
 
+/*! \brief Query Server: Set dem. */
+
 void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 {
   FUNCTION_TRACE
@@ -183,6 +201,8 @@ void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 
 
+
+/*! \brief Query Server: Set land cover. */
 
 void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 {
@@ -200,6 +220,8 @@ void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
 
 
 
+/*! \brief Query Server: Set enabled. */
+
 void ServiceInterface::setEnabled(bool enabled)
 {
   FUNCTION_TRACE
@@ -215,6 +237,8 @@ void ServiceInterface::setEnabled(bool enabled)
 
 
 
+
+/*! \brief Query Server: Is enabled. */
 
 bool ServiceInterface::isEnabled()
 {
@@ -233,6 +257,8 @@ bool ServiceInterface::isEnabled()
 
 
 
+/*! \brief Query Server: Shutdown. */
+
 void ServiceInterface::shutdown()
 {
   FUNCTION_TRACE
@@ -248,6 +274,8 @@ void ServiceInterface::shutdown()
 
 
 
+
+/*! \brief Query Server: Execute query. */
 
 int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
 {
@@ -274,6 +302,8 @@ int ServiceInterface::executeQuery(T::SessionId sessionId,Query& query)
 
 
 
+/*! \brief Query Server: Get producer list. */
+
 int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& producerList)
 {
   FUNCTION_TRACE
@@ -298,6 +328,8 @@ int ServiceInterface::getProducerList(T::SessionId sessionId,string_vec& produce
 
 
 
+
+/*! \brief Query Server: Get values by grid point. */
 
 int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {
@@ -324,6 +356,8 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
 
 
 
+/*! \brief Query Server: Get parameter value by point and time. */
+
 int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
   FUNCTION_TRACE
@@ -348,6 +382,8 @@ int ServiceInterface::getParameterValueByPointAndTime(T::SessionId sessionId,con
 
 
 
+
+/*! \brief Query Server: Get parameter values by point list and time. */
 
 int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
 {
@@ -374,6 +410,8 @@ int ServiceInterface::getParameterValuesByPointListAndTime(T::SessionId sessionI
 
 
 
+/*! \brief Query Server: Get parameter values by point and time list. */
+
 int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
   FUNCTION_TRACE
@@ -398,6 +436,8 @@ int ServiceInterface::getParameterValuesByPointAndTimeList(T::SessionId sessionI
 
 
 
+
+/*! \brief Query Server: Get parameter vertical value vector by point and time. */
 
 int ServiceInterface::getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
 {
@@ -424,6 +464,8 @@ int ServiceInterface::getParameterVerticalValueVectorByPointAndTime(T::SessionId
 
 
 
+/*! \brief Query Server: Get parameter vertical value vector by point list and time. */
+
 int ServiceInterface::getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
 {
   FUNCTION_TRACE
@@ -447,6 +489,8 @@ int ServiceInterface::getParameterVerticalValueVectorByPointListAndTime(T::Sessi
 
 
 
+
+/*! \brief Query Server: Get parameter value vector by geometry and time. */
 
 int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {
@@ -473,6 +517,8 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
 
 
 
+/*! \brief Query Server: Protected hook: execute query. */
+
 int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -481,6 +527,8 @@ int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 
 
 
+
+/*! \brief Query Server: Protected hook: get producer list. */
 
 int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& producerList)
 {
@@ -491,6 +539,8 @@ int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& produc
 
 
 
+/*! \brief Query Server: Protected hook: get values by grid point. */
+
 int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
@@ -499,6 +549,8 @@ int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInf
 
 
 
+
+/*! \brief Query Server: Protected hook: get parameter value by point and time. */
 
 int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue& value)
 {
@@ -552,6 +604,8 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
 
 
 
+/*! \brief Query Server: Protected hook: get parameter values by point list and time. */
+
 int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,std::vector<T::ParamValue>& valueList)
 {
   FUNCTION_TRACE
@@ -602,6 +656,8 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
 
 
 
+
+/*! \brief Query Server: Protected hook: get parameter values by point and time list. */
 
 int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,std::vector<std::string>& times,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,T::ParamValue_vec& values)
 {
@@ -673,6 +729,8 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 
 
 
+/*! \brief Query Server: Protected hook: get parameter vertical value vector by point and time. */
+
 int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,double x,double y,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
 {
   FUNCTION_TRACE
@@ -726,6 +784,8 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionI
 
 
 
+/*! \brief Query Server: Protected hook: get parameter vertical value vector by point list and time. */
+
 int ServiceInterface::_getParameterVerticalValueVectorByPointListAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,const std::string& timeString,short areaInterpolationMethod,short timeInterpolationMethod,T::ParamValue_vec& values,std::vector<T::ParamLevel>& paramLevelList)
 {
   FUNCTION_TRACE
@@ -775,6 +835,8 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointListAndTime(T::Sess
 
 
 
+
+/*! \brief Query Server: Protected hook: get parameter value vector by geometry and time. */
 
 int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId sessionId,const std::string& producer,const std::string& parameter,const std::string& timeString,T::AttributeList& attributeList,T::ParamValue_vec& values)
 {

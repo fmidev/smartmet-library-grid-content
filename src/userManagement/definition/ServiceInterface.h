@@ -12,8 +12,13 @@ namespace SmartMet
 namespace UserManagement
 {
 
-
-
+// ====================================================================================
+/*! \brief Abstract base class for the UserManagement service layer.
+ *
+ *  Declares CRUD operations on user records and their attribute groups.  Concrete
+ *  backends override the protected _-prefixed methods; the public methods add
+ *  cross-cutting concerns before delegating. */
+// ====================================================================================
 
 class ServiceInterface
 {
@@ -60,9 +65,9 @@ class ServiceInterface
 
   protected:
 
-     bool           mEnabled;
-     Log            *mDebugLog;
-     Log            *mProcessingLog;
+     bool           mEnabled;        //!< When false, all service calls return SERVICE_DISABLED immediately.
+     Log            *mDebugLog;       //!< Optional log for verbose debug output.
+     Log            *mProcessingLog;  //!< Optional log for request timing and statistics.
 };
 
 

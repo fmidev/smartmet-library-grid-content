@@ -8,6 +8,13 @@ namespace SmartMet
 namespace T
 {
 
+// ====================================================================================
+/*! \brief Value object describing a single vertical level available for a parameter.
+ *
+ *  LevelInfo records the FMI parameter name, its associated level-type identifier, and
+ *  the concrete numeric level value. Lists of LevelInfo are used to enumerate the
+ *  vertical levels present in the Content Server for a given producer and parameter. */
+// ====================================================================================
 
 class LevelInfo
 {
@@ -19,8 +26,6 @@ class LevelInfo
                         T::ProducerId producerId,
                         std::string fmiParameterName,
                         T::ParamLevelId fmiParameterLevelId,
-                        //T::ParamLevelId grib1ParameterLevelId,
-                        //T::ParamLevelId grib2ParameterLevelId,
                         T::ParamLevel parameterLevel);
 
     virtual         ~LevelInfo();
@@ -34,12 +39,10 @@ class LevelInfo
     LevelInfo*      duplicate();
     void            print(std::ostream& stream,uint level,uint optionFlags);
 
-    T::ProducerId   mProducerId;
-    std::string     mFmiParameterName;
-    T::ParamLevelId mFmiParameterLevelId;
-    //T::ParamLevelId mGrib1ParameterLevelId;
-    //T::ParamLevelId mGrib2ParameterLevelId;
-    T::ParamLevel   mParameterLevel;
+    T::ProducerId   mProducerId;           //!< Identifier of the producer that provides this level.
+    std::string     mFmiParameterName;    //!< FMI parameter name string (e.g. "T-K").
+    T::ParamLevelId mFmiParameterLevelId; //!< FMI level type identifier.
+    T::ParamLevel   mParameterLevel;      //!< Numeric vertical level value (e.g. 850 for 850 hPa).
 };
 
 

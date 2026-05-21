@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes stream-line direction (degrees) from horizontal U and V flow components. */
+// ====================================================================================
+
 class Function_streamDir : public Function
 {
   public:

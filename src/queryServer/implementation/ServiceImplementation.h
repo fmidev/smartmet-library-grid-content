@@ -20,95 +20,116 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::vector<std::pair<std::string,T::GeometryId>>     Producer_vec;
-typedef std::unordered_map<std::string,T::ProducerInfo>       Producer_map;
-typedef std::shared_ptr<Producer_map>                         Producer_map_sptr;
-typedef ContentServer::ServiceInterface*                      ContentServer_ptr;
-typedef DataServer::ServiceInterface*                         DataServer_ptr;
-typedef std::shared_ptr<ParameterMapping_vec>                 ParameterMapping_vec_sptr;
-typedef boost::unordered_map<size_t,ParameterMapping_vec_sptr>  ParameterMappingCache;
-typedef std::shared_ptr<std::vector<std::string>>             StringVector_sptr;
-typedef std::unordered_map<std::string,Producer_vec>          Altenative_map;
+typedef std::vector<std::pair<std::string,T::GeometryId>>     Producer_vec;               //!< Ordered list of (producer name, geometry id) pairs.
+typedef std::unordered_map<std::string,T::ProducerInfo>       Producer_map;               //!< Map from producer name to ProducerInfo.
+typedef std::shared_ptr<Producer_map>                         Producer_map_sptr;          //!< Shared pointer to a Producer_map.
+typedef ContentServer::ServiceInterface*                      ContentServer_ptr;          //!< Non-owning pointer to a ContentServer service.
+typedef DataServer::ServiceInterface*                         DataServer_ptr;             //!< Non-owning pointer to a DataServer service.
+typedef std::shared_ptr<ParameterMapping_vec>                 ParameterMapping_vec_sptr;  //!< Shared pointer to a ParameterMapping vector.
+typedef boost::unordered_map<size_t,ParameterMapping_vec_sptr>  ParameterMappingCache;   //!< Hash cache from query hash to resolved ParameterMapping vector.
+typedef std::shared_ptr<std::vector<std::string>>             StringVector_sptr;          //!< Shared pointer to a string vector.
+typedef std::unordered_map<std::string,Producer_vec>          Altenative_map;             //!< Map from producer name to its alternative (concatenated) producers.
 
 
+// ====================================================================================
+/*! \brief Internal cache entry holding generation info for one producer. */
+// ====================================================================================
 class CacheEntry
 {
   public:
-    T::GenerationInfoList_sptr generationInfoList;
-    StringVector_sptr          analysisTimes;
-    UInt64                     producerHash;
+    T::GenerationInfoList_sptr generationInfoList;  //!< Cached list of generations for this producer.
+    StringVector_sptr          analysisTimes;        //!< Cached list of analysis time strings.
+    UInt64                     producerHash;         //!< Hash of the producer state when this entry was built.
 };
 
-typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;
-typedef std::unordered_map<T::ProducerId,CacheEntry_sptr> ProducerGenarationListCache;
+typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;                                          //!< Shared pointer to a CacheEntry.
+typedef std::unordered_map<T::ProducerId,CacheEntry_sptr> ProducerGenarationListCache;        //!< Cache of CacheEntry records keyed by producer id.
 
+// ====================================================================================
+/*! \brief Internal cache entry holding a ContentInfoList for a specific query. */
+// ====================================================================================
 class ContentCacheEntry
 {
   public:
-    T::ContentInfoList contentInfoList;
-    UInt64 producerHash;
-    T::GenerationId generationId;
+    T::ContentInfoList contentInfoList;  //!< Cached content records matching the query.
+    UInt64 producerHash;                 //!< Producer state hash when this entry was built.
+    T::GenerationId generationId;        //!< Generation identifier for which the content was cached.
 };
 
-typedef std::shared_ptr<ContentCacheEntry> ContentCacheEntry_sptr;
+typedef std::shared_ptr<ContentCacheEntry> ContentCacheEntry_sptr;                            //!< Shared pointer to a ContentCacheEntry.
 
-typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;
+typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;                  //!< Hash cache from query hash to ContentCacheEntry.
 
 
-
+// ====================================================================================
+/*! \brief Internal cache entry for content search results. */
+// ====================================================================================
 class ContentSearchCacheEntry
 {
   public:
-    std::shared_ptr<T::ContentInfoList> contentInfoList;
-    UInt64 producerHash;
-    T::GenerationId generationId;
+    std::shared_ptr<T::ContentInfoList> contentInfoList;  //!< Shared cached content list from the search.
+    UInt64 producerHash;                                   //!< Producer state hash when this entry was built.
+    T::GenerationId generationId;                          //!< Generation identifier for this cache entry.
 };
-typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;
+typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;           //!< Hash cache from query hash to ContentSearchCacheEntry.
 
 
+// ====================================================================================
+/*! \brief Height interpolation bracket: two level/height pairs at two time steps. */
+// ====================================================================================
 class HeightRec
 {
   public:
     HeightRec() {levelId = 0; time1 = 0;level1_1 = 0; level1_2 = 0; height1_1 = 0; height1_2 = 0;time2 = 0; level2_1 = 0; level2_2 = 0;height2_1 = 0; height2_2 = 0;};
 
-    T::ParamLevelId levelId;
-    time_t time1;
-    T::ParamLevel level1_1;
-    T::ParamLevel level1_2;
-    T::ParamValue height1_1;
-    T::ParamValue height1_2;
+    T::ParamLevelId levelId;     //!< Level type identifier for this height bracket.
+    time_t time1;                //!< Forecast time of the first bracketing level pair.
+    T::ParamLevel level1_1;      //!< Lower level at time1.
+    T::ParamLevel level1_2;      //!< Upper level at time1.
+    T::ParamValue height1_1;     //!< Height (m) corresponding to level1_1 at time1.
+    T::ParamValue height1_2;     //!< Height (m) corresponding to level1_2 at time1.
 
-    time_t time2;
-    T::ParamLevel level2_1;
-    T::ParamLevel level2_2;
-    T::ParamValue height2_1;
-    T::ParamValue height2_2;
+    time_t time2;                //!< Forecast time of the second bracketing level pair.
+    T::ParamLevel level2_1;      //!< Lower level at time2.
+    T::ParamLevel level2_2;      //!< Upper level at time2.
+    T::ParamValue height2_1;     //!< Height (m) corresponding to level2_1 at time2.
+    T::ParamValue height2_2;     //!< Height (m) corresponding to level2_2 at time2.
 };
 
-typedef std::vector<HeightRec> HeightRec_vec;
+typedef std::vector<HeightRec> HeightRec_vec;                                                 //!< Ordered list of HeightRec records.
 
-typedef Fmi::Cache::Cache<std::size_t,HeightRec> HeightCache;
-typedef Fmi::Cache::Cache<std::size_t,std::size_t> LevelCache;
-typedef Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>> HeightVecCache;
-typedef Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr> LevelContentCache;
+typedef Fmi::Cache::Cache<std::size_t,HeightRec> HeightCache;                                 //!< LRU cache from query hash to HeightRec.
+typedef Fmi::Cache::Cache<std::size_t,std::size_t> LevelCache;                                //!< LRU cache from query hash to resolved level index.
+typedef Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>> HeightVecCache;     //!< LRU cache from query hash to height value vector.
+typedef Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr> LevelContentCache;              //!< LRU cache from query hash to ContentCacheEntry for level queries.
 
 
-
+// ====================================================================================
+/*! \brief Rule for converting model levels to heights via an auxiliary height parameter. */
+// ====================================================================================
 class HeightConversion
 {
   public:
     HeightConversion() {producerId = 0; heightProducerId = 0; multiplier = 1.0;}
 
-    T::ProducerId   producerId;
-    T::ParamLevelId levelId;
-    T::ProducerId   heightProducerId;
-    std::string     heightParameter;
-    double          multiplier;
+    T::ProducerId   producerId;       //!< Producer whose levels are converted.
+    T::ParamLevelId levelId;          //!< Level type to which this conversion applies.
+    T::ProducerId   heightProducerId; //!< Producer that supplies the height field.
+    std::string     heightParameter;  //!< Parameter name of the auxiliary height field.
+    double          multiplier;       //!< Scale factor applied to the height values.
 };
 
-typedef std::unordered_map<std::size_t,HeightConversion> HeightConversionMap;
+typedef std::unordered_map<std::size_t,HeightConversion> HeightConversionMap;                 //!< Map from hash key to HeightConversion rule.
 
 
+// ====================================================================================
+/*! \brief Main implementation of the QueryServer ServiceInterface.
+ *
+ *  Combines a ContentServer and DataServer to execute named-parameter queries with
+ *  time ranges and coordinate specifications.  Manages parameter mapping files,
+ *  alias files, Lua scripts, and multiple levels of internal caches.  A background
+ *  thread handles periodic reloads of configuration files and producer map updates. */
+// ====================================================================================
 
 class ServiceImplementation : public ServiceInterface
 {

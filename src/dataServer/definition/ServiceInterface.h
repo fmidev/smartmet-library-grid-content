@@ -22,6 +22,16 @@ namespace DataServer
 {
 
 
+// ====================================================================================
+/*! \brief Abstract base class for all DataServer service backends.
+ *
+ *  Declares the full public API for grid data retrieval — single-point lookups,
+ *  area queries (circle, polygon, rectangle), isobands, isolines, streamlines,
+ *  and bulk multi-point requests — as well as lifecycle and logging helpers.
+ *  Concrete backends override the protected _-prefixed methods; the public
+ *  methods handle cross-cutting concerns such as logging and then delegate. */
+// ====================================================================================
+
 class ServiceInterface
 {
   public:

@@ -24,7 +24,13 @@ namespace SmartMet
 namespace ContentServer
 {
 
-
+// ====================================================================================
+/*! \brief ContentServer backend that persists all metadata in a PostgreSQL database.
+ *
+ *  Uses libpq to connect to primary (and optionally secondary) PostgreSQL instances.
+ *  The class manages its own connection lifecycle, creates tables on first use when
+ *  permitted, and emits change events so that a CacheImplementation can stay in sync. */
+// ====================================================================================
 class PostgresqlImplementation : public ServiceInterface
 {
   public:
@@ -241,16 +247,16 @@ class PostgresqlImplementation : public ServiceInterface
 
      void           truncateEvents();
 
-     bool           mShutdownRequested;
-     bool           mTableCreationAllowed;
-     time_t         mStartTime;
-     time_t         mEventTruncateCheckTime;
-     ThreadLock     mThreadLock;
-     pg_conn *      mConnection;
-     std::string    mPrimaryConnectionString;
-     std::string    mSecondaryConnectionString;
-     T::EventInfo   mLastEvent;
-     time_t         mContentChangeTime;
+     bool           mShutdownRequested;           //!< True after shutdown() has been called.
+     bool           mTableCreationAllowed;         //!< True if the implementation may create missing tables on startup.
+     time_t         mStartTime;                    //!< Unix timestamp when the implementation was initialised.
+     time_t         mEventTruncateCheckTime;       //!< Time of the last check for old events that should be truncated.
+     ThreadLock     mThreadLock;                   //!< Serialises concurrent database operations.
+     pg_conn *      mConnection;                   //!< Active libpq connection handle (forward-declared as pg_conn).
+     std::string    mPrimaryConnectionString;      //!< libpq connection string for the primary database.
+     std::string    mSecondaryConnectionString;    //!< libpq connection string for the optional secondary/replica database.
+     T::EventInfo   mLastEvent;                    //!< Most recently written event, used for continuity checks.
+     time_t         mContentChangeTime;            //!< Time of the most recent content change.
 };
 
 

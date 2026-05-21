@@ -8,6 +8,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 UnitConversion::UnitConversion()
 {
   try
@@ -21,6 +23,8 @@ UnitConversion::UnitConversion()
 
 
 
+
+/*! \brief Query Server: Destructor. */
 
 UnitConversion::~UnitConversion()
 {
@@ -37,6 +41,8 @@ UnitConversion::~UnitConversion()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void UnitConversion::print(std::ostream& stream,uint level,uint optionFlags)
 {

@@ -9,6 +9,8 @@ namespace QueryServer
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 AliasFile::AliasFile()
 {
   try
@@ -25,6 +27,8 @@ AliasFile::AliasFile()
 
 
 
+
+/*! \brief Query Server: Constructor. */
 
 AliasFile::AliasFile(const std::string& filename)
 {
@@ -43,6 +47,8 @@ AliasFile::AliasFile(const std::string& filename)
 
 
 
+
+/*! \brief Query Server: Constructor. */
 
 AliasFile::AliasFile(const std::string& filename,bool duplicatesAllowed)
 {
@@ -80,6 +86,8 @@ AliasFile::AliasFile(const AliasFile& aliasFile)
 
 
 
+/*! \brief Query Server: Destructor. */
+
 AliasFile::~AliasFile()
 {
   try
@@ -95,6 +103,8 @@ AliasFile::~AliasFile()
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void AliasFile::init()
 {
@@ -116,6 +126,8 @@ void AliasFile::init()
 
 
 
+/*! \brief Query Server: Init. */
+
 void AliasFile::init(const std::string& filename)
 {
   try
@@ -132,6 +144,8 @@ void AliasFile::init(const std::string& filename)
 
 
 
+
+/*! \brief Query Server: Init. */
 
 void AliasFile::init(const std::string& filename,bool duplicatesAllowed)
 {
@@ -150,6 +164,8 @@ void AliasFile::init(const std::string& filename,bool duplicatesAllowed)
 
 
 
+
+/*! \brief Query Server: Check updates. */
 
 bool AliasFile::checkUpdates()
 {
@@ -175,6 +191,8 @@ bool AliasFile::checkUpdates()
 
 
 
+
+/*! \brief Query Server: Get alias. */
 
 bool AliasFile::getAlias(const std::string& name,std::string& alias)
 {
@@ -213,6 +231,8 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
 
 
 
+/*! \brief Query Server: Replace alias. */
+
 bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
 {
   try
@@ -246,6 +266,8 @@ bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
 
 
 
+/*! \brief Query Server: Get alias list. */
+
 void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& aliasList)
 {
   try
@@ -277,6 +299,8 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
 
 
 
+
+/*! \brief Query Server: Load file. */
 
 void AliasFile::loadFile()
 {
@@ -382,6 +406,8 @@ void AliasFile::loadFile()
 
 
 
+
+/*! \brief Query Server: Print. */
 
 void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
 {

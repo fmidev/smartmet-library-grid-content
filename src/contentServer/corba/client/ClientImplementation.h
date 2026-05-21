@@ -12,7 +12,14 @@ namespace ContentServer
 namespace Corba
 {
 
-
+// ====================================================================================
+/*! \brief CORBA client proxy that forwards all ContentServer calls to a remote server.
+ *
+ *  Connects to a remote ContentServer CORBA servant via an IOR string.  Every
+ *  ServiceInterface method is marshalled through omniORB to the remote process.
+ *  Used by CacheImplementation when the master content store runs as a separate
+ *  process. */
+// ====================================================================================
 class ClientImplementation : public ContentServer::ServiceInterface
 {
   public:
@@ -172,13 +179,13 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
    protected:
 
-     bool           mInitialized;
-     std::string    mServiceIor;
-     int            mId;
-     time_t         mLastAccessTime;
-     time_t         mLastErrorTime;
+     bool           mInitialized;    //!< True after init() has completed successfully.
+     std::string    mServiceIor;     //!< CORBA IOR string used to locate the remote servant.
+     int            mId;             //!< Numeric identifier for this client instance.
+     time_t         mLastAccessTime; //!< Unix timestamp of the most recent successful call.
+     time_t         mLastErrorTime;  //!< Unix timestamp of the most recent CORBA error.
 
-     ContentServer::Corba::ServiceInterface_var  mService;
+     ContentServer::Corba::ServiceInterface_var  mService;  //!< omniORB smart reference to the remote CORBA servant.
 };
 
 

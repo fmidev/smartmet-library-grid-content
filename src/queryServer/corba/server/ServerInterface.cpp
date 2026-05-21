@@ -17,6 +17,8 @@ namespace Corba
 {
 
 
+/*! \brief Query Server: Constructor. */
+
 ServerInterface::ServerInterface()
 {
   FUNCTION_TRACE
@@ -33,6 +35,8 @@ ServerInterface::ServerInterface()
 
 
 
+
+/*! \brief Query Server: Destructor. */
 
 ServerInterface::~ServerInterface()
 {
@@ -51,6 +55,8 @@ ServerInterface::~ServerInterface()
 
 
 
+/*! \brief Query Server: Init. */
+
 void ServerInterface::init(QueryServer::ServiceInterface *service)
 {
   FUNCTION_TRACE
@@ -66,6 +72,8 @@ void ServerInterface::init(QueryServer::ServiceInterface *service)
 
 
 
+
+/*! \brief Query Server: Execute query. */
 
 SmartMet::C::Result ServerInterface::executeQuery(SmartMet::C::SessionId sessionId, SmartMet::C::Query& query)
 {
@@ -96,6 +104,8 @@ SmartMet::C::Result ServerInterface::executeQuery(SmartMet::C::SessionId session
 
 
 
+/*! \brief Query Server: Get producer list. */
+
 SmartMet::C::Result ServerInterface::getProducerList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out producerList)
 {
   FUNCTION_TRACE
@@ -125,6 +135,8 @@ SmartMet::C::Result ServerInterface::getProducerList(SmartMet::C::SessionId sess
 
 
 
+
+/*! \brief Query Server: Get values by grid point. */
 
 SmartMet::C::Result ServerInterface::getValuesByGridPoint(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfoList& contentInfoList, SmartMet::C::UInt8 coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 interpolationMethod, SmartMet::C::GridPointValueList_out valueList)
 {

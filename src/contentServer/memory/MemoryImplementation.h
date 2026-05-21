@@ -14,7 +14,14 @@ namespace ContentServer
 
 #define CONTENT_LIST_COUNT 2
 
-
+// ====================================================================================
+/*! \brief Lightweight pure in-memory ContentServer implementation without event sync.
+ *
+ *  Stores producers, generations, geometries, files and content records entirely in RAM.
+ *  Unlike CacheImplementation it does not monitor an external master; it can optionally
+ *  load initial data from disk, save periodic snapshots, and synchronise content between
+ *  its internal structures.  Suitable for small standalone deployments or unit tests. */
+// ====================================================================================
 class MemoryImplementation : public ServiceInterface
 {
   public:
@@ -190,49 +197,49 @@ class MemoryImplementation : public ServiceInterface
      virtual bool   syncFileList();
      virtual bool   syncContentList();
 
-     bool                   mReloadActivated;
-     bool                   mShutdownRequested;
-     bool                   mUpdateInProgress;
-     T::SessionId           mSessionId;
+     bool                   mReloadActivated;    //!< True when a full data reload has been requested.
+     bool                   mShutdownRequested;  //!< True after shutdown() has been called.
+     bool                   mUpdateInProgress;   //!< True while a bulk content update is running.
+     T::SessionId           mSessionId;          //!< Session identifier used for internal operations.
 
-     T::FileInfoList        mFileInfoList;
-     T::FileInfoList        mFileInfoListByName;
-     T::ProducerInfoList    mProducerInfoList;
-     T::GenerationInfoList  mGenerationInfoList;
-     T::GeometryInfoList    mGeometryInfoList;
-     T::EventInfoList       mEventInfoList;
-     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];
+     T::FileInfoList        mFileInfoList;        //!< File records indexed by file id.
+     T::FileInfoList        mFileInfoListByName;  //!< File records indexed by filename.
+     T::ProducerInfoList    mProducerInfoList;    //!< In-memory producer records.
+     T::GenerationInfoList  mGenerationInfoList;  //!< In-memory generation records.
+     T::GeometryInfoList    mGeometryInfoList;    //!< In-memory geometry records.
+     T::EventInfoList       mEventInfoList;       //!< In-memory event log.
+     T::ContentInfoList     mContentInfoList[CONTENT_LIST_COUNT];  //!< Double-buffered content records.
 
-     time_t                 mStartTime;
-     pthread_t              mThread;
-     ThreadLock             mEventProcessingLock;
-     ModificationLock       mModificationLock;
-     bool                   mEventsEnabled;
+     time_t                 mStartTime;           //!< Unix timestamp when the implementation was initialised.
+     pthread_t              mThread;              //!< Handle of the optional background sync thread.
+     ThreadLock             mEventProcessingLock; //!< Prevents concurrent event-processing runs.
+     ModificationLock       mModificationLock;    //!< Guards mutable list members.
+     bool                   mEventsEnabled;       //!< True if the event log is maintained.
 
-     bool                   mContentLoadEnabled;
-     bool                   mContentSaveEnabled;
-     bool                   mContentSyncEnabled;
-     std::string            mContentDir;
-     time_t                 mLastSaveTime;
-     time_t                 mContentChangeTime;
-     uint                   mContentSaveInterval;
+     bool                   mContentLoadEnabled;  //!< True if initial content is loaded from disk on startup.
+     bool                   mContentSaveEnabled;  //!< True if periodic snapshots are written to disk.
+     bool                   mContentSyncEnabled;  //!< True if synchronisation between internal lists is active.
+     std::string            mContentDir;          //!< Directory used for persistent snapshots.
+     time_t                 mLastSaveTime;        //!< Unix timestamp of the most recent snapshot save.
+     time_t                 mContentChangeTime;   //!< Time of the most recent content change.
+     uint                   mContentSaveInterval; //!< Minimum seconds between successive disk snapshots.
 
-     uint                   mProducerCount;
-     uint                   mGenerationCount;
-     uint                   mGeometryCount;
-     uint                   mFileCount;
-     uint                   mContentCount;
+     uint                   mProducerCount;       //!< Total number of stored producers.
+     uint                   mGenerationCount;     //!< Total number of stored generations.
+     uint                   mGeometryCount;       //!< Total number of stored geometries.
+     uint                   mFileCount;           //!< Total number of stored files.
+     uint                   mContentCount;        //!< Total number of stored content records.
 
-     T::ProducerId          mMaxProducerId;
-     T::GenerationId        mMaxGenerationId;
-     T::FileId              mMaxFileId;
-     T::EventId             mMaxEventId;
+     T::ProducerId          mMaxProducerId;       //!< Highest producer id assigned so far.
+     T::GenerationId        mMaxGenerationId;     //!< Highest generation id assigned so far.
+     T::FileId              mMaxFileId;           //!< Highest file id assigned so far.
+     T::EventId             mMaxEventId;          //!< Highest event id assigned so far.
 
-     time_t                 mProducerStorage_modificationTime;
-     time_t                 mGenerationStorage_modificationTime;
-     time_t                 mGeometryStorage_modificationTime;
-     time_t                 mFileStorage_modificationTime;
-     time_t                 mContentStorage_modificationTime;
+     time_t                 mProducerStorage_modificationTime;   //!< Modification time of the on-disk producer snapshot.
+     time_t                 mGenerationStorage_modificationTime; //!< Modification time of the on-disk generation snapshot.
+     time_t                 mGeometryStorage_modificationTime;   //!< Modification time of the on-disk geometry snapshot.
+     time_t                 mFileStorage_modificationTime;       //!< Modification time of the on-disk file snapshot.
+     time_t                 mContentStorage_modificationTime;    //!< Modification time of the on-disk content snapshot.
 };
 
 

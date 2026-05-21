@@ -17,6 +17,8 @@ namespace T
 
 
 
+/*! \brief Qsort comparator for GenerationInfo using comparison method 1. */
+
 int generationInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -30,6 +32,8 @@ int generationInfo_compare_1(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for GenerationInfo using comparison method 2. */
 
 int generationInfo_compare_2(const void *_val1,const void *_val2)
 {
@@ -45,6 +49,8 @@ int generationInfo_compare_2(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for GenerationInfo using comparison method 3. */
+
 int generationInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -58,6 +64,8 @@ int generationInfo_compare_3(const void *_val1,const void *_val2)
 }
 
 
+
+/*! \brief Qsort comparator for GenerationInfo using comparison method 4. */
 
 int generationInfo_compare_4(const void *_val1,const void *_val2)
 {
@@ -74,6 +82,8 @@ int generationInfo_compare_4(const void *_val1,const void *_val2)
 
 
 
+/*! \brief Qsort comparator for GenerationInfo using comparison method 5. */
+
 int generationInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -88,6 +98,8 @@ int generationInfo_compare_5(const void *_val1,const void *_val2)
 
 
 
+
+/*! \brief Default constructor for GenerationInfoList. */
 
 GenerationInfoList::GenerationInfoList()
 {
@@ -111,6 +123,8 @@ GenerationInfoList::GenerationInfoList()
 
 
 
+
+/*! \brief Copy constructor for GenerationInfoList. */
 
 GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
 {
@@ -158,6 +172,8 @@ GenerationInfoList::GenerationInfoList(GenerationInfoList& generationInfoList)
 
 
 
+/*! \brief Destructor for GenerationInfoList. */
+
 GenerationInfoList::~GenerationInfoList()
 {
   FUNCTION_TRACE
@@ -187,6 +203,8 @@ GenerationInfoList::~GenerationInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for GenerationInfoList. */
 
 GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generationInfoList)
 {
@@ -244,6 +262,8 @@ GenerationInfoList& GenerationInfoList::operator=(GenerationInfoList& generation
 
 
 
+/*! \brief Set the pointer to the modification mutex used by the list. */
+
 void GenerationInfoList::setModificationLockPtr(ModificationLock* modificationLockPtr)
 {
   FUNCTION_TRACE
@@ -264,6 +284,8 @@ void GenerationInfoList::setModificationLockPtr(ModificationLock* modificationLo
 
 
 
+/*! \brief Return a pointer to the internal modification mutex. */
+
 ModificationLock*  GenerationInfoList::getModificationLockPtr()
 {
   FUNCTION_TRACE
@@ -281,6 +303,8 @@ ModificationLock*  GenerationInfoList::getModificationLockPtr()
 
 
 
+/*! \brief Acquire the internal mutex protecting the list. */
+
 void GenerationInfoList::lock()
 {
   FUNCTION_TRACE
@@ -296,6 +320,8 @@ void GenerationInfoList::lock()
 
 
 
+
+/*! \brief Release the internal mutex protecting the list. */
 
 void GenerationInfoList::unlock()
 {
@@ -313,6 +339,8 @@ void GenerationInfoList::unlock()
 
 
 
+
+/*! \brief Add a GenerationInfo record to the list. */
 
 GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generationInfo)
 {
@@ -375,6 +403,8 @@ GenerationInfo* GenerationInfoList::addGenerationInfo(GenerationInfo *generation
 
 
 
+/*! \brief Increase the capacity of the underlying storage. */
+
 void GenerationInfoList::increaseSize(uint newSize)
 {
   FUNCTION_TRACE
@@ -419,6 +449,8 @@ void GenerationInfoList::increaseSize(uint newSize)
 
 
 
+/*! \brief Remove all entries from the list. */
+
 void GenerationInfoList::clear()
 {
   FUNCTION_TRACE
@@ -453,6 +485,8 @@ void GenerationInfoList::clear()
 
 
 
+/*! \brief Return the index of the entry closest to the given GenerationInfo. */
+
 int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -473,6 +507,8 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
 
 
 
+
+/*! \brief Return the index of the entry closest to the given GenerationInfo without locking. */
 
 int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo)
 {
@@ -550,6 +586,8 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
 
 
 
+/*! \brief Delete the entry matching the given generation id. */
+
 bool GenerationInfoList::deleteGenerationInfoById(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -591,6 +629,8 @@ bool GenerationInfoList::deleteGenerationInfoById(T::GenerationId generationId)
 
 
 
+
+/*! \brief Delete all entries whose producer id matches the given value. */
 
 uint GenerationInfoList::deleteGenerationInfoListByProducerId(T::ProducerId producerId)
 {
@@ -635,6 +675,8 @@ uint GenerationInfoList::deleteGenerationInfoListByProducerId(T::ProducerId prod
 
 
 
+/*! \brief Remove all entries previously flagged for deletion. */
+
 uint GenerationInfoList::deleteMarkedGenerations()
 {
   FUNCTION_TRACE
@@ -678,6 +720,8 @@ uint GenerationInfoList::deleteMarkedGenerations()
 
 
 
+/*! \brief Flag every entry in the list as deleted. */
+
 uint GenerationInfoList::markDeleted()
 {
   FUNCTION_TRACE
@@ -708,6 +752,8 @@ uint GenerationInfoList::markDeleted()
 
 
 
+
+/*! \brief Flag entries whose producer id matches the given value as deleted. */
 
 uint GenerationInfoList::markDeletedByProducerId(T::ProducerId producerId)
 {
@@ -743,6 +789,8 @@ uint GenerationInfoList::markDeletedByProducerId(T::ProducerId producerId)
 
 
 
+/*! \brief Flag entries whose source id matches the given value as deleted. */
+
 uint GenerationInfoList::markDeletedBySourceId(T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -776,6 +824,8 @@ uint GenerationInfoList::markDeletedBySourceId(T::SourceId sourceId)
 
 
 
+
+/*! \brief Flag entries whose storage id matches the given value as deleted. */
 
 uint GenerationInfoList::markDeletedByStorageId(T::StorageId storageId)
 {
@@ -811,6 +861,8 @@ uint GenerationInfoList::markDeletedByStorageId(T::StorageId storageId)
 
 
 
+/*! \brief Flag the entry matching the given generation id as deleted. */
+
 uint GenerationInfoList::markDeletedById(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -834,6 +886,8 @@ uint GenerationInfoList::markDeletedById(T::GenerationId generationId)
 
 
 
+
+/*! \brief Return the GenerationInfo matching the given generation id. */
 
 GenerationInfo* GenerationInfoList::getGenerationInfoById(T::GenerationId generationId)
 {
@@ -866,6 +920,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoById(T::GenerationId genera
 
 
 
+
+/*! \brief Copy the GenerationInfo matching the given generation id into the output structure. */
 
 bool GenerationInfoList::getGenerationInfoById(T::GenerationId generationId,GenerationInfo& generationInfo)
 {
@@ -901,6 +957,8 @@ bool GenerationInfoList::getGenerationInfoById(T::GenerationId generationId,Gene
 
 
 
+
+/*! \brief Delete all entries whose source id matches the given value. */
 
 uint GenerationInfoList::deleteGenerationInfoListBySourceId(T::SourceId sourceId)
 {
@@ -945,6 +1003,8 @@ uint GenerationInfoList::deleteGenerationInfoListBySourceId(T::SourceId sourceId
 
 
 
+/*! \brief Delete all entries whose storage id matches the given value. */
+
 uint GenerationInfoList::deleteGenerationInfoListByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -988,6 +1048,8 @@ uint GenerationInfoList::deleteGenerationInfoListByStorageId(T::StorageId storag
 
 
 
+/*! \brief Return the GenerationInfo at the given list index. */
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
 {
   FUNCTION_TRACE
@@ -1012,6 +1074,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndex(uint index)
 
 
 
+/*! \brief Return the GenerationInfo at the given list index without bounds checking. */
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 {
   FUNCTION_TRACE
@@ -1028,6 +1092,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Collect distinct generation ids matching the given status into the output set. */
 
 void GenerationInfoList::getGenerationIdListByStatus(uchar generationStatus,std::set<T::GenerationId>& idList)
 {
@@ -1056,6 +1122,8 @@ void GenerationInfoList::getGenerationIdListByStatus(uchar generationStatus,std:
 
 
 
+/*! \brief Return the GenerationInfo matching the given generation name. */
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -1082,6 +1150,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByName(const std::string& g
 
 
 
+
+/*! \brief Copy the GenerationInfo matching the given generation name into the output structure. */
 
 bool GenerationInfoList::getGenerationInfoByName(const std::string& generationName,GenerationInfo& generationInfo)
 {
@@ -1112,6 +1182,8 @@ bool GenerationInfoList::getGenerationInfoByName(const std::string& generationNa
 
 
 
+
+/*! \brief Return the GenerationInfo with the given generation id and analysis time. */
 
 GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(T::GenerationId generationId,const std::string& analysisTime)
 {
@@ -1156,6 +1228,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(T::Generatio
 
 
 
+/*! \brief Return the first GenerationInfo matching the given analysis time. */
+
 GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::string& analysisTime)
 {
   FUNCTION_TRACE
@@ -1197,6 +1271,8 @@ GenerationInfo* GenerationInfoList::getGenerationInfoByAnalysisTime(const std::s
 
 
 
+
+/*! \brief Return the list index of the entry with the given generation id and analysis time. */
 
 int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(T::GenerationId generationId,const std::string& analysisTime)
 {
@@ -1242,6 +1318,8 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(T::GenerationId gen
 
 
 
+/*! \brief Return the list index of the first entry matching the given analysis time. */
+
 int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& analysisTime)
 {
   FUNCTION_TRACE
@@ -1285,6 +1363,8 @@ int GenerationInfoList::getGenerationInfoIndexByAnalysisTime(const std::string& 
 
 
 
+/*! \brief Return the list index of the entry with the given generation id. */
+
 int GenerationInfoList::getGenerationInfoIndexByGenerationId(T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1311,6 +1391,8 @@ int GenerationInfoList::getGenerationInfoIndexByGenerationId(T::GenerationId gen
 
 
 
+
+/*! \brief Append all entries matching the given producer id to the target list. */
 
 void GenerationInfoList::getGenerationInfoListByProducerId(T::ProducerId producerId,GenerationInfoList& generationInfoList)
 {
@@ -1368,6 +1450,8 @@ void GenerationInfoList::getGenerationInfoListByProducerId(T::ProducerId produce
 
 
 
+/*! \brief Return a hash value computed from the entire list contents. */
+
 std::size_t GenerationInfoList::getHash()
 {
   FUNCTION_TRACE
@@ -1402,6 +1486,8 @@ std::size_t GenerationInfoList::getHash()
 
 
 
+/*! \brief Return a hash value computed from entries matching the given storage id. */
+
 std::size_t GenerationInfoList::getHashByStorageId(T::StorageId storageId)
 {
   FUNCTION_TRACE
@@ -1434,6 +1520,8 @@ std::size_t GenerationInfoList::getHashByStorageId(T::StorageId storageId)
 
 
 
+
+/*! \brief Return a hash value computed from entries matching the given producer id. */
 
 std::size_t GenerationInfoList::getHashByProducerId(T::ProducerId producerId)
 {
@@ -1489,6 +1577,8 @@ std::size_t GenerationInfoList::getHashByProducerId(T::ProducerId producerId)
 
 
 
+
+/*! \brief Append entries matching the given producer id and status to the target list. */
 
 void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(T::ProducerId producerId,GenerationInfoList& generationInfoList,uchar generationStatus)
 {
@@ -1546,6 +1636,8 @@ void GenerationInfoList::getGenerationInfoListByProducerIdAndStatus(T::ProducerI
 
 
 
+/*! \brief Copy the entry matching the given producer id and analysis time into the output structure. */
+
 bool GenerationInfoList::getGenerationInfoByProducerIdAndAnalysisTime(T::ProducerId producerId,const std::string& analysisTime,GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1601,6 +1693,8 @@ bool GenerationInfoList::getGenerationInfoByProducerIdAndAnalysisTime(T::Produce
 
 
 
+/*! \brief Append entries matching the given analysis time to the target list. */
+
 void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& analysisTime,GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1634,6 +1728,8 @@ void GenerationInfoList::getGenerationInfoListByAnalysisTime(const std::string& 
 
 
 
+/*! \brief Return the most recent GenerationInfo for the given producer id and status. */
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T::ProducerId producerId,uchar generationStatus)
 {
   FUNCTION_TRACE
@@ -1665,6 +1761,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T
 
 
 
+
+/*! \brief Return the most recent GenerationInfo by content time for the given producer id and status. */
 
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(T::ProducerId producerId,uchar generationStatus)
 {
@@ -1698,6 +1796,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTimeAndStatus(
 
 
 
+/*! \brief Copy the most recent GenerationInfo for the given producer id and status into the output structure. */
+
 bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1719,6 +1819,8 @@ bool GenerationInfoList::getLastGenerationInfoByProducerIdAndStatus(T::ProducerI
 
 
 
+
+/*! \brief Return the GenerationInfo with the most recent analysis time. */
 
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
 {
@@ -1751,6 +1853,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime()
 
 
 
+/*! \brief Return the GenerationInfo with the most recent analysis time for the given status. */
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime(uchar generationStatus)
 {
   FUNCTION_TRACE
@@ -1781,6 +1885,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByAnalysisTime(uchar ge
 
 
 
+
+/*! \brief Return the GenerationInfo with the earliest analysis time. */
 
 GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime()
 {
@@ -1813,6 +1919,8 @@ GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime()
 
 
 
+/*! \brief Return the GenerationInfo with the earliest analysis time for the given status. */
+
 GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime(uchar generationStatus)
 {
   FUNCTION_TRACE
@@ -1844,6 +1952,8 @@ GenerationInfo* GenerationInfoList::getFirstGenerationInfoByAnalysisTime(uchar g
 
 
 
+/*! \brief Return the most recent GenerationInfo for the given producer id. */
+
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -1874,6 +1984,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByProducerId(T::Produce
 
 
 
+
+/*! \brief Return the most recent GenerationInfo by content time for the given producer id. */
 
 GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(T::ProducerId producerId)
 {
@@ -1907,6 +2019,8 @@ GenerationInfo* GenerationInfoList::getLastGenerationInfoByContentTime(T::Produc
 
 
 
+/*! \brief Return the GenerationInfo immediately before the given one for the given producer id. */
+
 GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(T::ProducerId producerId,const std::string& nextGenerationName)
 {
   FUNCTION_TRACE
@@ -1937,6 +2051,8 @@ GenerationInfo*  GenerationInfoList::getPrevGenerationInfoByProducerId(T::Produc
 
 
 
+
+/*! \brief Append all entries matching the given source id to the target list. */
 
 void GenerationInfoList::getGenerationInfoListBySourceId(T::SourceId sourceId,GenerationInfoList& generationInfoList)
 {
@@ -1970,6 +2086,8 @@ void GenerationInfoList::getGenerationInfoListBySourceId(T::SourceId sourceId,Ge
 
 
 
+/*! \brief Return the number of entries in the list. */
+
 uint GenerationInfoList::getLength()
 {
   FUNCTION_TRACE
@@ -1986,6 +2104,8 @@ uint GenerationInfoList::getLength()
 
 
 
+
+/*! \brief Return the capacity of the underlying storage. */
 
 uint GenerationInfoList::getSize() const
 {
@@ -2004,6 +2124,8 @@ uint GenerationInfoList::getSize() const
 
 
 
+/*! \brief Return whether contained objects are owned and released by the list. */
+
 bool GenerationInfoList::getReleaseObjects()
 {
   FUNCTION_TRACE
@@ -2021,6 +2143,8 @@ bool GenerationInfoList::getReleaseObjects()
 
 
 
+/*! \brief Set whether contained objects are owned and released by the list. */
+
 void GenerationInfoList::setReleaseObjects(bool releaseObjects)
 {
   FUNCTION_TRACE
@@ -2037,6 +2161,8 @@ void GenerationInfoList::setReleaseObjects(bool releaseObjects)
 
 
 
+
+/*! \brief Collect distinct analysis times into the output vector, optionally in reverse order. */
 
 void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTimes,bool reverseOrder)
 {
@@ -2084,6 +2210,8 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
 
 
 
+/*! \brief Enable or disable internal locking on the list. */
+
 void GenerationInfoList::setLockingEnabled(bool lockingEnabled)
 {
   FUNCTION_TRACE
@@ -2100,6 +2228,8 @@ void GenerationInfoList::setLockingEnabled(bool lockingEnabled)
 
 
 
+
+/*! \brief Set the comparison method used for sorting the list. */
 
 void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
 {
@@ -2120,6 +2250,8 @@ void GenerationInfoList::setComparisonMethod(uint comparisonMethod)
 
 
 
+
+/*! \brief Sort the list using the given comparison method. */
 
 void GenerationInfoList::sort(uint comparisonMethod)
 {
@@ -2164,6 +2296,8 @@ void GenerationInfoList::sort(uint comparisonMethod)
 
 
 
+/*! \brief Write the list contents to the named file. */
+
 void GenerationInfoList::writeToFile(const std::string& filename)
 {
   FUNCTION_TRACE
@@ -2196,6 +2330,8 @@ void GenerationInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void GenerationInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

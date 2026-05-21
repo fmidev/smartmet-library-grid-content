@@ -41,6 +41,8 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
 
 
 
+/*! \brief Constructs the cache with default counters, lists, and update settings. */
+
 CacheImplementation::CacheImplementation()
 {
   FUNCTION_TRACE
@@ -109,6 +111,8 @@ CacheImplementation::CacheImplementation()
 
 
 
+/*! \brief Destructor: stops the event thread and releases search structures. */
+
 CacheImplementation::~CacheImplementation()
 {
   FUNCTION_TRACE
@@ -133,6 +137,8 @@ CacheImplementation::~CacheImplementation()
 
 
 
+/*! \brief Fills in cache statistics for monitoring (no-op placeholder). */
+
 void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
 {
   FUNCTION_TRACE
@@ -148,6 +154,8 @@ void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics)
 
 
 
+
+/*! \brief Initialises the cache with session IDs and the upstream content storage backend. */
 
 void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSessionId,ServiceInterface *contentStorage)
 {
@@ -204,6 +212,8 @@ void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
 
 
 
+/*! \brief Returns true once the cache has finished loading data from the source. */
+
 bool CacheImplementation::isReady()
 {
   FUNCTION_TRACE
@@ -232,6 +242,8 @@ bool CacheImplementation::isReady()
 
 
 
+/*! \brief Enables or disables forwarding of modifying requests to the upstream storage. */
+
 void CacheImplementation::setRequestForwardEnabled(bool enabled)
 {
   FUNCTION_TRACE
@@ -249,6 +261,8 @@ void CacheImplementation::setRequestForwardEnabled(bool enabled)
 
 
 
+/*! \brief Sets how often (in seconds) the cache polls the master source for updates. */
+
 void CacheImplementation::setContentUpdateInterval(uint intervalInSec)
 {
   FUNCTION_TRACE
@@ -265,6 +279,8 @@ void CacheImplementation::setContentUpdateInterval(uint intervalInSec)
 
 
 
+
+/*! \brief Appends current cache state and counters to the given attribute tree node. */
 
 void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
 {
@@ -311,6 +327,8 @@ void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
 
 
 
+/*! \brief Configures double-buffered search-structure swapping and its timeouts. */
+
 void CacheImplementation::setContentSwap(bool enabled,uint fileCacheMaxFirstWaitTime,uint fileCacheMaxWaitTime)
 {
   FUNCTION_TRACE
@@ -330,6 +348,8 @@ void CacheImplementation::setContentSwap(bool enabled,uint fileCacheMaxFirstWait
 
 
 
+/*! \brief Limits the maximum length of the in-memory event list. */
+
 void CacheImplementation::setEventListMaxLength(uint maxLength)
 {
   FUNCTION_TRACE
@@ -346,26 +366,8 @@ void CacheImplementation::setEventListMaxLength(uint maxLength)
 
 
 
-/*
-std::string& CacheImplementation::getSourceInfo()
-{
-  FUNCTION_TRACE
-  try
-  {
-    if (mContentStorage)
-      return mContentStorage->getSourceInfo();
 
-    mSourceInfo = "No source";
-    return mSourceInfo;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-*/
-
-
+/*! \brief Starts the background thread that consumes events from the master source. */
 
 void CacheImplementation::startEventProcessing()
 {
@@ -384,6 +386,8 @@ void CacheImplementation::startEventProcessing()
 
 
 
+/*! \brief Requests shutdown and forwards the shutdown to the upstream storage. */
+
 void CacheImplementation::shutdown()
 {
   FUNCTION_TRACE
@@ -400,6 +404,8 @@ void CacheImplementation::shutdown()
 
 
 
+
+/*! \brief Returns whether the supplied session id is valid for this cache. */
 
 bool CacheImplementation::isSessionValid(T::SessionId sessionId)
 {
@@ -420,6 +426,8 @@ bool CacheImplementation::isSessionValid(T::SessionId sessionId)
 
 
 
+
+/*! \brief Cache override: clears the upstream content storage. */
 
 int CacheImplementation::_clear(T::SessionId sessionId)
 {
@@ -443,6 +451,8 @@ int CacheImplementation::_clear(T::SessionId sessionId)
 
 
 
+/*! \brief Cache override: triggers a reload of the cache contents from the master source. */
+
 int CacheImplementation::_reload(T::SessionId sessionId)
 {
   FUNCTION_TRACE
@@ -465,6 +475,8 @@ int CacheImplementation::_reload(T::SessionId sessionId)
 
 
 
+
+/*! \brief Reloads all producer/generation/geometry/file/content lists from the source. */
 
 void CacheImplementation::reloadData()
 {
@@ -516,6 +528,8 @@ void CacheImplementation::reloadData()
 
 
 
+/*! \brief Cache override: returns the time of the most recent content change. */
+
 int CacheImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
 {
   FUNCTION_TRACE
@@ -537,6 +551,8 @@ int CacheImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& ch
 
 
 
+
+/*! \brief Cache override: adds a producer record via the upstream storage. */
 
 int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
@@ -560,6 +576,8 @@ int CacheImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 
 
+/*! \brief Cache override: updates an existing producer record via the upstream storage. */
+
 int CacheImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
@@ -581,6 +599,8 @@ int CacheImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 
 
+
+/*! \brief Cache override: deletes a producer by id via the upstream storage. */
 
 int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -604,6 +624,8 @@ int CacheImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::Produ
 
 
 
+/*! \brief Cache override: deletes a producer by name via the upstream storage. */
+
 int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -625,6 +647,8 @@ int CacheImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const 
 
 
 
+
+/*! \brief Cache override: returns the producer info matching the given id. */
 
 int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
 {
@@ -676,6 +700,8 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
 
 
 
+/*! \brief Cache override: deletes all producers belonging to the given source id. */
+
 int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -697,6 +723,8 @@ int CacheImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionI
 
 
 
+
+/*! \brief Cache override: returns the producer info matching the given name. */
 
 int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
 {
@@ -748,6 +776,8 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
 
 
 
+/*! \brief Cache override: returns the full list of cached producer records. */
+
 int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -795,6 +825,8 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
 
 
 
+
+/*! \brief Cache override: returns producers that publish the given parameter key. */
 
 int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
 {
@@ -904,6 +936,8 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
 
 
+/*! \brief Cache override: returns producers belonging to the given source id. */
+
 int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
 {
   FUNCTION_TRACE
@@ -953,6 +987,8 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Cache override: returns the number of cached producer records. */
+
 int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -999,6 +1035,8 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
 
 
 
+
+/*! \brief Cache override: lists producer-name/geometry combinations found in the cache. */
 
 int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -1058,6 +1096,8 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
 
 
 
+
+/*! \brief Cache override: lists distinct producer parameters across all generations. */
 
 int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
@@ -1259,6 +1299,8 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
 
 
+/*! \brief Cache override: lists distinct parameters published by the given producer. */
+
 int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
 {
   FUNCTION_TRACE
@@ -1448,6 +1490,8 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
 
 
+/*! \brief Cache override: adds a generation record via the upstream storage. */
+
 int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1469,6 +1513,8 @@ int CacheImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+
+/*! \brief Cache override: updates an existing generation record via the upstream storage. */
 
 int CacheImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
 {
@@ -1492,6 +1538,8 @@ int CacheImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generation
 
 
 
+/*! \brief Cache override: deletes a generation by id via the upstream storage. */
+
 int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -1513,6 +1561,8 @@ int CacheImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Gen
 
 
 
+
+/*! \brief Cache override: deletes a generation by name via the upstream storage. */
 
 int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -1536,6 +1586,8 @@ int CacheImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,cons
 
 
 
+/*! \brief Cache override: deletes a batch of generations identified by id list. */
+
 int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
@@ -1557,6 +1609,8 @@ int CacheImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
 
 
 
+
+/*! \brief Cache override: deletes all generations belonging to the given producer id. */
 
 int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -1580,6 +1634,8 @@ int CacheImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 
 
+/*! \brief Cache override: deletes all generations belonging to the given producer name. */
+
 int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -1602,6 +1658,8 @@ int CacheImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
 
 
+/*! \brief Cache override: deletes all generations belonging to the given source id. */
+
 int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -1623,6 +1681,8 @@ int CacheImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessio
 
 
 
+
+/*! \brief Cache override: lists generation/geometry/forecast-time tuples available in the cache. */
 
 int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
 {
@@ -1676,6 +1736,8 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
 
 
 
+/*! \brief Cache override: returns generations that include the given geometry id. */
+
 int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1724,6 +1786,8 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
 
 
+
+/*! \brief Cache override: returns the generation info matching the given id. */
 
 int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
 {
@@ -1775,6 +1839,8 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Genera
 
 
 
+/*! \brief Cache override: returns the generation info matching the given name. */
+
 int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -1824,6 +1890,8 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
 
 
 
+
+/*! \brief Cache override: returns the full list of cached generations. */
 
 int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
 {
@@ -1875,6 +1943,8 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
 
 
 
+/*! \brief Cache override: returns generations belonging to the given producer id. */
+
 int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -1923,6 +1993,8 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
 
 
 
+
+/*! \brief Cache override: returns generations belonging to the given producer name. */
 
 int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
 {
@@ -1985,6 +2057,8 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
 
 
 
+/*! \brief Cache override: returns generations belonging to the given source id. */
+
 int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
@@ -2033,6 +2107,8 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
 
 
 
+/*! \brief Cache override: returns the newest generation of a producer matching the given status. */
+
 int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2072,6 +2148,8 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
 
 
 
+/*! \brief Cache override: returns the newest generation of a named producer matching the given status. */
+
 int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
@@ -2110,6 +2188,8 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
 
 
 
+
+/*! \brief Cache override: returns the number of cached generation records. */
 
 int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
 {
@@ -2158,6 +2238,8 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
 
 
 
+/*! \brief Cache override: sets the status of a generation identified by id. */
+
 int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
 {
   FUNCTION_TRACE
@@ -2179,6 +2261,8 @@ int CacheImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Cache override: sets the status of a generation identified by name. */
 
 int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
 {
@@ -2202,6 +2286,8 @@ int CacheImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
 
 
 
+/*! \brief Cache override: adds a geometry record via the upstream storage. */
+
 int CacheImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -2222,6 +2308,8 @@ int CacheImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 
 
+
+/*! \brief Cache override: deletes a geometry record by generation/geometry/level ids. */
 
 int CacheImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
@@ -2245,6 +2333,8 @@ int CacheImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::Gener
 
 
 
+/*! \brief Cache override: deletes all geometry records of the given generation. */
+
 int CacheImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -2266,6 +2356,8 @@ int CacheImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sess
 
 
 
+
+/*! \brief Cache override: deletes all geometry records of the given producer. */
 
 int CacheImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -2289,6 +2381,8 @@ int CacheImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessio
 
 
 
+/*! \brief Cache override: deletes all geometry records of the given source id. */
+
 int CacheImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -2310,6 +2404,8 @@ int CacheImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionI
 
 
 
+
+/*! \brief Cache override: returns the geometry info identified by generation/geometry/level. */
 
 int CacheImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
@@ -2360,6 +2456,8 @@ int CacheImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generati
 
 
 
+/*! \brief Cache override: returns the full list of cached geometry records. */
+
 int CacheImplementation::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2409,6 +2507,8 @@ int CacheImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
 
 
 
+/*! \brief Cache override: returns geometry records belonging to the given generation. */
+
 int CacheImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2456,6 +2556,8 @@ int CacheImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
 
 
 
+
+/*! \brief Cache override: returns geometry records belonging to the given producer. */
 
 int CacheImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
 {
@@ -2506,6 +2608,8 @@ int CacheImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
 
 
 
+/*! \brief Cache override: returns geometry records belonging to the given source id. */
+
 int CacheImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
 {
   FUNCTION_TRACE
@@ -2555,6 +2659,8 @@ int CacheImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T
 
 
 
+/*! \brief Cache override: returns the number of cached geometry records. */
+
 int CacheImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -2602,6 +2708,8 @@ int CacheImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
 
 
 
+/*! \brief Cache override: updates an existing geometry record via the upstream storage. */
+
 int CacheImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
 {
   FUNCTION_TRACE
@@ -2623,6 +2731,8 @@ int CacheImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 
 
+
+/*! \brief Cache override: sets the status of a geometry identified by generation/geometry/level. */
 
 int CacheImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
 {
@@ -2646,6 +2756,8 @@ int CacheImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::Ge
 
 
 
+/*! \brief Cache override: adds a file record via the upstream storage. */
+
 int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
@@ -2667,6 +2779,8 @@ int CacheImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+
+/*! \brief Cache override: updates an existing file record via the upstream storage. */
 
 int CacheImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 {
@@ -2690,6 +2804,8 @@ int CacheImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+/*! \brief Cache override: adds a file together with its content records. */
+
 int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -2710,6 +2826,8 @@ int CacheImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Cache override: adds a batch of files together with their content records. */
+
 int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
@@ -2729,6 +2847,8 @@ int CacheImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
 
 
+
+/*! \brief Cache override: deletes a file record by id via the upstream storage. */
 
 int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
 {
@@ -2752,6 +2872,8 @@ int CacheImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fi
 
 
 
+/*! \brief Cache override: deletes a file record by filename via the upstream storage. */
+
 int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
 {
   FUNCTION_TRACE
@@ -2773,6 +2895,8 @@ int CacheImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
 
 
 
+
+/*! \brief Cache override: deletes all files belonging to the given producer id. */
 
 int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
@@ -2796,6 +2920,8 @@ int CacheImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 
 
+/*! \brief Cache override: deletes all files belonging to the given producer name. */
+
 int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
   FUNCTION_TRACE
@@ -2817,6 +2943,8 @@ int CacheImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
 
 
 
+
+/*! \brief Cache override: deletes all files belonging to the given generation id. */
 
 int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
@@ -2840,6 +2968,8 @@ int CacheImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 
 
+/*! \brief Cache override: deletes files matching the given generation, geometry and forecast time. */
+
 int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
 {
   FUNCTION_TRACE
@@ -2861,6 +2991,8 @@ int CacheImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
 
 
 
+
+/*! \brief Cache override: deletes files identified by a list of forecast times. */
 
 int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
 {
@@ -2884,6 +3016,8 @@ int CacheImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 
 
+/*! \brief Cache override: deletes all files belonging to the given generation name. */
+
 int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
   FUNCTION_TRACE
@@ -2905,6 +3039,8 @@ int CacheImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
 
 
 
+
+/*! \brief Cache override: deletes all files belonging to the given source id. */
 
 int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
@@ -2928,6 +3064,8 @@ int CacheImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Cache override: deletes a batch of files identified by file-id list. */
+
 int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -2949,6 +3087,8 @@ int CacheImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
 
 
 
+
+/*! \brief Cache override: returns the file info matching the given file id. */
 
 int CacheImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
 {
@@ -2999,6 +3139,8 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileI
 
 
 
+
+/*! \brief Cache override: returns the file info matching the given filename. */
 
 int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
 {
@@ -3051,6 +3193,8 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
 
 
 
+/*! \brief Cache override: returns a paged list of cached file records. */
+
 int CacheImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3099,6 +3243,8 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId start
 
 
 
+/*! \brief Cache override: returns file records matching the given file-id list. */
+
 int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3144,6 +3290,8 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
 
 
+
+/*! \brief Cache override: returns a paged list of files belonging to the given producer id. */
 
 int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3198,6 +3346,8 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Cache override: returns a paged list of files belonging to the given producer name. */
 
 int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3259,6 +3409,8 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
 
 
 
+/*! \brief Cache override: returns a paged list of files belonging to the given generation id. */
+
 int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3306,6 +3458,8 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Cache override: returns a paged list of files belonging to the given generation name. */
 
 int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
@@ -3367,6 +3521,8 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
 
 
 
+/*! \brief Cache override: returns a paged list of files belonging to the given source id. */
+
 int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
@@ -3415,6 +3571,8 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::So
 
 
 
+/*! \brief Cache override: returns the number of cached file records. */
+
 int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3461,6 +3619,8 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Cache override: returns the file count for the given producer id. */
+
 int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
@@ -3505,6 +3665,8 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
 
 
 
+
+/*! \brief Cache override: returns the file count for the given generation id. */
 
 int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
 {
@@ -3551,6 +3713,8 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Cache override: returns the file count for the given source id. */
 
 int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
 {
@@ -3599,6 +3763,8 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
 
 
 
+/*! \brief Cache override: adds an event record via the upstream storage. */
+
 int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -3620,6 +3786,8 @@ int CacheImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 
 
+
+/*! \brief Cache override: returns the most recent event for the given requesting server. */
 
 int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
 {
@@ -3660,6 +3828,8 @@ int CacheImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 
 
+/*! \brief Cache override: returns a paged list of events starting from the given event id. */
+
 int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   //FUNCTION_TRACE
@@ -3691,6 +3861,8 @@ int CacheImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
 
 
+/*! \brief Cache override: returns the total number of stored events. */
+
 int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 {
   FUNCTION_TRACE
@@ -3718,6 +3890,8 @@ int CacheImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 
 
+/*! \brief Cache override: adds a content record via the upstream storage. */
+
 int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
@@ -3739,6 +3913,8 @@ int CacheImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 
 
+
+/*! \brief Cache override: updates an existing content record via the upstream storage. */
 
 int CacheImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
 {
@@ -3762,6 +3938,8 @@ int CacheImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 
 
+/*! \brief Cache override: adds a batch of content records via the upstream storage. */
+
 int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -3783,6 +3961,8 @@ int CacheImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
 
 
+
+/*! \brief Cache override: deletes a content record identified by file id and message index. */
 
 int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
 {
@@ -3806,6 +3986,8 @@ int CacheImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fil
 
 
 
+/*! \brief Cache override: deletes all content records belonging to the given file id. */
+
 int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
 {
   FUNCTION_TRACE
@@ -3827,6 +4009,8 @@ int CacheImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::Fi
 
 
 
+
+/*! \brief Cache override: deletes all content records belonging to the given filename. */
 
 int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
 {
@@ -3850,6 +4034,8 @@ int CacheImplementation::_deleteContentListByFileName(T::SessionId sessionId,con
 
 
 
+/*! \brief Cache override: deletes all content records belonging to the given producer id. */
+
 int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
 {
   FUNCTION_TRACE
@@ -3871,6 +4057,8 @@ int CacheImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T
 
 
 
+
+/*! \brief Cache override: deletes all content records belonging to the given producer name. */
 
 int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
 {
@@ -3894,6 +4082,8 @@ int CacheImplementation::_deleteContentListByProducerName(T::SessionId sessionId
 
 
 
+/*! \brief Cache override: deletes all content records belonging to the given generation id. */
+
 int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
 {
   FUNCTION_TRACE
@@ -3915,6 +4105,8 @@ int CacheImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 
 
+
+/*! \brief Cache override: deletes all content records belonging to the given generation name. */
 
 int CacheImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
 {
@@ -3938,6 +4130,8 @@ int CacheImplementation::_deleteContentListByGenerationName(T::SessionId session
 
 
 
+/*! \brief Cache override: deletes all content records belonging to the given source id. */
+
 int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
 {
   FUNCTION_TRACE
@@ -3959,6 +4153,8 @@ int CacheImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::
 
 
 
+
+/*! \brief Cache override: returns the content record matching the file id and message index. */
 
 int CacheImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
 {
@@ -4022,6 +4218,8 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId
 
 
 
+/*! \brief Cache override: returns a paged list of cached content records. */
+
 int CacheImplementation::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4071,6 +4269,8 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,T::FileId startF
 
 
 
+/*! \brief Cache override: returns content records belonging to the given file id. */
+
 int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4118,6 +4318,8 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileI
 
 
 
+
+/*! \brief Cache override: returns content records belonging to the given file-id list. */
 
 int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
 {
@@ -4175,6 +4377,8 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
 
 
+
+/*! \brief Cache override: returns content records belonging to the given filename. */
 
 int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
 {
@@ -4237,6 +4441,8 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const 
 
 
 
+/*! \brief Cache override: returns a paged list of content records for the given producer id. */
+
 int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4289,6 +4495,8 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,T::P
 
 
 
+
+/*! \brief Cache override: returns a paged list of content records for the given producer name. */
 
 int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
@@ -4348,6 +4556,8 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,co
 
 
 
+
+/*! \brief Cache override: returns a paged list of content records for the given generation id. */
 
 int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4417,6 +4627,8 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,T:
 
 
 
+/*! \brief Cache override: returns a paged list of content records for the given generation name. */
+
 int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4476,6 +4688,8 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
 
 
 
+
+/*! \brief Cache override: returns content records for a generation within a forecast time range. */
 
 int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
@@ -4538,6 +4752,8 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
 
 
 
+/*! \brief Cache override: returns content records for a generation name within a forecast time range. */
+
 int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4599,6 +4815,8 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
 
 
 
+/*! \brief Cache override: returns a paged list of content records for the given source id. */
+
 int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4646,6 +4864,8 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
 
 
 
+
+/*! \brief Cache override: searches content records by parameter, level range and forecast time range. */
 
 int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4734,6 +4954,8 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 
 
+
+/*! \brief Cache override: searches content records by parameter restricted to a generation id. */
 
 int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -4827,6 +5049,8 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 
 
+/*! \brief Cache override: searches content records by parameter restricted to a generation name. */
+
 int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -4916,6 +5140,8 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 
 
+
+/*! \brief Cache override: searches content records by parameter restricted to a producer id. */
 
 int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
@@ -5010,6 +5236,8 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
 
 
+/*! \brief Cache override: searches content records by parameter restricted to a producer name. */
+
 int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5100,6 +5328,8 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 
 
+
+/*! \brief Cache override: returns content records matching parameter, generation and exact forecast time. */
 
 int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
 {
@@ -5206,6 +5436,8 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
+/*! \brief Cache override: returns content records whose producer/generation/geometry links are inconsistent. */
+
 int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
@@ -5276,6 +5508,8 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
 
 
+/*! \brief Cache override: lists distinct geometry ids referenced by the given generation. */
+
 int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
@@ -5325,6 +5559,8 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
 
 
 
+
+/*! \brief Cache override: lists distinct parameter content entries for the given generation. */
 
 int CacheImplementation::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
 {
@@ -5396,6 +5632,8 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
 
 
 
+/*! \brief Cache override: lists distinct parameter keys for the given generation. */
+
 int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -5444,6 +5682,8 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
 
 
 
+
+/*! \brief Cache override: lists distinct parameter keys for the given generation and geometry. */
 
 int CacheImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
@@ -5494,6 +5734,8 @@ int CacheImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
 
 
 
+/*! \brief Cache override: lists distinct parameter keys for the given generation, geometry and level id. */
+
 int CacheImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
 {
   FUNCTION_TRACE
@@ -5542,6 +5784,8 @@ int CacheImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T
 
 
 
+
+/*! \brief Cache override: lists distinct levels for the given generation, geometry and level id. */
 
 int CacheImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
@@ -5592,6 +5836,8 @@ int CacheImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::S
 
 
 
+/*! \brief Cache override: lists distinct levels for the given parameter, generation, geometry and level id. */
+
 int CacheImplementation::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
@@ -5639,6 +5885,8 @@ int CacheImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
 
 
 
+
+/*! \brief Cache override: lists distinct forecast times for the given generation. */
 
 int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
 {
@@ -5727,6 +5975,8 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
 
 
+/*! \brief Cache override: returns the forecast time range covered by the given producer and generation. */
+
 int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
   FUNCTION_TRACE
@@ -5793,6 +6043,8 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
 
 
 
+
+/*! \brief Cache override: returns the forecast time range covered by the given generation. */
 
 int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
 {
@@ -5861,6 +6113,8 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
 
 
 
+/*! \brief Cache override: lists distinct forecast times for the given generation and geometry. */
+
 int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -5911,6 +6165,8 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
 
 
 
+
+/*! \brief Cache override: lists distinct forecast times for the given generation, geometry and level id. */
 
 int CacheImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
 {
@@ -5963,6 +6219,8 @@ int CacheImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::Se
 
 
 
+/*! \brief Cache override: lists distinct forecast times for the given producer. */
+
 int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
 {
   FUNCTION_TRACE
@@ -6003,6 +6261,8 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
 
 
 
+
+/*! \brief Cache override: returns the number of cached content records. */
 
 int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 {
@@ -6049,6 +6309,8 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
 
 
 
+
+/*! \brief Cache override: returns a hash representing the cached content state of the given producer. */
 
 int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
 {
@@ -6118,6 +6380,8 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,T::Producer
 
 
 
+/*! \brief Cache override: returns the list of distinct level types found in the cache. */
+
 int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
 {
   FUNCTION_TRACE
@@ -6166,6 +6430,8 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
 
 
 
+/*! \brief Cache override: refreshes the set of cached file ids from the upstream storage. */
+
 int CacheImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
 {
   FUNCTION_TRACE
@@ -6203,6 +6469,8 @@ int CacheImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::F
 
 
 
+/*! \brief Loads the producer list from the master source into the cache. */
+
 void CacheImplementation::readProducerList()
 {
   FUNCTION_TRACE
@@ -6235,6 +6503,8 @@ void CacheImplementation::readProducerList()
 
 
 
+
+/*! \brief Loads the generation list from the master source into the cache. */
 
 void CacheImplementation::readGenerationList()
 {
@@ -6271,6 +6541,8 @@ void CacheImplementation::readGenerationList()
 
 
 
+/*! \brief Loads the geometry list from the master source into the cache. */
+
 void CacheImplementation::readGeometryList()
 {
   FUNCTION_TRACE
@@ -6305,6 +6577,8 @@ void CacheImplementation::readGeometryList()
 
 
 
+
+/*! \brief Loads the file list from the master source into the cache. */
 
 void CacheImplementation::readFileList()
 {
@@ -6366,6 +6640,8 @@ void CacheImplementation::readFileList()
 
 
 
+
+/*! \brief Loads the content list from the master source into the cache. */
 
 void CacheImplementation::readContentList()
 {
@@ -6429,6 +6705,8 @@ void CacheImplementation::readContentList()
 
 
 
+/*! \brief Handles a CLEAR event by emptying all cached lists. */
+
 void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6476,6 +6754,8 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a CONTENT_SERVER_RELOAD event by triggering a full reload. */
+
 void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6492,6 +6772,8 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles the start of an upstream update loop. */
 
 void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
 {
@@ -6516,6 +6798,8 @@ void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles the end of an upstream update loop and may trigger a search-structure swap. */
 
 void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
 {
@@ -6550,6 +6834,8 @@ void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a PRODUCER_ADDED event by inserting the new producer into the cache. */
 
 void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
 {
@@ -6590,6 +6876,8 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a PRODUCER_DELETED event by marking the producer as deleted in the cache. */
+
 void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6626,6 +6914,8 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a PRODUCER_UPDATED event by refreshing the cached producer record. */
 
 void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 {
@@ -6671,6 +6961,8 @@ void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles bulk deletion of producers belonging to a source id. */
+
 void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6707,6 +6999,8 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
 
 
 
+
+/*! \brief Handles a GENERATION_ADDED event by inserting the new generation into the cache. */
 
 void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
 {
@@ -6746,6 +7040,8 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a GENERATION_DELETED event by marking the generation as deleted in the cache. */
 
 void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 {
@@ -6788,6 +7084,8 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a GENERATION_UPDATED event by refreshing the cached generation record. */
+
 void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6826,6 +7124,8 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a GENERATION_STATUS_CHANGED event by updating the cached status. */
+
 void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6863,6 +7163,8 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles bulk deletion of generations belonging to a producer id. */
+
 void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6898,6 +7200,8 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
 
 
+/*! \brief Handles bulk deletion of generations belonging to a source id. */
+
 void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -6932,6 +7236,8 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
 
 
 
+
+/*! \brief Handles a GEOMETRY_ADDED event by inserting the new geometry into the cache. */
 
 void CacheImplementation::event_geometryAdded(T::EventInfo& eventInfo)
 {
@@ -6971,6 +7277,8 @@ void CacheImplementation::event_geometryAdded(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a GEOMETRY_DELETED event by marking the geometry as deleted in the cache. */
+
 void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7002,6 +7310,8 @@ void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a GEOMETRY_STATUS_CHANGED event by updating the cached geometry status. */
 
 void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
 {
@@ -7038,6 +7348,8 @@ void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a GEOMETRY_UPDATED event by refreshing the cached geometry record. */
 
 void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
 {
@@ -7079,6 +7391,8 @@ void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles bulk deletion of geometries belonging to a producer id. */
+
 void CacheImplementation::event_geometryListDeletedByProducerId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7112,6 +7426,8 @@ void CacheImplementation::event_geometryListDeletedByProducerId(T::EventInfo& ev
 
 
 
+/*! \brief Handles bulk deletion of geometries belonging to a generation id. */
+
 void CacheImplementation::event_geometryListDeletedByGenerationId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7143,6 +7459,8 @@ void CacheImplementation::event_geometryListDeletedByGenerationId(T::EventInfo& 
 
 
 
+
+/*! \brief Handles bulk deletion of geometries belonging to a source id. */
 
 void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& eventInfo)
 {
@@ -7176,6 +7494,8 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
 
 
 
+
+/*! \brief Handles a FILE_ADDED event by inserting the new file (and its content) into the cache. */
 
 void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 {
@@ -7308,6 +7628,8 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a FILE_DELETED event by marking the file and its content as deleted. */
+
 void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7338,6 +7660,8 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Handles a FILE_UPDATED event by refreshing the cached file record. */
 
 void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
 {
@@ -7403,6 +7727,8 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles bulk deletion of files belonging to a producer id. */
+
 void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7433,6 +7759,8 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
 
 
 
+
+/*! \brief Handles bulk deletion of files belonging to a generation id. */
 
 void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& eventInfo)
 {
@@ -7466,6 +7794,8 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
 
 
+/*! \brief Handles bulk deletion of files belonging to a source id. */
+
 void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7497,6 +7827,8 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
 
 
 
+/*! \brief Handles bulk deletion of content records belonging to a file id. */
+
 void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7524,6 +7856,8 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
 
 
 
+
+/*! \brief Handles bulk deletion of content records belonging to a producer id. */
 
 void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eventInfo)
 {
@@ -7553,6 +7887,8 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
 
 
 
+/*! \brief Handles bulk deletion of content records belonging to a source id. */
+
 void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7581,6 +7917,8 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
 
 
 
+/*! \brief Handles bulk deletion of content records belonging to a generation id. */
+
 void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7608,6 +7946,8 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
 
 
 
+
+/*! \brief Handles a CONTENT_ADDED event by inserting the new content record into the cache. */
 
 void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 {
@@ -7677,6 +8017,8 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a CONTENT_UPDATED event by refreshing the cached content record. */
+
 void CacheImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7710,6 +8052,8 @@ void CacheImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Handles a CONTENT_DELETED event by marking the content record as deleted. */
+
 void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
@@ -7738,6 +8082,8 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
 
 
+
+/*! \brief Dispatches a single event to the matching event_* handler. */
 
 void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 {
@@ -7899,6 +8245,8 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Pulls new events from the upstream source and applies them to the cache. */
+
 void CacheImplementation::processEvents(bool eventThread)
 {
   // FUNCTION_TRACE
@@ -8031,6 +8379,8 @@ void CacheImplementation::processEvents(bool eventThread)
 
 
 
+/*! \brief Background-thread main loop that periodically processes events and updates content. */
+
 void CacheImplementation::eventProcessingThread()
 {
   FUNCTION_TRACE
@@ -8063,6 +8413,8 @@ void CacheImplementation::eventProcessingThread()
 
 
 
+
+/*! \brief Serialises the current cache contents to disk for diagnostics. */
 
 void CacheImplementation::saveData()
 {
@@ -8109,6 +8461,8 @@ void CacheImplementation::saveData()
 
 
 
+
+/*! \brief Refreshes cached content from the master source and may swap search structures. */
 
 void CacheImplementation::updateContent()
 {

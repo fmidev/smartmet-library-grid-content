@@ -8,6 +8,8 @@ namespace Functions
 {
 
 
+/*! \brief Function: Constructor. */
+
 Function_diff::Function_diff()
 {
   try
@@ -22,6 +24,8 @@ Function_diff::Function_diff()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_diff::Function_diff(const Function_diff& function)
 :Function(function)
@@ -39,6 +43,8 @@ Function_diff::Function_diff(const Function_diff& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_diff::~Function_diff()
 {
   try
@@ -54,6 +60,8 @@ Function_diff::~Function_diff()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_diff::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -87,6 +95,8 @@ float Function_diff::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+/*! \brief Function: Execute function call1. */
+
 double Function_diff::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
@@ -118,6 +128,8 @@ double Function_diff::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -193,6 +205,8 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -265,6 +279,8 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_diff::duplicate()
 {

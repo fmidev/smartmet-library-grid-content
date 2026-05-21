@@ -9,6 +9,10 @@ namespace Functions
 {
 
 
+// ====================================================================================
+/*! \brief Computes the element-wise difference between two consecutive time-step grids. */
+// ====================================================================================
+
 class Function_diff : public Function
 {
   public:

@@ -12,6 +12,8 @@ namespace SmartMet
 namespace SessionManagement
 {
 
+/*! \brief Constructor. */
+
 SessionInfo::SessionInfo()
 {
   try
@@ -33,11 +35,15 @@ SessionInfo::SessionInfo()
 
 
 
+/*! \brief Destructor. */
+
 SessionInfo::~SessionInfo()
 {
 }
 
 
+
+/*! \brief Get attribute list. */
 
 AttributeList* SessionInfo::getAttributeList(const char *attributeGroup)
 {
@@ -59,6 +65,8 @@ AttributeList* SessionInfo::getAttributeList(const char *attributeGroup)
 
 
 
+/*! \brief Get attribute group list. */
+
 AttributeGroupList& SessionInfo::getAttributeGroupList()
 {
   try
@@ -73,6 +81,8 @@ AttributeGroupList& SessionInfo::getAttributeGroupList()
 
 
 
+
+/*! \brief Update access time. */
 
 void SessionInfo::updateAccessTime()
 {
@@ -89,6 +99,8 @@ void SessionInfo::updateAccessTime()
 
 
 
+
+/*! \brief Update session info. */
 
 void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
 {
@@ -137,6 +149,8 @@ void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
 
 
 
+/*! \brief Get expiration time. */
+
 time_t SessionInfo::getExpirationTime()
 {
   try
@@ -151,6 +165,8 @@ time_t SessionInfo::getExpirationTime()
 
 
 
+
+/*! \brief Get last access time. */
 
 time_t SessionInfo::getLastAccessTime()
 {
@@ -167,6 +183,8 @@ time_t SessionInfo::getLastAccessTime()
 
 
 
+/*! \brief Get session id. */
+
 T::SessionId SessionInfo::getSessionId()
 {
   try
@@ -181,6 +199,8 @@ T::SessionId SessionInfo::getSessionId()
 
 
 
+
+/*! \brief Set session id. */
 
 void SessionInfo::setSessionId(T::SessionId sessionId)
 {
@@ -198,6 +218,8 @@ void SessionInfo::setSessionId(T::SessionId sessionId)
 
 
 
+/*! \brief Get key. */
+
 const char* SessionInfo::getKey()
 {
   try
@@ -212,6 +234,8 @@ const char* SessionInfo::getKey()
 
 
 
+
+/*! \brief Set key. */
 
 void SessionInfo::setKey(const char *key)
 {
@@ -228,6 +252,8 @@ void SessionInfo::setKey(const char *key)
 
 
 
+/*! \brief Get address. */
+
 const char* SessionInfo::getAddress()
 {
   try
@@ -242,6 +268,8 @@ const char* SessionInfo::getAddress()
 
 
 
+
+/*! \brief Set address. */
 
 void SessionInfo::setAddress(const char *address)
 {
@@ -258,6 +286,8 @@ void SessionInfo::setAddress(const char *address)
 
 
 
+/*! \brief Get status. */
+
 uchar SessionInfo::getStatus()
 {
   try
@@ -272,6 +302,8 @@ uchar SessionInfo::getStatus()
 
 
 
+
+/*! \brief Get time out in seconds. */
 
 uint SessionInfo::getTimeOutInSeconds()
 {
@@ -288,6 +320,8 @@ uint SessionInfo::getTimeOutInSeconds()
 
 
 
+/*! \brief Set time out in seconds. */
+
 void SessionInfo::setTimeOutInSeconds(uint seconds)
 {
   try
@@ -303,6 +337,8 @@ void SessionInfo::setTimeOutInSeconds(uint seconds)
 
 
 
+/*! \brief Set status. */
+
 void SessionInfo::setStatus(uchar status)
 {
   try
@@ -317,6 +353,8 @@ void SessionInfo::setStatus(uchar status)
 
 
 
+
+/*! \brief Get attribute. */
 
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
@@ -346,6 +384,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Get attribute. */
+
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,int& attributeValue)
 {
   try
@@ -372,6 +412,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Get attribute. */
 
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,uint& attributeValue)
 {
@@ -400,6 +442,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Get attribute. */
+
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,Int64  & attributeValue)
 {
   try
@@ -426,6 +470,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Get attribute. */
 
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,UInt64 & attributeValue)
 {
@@ -454,6 +500,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Get attribute. */
+
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,float& attributeValue)
 {
   try
@@ -480,6 +528,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Get attribute. */
 
 bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeName,double& attributeValue)
 {
@@ -508,6 +558,8 @@ bool SessionInfo::getAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Get attributes. */
 
 void SessionInfo::getAttributes(const char *attributeGroup,AttributeList& attributeList)
 {
@@ -541,6 +593,8 @@ void SessionInfo::getAttributes(const char *attributeGroup,AttributeList& attrib
 
 
 
+/*! \brief Set attribute. */
+
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   try
@@ -572,6 +626,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Set attribute. */
 
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,int attributeValue)
 {
@@ -605,6 +661,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Set attribute. */
+
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,uint attributeValue)
 {
   try
@@ -636,6 +694,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Set attribute. */
 
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue)
 {
@@ -669,6 +729,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Set attribute. */
+
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,UInt64 attributeValue)
 {
   try
@@ -700,6 +762,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+
+/*! \brief Set attribute. */
 
 void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue)
 {
@@ -733,6 +797,8 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 
 
+/*! \brief Set attributes. */
+
 void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attributeList)
 {
   try
@@ -764,6 +830,8 @@ void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attrib
 
 
 
+/*! \brief Delete attribute. */
+
 void SessionInfo::deleteAttribute(const char *attributeGroup,const char *attributeName)
 {
   try
@@ -786,6 +854,8 @@ void SessionInfo::deleteAttribute(const char *attributeGroup,const char *attribu
 
 
 
+/*! \brief Delete attribute group. */
+
 void SessionInfo::deleteAttributeGroup(const char *attributeGroup)
 {
   try
@@ -802,6 +872,8 @@ void SessionInfo::deleteAttributeGroup(const char *attributeGroup)
 
 
 
+
+/*! \brief Delete attributes. */
 
 void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {
@@ -827,6 +899,8 @@ void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::s
 
 
 
+
+/*! \brief Print. */
 
 void SessionInfo::print(std::ostream& stream,uint level,uint optionFlags)
 {

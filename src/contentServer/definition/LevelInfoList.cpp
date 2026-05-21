@@ -9,6 +9,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for LevelInfoList. */
+
 LevelInfoList::LevelInfoList()
 {
   try
@@ -23,6 +25,8 @@ LevelInfoList::LevelInfoList()
 
 
 
+
+/*! \brief Copy constructor for LevelInfoList. */
 
 LevelInfoList::LevelInfoList(LevelInfoList& levelInfoList)
 {
@@ -46,6 +50,8 @@ LevelInfoList::LevelInfoList(LevelInfoList& levelInfoList)
 
 
 
+/*! \brief Destructor for LevelInfoList. */
+
 LevelInfoList::~LevelInfoList()
 {
   try
@@ -66,6 +72,8 @@ LevelInfoList::~LevelInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for LevelInfoList. */
 
 LevelInfoList& LevelInfoList::operator=(LevelInfoList& levelInfoList)
 {
@@ -95,6 +103,8 @@ LevelInfoList& LevelInfoList::operator=(LevelInfoList& levelInfoList)
 
 
 
+/*! \brief Add a LevelInfo record to the list. */
+
 void LevelInfoList::addLevelInfo(LevelInfo* levelInfo)
 {
   try
@@ -110,6 +120,8 @@ void LevelInfoList::addLevelInfo(LevelInfo* levelInfo)
 
 
 
+
+/*! \brief Remove all entries from the list. */
 
 void LevelInfoList::clear()
 {
@@ -131,6 +143,8 @@ void LevelInfoList::clear()
 
 
 
+/*! \brief Return the LevelInfo at the given list index. */
+
 LevelInfo* LevelInfoList::getLevelInfoByIndex(uint index)
 {
   try
@@ -149,6 +163,8 @@ LevelInfo* LevelInfoList::getLevelInfoByIndex(uint index)
 
 
 
+/*! \brief Return the LevelInfo at the given list index without bounds checking. */
+
 LevelInfo* LevelInfoList::getLevelInfoByIndexNoCheck(uint index)
 {
   try
@@ -163,6 +179,8 @@ LevelInfo* LevelInfoList::getLevelInfoByIndexNoCheck(uint index)
 
 
 
+
+/*! \brief Return the number of entries in the list. */
 
 uint LevelInfoList::getLength()
 {
@@ -179,6 +197,8 @@ uint LevelInfoList::getLength()
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void LevelInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {

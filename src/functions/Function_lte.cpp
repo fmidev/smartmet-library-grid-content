@@ -9,6 +9,8 @@ namespace Functions
 
 
 
+/*! \brief Function: Constructor. */
+
 Function_lte::Function_lte()
 {
   try
@@ -23,6 +25,8 @@ Function_lte::Function_lte()
 
 
 
+
+/*! \brief Function: Constructor. */
 
 Function_lte::Function_lte(const Function_lte& function)
 :Function(function)
@@ -40,6 +44,8 @@ Function_lte::Function_lte(const Function_lte& function)
 
 
 
+/*! \brief Function: Destructor. */
+
 Function_lte::~Function_lte()
 {
   try
@@ -55,6 +61,8 @@ Function_lte::~Function_lte()
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 float Function_lte::executeFunctionCall1(std::vector<float>& parameters)
 {
@@ -84,6 +92,8 @@ float Function_lte::executeFunctionCall1(std::vector<float>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call1. */
 
 double Function_lte::executeFunctionCall1(std::vector<double>& parameters)
 {
@@ -115,6 +125,8 @@ double Function_lte::executeFunctionCall1(std::vector<double>& parameters)
 
 
 
+
+/*! \brief Function: Execute function call9. */
 
 void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
@@ -180,6 +192,8 @@ void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+/*! \brief Function: Execute function call9. */
+
 void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -242,6 +256,8 @@ void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 
 
+
+/*! \brief Function: Duplicate. */
 
 Function* Function_lte::duplicate()
 {

@@ -12,9 +12,16 @@ namespace SmartMet
 namespace SessionManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;
-typedef std::map<std::string,AttributeList> AttributeGroupList;
+typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
+typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
 
+// ====================================================================================
+/*! \brief Record describing an active user session with its attributes and timeout.
+ *
+ *  Stores the session identifier, authentication credentials, network address,
+ *  timing information (start, last access, timeout), status, a copy of the
+ *  associated UserInfo, and a map of named attribute groups for arbitrary session state. */
+// ====================================================================================
 
 class SessionInfo
 {
@@ -61,25 +68,25 @@ class SessionInfo
 
     void                print(std::ostream& stream,uint level,uint optionFlags);
 
-    UserManagement::UserInfo mUserInfo;
+    UserManagement::UserInfo mUserInfo;  //!< Copy of the user record associated with this session.
 
   protected:
 
-    T::SessionId        mSessionId;
-    time_t              mStartTime;
-    time_t              mLastAccessTime;
-    uint                mTimeOutInSeconds;
-    std::string         mKey;
-    std::string         mAddress;
-    uchar               mStatus;
+    T::SessionId        mSessionId;        //!< Unique identifier for this session.
+    time_t              mStartTime;        //!< Epoch time when the session was created.
+    time_t              mLastAccessTime;   //!< Epoch time of the most recent successful access.
+    uint                mTimeOutInSeconds; //!< Inactivity timeout after which the session expires.
+    std::string         mKey;              //!< Authentication key or token for this session.
+    std::string         mAddress;          //!< Remote IP address of the session owner.
+    uchar               mStatus;           //!< Session status code (active, expired, …).
 
-    AttributeGroupList  mAttributeGroups;
-    ModificationLock    mModificationLock;
+    AttributeGroupList  mAttributeGroups;  //!< Named groups of key-value attributes for arbitrary session state.
+    ModificationLock    mModificationLock; //!< Lock protecting concurrent attribute access.
 };
 
 
-typedef std::shared_ptr<SessionInfo> SessionInfo_sptr;
-typedef std::map<T::SessionId,SessionInfo_sptr> SessionInfo_sptr_map;
+typedef std::shared_ptr<SessionInfo> SessionInfo_sptr;                          //!< Shared pointer to a SessionInfo record.
+typedef std::map<T::SessionId,SessionInfo_sptr> SessionInfo_sptr_map;           //!< Map from session id to SessionInfo shared pointer.
 
 
 

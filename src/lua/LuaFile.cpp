@@ -25,6 +25,8 @@ extern "C"
 
 
 
+/*! \brief Constructor. */
+
 LuaFile::LuaFile()
 {
   try
@@ -47,6 +49,8 @@ LuaFile::LuaFile()
 
 
 
+
+/*! \brief Constructor. */
 
 LuaFile::LuaFile(const std::string& filename)
 {
@@ -71,6 +75,8 @@ LuaFile::LuaFile(const std::string& filename)
 
 
 
+
+/*! \brief Constructor. */
 
 LuaFile::LuaFile(const LuaFile& luaFile)
 {
@@ -97,6 +103,8 @@ LuaFile::LuaFile(const LuaFile& luaFile)
 
 
 
+/*! \brief Destructor. */
+
 LuaFile::~LuaFile()
 {
   try
@@ -117,6 +125,8 @@ LuaFile::~LuaFile()
 
 
 
+
+/*! \brief Init. */
 
 void LuaFile::init()
 {
@@ -140,6 +150,8 @@ void LuaFile::init()
 
 
 
+/*! \brief Init. */
+
 void LuaFile::init(const std::string& filename)
 {
   try
@@ -156,6 +168,8 @@ void LuaFile::init(const std::string& filename)
 
 
 
+
+/*! \brief Get lua state. */
 
 void* LuaFile::getLuaState(UInt64 & key)
 {
@@ -187,6 +201,8 @@ void* LuaFile::getLuaState(UInt64 & key)
 
 
 
+/*! \brief Release lua state. */
+
 void LuaFile::releaseLuaState(UInt64 key)
 {
   try
@@ -208,6 +224,8 @@ void LuaFile::releaseLuaState(UInt64 key)
 
 
 
+
+/*! \brief Check updates. */
 
 bool LuaFile::checkUpdates()
 {
@@ -270,6 +288,8 @@ bool LuaFile::checkUpdates()
 
 
 
+/*! \brief Get function. */
+
 uint LuaFile::getFunction(const std::string& functionName,std::string& function)
 {
   try
@@ -293,6 +313,8 @@ uint LuaFile::getFunction(const std::string& functionName,std::string& function)
 
 
 
+
+/*! \brief Execute function call1. */
 
 float LuaFile::executeFunctionCall1(const std::string& function,std::vector<float>& parameters)
 {
@@ -381,6 +403,8 @@ float LuaFile::executeFunctionCall1(const std::string& function,std::vector<floa
 
 
 
+/*! \brief Execute function call1. */
+
 double LuaFile::executeFunctionCall1(const std::string& function,std::vector<double>& parameters)
 {
   try
@@ -466,6 +490,8 @@ double LuaFile::executeFunctionCall1(const std::string& function,std::vector<dou
 
 
 
+/*! \brief Execute function call2. */
+
 double LuaFile::executeFunctionCall2(const std::string& function,const char *str)
 {
   try
@@ -539,6 +565,8 @@ double LuaFile::executeFunctionCall2(const std::string& function,const char *str
 
 
 
+
+/*! \brief Execute function call4. */
 
 void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
 {
@@ -652,6 +680,8 @@ void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint
 
 
 
+/*! \brief Execute function call4. */
+
 void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
 {
   try
@@ -762,6 +792,8 @@ void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint
 
 
 
+/*! \brief Execute function call5. */
+
 std::string LuaFile::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<float>& parameters)
 {
   try
@@ -850,6 +882,8 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
 
 
 
+
+/*! \brief Execute function call5. */
 
 std::string LuaFile::executeFunctionCall5(const std::string& function,const std::string& language,std::vector<double>& parameters)
 {
@@ -940,6 +974,8 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
 
 
 
+/*! \brief Execute function call6. */
+
 std::string LuaFile::executeFunctionCall6(const std::string& function,std::vector<std::string>& params)
 {
   try
@@ -1016,6 +1052,8 @@ std::string LuaFile::executeFunctionCall6(const std::string& function,std::vecto
 
 
 
+
+/*! \brief Execute function call6. */
 
 std::string LuaFile::executeFunctionCall6(
                   const std::string& function,
@@ -1118,6 +1156,8 @@ std::string LuaFile::executeFunctionCall6(
 
 
 
+/*! \brief Execute function call8. */
+
 void LuaFile::executeFunctionCall8(const std::string& function,const char *subfunction,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
@@ -1217,6 +1257,8 @@ void LuaFile::executeFunctionCall8(const std::string& function,const char *subfu
 
 
 
+
+/*! \brief Execute function call8. */
 
 void LuaFile::executeFunctionCall8(const std::string& function,const char *subfunction,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
@@ -1318,6 +1360,8 @@ void LuaFile::executeFunctionCall8(const std::string& function,const char *subfu
 
 
 
+/*! \brief Execute function call9. */
+
 void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
@@ -1417,6 +1461,8 @@ void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint
 
 
 
+/*! \brief Execute function call9. */
+
 void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
@@ -1515,6 +1561,8 @@ void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint
 
 
 
+/*! \brief Print. */
+
 void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
@@ -1536,6 +1584,8 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
 
 
 
+
+/*! \brief Load file. */
 
 void LuaFile::loadFile()
 {
@@ -1572,6 +1622,8 @@ void LuaFile::loadFile()
 
 
 
+
+/*! \brief Load function list. */
 
 void LuaFile::loadFunctionList(uint type)
 {

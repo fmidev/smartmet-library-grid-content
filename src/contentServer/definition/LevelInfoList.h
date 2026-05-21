@@ -10,8 +10,15 @@ namespace T
 {
 
 
-typedef std::vector<LevelInfo*> LevelInfo_pvec;
+typedef std::vector<LevelInfo*> LevelInfo_pvec;  //!< Convenience vector of LevelInfo pointers.
 
+// ====================================================================================
+/*! \brief Simple container of LevelInfo pointers representing available vertical levels.
+ *
+ *  LevelInfoList is a thin wrapper around a std::vector used to return enumerations
+ *  of the vertical levels registered in the Content Server for a given parameter and
+ *  producer combination. */
+// ====================================================================================
 
 class LevelInfoList
 {
@@ -31,7 +38,7 @@ class LevelInfoList
 
   protected:
 
-    LevelInfo_pvec  mList;
+    LevelInfo_pvec  mList;  //!< Underlying vector of LevelInfo pointers.
 };
 
 

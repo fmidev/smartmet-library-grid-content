@@ -11,6 +11,12 @@ namespace QueryServer
 namespace Corba
 {
 
+// ====================================================================================
+/*! \brief CORBA client proxy that forwards QueryServer calls to a remote server.
+ *
+ *  Implements QueryServer::ServiceInterface by serialising each request over CORBA
+ *  to the remote service identified by the IOR supplied to init(). */
+// ====================================================================================
 
 class ClientImplementation : public QueryServer::ServiceInterface
 {
@@ -28,10 +34,10 @@ class ClientImplementation : public QueryServer::ServiceInterface
 
   private:
 
-     bool           mInitialized;
-     std::string    mServiceIor;
+     bool           mInitialized;  //!< True after init() has successfully resolved the IOR.
+     std::string    mServiceIor;   //!< CORBA IOR string used to locate the remote QueryServer service.
 
-     QueryServer::Corba::ServiceInterface_var  mService;
+     QueryServer::Corba::ServiceInterface_var  mService;  //!< CORBA object reference to the remote service.
 };
 
 

@@ -10,6 +10,8 @@ namespace T
 {
 
 
+/*! \brief Content Server: Constructor. */
+
 ResponseMessage::ResponseMessage()
 {
   try
@@ -25,6 +27,8 @@ ResponseMessage::ResponseMessage()
 
 
 
+
+/*! \brief Content Server: Constructor. */
 
 ResponseMessage::ResponseMessage(ResponseMessage& responseMessage)
 {
@@ -42,6 +46,8 @@ ResponseMessage::ResponseMessage(ResponseMessage& responseMessage)
 
 
 
+/*! \brief Content Server: Destructor. */
+
 ResponseMessage::~ResponseMessage()
 {
   try
@@ -57,6 +63,8 @@ ResponseMessage::~ResponseMessage()
 
 
 
+
+/*! \brief Content Server: Add char. */
 
 void ResponseMessage::addChar(char ch)
 {
@@ -86,6 +94,8 @@ void ResponseMessage::addChar(char ch)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const char *line)
 {
   try
@@ -102,6 +112,8 @@ void ResponseMessage::addLine(const char *line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const std::string& line)
 {
   try
@@ -116,6 +128,8 @@ void ResponseMessage::addLine(const std::string& line)
 
 
 
+
+/*! \brief Content Server: Add line. */
 
 void ResponseMessage::addLine(UInt64 line)
 {
@@ -133,6 +147,8 @@ void ResponseMessage::addLine(UInt64 line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(int line)
 {
   try
@@ -148,6 +164,8 @@ void ResponseMessage::addLine(int line)
 
 
 
+
+/*! \brief Content Server: Add line. */
 
 void ResponseMessage::addLine(uint line)
 {
@@ -165,6 +183,8 @@ void ResponseMessage::addLine(uint line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const char *key,const char *line)
 {
   try
@@ -181,6 +201,8 @@ void ResponseMessage::addLine(const char *key,const char *line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const char *key,const std::string& line)
 {
   try
@@ -195,6 +217,8 @@ void ResponseMessage::addLine(const char *key,const std::string& line)
 
 
 
+
+/*! \brief Content Server: Add line. */
 
 void ResponseMessage::addLine(const char *key,UInt64 line)
 {
@@ -212,6 +236,8 @@ void ResponseMessage::addLine(const char *key,UInt64 line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const char *key,time_t line)
 {
   try
@@ -227,6 +253,8 @@ void ResponseMessage::addLine(const char *key,time_t line)
 
 
 
+
+/*! \brief Content Server: Add line. */
 
 void ResponseMessage::addLine(const char *key,int line)
 {
@@ -244,6 +272,8 @@ void ResponseMessage::addLine(const char *key,int line)
 
 
 
+/*! \brief Content Server: Add line. */
+
 void ResponseMessage::addLine(const char *key,uint line)
 {
   try
@@ -260,6 +290,8 @@ void ResponseMessage::addLine(const char *key,uint line)
 
 
 
+/*! \brief Content Server: Get line count. */
+
 uint ResponseMessage::getLineCount()
 {
   try
@@ -275,6 +307,8 @@ uint ResponseMessage::getLineCount()
 
 
 
+
+/*! \brief Content Server: Get content size. */
 
 uint ResponseMessage::getContentSize()
 {
@@ -296,6 +330,8 @@ uint ResponseMessage::getContentSize()
 
 
 
+/*! \brief Content Server: Get line by index. */
+
 std::string ResponseMessage::getLineByIndex(uint index)
 {
   try
@@ -315,6 +351,8 @@ std::string ResponseMessage::getLineByIndex(uint index)
 
 
 
+/*! \brief Content Server: Get line value by index. */
+
 Int64  ResponseMessage::getLineValueByIndex(uint index)
 {
   try
@@ -333,6 +371,8 @@ Int64  ResponseMessage::getLineValueByIndex(uint index)
 
 
 
+
+/*! \brief Content Server: Get line by key. */
 
 std::string ResponseMessage::getLineByKey(const char *key)
 {
@@ -359,6 +399,8 @@ std::string ResponseMessage::getLineByKey(const char *key)
 
 
 
+/*! \brief Content Server: Get line value by key. */
+
 int ResponseMessage::getLineValueByKey(const char *key)
 {
   try
@@ -384,6 +426,8 @@ int ResponseMessage::getLineValueByKey(const char *key)
 
 
 
+/*! \brief Content Server: Get line int64 value by key. */
+
 Int64  ResponseMessage::getLineInt64ValueByKey(const char *key)
 {
   try
@@ -408,6 +452,8 @@ Int64  ResponseMessage::getLineInt64ValueByKey(const char *key)
 
 
 
+
+/*! \brief Content Server: Get line by key. */
 
 bool ResponseMessage::getLineByKey(const char *key,std::string& value)
 {
@@ -437,6 +483,8 @@ bool ResponseMessage::getLineByKey(const char *key,std::string& value)
 
 
 
+/*! \brief Content Server: Get line by key. */
+
 bool ResponseMessage::getLineByKey(const char *key,int& value)
 {
   try
@@ -463,6 +511,8 @@ bool ResponseMessage::getLineByKey(const char *key,int& value)
 
 
 
+
+/*! \brief Content Server: Get line by key. */
 
 bool ResponseMessage::getLineByKey(const char *key,uint& value)
 {
@@ -491,6 +541,8 @@ bool ResponseMessage::getLineByKey(const char *key,uint& value)
 
 
 
+/*! \brief Content Server: Get line by key. */
+
 bool ResponseMessage::getLineByKey(const char *key,unsigned char& value)
 {
   try
@@ -518,6 +570,8 @@ bool ResponseMessage::getLineByKey(const char *key,unsigned char& value)
 
 
 
+/*! \brief Content Server: Get line by key. */
+
 bool ResponseMessage::getLineByKey(const char *key,UInt64 & value)
 {
   try
@@ -544,6 +598,8 @@ bool ResponseMessage::getLineByKey(const char *key,UInt64 & value)
 
 
 
+
+/*! \brief Content Server: Get line by key. */
 
 bool ResponseMessage::getLineByKey(const char *key,Int64 & value)
 {
@@ -573,6 +629,8 @@ bool ResponseMessage::getLineByKey(const char *key,Int64 & value)
 
 
 
+/*! \brief Content Server: Get lines by key. */
+
 uint ResponseMessage::getLinesByKey(const char *key,std::vector<std::string>& values)
 {
   try
@@ -599,6 +657,8 @@ uint ResponseMessage::getLinesByKey(const char *key,std::vector<std::string>& va
 
 
 
+
+/*! \brief Content Server: Print. */
 
 void ResponseMessage::print(std::ostream& stream,uint level,uint optionFlags)
 {

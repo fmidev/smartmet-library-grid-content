@@ -9,8 +9,15 @@ namespace SmartMet
 namespace T
 {
 
-typedef std::vector<ParameterLevelInfo*> ParameterLevelInfo_pvec;
+typedef std::vector<ParameterLevelInfo*> ParameterLevelInfo_pvec;  //!< Convenience vector of ParameterLevelInfo pointers.
 
+// ====================================================================================
+/*! \brief Simple container of ParameterLevelInfo pointers for parameter-level enumeration.
+ *
+ *  ParameterLevelInfoList is a thin wrapper around a std::vector used to return the
+ *  set of parameter-level combinations registered in the Content Server for a given
+ *  query context. */
+// ====================================================================================
 
 class ParameterLevelInfoList
 {
@@ -37,7 +44,7 @@ class ParameterLevelInfoList
 
   protected:
 
-    ParameterLevelInfo_pvec mList;
+    ParameterLevelInfo_pvec mList;  //!< Underlying vector of ParameterLevelInfo pointers.
 };
 
 

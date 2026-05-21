@@ -13,6 +13,8 @@ namespace T
 {
 
 
+/*! \brief Default constructor for EventInfoList. */
+
 EventInfoList::EventInfoList()
 {
   FUNCTION_TRACE
@@ -32,6 +34,8 @@ EventInfoList::EventInfoList()
 
 
 
+
+/*! \brief Copy constructor for EventInfoList. */
 
 EventInfoList::EventInfoList(EventInfoList& eventInfoList)
 {
@@ -63,6 +67,8 @@ EventInfoList::EventInfoList(EventInfoList& eventInfoList)
 
 
 
+/*! \brief Destructor for EventInfoList. */
+
 EventInfoList::~EventInfoList()
 {
   FUNCTION_TRACE
@@ -90,6 +96,8 @@ EventInfoList::~EventInfoList()
 
 
 
+
+/*! \brief Copy assignment operator for EventInfoList. */
 
 EventInfoList& EventInfoList::operator=(EventInfoList& eventInfoList)
 {
@@ -124,6 +132,8 @@ EventInfoList& EventInfoList::operator=(EventInfoList& eventInfoList)
 
 
 
+/*! \brief Return the oldest event in the list. */
+
 EventInfo* EventInfoList::getFirstEvent()
 {
   FUNCTION_TRACE
@@ -140,6 +150,8 @@ EventInfo* EventInfoList::getFirstEvent()
 
 
 
+/*! \brief Return the newest event in the list. */
+
 EventInfo* EventInfoList::getLastEvent()
 {
   FUNCTION_TRACE
@@ -155,6 +167,8 @@ EventInfo* EventInfoList::getLastEvent()
 
 
 
+
+/*! \brief Append an event to the end of the list. */
 
 void EventInfoList::addEventInfo(EventInfo *dataEventInfo)
 {
@@ -192,6 +206,8 @@ void EventInfoList::addEventInfo(EventInfo *dataEventInfo)
 
 
 
+/*! \brief Insert an event at the beginning of the list. */
+
 void EventInfoList::addEventInfoToBegin(EventInfo *dataEventInfo)
 {
   FUNCTION_TRACE
@@ -225,6 +241,8 @@ void EventInfoList::addEventInfoToBegin(EventInfo *dataEventInfo)
 
 
 
+/*! \brief Remove the oldest event from the list. */
+
 void EventInfoList::deleteFirstEvent()
 {
   FUNCTION_TRACE
@@ -255,6 +273,8 @@ void EventInfoList::deleteFirstEvent()
 
 
 
+/*! \brief Remove the newest event from the list. */
+
 void EventInfoList::deleteLastEvent()
 {
   FUNCTION_TRACE
@@ -282,6 +302,8 @@ void EventInfoList::deleteLastEvent()
 
 
 
+
+/*! \brief Remove all events from the list. */
 
 void EventInfoList::clear()
 {
@@ -311,6 +333,8 @@ void EventInfoList::clear()
 
 
 
+/*! \brief Return the number of events currently in the list. */
+
 uint EventInfoList::getLength()
 {
   FUNCTION_TRACE
@@ -328,6 +352,8 @@ uint EventInfoList::getLength()
 
 
 
+/*! \brief Return the maximum number of events the list will retain. */
+
 uint EventInfoList::getMaxLength()
 {
   FUNCTION_TRACE
@@ -344,6 +370,8 @@ uint EventInfoList::getMaxLength()
 
 
 
+
+/*! \brief Return the event matching the given event id. */
 
 EventInfo* EventInfoList::getEventInfo(T::EventId  eventId)
 {
@@ -372,6 +400,8 @@ EventInfo* EventInfoList::getEventInfo(T::EventId  eventId)
 
 
 
+
+/*! \brief Append a paginated slice of events starting from the given event id. */
 
 void EventInfoList::getEventInfoList(T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
@@ -416,6 +446,8 @@ void EventInfoList::getEventInfoList(T::EventId startEventId,int maxRecords,T::E
 
 
 
+/*! \brief Set the maximum number of events the list will retain. */
+
 void EventInfoList::setMaxLength(uint maxLength)
 {
   FUNCTION_TRACE
@@ -437,6 +469,8 @@ void EventInfoList::setMaxLength(uint maxLength)
 
 
 
+/*! \brief Acquire the internal mutex protecting the list. */
+
 void EventInfoList::lock()
 {
   FUNCTION_TRACE
@@ -454,6 +488,8 @@ void EventInfoList::lock()
 
 
 
+/*! \brief Release the internal mutex protecting the list. */
+
 void EventInfoList::unlock()
 {
   FUNCTION_TRACE
@@ -470,6 +506,8 @@ void EventInfoList::unlock()
 
 
 
+
+/*! \brief Write the list contents to the named file. */
 
 void EventInfoList::writeToFile(const std::string& filename)
 {
@@ -503,6 +541,8 @@ void EventInfoList::writeToFile(const std::string& filename)
 
 
 
+
+/*! \brief Print the list contents to the given stream. */
 
 void EventInfoList::print(std::ostream& stream,uint level,uint optionFlags)
 {
