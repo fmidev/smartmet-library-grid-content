@@ -7,6 +7,7 @@
 #include <grid-files/common/FileWriter.h>
 #include <grid-files/identification/GridDef.h>
 #include <grid-files/grid/GridFile.h>
+#include <grid-files/common/GraphFunctions.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TimeParser.h>
 #include <macgyver/Astronomy.h>
@@ -2137,6 +2138,28 @@ void ServiceImplementation::postProcessQuery(Query& query)
     if (contourSubdivideStr != nullptr)
       contourSubdivide = toInt32(contourSubdivideStr);
 
+    // Opt-in Trax grid smoother (box / median / morphology). Active only when a
+    // method is given; otherwise an inactive option is a no-op in grid-files.
+    // The legacy contour.smooth.size/degree above remain unused (Savitzky-Golay
+    // is not implemented on the grid path).
+    Trax::SmoothOptions smoothOptions;
+    const char *smoothMethodStr = query.mAttributeList.getAttributeValue("contour.smooth.method");
+    if (smoothMethodStr != nullptr)
+    {
+      smoothOptions.method = Trax::to_smooth_method(smoothMethodStr);
+      const char *str = nullptr;
+      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.radius")) != nullptr)
+        smoothOptions.radius = toInt32(str);
+      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.passes")) != nullptr)
+        smoothOptions.passes = toInt32(str);
+      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.boundary")) != nullptr)
+        smoothOptions.boundary = Trax::to_smooth_boundary(str);
+      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.morphology")) != nullptr)
+        smoothOptions.morphology = Trax::to_morphology_op(str);
+      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.preserve_missing")) != nullptr)
+        smoothOptions.preserve_missing = (toInt32(str) != 0);
+    }
+
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       auto sz = qParam->mCoordinates.size();
@@ -2160,7 +2183,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData,
-                    contourSubdivide);
+                    contourSubdivide,
+                    smoothOptions);
               }
             }
           }
@@ -2183,7 +2207,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData,
-                    contourSubdivide);
+                    contourSubdivide,
+                    smoothOptions);
               }
             }
           }
