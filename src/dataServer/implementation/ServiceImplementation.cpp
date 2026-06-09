@@ -1344,13 +1344,6 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
-
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
       {
@@ -1373,7 +1366,6 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByLevelAndGeometry(*message1,*message2,newLevel,attributeList,modificationOperation,modificationParameters,values);
@@ -1436,13 +1428,6 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
-
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
       {
@@ -1465,7 +1450,6 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeAndGeometry(*message1,*message2,newTime,attributeList,modificationOperation,modificationParameters,values);
@@ -1797,13 +1781,6 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
       if (message4 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
-
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
       {
@@ -1826,7 +1803,6 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeLevelAndGeometry(*message1,*message2,*message3,*message4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
@@ -1967,14 +1943,6 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
       if (message == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
-
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
       {
@@ -1997,7 +1965,6 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
           }
         }
       }
-#endif
 
       message->getGridValueVectorByGeometry(attributeList,modificationOperation,modificationParameters,values);
       return Result::OK;
