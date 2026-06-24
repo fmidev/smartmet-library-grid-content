@@ -2207,6 +2207,11 @@ void ServiceImplementation::postProcessQuery(Query& query)
     if (contourSubdivideStr != nullptr)
       contourSubdivide = toInt32(contourSubdivideStr);
 
+    int contourThreads = 1;
+    const char *contourThreadsStr = query.mAttributeList.getAttributeValue("contour.threads");
+    if (contourThreadsStr != nullptr)
+      contourThreads = toInt32(contourThreadsStr);
+
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
       auto sz = qParam->mCoordinates.size();
@@ -2230,7 +2235,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData,
-                    contourSubdivide);
+                    contourSubdivide,
+                    contourThreads);
               }
             }
           }
@@ -2253,7 +2259,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
                     smoothSize,
                     smoothDegree,
                     (*pValue)->mValueData,
-                    contourSubdivide);
+                    contourSubdivide,
+                    contourThreads);
               }
             }
           }

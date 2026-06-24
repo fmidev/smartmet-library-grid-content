@@ -1344,12 +1344,10 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
+      // If the requester obviously wants the original grid (the data CRS with no target
+      // grid size, cell resolution, bounding box or center given), add the geometryId
+      // into the request. This lets the data be fetched by a direct copy of the original
+      // message data instead of sampling the grid point by point, which is much faster.
 
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
@@ -1357,23 +1355,25 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
         const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
         if (geometryIdStr == nullptr)
         {
-          // Adding  geometryId information into the request if the requester obviously
-          // wants to fetch the original grid. This makes its prosessing faster.
-
           const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
           const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
           const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
           const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
           const char *centerStr = attributeList.getAttributeValue("grid.center");
+          const char *cellWidthStr = attributeList.getAttributeValue("grid.cell.width");
+          const char *cellHeightStr = attributeList.getAttributeValue("grid.cell.height");
+
+          // A target cell resolution (grid.cell.width/height) means the data must be
+          // resampled, so such requests are left to the generic path.
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              cellWidthStr == nullptr && cellHeightStr == nullptr  &&
               (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByLevelAndGeometry(*message1,*message2,newLevel,attributeList,modificationOperation,modificationParameters,values);
@@ -1436,12 +1436,10 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
+      // If the requester obviously wants the original grid (the data CRS with no target
+      // grid size, cell resolution, bounding box or center given), add the geometryId
+      // into the request. This lets the data be fetched by a direct copy of the original
+      // message data instead of sampling the grid point by point, which is much faster.
 
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
@@ -1449,23 +1447,25 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
         const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
         if (geometryIdStr == nullptr)
         {
-          // Adding  geometryId information into the request if the requester obviously
-          // wants to fetch the original grid. This makes its prosessing faster.
-
           const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
           const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
           const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
           const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
           const char *centerStr = attributeList.getAttributeValue("grid.center");
+          const char *cellWidthStr = attributeList.getAttributeValue("grid.cell.width");
+          const char *cellHeightStr = attributeList.getAttributeValue("grid.cell.height");
+
+          // A target cell resolution (grid.cell.width/height) means the data must be
+          // resampled, so such requests are left to the generic path.
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              cellWidthStr == nullptr && cellHeightStr == nullptr  &&
               (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeAndGeometry(*message1,*message2,newTime,attributeList,modificationOperation,modificationParameters,values);
@@ -1797,12 +1797,10 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
       if (message4 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
+      // If the requester obviously wants the original grid (the data CRS with no target
+      // grid size, cell resolution, bounding box or center given), add the geometryId
+      // into the request. This lets the data be fetched by a direct copy of the original
+      // message data instead of sampling the grid point by point, which is much faster.
 
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
@@ -1810,23 +1808,25 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
         const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
         if (geometryIdStr == nullptr)
         {
-          // Adding  geometryId information into the request if the requester obviously
-          // wants to fetch the original grid. This makes its prosessing faster.
-
           const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
           const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
           const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
           const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
           const char *centerStr = attributeList.getAttributeValue("grid.center");
+          const char *cellWidthStr = attributeList.getAttributeValue("grid.cell.width");
+          const char *cellHeightStr = attributeList.getAttributeValue("grid.cell.height");
+
+          // A target cell resolution (grid.cell.width/height) means the data must be
+          // resampled, so such requests are left to the generic path.
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              cellWidthStr == nullptr && cellHeightStr == nullptr  &&
               (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
         }
       }
-#endif
 
       GRID::MessageProcessing messageProcessing;
       messageProcessing.getGridValueVectorByTimeLevelAndGeometry(*message1,*message2,*message3,*message4,newTime,newLevel,attributeList,modificationOperation,modificationParameters,values);
@@ -1968,12 +1968,10 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
         return Result::MESSAGE_NOT_FOUND;
 
 
-#if 0
-      // *********************************************************************************'
-
-      // This does not work correctly. There is something wrong with the scanning directions.
-      // Maybe scanning direction information is not returned correctly or Download assumes
-      // to get data always by using the same scanning direction.
+      // If the requester obviously wants the original grid (the data CRS with no target
+      // grid size, cell resolution, bounding box or center given), add the geometryId
+      // into the request. This lets the data be fetched by a direct copy of the original
+      // message data instead of sampling the grid point by point, which is much faster.
 
       const char *crsStr = attributeList.getAttributeValue("grid.crs");
       if (crsStr != nullptr &&  strcasecmp(crsStr,"data") == 0)
@@ -1981,23 +1979,25 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
         const char *geometryIdStr = attributeList.getAttributeValue("grid.geometryId");
         if (geometryIdStr == nullptr)
         {
-          // Adding  geometryId information into the request if the requester obviously
-          // wants to fetch the original grid. This makes its prosessing faster.
-
           const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
           const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
           const char *llboxStr = attributeList.getAttributeValue("grid.llbox");
           const char *gridSizeStr = attributeList.getAttributeValue("grid.size");
           const char *centerStr = attributeList.getAttributeValue("grid.center");
+          const char *cellWidthStr = attributeList.getAttributeValue("grid.cell.width");
+          const char *cellHeightStr = attributeList.getAttributeValue("grid.cell.height");
+
+          // A target cell resolution (grid.cell.width/height) means the data must be
+          // resampled, so such requests are left to the generic path.
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
+              cellWidthStr == nullptr && cellHeightStr == nullptr  &&
               (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message->getGridGeometryId()));
           }
         }
       }
-#endif
 
       message->getGridValueVectorByGeometry(attributeList,modificationOperation,modificationParameters,values);
       return Result::OK;
