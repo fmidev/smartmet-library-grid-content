@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.6.8
-BuildRequires: smartmet-library-grid-files-devel >= 26.6.15
-BuildRequires: smartmet-library-macgyver-devel >= 26.6.6
-BuildRequires: smartmet-library-spine-devel >= 26.6.9
+BuildRequires: smartmet-library-gis-devel >= 26.6.15
+BuildRequires: smartmet-library-grid-files-devel >= 26.6.24
+BuildRequires: smartmet-library-macgyver-devel >= 26.6.15
+BuildRequires: smartmet-library-spine-devel >= 26.6.24
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -42,10 +42,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.6.8
-Requires: smartmet-library-grid-files >= 26.6.15
-Requires: smartmet-library-macgyver >= 26.6.6
-Requires: smartmet-library-spine >= 26.6.9
+Requires: smartmet-library-gis >= 26.6.15
+Requires: smartmet-library-grid-files >= 26.6.24
+Requires: smartmet-library-macgyver >= 26.6.15
+Requires: smartmet-library-spine >= 26.6.24
 
 Provides: %{SPECNAME}
 
@@ -79,10 +79,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 26.6.6
-Requires: smartmet-library-gis-devel >= 26.6.8
-Requires: smartmet-library-spine-devel >= 26.6.9
-Requires: smartmet-library-grid-files-devel >= 26.6.15
+Requires: smartmet-library-macgyver-devel >= 26.6.15
+Requires: smartmet-library-gis-devel >= 26.6.15
+Requires: smartmet-library-spine-devel >= 26.6.24
+Requires: smartmet-library-grid-files-devel >= 26.6.24
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
