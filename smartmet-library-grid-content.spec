@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.6.24
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -92,6 +92,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-2.fmi
+- Pass the Trax grid smoother (contour.smooth.method/.radius/.passes/.boundary/.morphology/
+  .preserve_missing) through to grid-files contouring
 * Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-1.fmi
 - Pass the contour.threads attribute through to grid-files contouring
 * Mon Jun 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.15-1.fmi
