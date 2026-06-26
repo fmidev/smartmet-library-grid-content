@@ -1,4 +1,5 @@
 #include "Server.h"
+#include <macgyver/ThreadName.h>
 
 
 namespace SmartMet
@@ -13,6 +14,7 @@ static void* Server_maintenanceThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("ds-maint");
     Server *server = static_cast<Server*>(arg);
     server->run();
     return nullptr;

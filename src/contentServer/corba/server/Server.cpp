@@ -1,5 +1,6 @@
 #include "Server.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/ThreadName.h>
 
 
 namespace SmartMet
@@ -14,6 +15,7 @@ static void* Server_maintenanceThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("cs-maint");
     Server *server = static_cast<Server*>(arg);
     server->run();
     return nullptr;

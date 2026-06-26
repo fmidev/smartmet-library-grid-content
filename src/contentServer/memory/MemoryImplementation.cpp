@@ -1,5 +1,6 @@
 #include "MemoryImplementation.h"
 #include <macgyver/Exception.h>
+#include <macgyver/ThreadName.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/ShowFunction.h>
@@ -26,6 +27,7 @@ static void* MemoryImplementation_syncProcessingThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("cs-mem-sync");
     MemoryImplementation *service = (MemoryImplementation*)arg;
     service->syncProcessingThread();
     return nullptr;

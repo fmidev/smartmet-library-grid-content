@@ -9,6 +9,7 @@
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/ThreadName.h>
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/thread/thread.hpp>
@@ -27,6 +28,7 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("ds-event");
     ServiceImplementation *service = (ServiceImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
@@ -46,6 +48,7 @@ static void* ServiceImplementation_cacheProcessingThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("ds-cache");
     ServiceImplementation *service = (ServiceImplementation*)arg;
     service->cacheProcessingThread();
     return nullptr;

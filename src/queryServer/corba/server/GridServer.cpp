@@ -1,4 +1,5 @@
 #include "GridServer.h"
+#include <macgyver/ThreadName.h>
 
 
 namespace SmartMet
@@ -13,6 +14,7 @@ static void* GridServer_maintenanceThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("qs-gmaint");
     GridServer *server = static_cast<GridServer*>(arg);
     server->run();
     return nullptr;

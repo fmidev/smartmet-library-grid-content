@@ -9,6 +9,7 @@
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/common/GraphFunctions.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/ThreadName.h>
 #include <macgyver/TimeParser.h>
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
@@ -109,6 +110,7 @@ static void* queryServer_updateThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("upd-qs");
     ServiceImplementation *service = static_cast<ServiceImplementation*>(arg);
     service->updateProcessing();
     return nullptr;

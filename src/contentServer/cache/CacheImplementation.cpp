@@ -1,6 +1,7 @@
 #include "CacheImplementation.h"
 
 #include <macgyver/Exception.h>
+#include <macgyver/ThreadName.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
@@ -25,6 +26,7 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("cs-cache-evt");
     CacheImplementation *service = (CacheImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;

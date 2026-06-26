@@ -1,6 +1,7 @@
 #include "MergeImplementation.h"
 
 #include <macgyver/Exception.h>
+#include <macgyver/ThreadName.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
@@ -27,6 +28,7 @@ static void* MergeImplementation_eventProcessingThread(void *arg)
 {
   try
   {
+    Fmi::set_thread_name("cs-merge-evt");
     MergeImplementation *service = (MergeImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
