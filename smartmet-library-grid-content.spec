@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.6.26
+Version: 26.7.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.6.15
-BuildRequires: smartmet-library-grid-files-devel >= 26.6.24
+BuildRequires: smartmet-library-gis-devel >= 26.6.25
+BuildRequires: smartmet-library-grid-files-devel >= 26.6.30
 BuildRequires: smartmet-library-macgyver-devel >= 26.6.26
-BuildRequires: smartmet-library-spine-devel >= 26.6.24
+BuildRequires: smartmet-library-spine-devel >= 26.7.7
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -42,10 +42,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.6.15
-Requires: smartmet-library-grid-files >= 26.6.24
+Requires: smartmet-library-gis >= 26.6.25
+Requires: smartmet-library-grid-files >= 26.6.30
 Requires: smartmet-library-macgyver >= 26.6.26
-Requires: smartmet-library-spine >= 26.6.24
+Requires: smartmet-library-spine >= 26.7.7
 
 Provides: %{SPECNAME}
 
@@ -80,9 +80,9 @@ Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 26.6.26
-Requires: smartmet-library-gis-devel >= 26.6.15
-Requires: smartmet-library-spine-devel >= 26.6.24
-Requires: smartmet-library-grid-files-devel >= 26.6.24
+Requires: smartmet-library-gis-devel >= 26.6.25
+Requires: smartmet-library-spine-devel >= 26.7.7
+Requires: smartmet-library-grid-files-devel >= 26.6.30
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -92,9 +92,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Jul  9 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.7.9-1.fmi
+- Added warnings on geometries not configured properly into use
 * Fri Jun 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.26-1.fmi
 - Thread naming: Named the Content/Data/Query server maintenance and processing threads
-
 * Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-2.fmi
 - Pass the Trax grid smoother (contour.smooth.method/.radius/.passes/.boundary/.morphology/
   .preserve_missing) through to grid-files contouring
