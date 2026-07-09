@@ -99,6 +99,13 @@ thread_local static time_t mParameterMappingCache_clearTime;
 
 thread_local static std::set<UInt64 > mReadyGeometryList;
 
+// Geometry ids for which a "no registered definition" warning has already been printed to
+// the terminal (=> journal). File-local and mutex-protected so that the warning is emitted
+// only once per geometry across all worker threads. The set stays small (one entry per
+// misconfigured geometry) and is touched only when such a geometry is actually encountered.
+static std::set<T::GeometryId> mUnregisteredGeometryWarnings;
+static ModificationLock mUnregisteredGeometryWarnings_modificationLock;
+
 thread_local static ProducerGenarationListCache mProducerGenerationListCache;
 thread_local static time_t mProducerGenerationListCache_clearTime;
 
@@ -1077,6 +1084,22 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
         // but does not cover the requested coordinates. The candidate is still rejected
         // either way, since a data fetch would fail later for the same reason.
         PRINT_DATA(mDebugLog, "  - Geometry '%d' has no registered definition. Coverage cannot be verified!\n", prod->second);
+
+        // The debug log is normally disabled in production, so also warn to the terminal
+        // (=> journal) where maintenance can see it. Print only once per geometry to avoid
+        // flooding the journal, since this method is called for every query.
+        bool firstWarning = false;
+        {
+          AutoWriteLock lock(&mUnregisteredGeometryWarnings_modificationLock);
+          firstWarning = mUnregisteredGeometryWarnings.insert(prod->second).second;
+        }
+        if (firstWarning)
+        {
+          Fmi::Exception warning(BCP, "Producer refers to a grid geometry that has no registered definition; check the grid geometry configuration");
+          warning.addParameter("GeometryId", std::to_string(prod->second));
+          warning.printError();
+        }
+
         continue;
       }
 
