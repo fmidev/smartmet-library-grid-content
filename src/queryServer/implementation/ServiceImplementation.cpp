@@ -1065,8 +1065,21 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
   FUNCTION_TRACE
   try
   {
+    std::set<T::GeometryId> registeredGeometryIds;
+    Identification::gridDef.getGeometryIdList(registeredGeometryIds);
+
     for (auto prod = producers.begin(); prod != producers.end(); ++prod)
     {
+      if (registeredGeometryIds.find(prod->second) == registeredGeometryIds.end())
+      {
+        // The geometry itself has no registered definition, so its coverage cannot be
+        // verified. This is different from the case where the geometry is registered
+        // but does not cover the requested coordinates. The candidate is still rejected
+        // either way, since a data fetch would fail later for the same reason.
+        PRINT_DATA(mDebugLog, "  - Geometry '%d' has no registered definition. Coverage cannot be verified!\n", prod->second);
+        continue;
+      }
+
       bool match = true;
       for (auto cList = coordinates.begin(); cList != coordinates.end(); ++cList)
       {
