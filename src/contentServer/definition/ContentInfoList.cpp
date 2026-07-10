@@ -564,9 +564,9 @@ ContentInfoList& ContentInfoList::operator=(const ContentInfoList& contentInfoLi
         if (info != nullptr && (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           if (mReleaseObjects)
-            mArray[t] = info->duplicate();
+            mArray[p] = info->duplicate();
           else
-            mArray[t] = info;
+            mArray[p] = info;
 
           p++;
         }
