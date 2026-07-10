@@ -8486,6 +8486,52 @@ void CacheImplementation::updateContent()
     auto ssp = mSearchStructurePtr[mActiveSearchStructure];
     if (mContentSwapEnabled)
     {
+      // Removing information that is marked to be deleted. In swap mode the delete
+      // events only mark records on these primary lists; the marked records are
+      // skipped when the new search structure is built below, so without this
+      // compaction they would stay allocated for the lifetime of the process.
+
+      if ((mContentDeleteCounter > 0 || mFileDeleteCounter > 0 || mGenerationDeleteCounter > 0 ||
+           mGeometryDeleteCounter > 0 || mProducerDeleteCounter > 0)  &&  !mShutdownRequested)
+      {
+        AutoWriteLock writeLock(&mModificationLock);
+
+        if (mContentDeleteCounter > 0)
+        {
+          PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
+          mContentInfoList.deleteMarkedContent();
+          mContentDeleteCounter = 0;
+        }
+
+        if (mFileDeleteCounter > 0)
+        {
+          PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
+          mFileInfoList.deleteMarkedFiles();
+          mFileDeleteCounter = 0;
+        }
+
+        if (mGenerationDeleteCounter > 0)
+        {
+          PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
+          mGenerationInfoList.deleteMarkedGenerations();
+          mGenerationDeleteCounter = 0;
+        }
+
+        if (mGeometryDeleteCounter > 0)
+        {
+          PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
+          mGeometryInfoList.deleteMarkedGeometries();
+          mGeometryDeleteCounter = 0;
+        }
+
+        if (mProducerDeleteCounter > 0)
+        {
+          PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
+          mProducerInfoList.deleteMarkedProducers();
+          mProducerDeleteCounter = 0;
+        }
+      }
+
       // If the swapping is enabled then we create totally new search structure
       // and replace the the old one.
 
