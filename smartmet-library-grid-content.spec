@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.7.9
+Version: 26.7.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -92,6 +92,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sun Jul 12 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.7.12-1.fmi
+- Free marked-deleted records in content swap mode and fix another memory leak
+
 * Thu Jul  9 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.7.9-1.fmi
 - Added warnings on geometries not configured properly into use
 * Fri Jun 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.26-1.fmi
