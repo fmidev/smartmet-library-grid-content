@@ -27,6 +27,7 @@ enum Result
   MISSING_PARAMETER                           = -6,    //!< A required input parameter was not supplied.
   PERMANENT_STORAGE_ERROR                     = -7,    //!< An error occurred while accessing permanent storage.
   NO_CONNECTION_TO_PERMANENT_STORAGE          = -8,    //!< Cannot connect to the persistent storage backend.
+  AUTHENTICATION_FAILED                       = -9,    //!< Authentication failed.
   INVALID_SESSION                             = -10,   //!< The supplied session id is invalid or expired.
   UNKNOWN_METHOD                              = -11,   //!< The requested service method is not recognised.
   SERVICE_DISABLED                            = -20,   //!< The service has been administratively disabled.

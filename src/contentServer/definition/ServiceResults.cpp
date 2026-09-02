@@ -47,6 +47,9 @@ std::string getResultString(int resultCode)
       case Result::NO_CONNECTION_TO_PERMANENT_STORAGE:
         return std::string("No connection to the permanent storage!");
 
+      case Result::AUTHENTICATION_FAILED:
+        return std::string("Authentication failed!");
+
       case Result::INVALID_SESSION:
         return std::string("Invalid session!");
 

@@ -25,9 +25,9 @@ class RedisImplementation : public ServiceInterface
                     RedisImplementation();
      virtual        ~RedisImplementation();
 
-     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix);
-     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled);
-     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisPassword);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled,const char *redisPassword);
+     virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired,const char *redisPassword);
      virtual void   shutdown();
      virtual void   syncFilenames();
      virtual void   getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
@@ -267,6 +267,7 @@ class RedisImplementation : public ServiceInterface
      int            mRedisPort;             //!< Port of the primary Redis instance.
      std::string    mRedisSecondaryAddress; //!< Hostname or IP of the optional secondary Redis instance.
      int            mRedisSecondaryPort;    //!< Port of the optional secondary Redis instance.
+     std::string    mRedisPassword;         //!< Password for default user.
      std::string    mFunction;              //!< Name of the currently executing function, used for lock diagnostics.
      uint           mLine;                  //!< Source line of the current lock acquisition, used for diagnostics.
      bool           mShutdownRequested;     //!< True after shutdown() has been called.
