@@ -25,7 +25,7 @@ class ServerInterface
                 ServerInterface();
     virtual     ~ServerInterface();
 
-    void        init(ContentServer::ServiceInterface *service);
+    void        init(ContentServer::ServiceInterface *service,bool readMethodsEnabled,bool writeMethodsEnabled);
 
     virtual void processRequest(T::RequestMessage& request,T::ResponseMessage& response);
 
@@ -171,6 +171,8 @@ class ServerInterface
   protected:
 
     ContentServer::ServiceInterface *mService;  //!< Non-owning pointer to the local service implementation.
+    bool mReadMethodsEnabled;
+    bool mWriteMethodsEnabled;
 };
 
 

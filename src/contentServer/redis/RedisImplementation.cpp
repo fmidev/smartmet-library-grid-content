@@ -274,7 +274,7 @@ void RedisImplementation::unlock(UInt64 key)
 
 /*! \brief Initializes the Redis backend using a single Redis instance and a key table prefix. */
 
-void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix)
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisPassword)
 {
   FUNCTION_TRACE
   try
@@ -284,6 +284,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     mTablePrefix = tablePrefix;
     mRedisSecondaryPort = 0;
     mDatabaseLockEnabled = false;
+    mRedisPassword = redisPassword;
 
     openConnection();
 
@@ -302,7 +303,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
 /*! \brief Initializes the Redis backend with an explicit database-lock flag. */
 
-void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled)
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled,const char *redisPassword)
 {
   FUNCTION_TRACE
   try
@@ -312,6 +313,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     mTablePrefix = tablePrefix;
     mRedisSecondaryPort = 0;
     mDatabaseLockEnabled = databaseLockEnabled;
+    mRedisPassword = redisPassword;
 
     openConnection();
 
@@ -330,7 +332,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
 /*! \brief Initializes the Redis backend with a primary and a secondary Redis instance. */
 
-void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired)
+void RedisImplementation::init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisSecondaryAddress,int redisSecondaryPort,bool databaseLockEnabled,bool reloadRequired,const char *redisPassword)
 {
   FUNCTION_TRACE
   try
@@ -342,6 +344,7 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
     mRedisSecondaryPort = redisSecondaryPort;
     mDatabaseLockEnabled = databaseLockEnabled;
     mReloadRequired = reloadRequired;
+    mRedisPassword = redisPassword;
 
     openConnection();
 
@@ -431,6 +434,32 @@ int RedisImplementation::openConnection()
 
           return Result::OK;
         }
+
+        if (strncasecmp(reply->str,"NOAUTH",6) == 0)
+        {
+          std::string auth = "AUTH " + mRedisPassword;
+          redisReply *reply = static_cast<redisReply*>(redisCommand(context,auth.c_str()));
+          if (reply != nullptr)
+          {
+            if (strcasecmp(reply->str,"OK") == 0)
+            {
+              mContext = context;
+              freeReplyObject(reply);
+              if (mStartTime == 0 || mReloadRequired)
+                mStartTime = time(nullptr);
+
+              return Result::OK;
+            }
+            else
+            {
+              freeReplyObject(reply);
+              printf("Redis authentication failed (%s)\n",mSourceInfo.c_str());
+              mSourceInfo = "Redis:AUTHENTICATION_FAILED";
+              return Result::AUTHENTICATION_FAILED;
+            }
+          }
+        }
+
         freeReplyObject(reply);
       }
       boost::this_thread::sleep(boost::posix_time::seconds(1));
