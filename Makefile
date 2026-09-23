@@ -302,25 +302,25 @@ install:
 	@mkdir -p $(includedir)/$(INCDIR)/userManagement/implementation
 	@mkdir -p $(includedir)/$(INCDIR)/functions
 	@mkdir -p $(includedir)/$(INCDIR)/lua
-	@cp src/contentServer/cache/*.h $(includedir)/$(INCDIR)/contentServer/cache
-	@cp src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
-	@cp src/contentServer/http/client/*.h $(includedir)/$(INCDIR)/contentServer/http/client
-	@cp src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
-	@cp src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server
-	@cp src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
-	@cp src/contentServer/merge/*.h $(includedir)/$(INCDIR)/contentServer/merge
-	@cp src/contentServer/postgresql/*.h $(includedir)/$(INCDIR)/contentServer/postgresql
-	@cp src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
-	@cp src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
-	@cp src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
-	@cp src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
-	@cp src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
-	@cp src/sessionManagement/definition/*.h $(includedir)/$(INCDIR)/sessionManagement/definition
-	@cp src/sessionManagement/implementation/*.h $(includedir)/$(INCDIR)/sessionManagement/implementation
-	@cp src/userManagement/definition/*.h $(includedir)/$(INCDIR)/userManagement/definition
-	@cp src/userManagement/implementation/*.h $(includedir)/$(INCDIR)/userManagement/implementation
-	@cp src/functions/*.h $(includedir)/$(INCDIR)/functions
-	@cp src/lua/*.h $(includedir)/$(INCDIR)/lua
+	$(INSTALL_DATA) src/contentServer/cache/*.h $(includedir)/$(INCDIR)/contentServer/cache
+	$(INSTALL_DATA) src/contentServer/definition/*.h $(includedir)/$(INCDIR)/contentServer/definition
+	$(INSTALL_DATA) src/contentServer/http/client/*.h $(includedir)/$(INCDIR)/contentServer/http/client
+	$(INSTALL_DATA) src/contentServer/http/common/*.h $(includedir)/$(INCDIR)/contentServer/http/common
+	$(INSTALL_DATA) src/contentServer/http/server/*.h $(includedir)/$(INCDIR)/contentServer/http/server
+	$(INSTALL_DATA) src/contentServer/memory/*.h $(includedir)/$(INCDIR)/contentServer/memory
+	$(INSTALL_DATA) src/contentServer/merge/*.h $(includedir)/$(INCDIR)/contentServer/merge
+	$(INSTALL_DATA) src/contentServer/postgresql/*.h $(includedir)/$(INCDIR)/contentServer/postgresql
+	$(INSTALL_DATA) src/contentServer/redis/*.h $(includedir)/$(INCDIR)/contentServer/redis
+	$(INSTALL_DATA) src/dataServer/definition/*.h $(includedir)/$(INCDIR)/dataServer/definition
+	$(INSTALL_DATA) src/dataServer/implementation/*.h $(includedir)/$(INCDIR)/dataServer/implementation
+	$(INSTALL_DATA) src/queryServer/definition/*.h $(includedir)/$(INCDIR)/queryServer/definition
+	$(INSTALL_DATA) src/queryServer/implementation/*.h $(includedir)/$(INCDIR)/queryServer/implementation
+	$(INSTALL_DATA) src/sessionManagement/definition/*.h $(includedir)/$(INCDIR)/sessionManagement/definition
+	$(INSTALL_DATA) src/sessionManagement/implementation/*.h $(includedir)/$(INCDIR)/sessionManagement/implementation
+	$(INSTALL_DATA) src/userManagement/definition/*.h $(includedir)/$(INCDIR)/userManagement/definition
+	$(INSTALL_DATA) src/userManagement/implementation/*.h $(includedir)/$(INCDIR)/userManagement/implementation
+	$(INSTALL_DATA) src/functions/*.h $(includedir)/$(INCDIR)/functions
+	$(INSTALL_DATA) src/lua/*.h $(includedir)/$(INCDIR)/lua
 ifneq ($(CORBA), disabled)
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/corba
 	@mkdir -p $(includedir)/$(INCDIR)/contentServer/corba/client
@@ -338,22 +338,23 @@ ifneq ($(CORBA), disabled)
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/corba/stubs
 	@mkdir -p $(includedir)/$(INCDIR)/queryServer/corba/server
 	@mkdir -p $(includedir)/$(INCDIR)/python
-	@cp src/contentServer/corba/client/*.h $(includedir)/$(INCDIR)/contentServer/corba/client
-	@cp src/contentServer/corba/convert/*.h $(includedir)/$(INCDIR)/contentServer/corba/convert
-	@cp src/contentServer/corba/idl/*.idl $(includedir)/$(INCDIR)/contentServer/idl
-	@cp src/contentServer/corba/stubs/*.h $(includedir)/$(INCDIR)/contentServer/corba/stubs
-	@cp src/contentServer/corba/server/*.h $(includedir)/$(INCDIR)/contentServer/corba/server
-	@cp src/dataServer/corba/client/*.h $(includedir)/$(INCDIR)/dataServer/corba/client
-	@cp src/dataServer/corba/convert/*.h $(includedir)/$(INCDIR)/dataServer/corba/convert
-	@cp src/dataServer/corba/idl/*.idl $(includedir)/$(INCDIR)/dataServer/idl
-	@cp src/dataServer/corba/stubs/*.h $(includedir)/$(INCDIR)/dataServer/corba/stubs
-	@cp src/dataServer/corba/server/*.h $(includedir)/$(INCDIR)/dataServer/corba/server
-	@cp src/queryServer/corba/client/*.h $(includedir)/$(INCDIR)/queryServer/corba/client
-	@cp src/queryServer/corba/convert/*.h $(includedir)/$(INCDIR)/queryServer/corba/convert
-	@cp src/queryServer/corba/idl/*.idl $(includedir)/$(INCDIR)/queryServer/idl
-	@cp src/queryServer/corba/stubs/*.h $(includedir)/$(INCDIR)/queryServer/corba/stubs
-	@cp src/queryServer/corba/server/*.h $(includedir)/$(INCDIR)/queryServer/corba/server
+	$(INSTALL_DATA) src/contentServer/corba/client/*.h $(includedir)/$(INCDIR)/contentServer/corba/client
+	$(INSTALL_DATA) src/contentServer/corba/convert/*.h $(includedir)/$(INCDIR)/contentServer/corba/convert
+	$(INSTALL_DATA) src/contentServer/corba/idl/*.idl $(includedir)/$(INCDIR)/contentServer/idl
+	$(INSTALL_DATA) src/contentServer/corba/stubs/*.h $(includedir)/$(INCDIR)/contentServer/corba/stubs
+	$(INSTALL_DATA) src/contentServer/corba/server/*.h $(includedir)/$(INCDIR)/contentServer/corba/server
+	$(INSTALL_DATA) src/dataServer/corba/client/*.h $(includedir)/$(INCDIR)/dataServer/corba/client
+	$(INSTALL_DATA) src/dataServer/corba/convert/*.h $(includedir)/$(INCDIR)/dataServer/corba/convert
+	$(INSTALL_DATA) src/dataServer/corba/idl/*.idl $(includedir)/$(INCDIR)/dataServer/idl
+	$(INSTALL_DATA) src/dataServer/corba/stubs/*.h $(includedir)/$(INCDIR)/dataServer/corba/stubs
+	$(INSTALL_DATA) src/dataServer/corba/server/*.h $(includedir)/$(INCDIR)/dataServer/corba/server
+	$(INSTALL_DATA) src/queryServer/corba/client/*.h $(includedir)/$(INCDIR)/queryServer/corba/client
+	$(INSTALL_DATA) src/queryServer/corba/convert/*.h $(includedir)/$(INCDIR)/queryServer/corba/convert
+	$(INSTALL_DATA) src/queryServer/corba/idl/*.idl $(includedir)/$(INCDIR)/queryServer/idl
+	$(INSTALL_DATA) src/queryServer/corba/stubs/*.h $(includedir)/$(INCDIR)/queryServer/corba/stubs
+	$(INSTALL_DATA) src/queryServer/corba/server/*.h $(includedir)/$(INCDIR)/queryServer/corba/server
 	@cp -r python/FmiSmartMet $(includedir)/$(INCDIR)/python
+	@chmod -R u=rwX,g=rwX,o=rX $(includedir)/$(INCDIR)/python/FmiSmartMet
 endif
 	@mkdir -p $(libdir)
 	$(INSTALL_PROG) $(LIBFILE) $(libdir)/$(LIBFILE)
