@@ -93,6 +93,7 @@ FMI Grid Content library development files
 
 %changelog
 * Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
+- Use std functions instead of boost
 - Repackaged since moving from boost::shared_lock to std::shared_lock
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-1.fmi
 - Repackaged due to Fmi::Cache::Cache locking changes
