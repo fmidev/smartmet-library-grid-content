@@ -16,8 +16,10 @@
 #include <macgyver/NumericCast.h>
 #include <macgyver/Hash.h>
 #include <boost/numeric/conversion/cast.hpp>
-#include <unordered_set>
+#include <chrono>
 #include <deque>
+#include <thread>
+#include <unordered_set>
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_acos.h"
 #include "../../functions/Function_and.h"
@@ -12334,7 +12336,7 @@ void ServiceImplementation::updateProcessing()
 
 
       if (!mShutdownRequested)
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     mUpdateProcessingActive = false;
   }
