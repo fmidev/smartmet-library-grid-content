@@ -10425,7 +10425,10 @@ void ServiceImplementation::getGridValues(
                   time_t firstTime = 0xFFFFFFFF;
                   time_t lastTime = startTime;
 
-                  if (analysisTime.empty())
+                  // The latest generation is selected by the analysis time. Limiting the generations to the
+                  // one with the latest content time would reject it if an older generation extends further.
+
+                  if (analysisTime.empty() && (queryFlags & Query::Flags::LatestGeneration) == 0)
                   {
                     T::GenerationInfo *lastGeneration = cacheEntry->generationInfoList->getLastGenerationInfoByContentTime(producerInfo.mProducerId);
                     if (lastGeneration)
