@@ -425,7 +425,10 @@ int RedisImplementation::openConnection()
       redisReply *reply = static_cast<redisReply*>(redisCommand(context,"PING"));
       if (reply != nullptr)
       {
-        if (strcasecmp(reply->str,"PONG") == 0)
+        // Status and error replies carry a string, other reply types may not
+        const char *replyStr = (reply->str != nullptr ? reply->str : "");
+
+        if (strcasecmp(replyStr,"PONG") == 0)
         {
           mContext = context;
           freeReplyObject(reply);
@@ -435,32 +438,40 @@ int RedisImplementation::openConnection()
           return Result::OK;
         }
 
-        if (strncasecmp(reply->str,"NOAUTH",6) == 0)
+        if (strncasecmp(replyStr,"NOAUTH",6) == 0)
         {
-          std::string auth = "AUTH " + mRedisPassword;
-          redisReply *reply = static_cast<redisReply*>(redisCommand(context,auth.c_str()));
-          if (reply != nullptr)
+          freeReplyObject(reply);
+          reply = nullptr;
+
+          // SECURITY: the password must be passed as an argument, never as part of the
+          // format string: a '%' in the password would otherwise be interpreted by
+          // hiredis as a conversion (reading garbage varargs), and a space would split
+          // it into two arguments.
+          redisReply *authReply = static_cast<redisReply*>(
+              redisCommand(context,"AUTH %b",mRedisPassword.data(),mRedisPassword.size()));
+          if (authReply != nullptr)
           {
-            if (strcasecmp(reply->str,"OK") == 0)
+            const bool ok = (authReply->type == REDIS_REPLY_STATUS && authReply->str != nullptr &&
+                             strcasecmp(authReply->str,"OK") == 0);
+            freeReplyObject(authReply);
+            if (ok)
             {
               mContext = context;
-              freeReplyObject(reply);
               if (mStartTime == 0 || mReloadRequired)
                 mStartTime = time(nullptr);
 
               return Result::OK;
             }
-            else
-            {
-              freeReplyObject(reply);
-              printf("Redis authentication failed (%s)\n",mSourceInfo.c_str());
-              mSourceInfo = "Redis:AUTHENTICATION_FAILED";
-              return Result::AUTHENTICATION_FAILED;
-            }
+
+            redisFree(context);
+            printf("Redis authentication failed (%s)\n",mSourceInfo.c_str());
+            mSourceInfo = "Redis:AUTHENTICATION_FAILED";
+            return Result::AUTHENTICATION_FAILED;
           }
         }
 
-        freeReplyObject(reply);
+        if (reply != nullptr)
+          freeReplyObject(reply);
       }
       boost::this_thread::sleep(boost::posix_time::seconds(1));
     }

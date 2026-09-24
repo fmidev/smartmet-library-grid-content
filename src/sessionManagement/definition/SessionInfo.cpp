@@ -18,10 +18,15 @@ SessionInfo::SessionInfo()
 {
   try
   {
+    // SECURITY: the session id is the only secret of a logged-in browser session.
+    // Take all 64 bits directly from the OS random source instead of the first
+    // output of a mt19937_64 seeded with a single 32-bit value (only 2^32 possible
+    // ids). Zero means "no session" to the callers.
     std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<uint64_t> dist;
-    mSessionId = dist(gen);
+    do
+    {
+      mSessionId = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+    } while (mSessionId == 0);
     mStartTime = time(nullptr);
     mLastAccessTime = mStartTime;
     mTimeOutInSeconds = 600;
