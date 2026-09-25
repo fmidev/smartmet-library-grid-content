@@ -93,6 +93,8 @@ CLA is required in order to contribute. Please contact us for more information!
 ## Documentation
 SmartMet Server Grid support (https://github.com/fmidev/smartmet-tools-grid/raw/master/doc/grid-support.pdf)
 
+Developer guide: [docs/developer-guide.md](docs/developer-guide.md) — architecture, code paths and conventions for developers of this library
+
 
 ## Communication and Resources
 You may contact us from following channels:

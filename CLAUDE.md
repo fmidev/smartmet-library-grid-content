@@ -20,6 +20,8 @@ make doc                # Generate Doxygen HTML documentation in doc/html/
 
 There is no test suite in this repository. Testing is done via integration with SmartMet Server components.
 
+Full developer documentation: `docs/developer-guide.md`.
+
 ## Dependencies
 
 **SmartMet libraries:** grid-files, spine, macgyver, gis
@@ -51,7 +53,7 @@ The `Implementation` enum at `src/contentServer/definition/ServiceInterface.h:34
 - `cache/` — In-memory with event-driven sync from a master source (typically Redis)
 - `redis/` — Persistent storage via hiredis, supports primary/secondary instances
 - `postgresql/` — Database backend via libpq
-- `memory/` — Lightweight in-memory, no event monitoring
+- `memory/` — In-memory, optionally loaded from and saved to CSV files; events optional
 - `merge/` — Combines multiple service implementations
 - `corba/client/` and `http/client/` — Remote access proxies
 
