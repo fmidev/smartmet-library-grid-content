@@ -576,9 +576,8 @@ and the dependency floors, and rebuild and release the dependants together.
 
 ## 16. Known pitfalls
 
-* **Sessions are not enforced.** `isSessionValid()` returns true in the Redis, Cache
-  and Data Server implementations. Anyone who can reach a CORBA or HTTP server port can
-  call every method, including the deleting ones. Protect the ports at the network level.
+* **Deploy the servers on trusted networks.** Restrict the CORBA and HTTP server ports
+  to the hosts of the grid cluster at the network level.
 * **`make CORBA=disabled` leaves out `merge/` and `postgresql/`.** The non-CORBA `SRCS`
   list does not include those directories, although neither depends on CORBA. The grid
   engine includes `PostgresqlImplementation.h` unconditionally, so a CORBA-less build of
