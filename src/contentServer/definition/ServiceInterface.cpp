@@ -3,6 +3,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 
+#include <utility>
+
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -5617,7 +5619,7 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
   {
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
-    return _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+    return _getContentListByParameter(sessionId,parameterKeyType,std::move(parameterKey),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
   }
   catch (...)
   {
@@ -5648,7 +5650,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
   {
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
-    return _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+    return _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,std::move(parameterKey),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
   }
   catch (...)
   {
@@ -5679,7 +5681,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
   {
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
-    return _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+    return _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,std::move(parameterKey),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
   }
   catch (...)
   {
@@ -5710,7 +5712,7 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
   {
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
-    return _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+    return _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,std::move(parameterKey),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
   }
   catch (...)
   {
@@ -5741,7 +5743,7 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
   {
     time_t startTimeUTC = utcTimeToTimeT(startTime);
     time_t endTimeUTC = utcTimeToTimeT(endTime);
-    return _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
+    return _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,std::move(parameterKey),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC,requestFlags,contentInfoList);
   }
   catch (...)
   {
@@ -5771,7 +5773,7 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
   try
   {
     time_t forecastTimeUTC = utcTimeToTimeT(forecastTime);
-    return _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
+    return _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,std::move(parameterKey),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC,contentInfoList);
   }
   catch (...)
   {

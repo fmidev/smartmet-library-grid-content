@@ -1,6 +1,8 @@
 #include "LevelInfo.h"
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <utility>
+
 
 namespace SmartMet
 {
@@ -56,7 +58,7 @@ LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::Pa
   try
   {
     mProducerId = producerId;
-    mFmiParameterName = fmiParameterName;
+    mFmiParameterName = std::move(fmiParameterName);
     mFmiParameterLevelId = fmiParameterLevelId;
     mParameterLevel = parameterLevel;
   }

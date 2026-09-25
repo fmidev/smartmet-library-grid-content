@@ -1,5 +1,7 @@
 #include "QueryStreamer.h"
 
+#include <utility>
+
 namespace SmartMet
 {
 namespace QueryServer
@@ -43,7 +45,7 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
   try
   {
     mSessionId = sessionId;
-    mQueryServerPtr = queryServerPtr;
+    mQueryServerPtr = std::move(queryServerPtr);
   }
   catch (...)
   {

@@ -418,7 +418,7 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::AttributeRec corbaObject = source[t];
+      const C::AttributeRec& corbaObject = source[t];
       T::Attribute *attr = new T::Attribute();
       convert(corbaObject,*attr);
       target.addAttribute(attr);
@@ -1333,7 +1333,7 @@ void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::By
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      auto obj = source[t];
+      const auto& obj = source[t];
       C::ByteData corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
@@ -1360,7 +1360,7 @@ void Converter::convert(const SmartMet::C::ByteDataSequence& source,SmartMet::T:
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      C::ByteData corbaObject = source[t];
+      const C::ByteData& corbaObject = source[t];
       T::ByteData obj;
       convert(corbaObject,obj);
       target.emplace_back(obj);
