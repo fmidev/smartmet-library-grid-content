@@ -51,8 +51,17 @@ class RedisProcessLock
     virtual ~RedisProcessLock()
     {
       FUNCTION_TRACE
-      if (mKey != 0)
-        mRedisImplementation->unlock(mKey);
+      try
+      {
+        if (mKey != 0)
+          mRedisImplementation->unlock(mKey);
+      }
+      catch (...)
+      {
+        // Throwing from a destructor would terminate the process
+        Fmi::Exception exception(BCP,"Failed to release the Redis lock!",nullptr);
+        exception.printError();
+      }
     }
 
   protected:
