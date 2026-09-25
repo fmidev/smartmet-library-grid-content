@@ -49,14 +49,13 @@ is written into the Content Server by the tools in `tools-grid` (`filesys2smartm
 `radon2smartmet`), which scan data directories or the Radon database.
 
 There is also session and user management (`sessionManagement/`,
-`userManagement/`) following the same interface pattern. The servers do not enforce
-it; see [§16](#16-known-pitfalls).
+`userManagement/`) following the same interface pattern.
 
 ## 2. Building
 
 ```bash
 make                    # generates CORBA stubs, then builds libsmartmet-grid-content.so
-make CORBA=disabled     # build without omniORB (see the pitfall in §16)
+make CORBA=disabled     # build without omniORB
 make install            # headers -> $(includedir)/smartmet/grid-content/..., lib -> $(libdir)
 make rpm
 make doc                # Doxygen HTML into doc/html
@@ -578,22 +577,12 @@ and the dependency floors, and rebuild and release the dependants together.
 
 * **Deploy the servers on trusted networks.** Restrict the CORBA and HTTP server ports
   to the hosts of the grid cluster at the network level.
-* **`make CORBA=disabled` leaves out `merge/` and `postgresql/`.** The non-CORBA `SRCS`
-  list does not include those directories, although neither depends on CORBA. The grid
-  engine includes `PostgresqlImplementation.h` unconditionally, so a CORBA-less build of
-  the stack fails to link.
-* **The Redis ticket lock can be stolen.** A writer that waits too long resets the
-  lock and proceeds ([§6](#6-content-server-backends)). Two slow ingest processes can
-  then write at the same time.
 * **Master restarts force a full reload.** A Redis content server restart, `clear` or
   `reload` makes every cache re-read everything. With millions of content records,
   that takes a while, during which the cache answers from the old data (swap mode) or
   may block.
 * **Error details stay on the server side.** Clients see only result codes. Enable the
   debug log (`setDebugLog`) on the failing server to see the stack trace.
-* **`DataServer::ServiceImplementation::getDataServerByFileId()` always returns
-  `nullptr`.** The forwarding to another Data Server that the callers expect is not
-  implemented.
 * **Files near deletion disappear early.** Files whose `mDeletionTime` is less than
   180 s away are no longer served. Ingest tools must set deletion times with that margin
   in mind.
