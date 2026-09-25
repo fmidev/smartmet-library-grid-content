@@ -8,6 +8,7 @@
 #include <macgyver/Hash.h>
 #include <boost/thread/thread.hpp>
 #include <libpq-fe.h>
+#include <fmt/format.h>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -17,6 +18,26 @@ namespace SmartMet
 {
 namespace ContentServer
 {
+
+namespace
+{
+// SECURITY: every string value inserted into an SQL string literal must go
+// through sqlText(), which escapes it for the connection's quoting rules so
+// that it cannot terminate the literal (SQL injection, e.g. via
+// getProducerInfoByName through grid-admin).
+
+std::string sqlText(PGconn *conn, const std::string &value)
+{
+  std::string ret(2 * value.size() + 1, '\0');
+  int err = 0;
+  const auto n = PQescapeStringConn(conn, ret.data(), value.c_str(), value.size(), &err);
+  if (err != 0)
+    throw Fmi::Exception(BCP, "Invalid string value for an SQL statement");
+  ret.resize(n);
+  return ret;
+}
+
+}  // namespace
 
 
 
@@ -117,21 +138,20 @@ void PostgresqlImplementation::createTables()
     if (!isConnectionValid())
       return;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS producer (\n");
-    p += sprintf(p,"  producerId serial PRIMARY KEY,\n");
-    p += sprintf(p,"  name VARCHAR (40) NOT NULL,\n");
-    p += sprintf(p,"  title VARCHAR (50) NOT NULL,\n");
-    p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
-    p += sprintf(p,"  flags INTEGER NOT NULL, \n");
-    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  status SMALLINT NOT NULL\n");
-    p += sprintf(p,");\n");
+    sql += "CREATE TABLE IF NOT EXISTS producer (\n";
+    sql += "  producerId serial PRIMARY KEY,\n";
+    sql += "  name VARCHAR (40) NOT NULL,\n";
+    sql += "  title VARCHAR (50) NOT NULL,\n";
+    sql += "  description VARCHAR (100) NOT NULL,\n";
+    sql += "  flags INTEGER NOT NULL, \n";
+    sql += "  storageId INTEGER NOT NULL,\n";
+    sql += "  sourceId INTEGER NOT NULL,\n";
+    sql += "  status SMALLINT NOT NULL\n";
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -144,24 +164,24 @@ void PostgresqlImplementation::createTables()
     }
     PQclear(res);
 
-    p = sql;
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS generation (\n");
-    p += sprintf(p,"  generationId serial PRIMARY KEY,\n");
-    p += sprintf(p,"  generationType INTEGER NOT NULL,\n");
-    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  name VARCHAR (50) UNIQUE NOT NULL,\n");
-    p += sprintf(p,"  description VARCHAR (100) NOT NULL,\n");
-    p += sprintf(p,"  analysisTime TIMESTAMP NOT NULL,\n");
-    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
-    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
-    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
-    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId)\n");
-    p += sprintf(p,"  );\n");
+    sql.clear();
+    sql += "CREATE TABLE IF NOT EXISTS generation (\n";
+    sql += "  generationId serial PRIMARY KEY,\n";
+    sql += "  generationType INTEGER NOT NULL,\n";
+    sql += "  producerId INTEGER NOT NULL,\n";
+    sql += "  name VARCHAR (50) UNIQUE NOT NULL,\n";
+    sql += "  description VARCHAR (100) NOT NULL,\n";
+    sql += "  analysisTime TIMESTAMP NOT NULL,\n";
+    sql += "  flags INTEGER NOT NULL,\n";
+    sql += "  storageId INTEGER NOT NULL,\n";
+    sql += "  sourceId INTEGER NOT NULL,\n";
+    sql += "  modificationTime TIMESTAMP,\n";
+    sql += "  deletionTime TIMESTAMP,\n";
+    sql += "  status SMALLINT NOT NULL,\n";
+    sql += "  FOREIGN KEY (producerId) REFERENCES producer (producerId)\n";
+    sql += "  );\n";
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -174,28 +194,28 @@ void PostgresqlImplementation::createTables()
     }
     PQclear(res);
 
-    p = sql;
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS file (\n");
-    p += sprintf(p,"  fileId serial PRIMARY KEY,\n");
-    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
-    p += sprintf(p,"  protocol SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  serverType SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  server VARCHAR (50) NOT NULL,\n");
-    p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  fileName VARCHAR (200) UNIQUE NOT NULL,\n");
-    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
-    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
-    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
-    p += sprintf(p,"  fileSize BIGINT NOT NULL,\n");
-    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
-    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
-    p += sprintf(p,");\n");
+    sql.clear();
+    sql += "CREATE TABLE IF NOT EXISTS file (\n";
+    sql += "  fileId serial PRIMARY KEY,\n";
+    sql += "  producerId INTEGER NOT NULL,\n";
+    sql += "  generationId BIGINT NOT NULL,\n";
+    sql += "  protocol SMALLINT NOT NULL,\n";
+    sql += "  serverType SMALLINT NOT NULL,\n";
+    sql += "  server VARCHAR (50) NOT NULL,\n";
+    sql += "  fileType SMALLINT NOT NULL,\n";
+    sql += "  fileName VARCHAR (200) UNIQUE NOT NULL,\n";
+    sql += "  flags INTEGER NOT NULL,\n";
+    sql += "  storageId INTEGER NOT NULL,\n";
+    sql += "  sourceId INTEGER NOT NULL,\n";
+    sql += "  modificationTime TIMESTAMP,\n";
+    sql += "  deletionTime TIMESTAMP,\n";
+    sql += "  fileSize BIGINT NOT NULL,\n";
+    sql += "  status SMALLINT NOT NULL,\n";
+    sql += "  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n";
+    sql += "  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n";
+    sql += ");\n";
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -208,25 +228,25 @@ void PostgresqlImplementation::createTables()
     }
     PQclear(res);
 
-    p = sql;
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS generationGeometry (\n");
-    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
-    p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  levelId SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
-    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
-    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
-    p += sprintf(p,"  status SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  PRIMARY KEY (generationId,geometryId,levelId),\n");
-    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
-    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
-    p += sprintf(p,");\n");
+    sql.clear();
+    sql += "CREATE TABLE IF NOT EXISTS generationGeometry (\n";
+    sql += "  producerId INTEGER NOT NULL,\n";
+    sql += "  generationId BIGINT NOT NULL,\n";
+    sql += "  geometryId INTEGER NOT NULL,\n";
+    sql += "  levelId SMALLINT NOT NULL,\n";
+    sql += "  flags INTEGER NOT NULL,\n";
+    sql += "  storageId INTEGER NOT NULL,\n";
+    sql += "  sourceId INTEGER NOT NULL,\n";
+    sql += "  modificationTime TIMESTAMP,\n";
+    sql += "  deletionTime TIMESTAMP,\n";
+    sql += "  status SMALLINT NOT NULL,\n";
+    sql += "  PRIMARY KEY (generationId,geometryId,levelId),\n";
+    sql += "  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n";
+    sql += "  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n";
+    sql += ");\n";
 
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -239,40 +259,40 @@ void PostgresqlImplementation::createTables()
     }
     PQclear(res);
 
-    p = sql;
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS content (\n");
-    p += sprintf(p,"  fileId BIGINT NOT NULL,\n");
-    p += sprintf(p,"  messageIndex INTEGER NOT NULL,\n");
-    p += sprintf(p,"  fileType SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  filePosition BIGINT NOT NULL,\n");
-    p += sprintf(p,"  messageSize INTEGER NOT NULL,\n");
-    p += sprintf(p,"  producerId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  generationId BIGINT NOT NULL,\n");
-    p += sprintf(p,"  geometryId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  parameterId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  parameterName VARCHAR (50) NOT NULL,\n");
-    p += sprintf(p,"  forecastTime TIMESTAMP NOT NULL,\n");
-    p += sprintf(p,"  levelId SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  level INTEGER NOT NULL,\n");
-    p += sprintf(p,"  forecastType SMALLINT,\n");
-    p += sprintf(p,"  foracastNumber INTEGER,\n");
-    p += sprintf(p,"  flags INTEGER NOT NULL,\n");
-    p += sprintf(p,"  storageId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  sourceId INTEGER NOT NULL,\n");
-    p += sprintf(p,"  modificationTime TIMESTAMP,\n");
-    p += sprintf(p,"  deletionTime TIMESTAMP,\n");
-    p += sprintf(p,"  aggregationId INTEGER,\n");
-    p += sprintf(p,"  aggregationPeriod INTEGER,\n");
-    p += sprintf(p,"  processingTypeId INTEGER,\n");
-    p += sprintf(p,"  processingTypeValue1 NUMERIC,\n");
-    p += sprintf(p,"  processingTypeValue2 NUMERIC,\n");
-    p += sprintf(p,"  PRIMARY KEY (fileId, messageIndex),\n");
-    p += sprintf(p,"  FOREIGN KEY (fileId) REFERENCES file (fileId),\n");
-    p += sprintf(p,"  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n");
-    p += sprintf(p,"  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n");
-    p += sprintf(p,");\n");
+    sql.clear();
+    sql += "CREATE TABLE IF NOT EXISTS content (\n";
+    sql += "  fileId BIGINT NOT NULL,\n";
+    sql += "  messageIndex INTEGER NOT NULL,\n";
+    sql += "  fileType SMALLINT NOT NULL,\n";
+    sql += "  filePosition BIGINT NOT NULL,\n";
+    sql += "  messageSize INTEGER NOT NULL,\n";
+    sql += "  producerId INTEGER NOT NULL,\n";
+    sql += "  generationId BIGINT NOT NULL,\n";
+    sql += "  geometryId INTEGER NOT NULL,\n";
+    sql += "  parameterId INTEGER NOT NULL,\n";
+    sql += "  parameterName VARCHAR (50) NOT NULL,\n";
+    sql += "  forecastTime TIMESTAMP NOT NULL,\n";
+    sql += "  levelId SMALLINT NOT NULL,\n";
+    sql += "  level INTEGER NOT NULL,\n";
+    sql += "  forecastType SMALLINT,\n";
+    sql += "  foracastNumber INTEGER,\n";
+    sql += "  flags INTEGER NOT NULL,\n";
+    sql += "  storageId INTEGER NOT NULL,\n";
+    sql += "  sourceId INTEGER NOT NULL,\n";
+    sql += "  modificationTime TIMESTAMP,\n";
+    sql += "  deletionTime TIMESTAMP,\n";
+    sql += "  aggregationId INTEGER,\n";
+    sql += "  aggregationPeriod INTEGER,\n";
+    sql += "  processingTypeId INTEGER,\n";
+    sql += "  processingTypeValue1 NUMERIC,\n";
+    sql += "  processingTypeValue2 NUMERIC,\n";
+    sql += "  PRIMARY KEY (fileId, messageIndex),\n";
+    sql += "  FOREIGN KEY (fileId) REFERENCES file (fileId),\n";
+    sql += "  FOREIGN KEY (producerId) REFERENCES producer (producerId),\n";
+    sql += "  FOREIGN KEY (generationId) REFERENCES generation (generationId)\n";
+    sql += ");\n";
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -285,19 +305,19 @@ void PostgresqlImplementation::createTables()
     }
     PQclear(res);
 
-    p = sql;
-    p += sprintf(p,"CREATE TABLE IF NOT EXISTS event (\n");
-    p += sprintf(p,"  eventId serial PRIMARY KEY,\n");
-    p += sprintf(p,"  eventTime TIMESTAMP,\n");
-    p += sprintf(p,"  eventType SMALLINT NOT NULL,\n");
-    p += sprintf(p,"  id1 BIGINT,\n");
-    p += sprintf(p,"  id2 BIGINT,\n");
-    p += sprintf(p,"  id3 BIGINT,\n");
-    p += sprintf(p,"  flags BIGINT,\n");
-    p += sprintf(p,"  eventData VARCHAR (300)\n");
-    p += sprintf(p,");\n");
+    sql.clear();
+    sql += "CREATE TABLE IF NOT EXISTS event (\n";
+    sql += "  eventId serial PRIMARY KEY,\n";
+    sql += "  eventTime TIMESTAMP,\n";
+    sql += "  eventType SMALLINT NOT NULL,\n";
+    sql += "  id1 BIGINT,\n";
+    sql += "  id2 BIGINT,\n";
+    sql += "  id3 BIGINT,\n";
+    sql += "  flags BIGINT,\n";
+    sql += "  eventData VARCHAR (300)\n";
+    sql += ");\n";
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -591,33 +611,32 @@ int PostgresqlImplementation::_addProducerInfo(T::SessionId sessionId,T::Produce
     if (getProducerByName(producerInfo.mName,pInfo) == Result::OK)
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO producer\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  title,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  storageId,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  DEFAULT,\n");
-    p += sprintf(p,"  '%s',\n",producerInfo.mName.c_str());
-    p += sprintf(p,"  '%s',\n",producerInfo.mTitle.c_str());
-    p += sprintf(p,"  '%s',\n",producerInfo.mDescription.c_str());
-    p += sprintf(p,"  %u,\n",producerInfo.mFlags);
-    p += sprintf(p,"  %u,\n",producerInfo.mStorageId);
-    p += sprintf(p,"  %u,\n",producerInfo.mSourceId);
-    p += sprintf(p,"  %u\n",(uint)producerInfo.mStatus);
-    p += sprintf(p,");\n");
+    sql += "INSERT INTO producer\n";
+    sql += "(\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  title,\n";
+    sql += "  description,\n";
+    sql += "  flags,\n";
+    sql += "  storageId,\n";
+    sql += "  sourceId,\n";
+    sql += "  status\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += "  DEFAULT,\n";
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, producerInfo.mName));
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, producerInfo.mTitle));
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, producerInfo.mDescription));
+    sql += fmt::format("  {},\n", producerInfo.mFlags);
+    sql += fmt::format("  {},\n", producerInfo.mStorageId);
+    sql += fmt::format("  {},\n", producerInfo.mSourceId);
+    sql += fmt::format("  {}\n", static_cast<int>((uint)producerInfo.mStatus));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -996,9 +1015,7 @@ int PostgresqlImplementation::_getProducerNameAndGeometryList(T::SessionId sessi
         T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
         if (producerInfo->mProducerId == contentInfo->mProducerId  &&  geometryIdList.find(contentInfo->mGeometryId) == geometryIdList.end())
         {
-          char tmp[100];
-          sprintf(tmp,"%s;%u",producerInfo->mName.c_str(),contentInfo->mGeometryId);
-          list.insert(std::string(tmp));
+          list.insert(fmt::format("{};{}",producerInfo->mName,contentInfo->mGeometryId));
           geometryIdList.insert(contentInfo->mGeometryId);
         }
       }
@@ -1176,26 +1193,24 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
           {
             tmpList.insert(seed);
 
-            char tmp[200];
-            char *p = tmp;
-            p += sprintf(p,"%s;%s;%d;%s;%d;;%d;%05d;%d;%d",
-                  producerInfo->mName.c_str(),
-                  sourceParamKey.c_str(),
-                  targetParameterKeyType,
-                  targetParamKey.c_str(),
-                  contentInfo->mGeometryId,
+            std::string tmp = fmt::format("{};{};{};{};{};;{};{:05d};{};{}",
+                  producerInfo->mName,
+                  sourceParamKey,
+                  static_cast<int>(targetParameterKeyType),
+                  targetParamKey,
+                  static_cast<int>(contentInfo->mGeometryId),
                   //paramLevelIdType,
-                  paramLevelId,
-                  contentInfo->mParameterLevel,
-                  contentInfo->mForecastType,
-                  contentInfo->mForecastNumber);
+                  static_cast<int>(paramLevelId),
+                  static_cast<int>(contentInfo->mParameterLevel),
+                  static_cast<int>(contentInfo->mForecastType),
+                  static_cast<int>(contentInfo->mForecastNumber));
 
             if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              p += sprintf(p,";1");
+              tmp += ";1";
             else
-              p += sprintf(p,";0");
+              tmp += ";0";
 
-            list.insert(std::string(tmp));
+            list.insert(tmp);
           }
         }
       }
@@ -1228,22 +1243,21 @@ int PostgresqlImplementation::_setProducerInfo(T::SessionId sessionId,T::Produce
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE producer\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  name = '%s',\n",producerInfo.mName.c_str());
-    p += sprintf(p,"  title = '%s',\n",producerInfo.mTitle.c_str());
-    p += sprintf(p,"  description = '%s',\n",producerInfo.mDescription.c_str());
-    p += sprintf(p,"  flags = %u,\n",producerInfo.mFlags);
-    p += sprintf(p,"  storageId = %u,\n",producerInfo.mStorageId);
-    p += sprintf(p,"  sourceId = %u,\n",producerInfo.mSourceId);
-    p += sprintf(p,"  status = %u\n",producerInfo.mStatus);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p, "  producerId = %u;\n", producerInfo.mProducerId);
+    sql += "UPDATE producer\n";
+    sql += "SET\n";
+    sql += fmt::format("  name = '{}',\n", sqlText(mConnection, producerInfo.mName));
+    sql += fmt::format("  title = '{}',\n", sqlText(mConnection, producerInfo.mTitle));
+    sql += fmt::format("  description = '{}',\n", sqlText(mConnection, producerInfo.mDescription));
+    sql += fmt::format("  flags = {},\n", producerInfo.mFlags);
+    sql += fmt::format("  storageId = {},\n", producerInfo.mStorageId);
+    sql += fmt::format("  sourceId = {},\n", producerInfo.mSourceId);
+    sql += fmt::format("  status = {}\n", static_cast<int>(producerInfo.mStatus));
+    sql += "WHERE \n";
+    sql += fmt::format("  producerId = {};\n", producerInfo.mProducerId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -1295,41 +1309,40 @@ int PostgresqlImplementation::_addGenerationInfo(T::SessionId sessionId,T::Gener
     std::string modificationTime = utcTimeFromTimeT(generationInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(generationInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO generation\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  analysisTime,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  storageId,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  DEFAULT,\n");
-    p += sprintf(p,"  %u,\n",generationInfo.mGenerationType);
-    p += sprintf(p,"  %u,\n",generationInfo.mProducerId);
-    p += sprintf(p,"  '%s',\n",generationInfo.mName.c_str());
-    p += sprintf(p,"  '%s',\n",generationInfo.mDescription.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",generationInfo.mAnalysisTime.c_str());
-    p += sprintf(p,"  %u,\n",generationInfo.mFlags);
-    p += sprintf(p,"  %u,\n",generationInfo.mStorageId);
-    p += sprintf(p,"  %u,\n",generationInfo.mSourceId);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  %u\n",generationInfo.mStatus);
-    p += sprintf(p,");\n");
+    sql += "INSERT INTO generation\n";
+    sql += "(\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  analysisTime,\n";
+    sql += "  flags,\n";
+    sql += "  storageId,\n";
+    sql += "  sourceId,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime,\n";
+    sql += "  status\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += "  DEFAULT,\n";
+    sql += fmt::format("  {},\n", generationInfo.mGenerationType);
+    sql += fmt::format("  {},\n", generationInfo.mProducerId);
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, generationInfo.mName));
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, generationInfo.mDescription));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, generationInfo.mAnalysisTime));
+    sql += fmt::format("  {},\n", generationInfo.mFlags);
+    sql += fmt::format("  {},\n", generationInfo.mStorageId);
+    sql += fmt::format("  {},\n", generationInfo.mSourceId);
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  {}\n", static_cast<int>(generationInfo.mStatus));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -1905,16 +1918,15 @@ int PostgresqlImplementation::_setGenerationInfoStatusById(T::SessionId sessionI
     if (getGenerationById(generationId,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_ID;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE generation\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  status = %u\n",status);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
+    sql += "UPDATE generation\n";
+    sql += "SET\n";
+    sql += fmt::format("  status = {}\n", static_cast<int>(status));
+    sql += "WHERE \n";
+    sql += fmt::format("  generationId = {};\n", generationInfo.mGenerationId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -1960,16 +1972,15 @@ int PostgresqlImplementation::_setGenerationInfoStatusByName(T::SessionId sessio
     if (getGenerationByName(generationName,generationInfo) != Result::OK)
       return Result::UNKNOWN_GENERATION_NAME;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE generation\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  status = %u\n",status);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
+    sql += "UPDATE generation\n";
+    sql += "SET\n";
+    sql += fmt::format("  status = {}\n", static_cast<int>(status));
+    sql += "WHERE \n";
+    sql += fmt::format("  generationId = {};\n", generationInfo.mGenerationId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2019,26 +2030,25 @@ int PostgresqlImplementation::_setGenerationInfo(T::SessionId sessionId,T::Gener
     std::string modificationTime = utcTimeFromTimeT(generationInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(generationInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE generation\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  generationType = %u,\n",generationInfo.mGenerationType);
-    p += sprintf(p,"  producerId = %u,\n",generationInfo.mProducerId);
-    p += sprintf(p,"  name = '%s',\n",generationInfo.mName.c_str());
-    p += sprintf(p,"  description = '%s',\n",generationInfo.mDescription.c_str());
-    p += sprintf(p,"  analysisTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",generationInfo.mAnalysisTime.c_str());
-    p += sprintf(p,"  flags = %u,\n",generationInfo.mFlags);
-    p += sprintf(p,"  storageId = %u,\n",generationInfo.mStorageId);
-    p += sprintf(p,"  sourceId = %u,\n",generationInfo.mSourceId);
-    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  status = %u\n",generationInfo.mStatus);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %lu;\n",generationInfo.mGenerationId);
+    sql += "UPDATE generation\n";
+    sql += "SET\n";
+    sql += fmt::format("  generationType = {},\n", generationInfo.mGenerationType);
+    sql += fmt::format("  producerId = {},\n", generationInfo.mProducerId);
+    sql += fmt::format("  name = '{}',\n", sqlText(mConnection, generationInfo.mName));
+    sql += fmt::format("  description = '{}',\n", sqlText(mConnection, generationInfo.mDescription));
+    sql += fmt::format("  analysisTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, generationInfo.mAnalysisTime));
+    sql += fmt::format("  flags = {},\n", generationInfo.mFlags);
+    sql += fmt::format("  storageId = {},\n", generationInfo.mStorageId);
+    sql += fmt::format("  sourceId = {},\n", generationInfo.mSourceId);
+    sql += fmt::format("  modificationTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  deletionTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  status = {}\n", static_cast<int>(generationInfo.mStatus));
+    sql += "WHERE \n";
+    sql += fmt::format("  generationId = {};\n", generationInfo.mGenerationId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2087,37 +2097,36 @@ int PostgresqlImplementation::_addGeometryInfo(T::SessionId sessionId,T::Geometr
     std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO generationGeometry\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  storageId,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  %u,\n",geometryInfo.mProducerId);
-    p += sprintf(p,"  %lu,\n",geometryInfo.mGenerationId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mGeometryId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mLevelId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mFlags);
-    p += sprintf(p,"  %u,\n",geometryInfo.mStorageId);
-    p += sprintf(p,"  %u,\n",geometryInfo.mSourceId);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  %u\n",(uint)geometryInfo.mStatus);
-    p += sprintf(p,");\n");
+    sql += "INSERT INTO generationGeometry\n";
+    sql += "(\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  storageId,\n";
+    sql += "  sourceId,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime,\n";
+    sql += "  status\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += fmt::format("  {},\n", geometryInfo.mProducerId);
+    sql += fmt::format("  {},\n", geometryInfo.mGenerationId);
+    sql += fmt::format("  {},\n", geometryInfo.mGeometryId);
+    sql += fmt::format("  {},\n", geometryInfo.mLevelId);
+    sql += fmt::format("  {},\n", geometryInfo.mFlags);
+    sql += fmt::format("  {},\n", geometryInfo.mStorageId);
+    sql += fmt::format("  {},\n", geometryInfo.mSourceId);
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  {}\n", static_cast<int>((uint)geometryInfo.mStatus));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2161,9 +2170,9 @@ int PostgresqlImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu AND geometryId=%u AND levelId=%u;",generationId,geometryId,levelId);
-    PGresult *res = PQexec(mConnection,sql);
+    std::string sql;
+    sql = fmt::format("DELETE FROM generationGeometry WHERE generationId = {} AND geometryId={} AND levelId={};", generationId, geometryId, levelId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2204,9 +2213,9 @@ int PostgresqlImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu;",generationId);
-    PGresult *res = PQexec(mConnection,sql);
+    std::string sql;
+    sql = fmt::format("DELETE FROM generationGeometry WHERE generationId = {};", generationId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2245,9 +2254,9 @@ int PostgresqlImplementation::_deleteGeometryInfoListByProducerId(T::SessionId s
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE producerId=%u;",producerId);
-    PGresult *res = PQexec(mConnection,sql);
+    std::string sql;
+    sql = fmt::format("DELETE FROM generationGeometry WHERE producerId={};", producerId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2286,9 +2295,9 @@ int PostgresqlImplementation::_deleteGeometryInfoListBySourceId(T::SessionId ses
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"DELETE FROM generationGeometry WHERE sourceId=%u;",sourceId);
-    PGresult *res = PQexec(mConnection,sql);
+    std::string sql;
+    sql = fmt::format("DELETE FROM generationGeometry WHERE sourceId={};", sourceId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2327,26 +2336,25 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Gen
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  storageId,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  storageId,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generationGeometry\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {} AND geometryId={} AND levelId={};\n", generationId, geometryId, levelId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2412,24 +2420,23 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  storageId,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  storageId,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generationGeometry;\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2497,25 +2504,24 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu;\n",generationId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generationGeometry\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {};\n", generationId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2582,25 +2588,24 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u;\n",producerId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generationGeometry;\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  producerId={};\n", producerId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2667,25 +2672,24 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generationGeometry;\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u;\n",sourceId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  levelId,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generationGeometry;\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  sourceId={};\n", sourceId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2785,20 +2789,19 @@ int PostgresqlImplementation::_setGeometryInfo(T::SessionId sessionId,T::Geometr
     std::string modificationTime = utcTimeFromTimeT(geometryInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(geometryInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE generationGeometry\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  flags = %u,\n",geometryInfo.mFlags);
-    p += sprintf(p,"  sourceId = %u,\n",geometryInfo.mSourceId);
-    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  status = %u\n",geometryInfo.mStatus);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
+    sql += "UPDATE generationGeometry\n";
+    sql += "SET\n";
+    sql += fmt::format("  flags = {},\n", geometryInfo.mFlags);
+    sql += fmt::format("  sourceId = {},\n", geometryInfo.mSourceId);
+    sql += fmt::format("  modificationTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  deletionTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  status = {}\n", static_cast<int>(geometryInfo.mStatus));
+    sql += "WHERE \n";
+    sql += fmt::format("  generationId = {} AND geometryId={} AND levelId={};\n", geometryInfo.mGenerationId, geometryInfo.mGeometryId, geometryInfo.mLevelId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -2840,16 +2843,15 @@ int PostgresqlImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE generationGeometry\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  status = %u\n",status);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p,"  generationId = %lu AND geometryId=%u AND levelId=%u;\n",generationId,geometryId,levelId);
+    sql += "UPDATE generationGeometry\n";
+    sql += "SET\n";
+    sql += fmt::format("  status = {}\n", static_cast<int>(status));
+    sql += "WHERE \n";
+    sql += fmt::format("  generationId = {} AND geometryId={} AND levelId={};\n", generationId, geometryId, levelId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -3745,9 +3747,9 @@ int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId session
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"SELECT COUNT(*) FROM file WHERE producerId=%u",producerId);
-    count = getCount(sql);
+    std::string sql;
+    sql = fmt::format("SELECT COUNT(*) FROM file WHERE producerId={}", producerId);
+    count = getCount(sql.c_str());
 
     return Result::OK;
   }
@@ -3774,9 +3776,9 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"SELECT COUNT(*) FROM file WHERE generationId = %lu",generationId);
-    count = getCount(sql);
+    std::string sql;
+    sql = fmt::format("SELECT COUNT(*) FROM file WHERE generationId = {}", generationId);
+    count = getCount(sql.c_str());
 
     return Result::OK;
   }
@@ -3803,9 +3805,9 @@ int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100];
-    sprintf(sql,"SELECT COUNT(*) FROM file WHERE sourceId=%u",sourceId);
-    count = getCount(sql);
+    std::string sql;
+    sql = fmt::format("SELECT COUNT(*) FROM file WHERE sourceId={}", sourceId);
+    count = getCount(sql.c_str());
 
     return Result::OK;
   }
@@ -3837,28 +3839,27 @@ int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& f
     std::string modificationTime = utcTimeFromTimeT(fileInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(fileInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE file\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  producerId = %u,\n",fileInfo.mProducerId);
-    p += sprintf(p,"  generationId = %lu,\n",fileInfo.mGenerationId);
-    p += sprintf(p,"  protocol = %u,\n",(uint)fileInfo.mProtocol);
-    p += sprintf(p,"  serverType = %u,\n",(uint)fileInfo.mServerType);
-    p += sprintf(p,"  server = '%s',\n",fileInfo.mServer.c_str());
-    p += sprintf(p,"  fileType = %u,\n",(uint)fileInfo.mFileType);
-    p += sprintf(p,"  fileName = '%s',\n",fileInfo.mName.c_str());
-    p += sprintf(p,"  flags = %u,\n",fileInfo.mFlags);
-    p += sprintf(p,"  sourceId = %u,\n",fileInfo.mSourceId);
-    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  fileSize = %lu,\n",fileInfo.mSize);
-    p += sprintf(p,"  status = %u\n",fileInfo.mStatus);
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p, "  fileId = %lu;\n", fileInfo.mFileId);
+    sql += "UPDATE file\n";
+    sql += "SET\n";
+    sql += fmt::format("  producerId = {},\n", fileInfo.mProducerId);
+    sql += fmt::format("  generationId = {},\n", fileInfo.mGenerationId);
+    sql += fmt::format("  protocol = {},\n", (uint)fileInfo.mProtocol);
+    sql += fmt::format("  serverType = {},\n", (uint)fileInfo.mServerType);
+    sql += fmt::format("  server = '{}',\n", sqlText(mConnection, fileInfo.mServer));
+    sql += fmt::format("  fileType = {},\n", static_cast<int>((uint)fileInfo.mFileType));
+    sql += fmt::format("  fileName = '{}',\n", sqlText(mConnection, fileInfo.mName));
+    sql += fmt::format("  flags = {},\n", fileInfo.mFlags);
+    sql += fmt::format("  sourceId = {},\n", fileInfo.mSourceId);
+    sql += fmt::format("  modificationTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  deletionTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  fileSize = {},\n", fileInfo.mSize);
+    sql += fmt::format("  status = {}\n", static_cast<int>(fileInfo.mStatus));
+    sql += "WHERE \n";
+    sql += fmt::format("  fileId = {};\n", fileInfo.mFileId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -3959,24 +3960,23 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     }
 
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  eventId,\n");
-    p += sprintf(p,"  eventType,\n");
-    p += sprintf(p,"  to_char(eventTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  id1,\n");
-    p += sprintf(p,"  id2,\n");
-    p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  eventData\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  event\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId=%lu;\n",eventId);
+    sql += "SELECT\n";
+    sql += "  eventId,\n";
+    sql += "  eventType,\n";
+    sql += "  to_char(eventTime,'yyyymmddThh24MISS'),\n";
+    sql += "  id1,\n";
+    sql += "  id2,\n";
+    sql += "  id3,\n";
+    sql += "  flags,\n";
+    sql += "  eventData\n";
+    sql += "FROM\n";
+    sql += "  event\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  eventId={};\n", eventId);
 
-    res = PQexec(mConnection, sql);
+    res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -4048,26 +4048,25 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
     //printf("GET EVENT LIST %lu\n",startEventId);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  eventId,\n");
-    p += sprintf(p,"  eventType,\n");
-    p += sprintf(p,"  to_char(eventTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  id1,\n");
-    p += sprintf(p,"  id2,\n");
-    p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  eventData\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  event\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  eventId>=%lu\n",startEventId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  eventId;\n");
+    sql += "SELECT\n";
+    sql += "  eventId,\n";
+    sql += "  eventType,\n";
+    sql += "  to_char(eventTime,'yyyymmddThh24MISS'),\n";
+    sql += "  id1,\n";
+    sql += "  id2,\n";
+    sql += "  id3,\n";
+    sql += "  flags,\n";
+    sql += "  eventData\n";
+    sql += "FROM\n";
+    sql += "  event\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  eventId>={}\n", startEventId);
+    sql += "ORDER BY\n";
+    sql += "  eventId;\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -4197,37 +4196,36 @@ int PostgresqlImplementation::_setContentInfo(T::SessionId sessionId,T::ContentI
     std::string modificationTime = utcTimeFromTimeT(contentInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(contentInfo.mDeletionTime);
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"UPDATE content\n");
-    p += sprintf(p,"SET\n");
-    p += sprintf(p,"  fileType = %u,\n",contentInfo.mFileType);
-    p += sprintf(p,"  filePosition = %lu,\n",contentInfo.mFilePosition);
-    p += sprintf(p,"  messageSize = %u,\n",contentInfo.mMessageSize);
-    p += sprintf(p,"  producerId = %u,\n",contentInfo.mProducerId);
-    p += sprintf(p,"  generationId = %lu,\n",contentInfo.mGenerationId);
-    p += sprintf(p,"  geometryId = %u,\n",contentInfo.mGeometryId);
-    p += sprintf(p,"  parameterId = %d,\n",contentInfo.mFmiParameterId);
-    p += sprintf(p,"  parameterName = '%s',\n",contentInfo.getFmiParameterName());
-    p += sprintf(p,"  forecastTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",forecastTime.c_str());
-    p += sprintf(p,"  levelId = %d,\n",contentInfo.mFmiParameterLevelId);
-    p += sprintf(p,"  level = %d,\n",contentInfo.mParameterLevel);
-    p += sprintf(p,"  forecastType = %d,\n",contentInfo.mForecastType);
-    p += sprintf(p,"  foracastNumber = %d,\n",contentInfo.mForecastNumber);
-    p += sprintf(p,"  flags = %u,\n",contentInfo.mFlags);
-    p += sprintf(p,"  sourceId = %u,\n",contentInfo.mSourceId);
-    p += sprintf(p,"  aggregationId = %d,\n",contentInfo.mAggregationId);
-    p += sprintf(p,"  aggregationPeriod = %d,\n",contentInfo.mAggregationPeriod);
-    p += sprintf(p,"  processingTypeId = %d,\n",contentInfo.mProcessingTypeId);
-    p += sprintf(p,"  processingTypeValue1 = %f,\n",contentInfo.mProcessingTypeValue1);
-    p += sprintf(p,"  processingTypeValue2 = %f,\n",contentInfo.mProcessingTypeValue2);
-    p += sprintf(p,"  modificationTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  deletionTime = TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
-    p += sprintf(p,"WHERE \n");
-    p += sprintf(p, "  fileId = %lu AND messageIndex = %u;\n",contentInfo.mFileId,contentInfo.mMessageIndex);
+    sql += "UPDATE content\n";
+    sql += "SET\n";
+    sql += fmt::format("  fileType = {},\n", static_cast<int>(contentInfo.mFileType));
+    sql += fmt::format("  filePosition = {},\n", contentInfo.mFilePosition);
+    sql += fmt::format("  messageSize = {},\n", contentInfo.mMessageSize);
+    sql += fmt::format("  producerId = {},\n", contentInfo.mProducerId);
+    sql += fmt::format("  generationId = {},\n", contentInfo.mGenerationId);
+    sql += fmt::format("  geometryId = {},\n", contentInfo.mGeometryId);
+    sql += fmt::format("  parameterId = {},\n", contentInfo.mFmiParameterId);
+    sql += fmt::format("  parameterName = '{}',\n", sqlText(mConnection, contentInfo.getFmiParameterName()));
+    sql += fmt::format("  forecastTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, forecastTime));
+    sql += fmt::format("  levelId = {},\n", contentInfo.mFmiParameterLevelId);
+    sql += fmt::format("  level = {},\n", contentInfo.mParameterLevel);
+    sql += fmt::format("  forecastType = {},\n", contentInfo.mForecastType);
+    sql += fmt::format("  foracastNumber = {},\n", contentInfo.mForecastNumber);
+    sql += fmt::format("  flags = {},\n", contentInfo.mFlags);
+    sql += fmt::format("  sourceId = {},\n", contentInfo.mSourceId);
+    sql += fmt::format("  aggregationId = {},\n", contentInfo.mAggregationId);
+    sql += fmt::format("  aggregationPeriod = {},\n", contentInfo.mAggregationPeriod);
+    sql += fmt::format("  processingTypeId = {},\n", contentInfo.mProcessingTypeId);
+    sql += fmt::format("  processingTypeValue1 = {:f},\n", contentInfo.mProcessingTypeValue1);
+    sql += fmt::format("  processingTypeValue2 = {:f},\n", contentInfo.mProcessingTypeValue2);
+    sql += fmt::format("  modificationTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  deletionTime = TO_TIMESTAMP('{}','yyyymmddThh24MISS')\n", sqlText(mConnection, deletionTime));
+    sql += "WHERE \n";
+    sql += fmt::format("  fileId = {} AND messageIndex = {};\n", contentInfo.mFileId, contentInfo.mMessageIndex);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -5848,7 +5846,7 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
     /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
@@ -5862,8 +5860,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
     */
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE producerId=%u;",producerId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE producerId={};", producerId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -5875,8 +5873,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
 
     if (deleteFiles)
     {
-      sprintf(sql,"DELETE FROM file WHERE producerId=%u;",producerId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM file WHERE producerId={};", producerId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -5888,8 +5886,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
 
     if (deleteGenerationGeometries)
     {
-      sprintf(sql,"DELETE FROM generationGeometry WHERE producerId=%u;",producerId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM generationGeometry WHERE producerId={};", producerId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -5901,8 +5899,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
 
     if (deleteGenerations)
     {
-      sprintf(sql,"DELETE FROM generation WHERE producerId=%u;",producerId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM generation WHERE producerId={};", producerId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -5912,8 +5910,8 @@ int PostgresqlImplementation::deleteProducerById(T::ProducerId producerId,bool d
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM producer WHERE producerId=%u;",producerId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM producer WHERE producerId={};", producerId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -5986,23 +5984,22 @@ int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::Produc
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  title,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  producer\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u;\n",producerId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  title,\n";
+    sql += "  description,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  producer\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  producerId={};\n", producerId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6054,23 +6051,22 @@ int PostgresqlImplementation::getProducerByName(std::string producerName,T::Prod
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  title,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  producer\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  LOWER(name)=LOWER('%s');\n",producerName.c_str());
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  title,\n";
+    sql += "  description,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  producer\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  LOWER(name)=LOWER('{}');\n", sqlText(mConnection, producerName));
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6124,21 +6120,20 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  title,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  producer;\n");
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  title,\n";
+    sql += "  description,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  producer;\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6192,23 +6187,22 @@ int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  title,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  producer\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u;\n",sourceId);
+    sql += "SELECT\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  title,\n";
+    sql += "  description,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  producer\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  sourceId={};\n", sourceId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6259,27 +6253,26 @@ int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  to_char(analysisTime, 'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generation\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu;\n",generationId);
+    sql += "SELECT\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  to_char(analysisTime, 'yyyymmddThh24MISS'),\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generation\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {};\n", generationId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6339,27 +6332,26 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  to_char(analysisTime, 'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generation\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  LOWER(name)=LOWER('%s');\n",generationName.c_str());
+    sql += "SELECT\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  to_char(analysisTime, 'yyyymmddThh24MISS'),\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generation\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  LOWER(name)=LOWER('{}');\n", sqlText(mConnection, generationName));
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6421,25 +6413,24 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  to_char(analysisTime, 'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generation\n");
+    sql += "SELECT\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  to_char(analysisTime, 'yyyymmddThh24MISS'),\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generation\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6524,27 +6515,26 @@ int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId produc
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  to_char(analysisTime, 'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generation\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u;\n",producerId);
+    sql += "SELECT\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  to_char(analysisTime, 'yyyymmddThh24MISS'),\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generation\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  producerId={};\n", producerId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6608,27 +6598,26 @@ int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  generationType,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  name,\n");
-    p += sprintf(p,"  description,\n");
-    p += sprintf(p,"  to_char(analysisTime, 'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  generation\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u\n",sourceId);
+    sql += "SELECT\n";
+    sql += "  generationId,\n";
+    sql += "  generationType,\n";
+    sql += "  producerId,\n";
+    sql += "  name,\n";
+    sql += "  description,\n";
+    sql += "  to_char(analysisTime, 'yyyymmddThh24MISS'),\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  status\n";
+    sql += "FROM\n";
+    sql += "  generation\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  sourceId={}\n", sourceId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6690,7 +6679,7 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -6702,8 +6691,8 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
 */
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE generationId = {};", generationId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -6715,8 +6704,8 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
 
     if (deleteFiles)
     {
-      sprintf(sql,"DELETE FROM file WHERE generationId = %lu;",generationId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM file WHERE generationId = {};", generationId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -6728,8 +6717,8 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
 
     if (deleteGenerationGeometries)
     {
-      sprintf(sql,"DELETE FROM generationGeometry WHERE generationId = %lu;",generationId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM generationGeometry WHERE generationId = {};", generationId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -6739,8 +6728,8 @@ int PostgresqlImplementation::deleteGenerationById(T::GenerationId generationId,
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM generation WHERE generationId = %lu;",generationId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM generation WHERE generationId = {};", generationId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -6796,48 +6785,47 @@ int PostgresqlImplementation::addFile(T::FileInfo& fileInfo)
       return Result::FILE_NAME_ALREADY_REGISTERED;
 
 */
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
     std::string modificationTime = utcTimeFromTimeT(fileInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(fileInfo.mDeletionTime);
 
-    p += sprintf(p,"INSERT INTO file\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  fileSize,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  DEFAULT,\n");
-    p += sprintf(p,"  %u,\n",fileInfo.mProducerId);
-    p += sprintf(p,"  %lu,\n",fileInfo.mGenerationId);
-    p += sprintf(p,"  %u,\n",fileInfo.mProtocol);
-    p += sprintf(p,"  %u,\n",fileInfo.mServerType);
-    p += sprintf(p,"  '%s',\n",fileInfo.mServer.c_str());
-    p += sprintf(p,"  %u,\n",fileInfo.mFileType);
-    p += sprintf(p,"  '%s',\n",fileInfo.mName.c_str());
-    p += sprintf(p,"  %u,\n",fileInfo.mFlags);
-    p += sprintf(p,"  %u,\n",fileInfo.mSourceId);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-    p += sprintf(p,"  %lu,\n",fileInfo.mSize);
-    p += sprintf(p,"  %u\n",fileInfo.mStatus);
-    p += sprintf(p,");\n");
+    sql += "INSERT INTO file\n";
+    sql += "(\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime,\n";
+    sql += "  fileSize,\n";
+    sql += "  status\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += "  DEFAULT,\n";
+    sql += fmt::format("  {},\n", fileInfo.mProducerId);
+    sql += fmt::format("  {},\n", fileInfo.mGenerationId);
+    sql += fmt::format("  {},\n", fileInfo.mProtocol);
+    sql += fmt::format("  {},\n", fileInfo.mServerType);
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, fileInfo.mServer));
+    sql += fmt::format("  {},\n", static_cast<int>(fileInfo.mFileType));
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, fileInfo.mName));
+    sql += fmt::format("  {},\n", fileInfo.mFlags);
+    sql += fmt::format("  {},\n", fileInfo.mSourceId);
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+    sql += fmt::format("  {},\n", fileInfo.mSize);
+    sql += fmt::format("  {}\n", static_cast<int>(fileInfo.mStatus));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6926,29 +6914,28 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
     PQclear(res);
 
 
-    char sql[1000000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO file\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  fileSize,\n");
-    p += sprintf(p,"  status\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
+    sql += "INSERT INTO file\n";
+    sql += "(\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime,\n";
+    sql += "  fileSize,\n";
+    sql += "  status\n";
+    sql += ")\n";
+    sql += "VALUES \n";
 
-    char *pp = p;
+    const std::size_t pp = sql.size();
     while (c < len)
     {
       maxFileId++;
@@ -6958,26 +6945,26 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
       std::string modificationTime = utcTimeFromTimeT(fileInfo->mModificationTime);
       std::string deletionTime = utcTimeFromTimeT(fileInfo->mDeletionTime);
 
-      p += sprintf(p,"(\n");
-      p += sprintf(p,"  %lu,\n",fileInfo->mFileId);
-      p += sprintf(p,"  %u,\n",fileInfo->mProducerId);
-      p += sprintf(p,"  %lu,\n",fileInfo->mGenerationId);
-      p += sprintf(p,"  %u,\n",fileInfo->mProtocol);
-      p += sprintf(p,"  %u,\n",fileInfo->mServerType);
-      p += sprintf(p,"  '%s',\n",fileInfo->mServer.c_str());
-      p += sprintf(p,"  %u,\n",fileInfo->mFileType);
-      p += sprintf(p,"  '%s',\n",fileInfo->mName.c_str());
-      p += sprintf(p,"  %u,\n",fileInfo->mFlags);
-      p += sprintf(p,"  %u,\n",fileInfo->mSourceId);
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",deletionTime.c_str());
-      p += sprintf(p,"  %lu,\n",fileInfo->mSize);
-      p += sprintf(p,"  %u\n",fileInfo->mStatus);
-      p += sprintf(p,")\n");
+      sql += "(\n";
+      sql += fmt::format("  {},\n", fileInfo->mFileId);
+      sql += fmt::format("  {},\n", fileInfo->mProducerId);
+      sql += fmt::format("  {},\n", fileInfo->mGenerationId);
+      sql += fmt::format("  {},\n", fileInfo->mProtocol);
+      sql += fmt::format("  {},\n", fileInfo->mServerType);
+      sql += fmt::format("  '{}',\n", sqlText(mConnection, fileInfo->mServer));
+      sql += fmt::format("  {},\n", static_cast<int>(fileInfo->mFileType));
+      sql += fmt::format("  '{}',\n", sqlText(mConnection, fileInfo->mName));
+      sql += fmt::format("  {},\n", fileInfo->mFlags);
+      sql += fmt::format("  {},\n", fileInfo->mSourceId);
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, deletionTime));
+      sql += fmt::format("  {},\n", fileInfo->mSize);
+      sql += fmt::format("  {}\n", static_cast<int>(fileInfo->mStatus));
+      sql += ")\n";
 
-      if ((p-sql) > 990000 || (c+1) == len)
+      if (sql.size() > 990000 || (c+1) == len)
       {
-        PGresult *res = PQexec(mConnection, sql);
+        PGresult *res = PQexec(mConnection, sql.c_str());
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
           if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -6991,11 +6978,11 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
           */
         }
         PQclear(res);
-        p = pp;
+        sql.resize(pp);
       }
       else
       {
-        p += sprintf(p,",\n");
+        sql += ",\n";
       }
       c++;
     }
@@ -7097,7 +7084,7 @@ int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
     /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
@@ -7112,8 +7099,8 @@ int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE fileId = %lu;",fileId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE fileId = {};", fileId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7123,8 +7110,8 @@ int PostgresqlImplementation::deleteFileById(T::FileId fileId,bool deleteContent
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE fileId = %lu;",fileId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM file WHERE fileId = {};", fileId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7165,7 +7152,7 @@ int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId gener
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
     /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
@@ -7180,8 +7167,8 @@ int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId gener
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE generationId = {};", generationId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7191,8 +7178,8 @@ int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId gener
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE generationId = %lu;",generationId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM file WHERE generationId = {};", generationId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7259,7 +7246,7 @@ int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
     /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
@@ -7274,8 +7261,8 @@ int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerI
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE producerId=%u;",producerId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE producerId={};", producerId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7286,8 +7273,8 @@ int PostgresqlImplementation::deleteFileListByProducerId(T::ProducerId producerI
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE producerId=%u;",producerId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM file WHERE producerId={};", producerId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7329,7 +7316,7 @@ int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
     /*
     PGresult *res = PQexec(mConnection,"BEGIN TRANSACTION;");
@@ -7344,8 +7331,8 @@ int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool
 
     if (deleteContent)
     {
-      sprintf(sql,"DELETE FROM content WHERE sourceId=%u;",sourceId);
-      PGresult *res = PQexec(mConnection,sql);
+      sql = fmt::format("DELETE FROM content WHERE sourceId={};", sourceId);
+      PGresult *res = PQexec(mConnection, sql.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK)
       {
         //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7356,8 +7343,8 @@ int PostgresqlImplementation::deleteFileListBySourceId(T::SourceId sourceId,bool
       PQclear(res);
     }
 
-    sprintf(sql,"DELETE FROM file WHERE sourceId=%u;",sourceId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM file WHERE sourceId={};", sourceId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -7400,28 +7387,27 @@ int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId = %lu;\n",fileId);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  fileId = {};\n", fileId);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -7481,28 +7467,27 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileName='%s';\n",fileName.c_str());
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  fileName='{}';\n", sqlText(mConnection, fileName));
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -7563,32 +7548,31 @@ int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId >= %lu\n",startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  fileId >= {}\n", startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -7650,32 +7634,31 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu AND fileId >= %lu\n",generationId,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {} AND fileId >= {}\n", generationId, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -7816,32 +7799,31 @@ int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u AND fileId >= %lu\n",producerId,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  producerId={} AND fileId >= {}\n", producerId, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -7903,32 +7885,31 @@ int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::File
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  protocol,\n");
-    p += sprintf(p,"  serverType,\n");
-    p += sprintf(p,"  server,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  fileName,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  file\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u AND fileId >= %lu\n",sourceId,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  protocol,\n";
+    sql += "  serverType,\n";
+    sql += "  server,\n";
+    sql += "  fileType,\n";
+    sql += "  fileName,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  file\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  sourceId={} AND fileId >= {}\n", sourceId, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8009,69 +7990,68 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
     if (generationInfo.mGenerationId != fileInfo.mGenerationId)
       return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
 */
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
     std::string forecastTime = utcTimeFromTimeT(contentInfo.mForecastTimeUTC);
     std::string modificationTime = utcTimeFromTimeT(contentInfo.mModificationTime);
     std::string deletionTime = utcTimeFromTimeT(contentInfo.mDeletionTime);
 
-    p += sprintf(p,"INSERT INTO content\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  forecastTime,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  %lu,\n",contentInfo.mFileId);
-    p += sprintf(p,"  %u,\n",contentInfo.mMessageIndex);
-    p += sprintf(p,"  %u,\n",contentInfo.mFileType);
-    p += sprintf(p,"  %lu,\n",contentInfo.mFilePosition);
-    p += sprintf(p,"  %u,\n",contentInfo.mMessageSize);
-    p += sprintf(p,"  %u,\n",contentInfo.mProducerId);
-    p += sprintf(p,"  %lu,\n",contentInfo.mGenerationId);
-    p += sprintf(p,"  %u,\n",contentInfo.mGeometryId);
-    p += sprintf(p,"  %d,\n",contentInfo.mFmiParameterId);
-    p += sprintf(p,"  '%s',\n",contentInfo.getFmiParameterName());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",forecastTime.c_str());
-    p += sprintf(p,"  %d,\n",contentInfo.mFmiParameterLevelId);
-    p += sprintf(p,"  %d,\n",contentInfo.mParameterLevel);
-    p += sprintf(p,"  %d,\n",contentInfo.mForecastType);
-    p += sprintf(p,"  %d,\n",contentInfo.mForecastNumber);
-    p += sprintf(p,"  %u,\n",contentInfo.mFlags);
-    p += sprintf(p,"  %u,\n",contentInfo.mSourceId);
-    p += sprintf(p,"  %d,\n",contentInfo.mAggregationId);
-    p += sprintf(p,"  %d,\n",contentInfo.mAggregationPeriod);
-    p += sprintf(p,"  %d,\n",contentInfo.mProcessingTypeId);
-    p += sprintf(p,"  %f,\n",contentInfo.mProcessingTypeValue1);
-    p += sprintf(p,"  %f,\n",contentInfo.mProcessingTypeValue2);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
-    p += sprintf(p,");\n");
+    sql += "INSERT INTO content\n";
+    sql += "(\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  forecastTime,\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += fmt::format("  {},\n", contentInfo.mFileId);
+    sql += fmt::format("  {},\n", contentInfo.mMessageIndex);
+    sql += fmt::format("  {},\n", static_cast<int>(contentInfo.mFileType));
+    sql += fmt::format("  {},\n", contentInfo.mFilePosition);
+    sql += fmt::format("  {},\n", contentInfo.mMessageSize);
+    sql += fmt::format("  {},\n", contentInfo.mProducerId);
+    sql += fmt::format("  {},\n", contentInfo.mGenerationId);
+    sql += fmt::format("  {},\n", contentInfo.mGeometryId);
+    sql += fmt::format("  {},\n", contentInfo.mFmiParameterId);
+    sql += fmt::format("  '{}',\n", sqlText(mConnection, contentInfo.getFmiParameterName()));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, forecastTime));
+    sql += fmt::format("  {},\n", contentInfo.mFmiParameterLevelId);
+    sql += fmt::format("  {},\n", contentInfo.mParameterLevel);
+    sql += fmt::format("  {},\n", contentInfo.mForecastType);
+    sql += fmt::format("  {},\n", contentInfo.mForecastNumber);
+    sql += fmt::format("  {},\n", contentInfo.mFlags);
+    sql += fmt::format("  {},\n", contentInfo.mSourceId);
+    sql += fmt::format("  {},\n", contentInfo.mAggregationId);
+    sql += fmt::format("  {},\n", contentInfo.mAggregationPeriod);
+    sql += fmt::format("  {},\n", contentInfo.mProcessingTypeId);
+    sql += fmt::format("  {:f},\n", contentInfo.mProcessingTypeValue1);
+    sql += fmt::format("  {:f},\n", contentInfo.mProcessingTypeValue2);
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS')\n", sqlText(mConnection, deletionTime));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8111,39 +8091,38 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
 
     //PQexec(mConnection,"ALTER TABLE content SET UNLOGGED;");
 
-    char sql[1000000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO content\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  forecastTime,\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
+    sql += "INSERT INTO content\n";
+    sql += "(\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  forecastTime,\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime\n";
+    sql += ")\n";
+    sql += "VALUES \n";
 
-    char *pp = p;
+    const std::size_t pp = sql.size();
 
     while (c < len)
     {
@@ -8153,36 +8132,36 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
       std::string modificationTime = utcTimeFromTimeT(contentInfo->mModificationTime);
       std::string deletionTime = utcTimeFromTimeT(contentInfo->mDeletionTime);
 
-      p += sprintf(p,"(\n");
-      p += sprintf(p,"  %lu,\n",contentInfo->mFileId);
-      p += sprintf(p,"  %u,\n",contentInfo->mMessageIndex);
-      p += sprintf(p,"  %u,\n",contentInfo->mFileType);
-      p += sprintf(p,"  %lu,\n",contentInfo->mFilePosition);
-      p += sprintf(p,"  %u,\n",contentInfo->mMessageSize);
-      p += sprintf(p,"  %u,\n",contentInfo->mProducerId);
-      p += sprintf(p,"  %lu,\n",contentInfo->mGenerationId);
-      p += sprintf(p,"  %u,\n",contentInfo->mGeometryId);
-      p += sprintf(p,"  %d,\n",contentInfo->mFmiParameterId);
-      p += sprintf(p,"  '%s',\n",contentInfo->getFmiParameterName());
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",forecastTime.c_str());
-      p += sprintf(p,"  %d,\n",contentInfo->mFmiParameterLevelId);
-      p += sprintf(p,"  %d,\n",contentInfo->mParameterLevel);
-      p += sprintf(p,"  %d,\n",contentInfo->mForecastType);
-      p += sprintf(p,"  %d,\n",contentInfo->mForecastNumber);
-      p += sprintf(p,"  %u,\n",contentInfo->mFlags);
-      p += sprintf(p,"  %u,\n",contentInfo->mSourceId);
-      p += sprintf(p,"  %d,\n",contentInfo->mAggregationId);
-      p += sprintf(p,"  %d,\n",contentInfo->mAggregationPeriod);
-      p += sprintf(p,"  %d,\n",contentInfo->mProcessingTypeId);
-      p += sprintf(p,"  %f,\n",contentInfo->mProcessingTypeValue1);
-      p += sprintf(p,"  %f,\n",contentInfo->mProcessingTypeValue2);
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",modificationTime.c_str());
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
-      p += sprintf(p,")\n");
+      sql += "(\n";
+      sql += fmt::format("  {},\n", contentInfo->mFileId);
+      sql += fmt::format("  {},\n", contentInfo->mMessageIndex);
+      sql += fmt::format("  {},\n", static_cast<int>(contentInfo->mFileType));
+      sql += fmt::format("  {},\n", contentInfo->mFilePosition);
+      sql += fmt::format("  {},\n", contentInfo->mMessageSize);
+      sql += fmt::format("  {},\n", contentInfo->mProducerId);
+      sql += fmt::format("  {},\n", contentInfo->mGenerationId);
+      sql += fmt::format("  {},\n", contentInfo->mGeometryId);
+      sql += fmt::format("  {},\n", contentInfo->mFmiParameterId);
+      sql += fmt::format("  '{}',\n", sqlText(mConnection, contentInfo->getFmiParameterName()));
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, forecastTime));
+      sql += fmt::format("  {},\n", contentInfo->mFmiParameterLevelId);
+      sql += fmt::format("  {},\n", contentInfo->mParameterLevel);
+      sql += fmt::format("  {},\n", contentInfo->mForecastType);
+      sql += fmt::format("  {},\n", contentInfo->mForecastNumber);
+      sql += fmt::format("  {},\n", contentInfo->mFlags);
+      sql += fmt::format("  {},\n", contentInfo->mSourceId);
+      sql += fmt::format("  {},\n", contentInfo->mAggregationId);
+      sql += fmt::format("  {},\n", contentInfo->mAggregationPeriod);
+      sql += fmt::format("  {},\n", contentInfo->mProcessingTypeId);
+      sql += fmt::format("  {:f},\n", contentInfo->mProcessingTypeValue1);
+      sql += fmt::format("  {:f},\n", contentInfo->mProcessingTypeValue2);
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, modificationTime));
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS')\n", sqlText(mConnection, deletionTime));
+      sql += ")\n";
 
-      if (p-sql > 990000 || (c+1) == len)
+      if (sql.size() > 990000 || (c+1) == len)
       {
-        PGresult *res = PQexec(mConnection, sql);
+        PGresult *res = PQexec(mConnection, sql.c_str());
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
           if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8195,11 +8174,11 @@ int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList
           return Result::CONTENT_ADDITION_FAILED;
         }
         PQclear(res);
-        p = pp;
+        sql.resize(pp);
       }
       else
       {
-        p += sprintf(p,",\n");
+        sql += ",\n";
       }
       c++;
     }
@@ -8227,10 +8206,10 @@ int PostgresqlImplementation::deleteContent(T::FileId fileId,T::MessageIndex mes
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
-    sprintf(sql,"DELETE FROM content WHERE fileId = %lu AND messageIndex=%u;",fileId,messageIndex);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM content WHERE fileId = {} AND messageIndex={};", fileId, messageIndex);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -8262,10 +8241,10 @@ int PostgresqlImplementation::deleteContentByFileId(T::FileId fileId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
-    sprintf(sql,"DELETE FROM content WHERE fileId = %lu;",fileId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM content WHERE fileId = {};", fileId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -8297,10 +8276,10 @@ int PostgresqlImplementation::deleteContentByProducerId(T::ProducerId producerId
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
-    sprintf(sql,"DELETE FROM content WHERE producerId=%u;",producerId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM content WHERE producerId={};", producerId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -8332,10 +8311,10 @@ int PostgresqlImplementation::deleteContentByGenerationId(T::GenerationId genera
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
-    sprintf(sql,"DELETE FROM content WHERE generationId = %lu;",generationId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM content WHERE generationId = {};", generationId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -8394,10 +8373,10 @@ int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[1000];
+    std::string sql;
 
-    sprintf(sql,"DELETE FROM content WHERE sourceId=%u;",sourceId);
-    PGresult *res = PQexec(mConnection,sql);
+    sql = fmt::format("DELETE FROM content WHERE sourceId={};", sourceId);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       //Fmi::Exception exception(BCP,PQerrorMessage(mConnection));
@@ -8473,40 +8452,39 @@ int PostgresqlImplementation::getContent(T::FileId fileId,T::MessageIndex messag
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId = %lu AND messageIndex=%u;\n",fileId,messageIndex);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  fileId = {} AND messageIndex={};\n", fileId, messageIndex);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8577,47 +8555,46 @@ int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex s
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  modificationTime,\n");
-    p += sprintf(p,"  deletionTime,\n");
-    p += sprintf(p,"  forecastTime\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  (fileId = %lu AND messageIndex>=%u) OR fileId > %lu\n",startFileId,startMessageIndex,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS'),\n";
+    sql += "  modificationTime,\n";
+    sql += "  deletionTime,\n";
+    sql += "  forecastTime\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  (fileId = {} AND messageIndex>={}) OR fileId > {}\n", startFileId, startMessageIndex, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8723,9 +8700,7 @@ int PostgresqlImplementation::getGenerationTimeAndGeometryList(std::set<std::str
           T::ContentInfo contentInfo;
           contentInfo.setCsv(reply->element[t]->str);
 
-          char st[200];
-          sprintf(st,"%u;%u;%u;%d;%d;%s;%s;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.mForecastTime.c_str(),contentInfo.mModificationTime.c_str());
-          std::string str = st;
+          std::string str = fmt::format("{};{};{};{};{};{};{};",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,static_cast<int>(contentInfo.mForecastType),static_cast<int>(contentInfo.mForecastNumber),contentInfo.mForecastTime,contentInfo.mModificationTime);
 
           if (list.find(str) == list.end())
             list.insert(str);
@@ -8767,44 +8742,43 @@ int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generatio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",generationId,startFileId,startMessageIndex,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {} AND ((fileId = {} AND messageIndex>={}) OR fileId > {})\n", generationId, startFileId, startMessageIndex, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -8880,56 +8854,55 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::Generatio
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[100000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId IN (");
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += "  generationId IN (";
 
-    char *pp = p;
+    const std::size_t pp = sql.size();
     for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
     {
-      if (p != pp)
-        p += sprintf(p,",");
+      if (sql.size() != pp)
+        sql += ",";
 
-      p += sprintf(p,"%lu",*it);
+      sql += fmt::format("{}", *it);
     }
 
-    p += sprintf(p,") AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",startFileId,startMessageIndex,startFileId);
+    sql += fmt::format(") AND ((fileId = {} AND messageIndex>={}) OR fileId > {})\n", startFileId, startMessageIndex, startFileId);
 
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9035,41 +9008,40 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
     }
 
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  parameterId=%d;\n",paramId);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  parameterId={};\n", paramId);
 
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9174,54 +9146,53 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
         break;
     }
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  forecastTime >= '%s' AND forecastTime <= '%s'\n",startTime.c_str(),endTime.c_str());
-    p += sprintf(p,"AND\n");
-    p += sprintf(p,"  parameterId=%d\n",paramId);
-    p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  forecastTime >= '{}' AND forecastTime <= '{}'\n", sqlText(mConnection, startTime), sqlText(mConnection, endTime));
+    sql += "AND\n";
+    sql += fmt::format("  parameterId={}\n", paramId);
+    sql += fmt::format("AND  parameterLevel >= {} AND parameterLevel <= {}\n", minLevel, maxLevel);
 
     if (geometryId > 0)
-      p += sprintf(p,"AND geometryId = %d\n",geometryId);
+      sql += fmt::format("AND geometryId = {}\n", geometryId);
 
     if (forecastType > 0)
     {
-      p += sprintf(p,"AND forecastType = %d\n",forecastType);
+      sql += fmt::format("AND forecastType = {}\n", forecastType);
 
       if (forecastNumber > 0)
-        p += sprintf(p,"AND forecastNumber = %d\n",forecastNumber);
+        sql += fmt::format("AND forecastNumber = {}\n", forecastNumber);
     }
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9326,54 +9297,53 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
         break;
     }
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS') >= '%s' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '%s'\n",startTime.c_str(),endTime.c_str());
-    p += sprintf(p,"AND\n");
-    p += sprintf(p,"  generationId = %lu AND parameterId=%d\n",generationId,paramId);
-    p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  to_char(forecastTime,'yyyymmddThh24MISS') >= '{}' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '{}'\n", sqlText(mConnection, startTime), sqlText(mConnection, endTime));
+    sql += "AND\n";
+    sql += fmt::format("  generationId = {} AND parameterId={}\n", generationId, paramId);
+    sql += fmt::format("AND  parameterLevel >= {} AND parameterLevel <= {}\n", minLevel, maxLevel);
 
     if (geometryId > 0)
-      p += sprintf(p,"AND geometryId = %d\n",geometryId);
+      sql += fmt::format("AND geometryId = {}\n", geometryId);
 
     if (forecastType > 0)
     {
-      p += sprintf(p,"AND forecastType = %d\n",forecastType);
+      sql += fmt::format("AND forecastType = {}\n", forecastType);
 
       if (forecastNumber > 0)
-        p += sprintf(p,"AND forecastNumber = %d\n",forecastNumber);
+        sql += fmt::format("AND forecastNumber = {}\n", forecastNumber);
     }
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9477,54 +9447,53 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
         break;
     }
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS') >= '%s' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '%s'\n",startTime.c_str(),endTime.c_str());
-    p += sprintf(p,"AND\n");
-    p += sprintf(p,"  producerId=%u AND parameterId=%d\n",producerId,paramId);
-    p += sprintf(p,"AND  parameterLevel >= %d AND parameterLevel <= %d\n",minLevel,maxLevel);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  to_char(forecastTime,'yyyymmddThh24MISS') >= '{}' AND to_char(forecastTime,'yyyymmddThh24MISS') <= '{}'\n", sqlText(mConnection, startTime), sqlText(mConnection, endTime));
+    sql += "AND\n";
+    sql += fmt::format("  producerId={} AND parameterId={}\n", producerId, paramId);
+    sql += fmt::format("AND  parameterLevel >= {} AND parameterLevel <= {}\n", minLevel, maxLevel);
 
     if (geometryId > 0)
-      p += sprintf(p,"AND geometryId = %d\n",geometryId);
+      sql += fmt::format("AND geometryId = {}\n", geometryId);
 
     if (forecastType > 0)
     {
-      p += sprintf(p,"AND forecastType = %d\n",forecastType);
+      sql += fmt::format("AND forecastType = {}\n", forecastType);
 
       if (forecastNumber > 0)
-        p += sprintf(p,"AND forecastNumber = %d\n",forecastNumber);
+        sql += fmt::format("AND forecastNumber = {}\n", forecastNumber);
     }
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9599,42 +9568,41 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::Generation
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId = %lu AND forecastTime >= TO_TIMESTAMP('%s','yyyymmddThh24MISS') AND forecastTime <= TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",generationId,startTime.c_str(),endTime.c_str());
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  generationId = {} AND forecastTime >= TO_TIMESTAMP('{}','yyyymmddThh24MISS') AND forecastTime <= TO_TIMESTAMP('{}','yyyymmddThh24MISS')\n", generationId, sqlText(mConnection, startTime), sqlText(mConnection, endTime));
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9713,62 +9681,59 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
     std::set<std::string> searchList;
 
-    char tmp[200];
     for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
     {
-      sprintf(tmp,"%lu;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
-      std::string st = tmp;
+      std::string st = fmt::format("{};{};{};{};{}",it->mGenerationId,static_cast<int>(it->mGeometryId),static_cast<int>(it->mForecastType),static_cast<int>(it->mForecastNumber),it->mForecastTime);
       if (searchList.find(st) == searchList.end())
         searchList.insert(st);
     }
 
-    char sql[100000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  generationId IN (");
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += "  generationId IN (";
 
-    char *pp = p;
+    const std::size_t pp = sql.size();
     for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
     {
-      if (p != pp)
-        p += sprintf(p,",");
+      if (sql.size() != pp)
+        sql += ",";
 
-      p += sprintf(p,"%lu",it->mGenerationId);
+      sql += fmt::format("{}", it->mGenerationId);
     }
 
-    p += sprintf(p,")\n");
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
+    sql += ")\n";
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9784,7 +9749,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
     for (int i = 0; i < rowCount; i++)
     {
-      sprintf(tmp,"%s;%s;%s;%s;%s",PQgetvalue(res, i, 6),PQgetvalue(res, i, 7),PQgetvalue(res, i, 13),PQgetvalue(res, i, 14),PQgetvalue(res, i, 10));
+      const std::string tmp = fmt::format("{};{};{};{};{}",PQgetvalue(res, i, 6),PQgetvalue(res, i, 7),PQgetvalue(res, i, 13),PQgetvalue(res, i, 14),PQgetvalue(res, i, 10));
       if (searchList.find(tmp) != searchList.end())
       {
         T::ContentInfo *contentInfo = new T::ContentInfo();
@@ -9848,44 +9813,43 @@ int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T:
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  producerId=%u AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",producerId,startFileId,startMessageIndex,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  producerId={} AND ((fileId = {} AND messageIndex>={}) OR fileId > {})\n", producerId, startFileId, startMessageIndex, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -9961,44 +9925,43 @@ int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  sourceId=%u AND ((fileId = %lu AND messageIndex>=%u) OR fileId > %lu)\n",sourceId,startFileId,startMessageIndex,startFileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
-    p += sprintf(p,"LIMIT\n");
-    p += sprintf(p,"  %u\n",maxRecords);
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  sourceId={} AND ((fileId = {} AND messageIndex>={}) OR fileId > {})\n", sourceId, startFileId, startMessageIndex, startFileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
+    sql += "LIMIT\n";
+    sql += fmt::format("  {}\n", maxRecords);
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -10074,42 +10037,41 @@ int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfo
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"SELECT\n");
-    p += sprintf(p,"  fileId,\n");
-    p += sprintf(p,"  messageIndex,\n");
-    p += sprintf(p,"  fileType,\n");
-    p += sprintf(p,"  filePosition,\n");
-    p += sprintf(p,"  messageSize,\n");
-    p += sprintf(p,"  producerId,\n");
-    p += sprintf(p,"  generationId,\n");
-    p += sprintf(p,"  geometryId,\n");
-    p += sprintf(p,"  parameterId,\n");
-    p += sprintf(p,"  parameterName,\n");
-    p += sprintf(p,"  to_char(forecastTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  levelId,\n");
-    p += sprintf(p,"  level,\n");
-    p += sprintf(p,"  forecastType,\n");
-    p += sprintf(p,"  foracastNumber,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  sourceId,\n");
-    p += sprintf(p,"  aggregationId,\n");
-    p += sprintf(p,"  aggregationPeriod,\n");
-    p += sprintf(p,"  processingTypeId,\n");
-    p += sprintf(p,"  processingTypeValue1,\n");
-    p += sprintf(p,"  processingTypeValue2,\n");
-    p += sprintf(p,"  to_char(modificationTime,'yyyymmddThh24MISS'),\n");
-    p += sprintf(p,"  to_char(deletionTime,'yyyymmddThh24MISS')\n");
-    p += sprintf(p,"FROM\n");
-    p += sprintf(p,"  content\n");
-    p += sprintf(p,"WHERE\n");
-    p += sprintf(p,"  fileId = %lu\n",fileId);
-    p += sprintf(p,"ORDER BY\n");
-    p += sprintf(p,"  fileId,messageIndex\n");
+    sql += "SELECT\n";
+    sql += "  fileId,\n";
+    sql += "  messageIndex,\n";
+    sql += "  fileType,\n";
+    sql += "  filePosition,\n";
+    sql += "  messageSize,\n";
+    sql += "  producerId,\n";
+    sql += "  generationId,\n";
+    sql += "  geometryId,\n";
+    sql += "  parameterId,\n";
+    sql += "  parameterName,\n";
+    sql += "  to_char(forecastTime,'yyyymmddThh24MISS'),\n";
+    sql += "  levelId,\n";
+    sql += "  level,\n";
+    sql += "  forecastType,\n";
+    sql += "  foracastNumber,\n";
+    sql += "  flags,\n";
+    sql += "  sourceId,\n";
+    sql += "  aggregationId,\n";
+    sql += "  aggregationPeriod,\n";
+    sql += "  processingTypeId,\n";
+    sql += "  processingTypeValue1,\n";
+    sql += "  processingTypeValue2,\n";
+    sql += "  to_char(modificationTime,'yyyymmddThh24MISS'),\n";
+    sql += "  to_char(deletionTime,'yyyymmddThh24MISS')\n";
+    sql += "FROM\n";
+    sql += "  content\n";
+    sql += "WHERE\n";
+    sql += fmt::format("  fileId = {}\n", fileId);
+    sql += "ORDER BY\n";
+    sql += "  fileId,messageIndex\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -10183,39 +10145,38 @@ T::EventId PostgresqlImplementation::addEvent(uint eventType,UInt64 id1,UInt64 i
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    char sql[10000];
-    char *p = sql;
+    std::string sql;
 
     time_t ct = time(nullptr);
     std::string currentTime = utcTimeFromTimeT(ct);
 
-    p += sprintf(p,"INSERT INTO event\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  eventId,\n");
-    p += sprintf(p,"  eventType,\n");
-    p += sprintf(p,"  eventTime,\n");
-    p += sprintf(p,"  id1,\n");
-    p += sprintf(p,"  id2,\n");
-    p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  eventData\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  DEFAULT,\n");
-    p += sprintf(p,"  %u,\n",eventType);
-    p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",currentTime.c_str());
-    p += sprintf(p,"  %lu,\n",id1);
-    p += sprintf(p,"  %lu,\n",id2);
-    p += sprintf(p,"  %lu,\n",id3);
-    p += sprintf(p,"  %lu,\n",flags);
+    sql += "INSERT INTO event\n";
+    sql += "(\n";
+    sql += "  eventId,\n";
+    sql += "  eventType,\n";
+    sql += "  eventTime,\n";
+    sql += "  id1,\n";
+    sql += "  id2,\n";
+    sql += "  id3,\n";
+    sql += "  flags,\n";
+    sql += "  eventData\n";
+    sql += ")\n";
+    sql += "VALUES \n";
+    sql += "(\n";
+    sql += "  DEFAULT,\n";
+    sql += fmt::format("  {},\n", eventType);
+    sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, currentTime));
+    sql += fmt::format("  {},\n", id1);
+    sql += fmt::format("  {},\n", id2);
+    sql += fmt::format("  {},\n", id3);
+    sql += fmt::format("  {},\n", flags);
     if (eventData[0] == '\0')
-      p += sprintf(p,"  ''\n");
+      sql += "  ''\n";
     else
-      p += sprintf(p,"  '%s\n'\n",eventData);
-    p += sprintf(p,");\n");
+      sql += fmt::format("  '{}\n'\n", sqlText(mConnection, eventData));
+    sql += ");\n";
 
-    PGresult *res = PQexec(mConnection, sql);
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -10264,46 +10225,45 @@ int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
     uint c = 0;
     time_t ct = time(nullptr);
 
-    char sql[1000000];
-    char *p = sql;
+    std::string sql;
 
-    p += sprintf(p,"INSERT INTO event\n");
-    p += sprintf(p,"(\n");
-    p += sprintf(p,"  eventId,\n");
-    p += sprintf(p,"  eventType,\n");
-    p += sprintf(p,"  eventTime,\n");
-    p += sprintf(p,"  id1,\n");
-    p += sprintf(p,"  id2,\n");
-    p += sprintf(p,"  id3,\n");
-    p += sprintf(p,"  flags,\n");
-    p += sprintf(p,"  eventData\n");
-    p += sprintf(p,")\n");
-    p += sprintf(p,"VALUES \n");
+    sql += "INSERT INTO event\n";
+    sql += "(\n";
+    sql += "  eventId,\n";
+    sql += "  eventType,\n";
+    sql += "  eventTime,\n";
+    sql += "  id1,\n";
+    sql += "  id2,\n";
+    sql += "  id3,\n";
+    sql += "  flags,\n";
+    sql += "  eventData\n";
+    sql += ")\n";
+    sql += "VALUES \n";
 
-    char *pp = p;
+    const std::size_t pp = sql.size();
 
     T::EventInfo *event = eventInfoList.getFirstEvent();
     while (event != nullptr)
     {
       std::string eventTime = utcTimeFromTimeT(event->mEventTime);
 
-      p += sprintf(p,"(\n");
-      p += sprintf(p,"  DEFAULT,\n");
-      p += sprintf(p,"  %u,\n",event->mType);
-      p += sprintf(p,"  TO_TIMESTAMP('%s','yyyymmddThh24MISS'),\n",eventTime.c_str());
-      p += sprintf(p,"  %lu,\n",event->mId1);
-      p += sprintf(p,"  %lu,\n",event->mId2);
-      p += sprintf(p,"  %lu,\n",event->mId3);
-      p += sprintf(p,"  %lu,\n",event->mFlags);
+      sql += "(\n";
+      sql += "  DEFAULT,\n";
+      sql += fmt::format("  {},\n", event->mType);
+      sql += fmt::format("  TO_TIMESTAMP('{}','yyyymmddThh24MISS'),\n", sqlText(mConnection, eventTime));
+      sql += fmt::format("  {},\n", event->mId1);
+      sql += fmt::format("  {},\n", event->mId2);
+      sql += fmt::format("  {},\n", event->mId3);
+      sql += fmt::format("  {},\n", event->mFlags);
       if (event->mEventData.empty())
-        p += sprintf(p,"  ''\n");
+        sql += "  ''\n";
       else
-        p += sprintf(p,"  '%s\n'\n",event->mEventData.c_str());
-      p += sprintf(p,")\n");
+        sql += fmt::format("  '{}\n'\n", sqlText(mConnection, event->mEventData));
+      sql += ")\n";
 
-      if (p-sql > 990000 || (c+1) == len)
+      if (sql.size() > 990000 || (c+1) == len)
       {
-        PGresult *res = PQexec(mConnection, sql);
+        PGresult *res = PQexec(mConnection, sql.c_str());
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
           if (PQresultStatus(res) == PGRES_FATAL_ERROR)
@@ -10316,11 +10276,11 @@ int PostgresqlImplementation::addEventInfoList(T::EventInfoList& eventInfoList)
           return Result::CONTENT_ADDITION_FAILED;
         }
         PQclear(res);
-        p = pp;
+        sql.resize(pp);
       }
       else
       {
-        p += sprintf(p,",\n");
+        sql += ",\n";
       }
       c++;
       event = event->nextItem;
@@ -10356,9 +10316,9 @@ void PostgresqlImplementation::truncateEvents()
 
     std::string deletionTime = utcTimeFromTimeT(time(nullptr)-1200);
 
-    char sql[10000];
-    sprintf(sql,"DELETE FROM event WHERE eventTime < TO_TIMESTAMP('%s','yyyymmddThh24MISS')\n",deletionTime.c_str());
-    PGresult *res = PQexec(mConnection, sql);
+    std::string sql;
+    sql = fmt::format("DELETE FROM event WHERE eventTime < TO_TIMESTAMP('{}','yyyymmddThh24MISS')\n", sqlText(mConnection, deletionTime));
+    PGresult *res = PQexec(mConnection, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
       if (PQresultStatus(res) == PGRES_FATAL_ERROR)

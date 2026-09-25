@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.9.23
-Release: 1%{?dist}.fmi
+Version: 26.9.24
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -22,6 +22,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
+BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: gdal312-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
@@ -92,6 +93,13 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Sep 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-2.fmi
+- Security: PostgreSQL content server escapes every string inserted into SQL literals (SQL injection, e.g. getProducerInfoByName via grid-admin) and builds statements with fmt::format into std::string instead of sprintf into fixed stack buffers (stack overflow with long names)
+- Security: Redis AUTH passes the password as an argument, not as the hiredis format string; reply strings are checked before use
+- Security: session ids use 64 bits from std::random_device instead of mt19937_64 seeded with 32 bits
+
+* Thu Sep 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-1.fmi
+- Fixed origintime=latest time range queries (starttime/endtime=data) returning nothing when an older generation extends further
 * Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
 - Use std functions instead of boost
 - Repackaged since moving from boost::shared_lock to std::shared_lock
