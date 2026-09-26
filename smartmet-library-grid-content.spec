@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.9.24
-Release: 2%{?dist}.fmi
+Version: 26.9.26
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -38,7 +38,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.9.23
-BuildRequires: smartmet-library-grid-files-devel >= 26.9.23
+BuildRequires: smartmet-library-grid-files-devel >= 26.9.26
 BuildRequires: smartmet-library-macgyver-devel >= 26.9.23
 BuildRequires: smartmet-library-spine-devel >= 26.9.23
 BuildRequires: postgresql15-devel
@@ -49,7 +49,7 @@ Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.9.23
-Requires: smartmet-library-grid-files >= 26.9.23
+Requires: smartmet-library-grid-files >= 26.9.26
 Requires: smartmet-library-macgyver >= 26.9.23
 Requires: smartmet-library-spine >= 26.9.23
 
@@ -88,7 +88,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 26.9.23
 Requires: smartmet-library-gis-devel >= 26.9.23
 Requires: smartmet-library-spine-devel >= 26.9.23
-Requires: smartmet-library-grid-files-devel >= 26.9.23
+Requires: smartmet-library-grid-files-devel >= 26.9.26
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -98,6 +98,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-1.fmi
+- Repackaged due to grid-files ABI changes
+
 * Thu Sep 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-2.fmi
 - Security: PostgreSQL content server escapes every string inserted into SQL literals (SQL injection, e.g. getProducerInfoByName via grid-admin) and builds statements with fmt::format into std::string instead of sprintf into fixed stack buffers (stack overflow with long names)
 - Security: Redis AUTH passes the password as an argument, not as the hiredis format string; reply strings are checked before use
