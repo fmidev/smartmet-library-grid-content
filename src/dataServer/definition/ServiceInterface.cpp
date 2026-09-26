@@ -4,6 +4,7 @@
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/grib1/GridDefinition.h>
 #include <grid-files/grib2/GridDefinition.h>
+#include <grid-files/grid/Message.h>
 #include <memory>
 
 
@@ -74,6 +75,7 @@ void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) co
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform1_cache", GRIB2::transformCache1_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform2_cache", GRIB2::transformCache2_stats));
     statistics.insert(std::make_pair("Grid-files::GRIB2_coordinate_transform3_cache", GRIB2::transformCache3_stats));
+    statistics.insert(std::make_pair("Grid-files::circle_point_cache", GRID::circlePointCache_stats));
   }
   catch (...)
   {
