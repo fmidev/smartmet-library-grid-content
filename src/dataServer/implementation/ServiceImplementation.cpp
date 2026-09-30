@@ -352,26 +352,21 @@ void ServiceImplementation::startCacheProcessing()
 
 
 
-/*! \brief Data Server: Get data server by file id. */
+/*! \brief Data Server: Get the data server that serves the given file.
 
-ServiceInterface* ServiceImplementation::getDataServerByFileId(T::FileId fileId)
+    Forwarding requests to other data servers is not implemented: this data
+    server has no registry of other servers, so there is never one to return.
+    The callers therefore answer FILE_NOT_FOUND for files this server does not
+    have. The method used to query the file information from the content
+    server first, which cost a content server call for every missing file
+    without affecting the result.
+*/
+
+ServiceInterface* ServiceImplementation::getDataServerByFileId(T::FileId /* fileId */)
 {
   FUNCTION_TRACE
   try
   {
-    T::FileInfo fileInfo;
-
-    if (mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo) == 0)
-    {
-      if (fileInfo.mDeletionTime != 0)
-      {
-        if ((time(nullptr) + 180) > fileInfo.mDeletionTime)
-        {
-          // The grid file will be deleted soon. We should not access it anymore.
-          return nullptr;
-        }
-      }
-    }
     return nullptr;
   }
   catch (...)
