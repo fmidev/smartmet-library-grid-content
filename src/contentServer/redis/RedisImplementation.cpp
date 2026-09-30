@@ -163,7 +163,61 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
 
     UInt64 lockRequestCounter = reply->integer;
     UInt64 lockReleaseCounter = 0;
+    UInt64 previousReleaseCounter = 0;
     freeReplyObject(reply);
+
+    // Record the ticket and the Redis connection of the lock holder. A waiter
+    // may reset the lock only if that connection no longer exists (the holder
+    // has crashed), never while the holder is alive but slow.
+    auto registerOwner = [&]()
+    {
+      redisReply *idReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT ID"));
+      if (idReply == nullptr)
+      {
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot get the Redis client id!");
+      }
+      const long long clientId = idReply->integer;
+      freeReplyObject(idReply);
+
+      redisReply *setReply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockOwner %llu:%lld",mTablePrefix.c_str(),static_cast<unsigned long long>(lockRequestCounter),clientId));
+      if (setReply == nullptr)
+      {
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot set the lock owner!");
+      }
+      freeReplyObject(setReply);
+    };
+
+    // True if the current lock holder (ticket lockReleaseCounter+1) is known to
+    // be connected to Redis. Holders of older versions do not register
+    // themselves, and are treated as not alive like before.
+    auto ownerAlive = [&](UInt64 releaseCounter) -> bool
+    {
+      redisReply *ownerReply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockOwner",mTablePrefix.c_str()));
+      if (ownerReply == nullptr)
+      {
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot get the lock owner!");
+      }
+      std::string owner = (ownerReply->str != nullptr ? ownerReply->str : "");
+      freeReplyObject(ownerReply);
+
+      unsigned long long ticket = 0;
+      long long clientId = 0;
+      if (sscanf(owner.c_str(),"%llu:%lld",&ticket,&clientId) != 2 || ticket != releaseCounter + 1)
+        return false;
+
+      redisReply *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
+      if (listReply == nullptr)
+      {
+        closeConnection();
+        throw Fmi::Exception(BCP,"Cannot list the Redis clients!");
+      }
+      const bool alive = listReply->type == REDIS_REPLY_STRING && listReply->str != nullptr && listReply->len > 0;
+      freeReplyObject(listReply);
+      return alive;
+    };
 
     time_t startTime = time(nullptr);
 
@@ -188,8 +242,16 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
 
       if ((lockReleaseCounter+1) == lockRequestCounter)
       {
+        registerOwner();
         key = lockRequestCounter;
         return;
+      }
+
+      // The wait time is for a single holder: restart it when the queue moves
+      if (lockReleaseCounter != previousReleaseCounter)
+      {
+        previousReleaseCounter = lockReleaseCounter;
+        startTime = time(nullptr);
       }
 
       boost::this_thread::sleep(boost::posix_time::microseconds(100));
@@ -197,21 +259,30 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
       time_t currentTime = time(nullptr);
       if ((currentTime-startTime) >= waitTimeInSec || lockReleaseCounter >= lockRequestCounter)
       {
-        if (resetLock)
+        if (!resetLock)
         {
-          redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),lockRequestCounter-1));
-          if (reply == nullptr)
-          {
-            closeConnection();
-            throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
-          }
+          // Never continue without the lock
+          Fmi::Exception exception(BCP,"Timeout while waiting for the database lock!");
+          exception.addParameter("Function",function);
+          exception.addParameter("Wait time",std::to_string(waitTimeInSec));
+          throw exception;
+        }
 
-          freeReplyObject(reply);
-        }
-        else
+        if (lockReleaseCounter < lockRequestCounter && ownerAlive(lockReleaseCounter))
         {
-          return;
+          // The holder is alive, just slow. Keep waiting.
+          startTime = currentTime;
+          continue;
         }
+
+        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),lockRequestCounter-1));
+        if (reply == nullptr)
+        {
+          closeConnection();
+          throw Fmi::Exception(BCP,"Cannot set the lock release counter!");
+        }
+
+        freeReplyObject(reply);
       }
     }
   }
