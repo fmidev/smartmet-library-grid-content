@@ -2474,11 +2474,13 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::
       return false;
 
     AutoReadLock lock(mModificationLockPtr);
-    ContentInfo contentInfo;
-    contentInfo.mFileId = fileId;
-    contentInfo.mMessageIndex = messageIndex;
+    // (This local search key used to be called contentInfo too, shadowing the output parameter,
+    // so the found record was never returned to the caller.)
+    ContentInfo searchInfo;
+    searchInfo.mFileId = fileId;
+    searchInfo.mMessageIndex = messageIndex;
 
-    int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
+    int idx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,searchInfo);
     if (idx < 0 ||  C_UINT(idx) >= mLength)
       return false;
 
