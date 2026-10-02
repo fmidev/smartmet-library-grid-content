@@ -641,7 +641,8 @@ void ParameterMappingFile::loadFile()
           if (field[12][0] == 'I')
             rec.mIgnore = true;
 
-          if (field[13][0] != '\0')
+          // (field[13] was read also when the line had only 13 fields)
+          if (c > 13  &&  field[13][0] != '\0')
             rec.mConversionFunction = field[13];
 
           if (c > 14  &&  field[14][0] > ' ')

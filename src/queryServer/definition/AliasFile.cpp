@@ -328,7 +328,10 @@ void AliasFile::loadFile()
       while (ind)
       {
         ind = false;
-        if (fgets(pp,30000,file) != nullptr)
+        // Continuation lines are read after the previous ones: only the rest of the buffer is
+        // available. (Passing the whole buffer size overflowed it with long continued lines.)
+        const int space = static_cast<int>(sizeof(st) - (pp - st));
+        if (space > 1  &&  fgets(pp,space,file) != nullptr)
         {
           lineCount++;
           char *p = strstr(pp,"\n");
