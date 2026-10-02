@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.9.26
-Release: 2%{?dist}.fmi
+Version: 26.10.2
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -39,7 +39,7 @@ BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.9.26
 BuildRequires: smartmet-library-grid-files-devel >= 26.9.26
-BuildRequires: smartmet-library-macgyver-devel >= 26.9.26-2
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
 BuildRequires: smartmet-library-spine-devel >= 26.9.26
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
@@ -50,7 +50,7 @@ Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.9.26
 Requires: smartmet-library-grid-files >= 26.9.26
-Requires: smartmet-library-macgyver >= 26.9.26-2
+Requires: smartmet-library-macgyver >= 26.10.2
 Requires: smartmet-library-spine >= 26.9.26
 
 Provides: %{SPECNAME}
@@ -85,7 +85,7 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 26.9.26-2
+Requires: smartmet-library-macgyver-devel >= 26.10.2
 Requires: smartmet-library-gis-devel >= 26.9.26
 Requires: smartmet-library-spine-devel >= 26.9.26
 Requires: smartmet-library-grid-files-devel >= 26.9.26
@@ -98,6 +98,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
+- Rebuilt against macgyver 26.10.2 where Fmi::Cache::Cache uses CLOCK eviction instead of LRU.
+  CLOCK is faster than LRU since a cache hit only takes a shared lock (ABI change)
+
 * Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-2.fmi
 - Report the grid-files circle point cache in the cache statistics (Grid-files::circle_point_cache)
 
