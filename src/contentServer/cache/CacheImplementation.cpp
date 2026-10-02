@@ -7545,6 +7545,32 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
 
 
 
+/*! \brief Adds a content record to the primary content list. If the list has a record of the
+    same message that is marked deleted (old content of a file that was registered again), the
+    record is reused for the new content. Previously the new content was dropped, so a file that
+    was rewritten in place lost its messages from the cache. Takes the ownership of contentInfo.
+*/
+
+static void addOrReplaceContent(T::ContentInfoList& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+{
+  T::ContentInfo *existing = list.addContentInfo(contentInfo);
+  if (existing == contentInfo)
+    return;
+
+  if (existing != nullptr  &&  (existing->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+  {
+    *existing = *contentInfo;
+    existing->mFlags &= ~T::ContentInfo::Flags::DeletedContent;
+    if (deleteCounter > 0)
+      deleteCounter--;
+  }
+  delete contentInfo;
+}
+
+
+
+
+
 /*! \brief Handles a FILE_ADDED event by inserting the new file (and its content) into the cache. */
 
 void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
@@ -7595,14 +7621,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                   it->second.insert(contentInfo->getForecastTime());
               }
 
-              if (mContentInfoList.addContentInfo(contentInfo) == contentInfo)
-              {
-              }
-              else
-              {
-                // Additon failed. The content probably exists
-                delete contentInfo;
-              }
+              addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
             }
             else
             {
@@ -7652,14 +7671,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
                       it->second.insert(cInfo->getForecastTime());
                   }
 
-                  if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                  {
-                  }
-                  else
-                  {
-                    // Addition failed
-                    delete cInfo;
-                  }
+                  addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
                 }
               }
             }
@@ -7753,14 +7765,7 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
             {
               T::ContentInfo *cInfo = info->duplicate();
 
-              if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-              {
-              }
-              else
-              {
-                // Addtion failed
-                delete cInfo;
-              }
+              addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
             }
           }
         }

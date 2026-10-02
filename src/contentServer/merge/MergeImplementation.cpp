@@ -6142,6 +6142,33 @@ void MergeImplementation::event_geometryListDeletedBySourceId(uint contentStorag
 
 
 
+/*! \brief Adds a content record to the primary content list. If the list has a record of the
+    same message that is marked deleted (old content of a file that was registered again), the
+    record is reused for the new content. Previously the new content was dropped, so a file that
+    was rewritten in place lost its messages. Takes the ownership of contentInfo.
+*/
+
+template <typename List>
+static void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+{
+  T::ContentInfo *existing = list.addContentInfo(contentInfo);
+  if (existing == contentInfo)
+    return;
+
+  if (existing != nullptr  &&  (existing->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+  {
+    *existing = *contentInfo;
+    existing->mFlags &= ~T::ContentInfo::Flags::DeletedContent;
+    if (deleteCounter > 0)
+      deleteCounter--;
+  }
+  delete contentInfo;
+}
+
+
+
+
+
 /*! \brief Merge backend: handle a file-added event from an upstream content storage. */
 
 void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
@@ -6209,14 +6236,7 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
               contentInfo->mSourceId = newSourceId;
               contentInfo->mStorageId = contentStorageIndex;
 
-              if (mContentInfoList.addContentInfo(contentInfo) == contentInfo)
-              {
-              }
-              else
-              {
-                // Additon failed. The content probably exists
-                delete contentInfo;
-              }
+              addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
             }
             else
             {
@@ -6278,14 +6298,7 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
                       it->second.insert(cInfo->getForecastTime());
                   }
 
-                  if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                  {
-                  }
-                  else
-                  {
-                    // Addition failed
-                    delete cInfo;
-                  }
+                  addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
                 }
               }
             }
@@ -6386,19 +6399,12 @@ void MergeImplementation::event_fileUpdated(uint contentStorageIndex,T::EventInf
             {
               T::ContentInfo *cInfo = info->duplicate();
               cInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
-              cInfo->mGenerationId = getNewProducerId(contentStorageIndex,fileInfo.mGenerationId);
+              cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
               cInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
               cInfo->mStorageId = contentStorageIndex;
               cInfo->mFileId = newFileId;
 
-              if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-              {
-              }
-              else
-              {
-                // Addtion failed
-                delete cInfo;
-              }
+              addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
             }
           }
         }
