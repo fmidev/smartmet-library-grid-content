@@ -604,18 +604,21 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
     if (info == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto producerId = info->mProducerId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(info->mProducerId);
+      mContentInfoList[t].deleteContentInfoByProducerId(producerId);
 
-    mFileInfoListByName.deleteFileInfoByProducerId(info->mProducerId);
-    mFileInfoList.deleteFileInfoByProducerId(info->mProducerId);
+    mFileInfoListByName.deleteFileInfoByProducerId(producerId);
+    mFileInfoList.deleteFileInfoByProducerId(producerId);
 
-    mGeometryInfoList.deleteGeometryInfoListByProducerId(info->mProducerId);
-    mGenerationInfoList.deleteGenerationInfoListByProducerId(info->mProducerId);
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerId);
+    mGenerationInfoList.deleteGenerationInfoListByProducerId(producerId);
 
-    mProducerInfoList.deleteProducerInfoById(info->mProducerId);
+    mProducerInfoList.deleteProducerInfoById(producerId);
 
-    addEvent(EventType::PRODUCER_DELETED,info->mProducerId,0,0,0);
+    addEvent(EventType::PRODUCER_DELETED,producerId,0,0,0);
 
     return Result::OK;
   }
@@ -1419,17 +1422,20 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Ge
     if (info == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto deletedGenerationId = info->mGenerationId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(info->mGenerationId);
+      mContentInfoList[t].deleteContentInfoByGenerationId(deletedGenerationId);
 
-    mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
-    mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
+    mFileInfoListByName.deleteFileInfoByGenerationId(deletedGenerationId);
+    mFileInfoList.deleteFileInfoByGenerationId(deletedGenerationId);
 
-    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(deletedGenerationId);
 
-    mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
+    mGenerationInfoList.deleteGenerationInfoById(deletedGenerationId);
 
-    addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_DELETED,deletedGenerationId,0,0,0);
 
     return Result::OK;
   }
@@ -1459,17 +1465,20 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
     if (info == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto generationId = info->mGenerationId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(info->mGenerationId);
+      mContentInfoList[t].deleteContentInfoByGenerationId(generationId);
 
-    mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
-    mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
+    mFileInfoListByName.deleteFileInfoByGenerationId(generationId);
+    mFileInfoList.deleteFileInfoByGenerationId(generationId);
 
-    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(generationId);
 
-    mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
+    mGenerationInfoList.deleteGenerationInfoById(generationId);
 
-    addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_DELETED,generationId,0,0,0);
 
     return Result::OK;
   }
@@ -5301,17 +5310,9 @@ int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
-    if (generationInfo->mContentStartTime == 0)
-    {
-      mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime,generationInfo->mContentHash);
-      generationInfo->mContentStartTime = startTime;
-      generationInfo->mContentEndTime = endTime;
-    }
-    else
-    {
-      startTime = generationInfo->mContentStartTime;
-      endTime = generationInfo->mContentEndTime;
-    }
+    // Computed every time: the range used to be cached in the generation record on the first
+    // call (under a read lock), and content added to the generation later was never included
+    mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
     //mContentInfoList[0].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
@@ -5796,7 +5797,9 @@ void MemoryImplementation::readGeometryList()
   FUNCTION_TRACE
   try
   {
-    mGenerationInfoList.clear();
+    // (This used to clear mGenerationInfoList, so every load from the content directory lost
+    // all generations and a "file" content source served no data)
+    mGeometryInfoList.clear();
 
     if (!mContentLoadEnabled)
       return;
