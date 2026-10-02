@@ -18,7 +18,14 @@ make format             # Run clang-format
 make doc                # Generate Doxygen HTML documentation in doc/html/
 ```
 
-There is no test suite in this repository. Testing is done via integration with SmartMet Server components.
+`make test` builds and runs the Boost.Test programs in `test/` (one executable per `*Test.cpp`):
+memory content server, content cache event following (`ContentCacheTest`, drives
+`CacheImplementation::processEvents` synchronously against a memory server), `ContentInfoList`
+property tests, functions, config file parsers and `QueryServerTest`, which runs content, data
+and query servers in-process (`QueryHarness.h`) on smartmet-test-data GRIBs with the
+smartmet-engine-grid-test configuration. Missing fixtures fail unless `GRID_TEST_ALLOW_SKIP=1`.
+The tests use the installed grid-files; run them against a local build with
+`LD_LIBRARY_PATH=../../grid-files`.
 
 Full developer documentation: `docs/developer-guide.md`.
 
@@ -97,4 +104,4 @@ Type aliases are defined via `grid-files/grid/Typedefs.h`. Commonly used: `Sessi
 
 ## CI
 
-CircleCI builds RPMs on RHEL 8 and RHEL 10 Docker images using `ci-build deps` and `ci-build rpm`. No test step — CI validates that the library compiles and packages cleanly.
+CircleCI builds RPMs on RHEL 8 and RHEL 10 Docker images using `ci-build deps` and `ci-build rpm`, then runs `ci-build testprep` and `ci-build test` before uploading.

@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.10.2
-Release: 3%{?dist}.fmi
+Release: 4%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -52,6 +52,20 @@ Requires: smartmet-library-gis >= 26.9.26
 Requires: smartmet-library-grid-files >= 26.9.26
 Requires: smartmet-library-macgyver >= 26.10.2
 Requires: smartmet-library-spine >= 26.9.26
+#TestRequires: %{smartmet_boost}-devel
+#TestRequires: %{smartmet_fmt_devel}
+#TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: gdal312-devel
+#TestRequires: luajit-devel
+#TestRequires: omniORB-devel >= 4.3.0
+#TestRequires: smartmet-library-gis-devel >= 26.9.26
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.2-2
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.2
+#TestRequires: smartmet-library-newbase-devel
+#TestRequires: smartmet-library-spine-devel >= 26.9.26
+#TestRequires: smartmet-engine-grid-test
+#TestRequires: smartmet-test-data
 
 Provides: %{SPECNAME}
 
@@ -98,6 +112,24 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-4.fmi
+- Memory content server: loading a content directory no longer loses all generations (the
+  grid engine "file" content source served no data), deletions no longer use freed records
+  for their events, file updates are reported as FILE_UPDATED with the content count, and the
+  content time range of a generation follows new content
+- Content cache and merge server keep the new content of files registered again (rewritten
+  files lost their messages until a restart)
+- Query server: exact times are no longer rounded up to the next timestep in the single time
+  methods, the requested time interpolation method is used (misspelled attribute), timestep=data
+  returns values, RAD2DEG uses 180/pi and producers/generations are loaded before the first query
+- Fixed SDEV_DIR, CHANGE, AND, OR, VALID and DIFF functions (units, missing values, grid versions)
+- Fixed a stack buffer overflow in alias files with long continued lines and an uninitialized
+  read in 13-field mapping lines
+- Threads that were never started are no longer joined (undefined behaviour on destruction)
+- ContentInfoList::getContentInfoByFileIdAndMessageIndex returns the found record
+- Added unit and integration tests (memory server, content cache, content lists, functions,
+  parsers, in-process query server); CI runs them
+
 * Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-3.fmi
 - Redis content storage skips file-ids still in use (and zero) when the 32-bit file-id counter
   wraps around. Long-lived files keep their old small ids, so a wrapped counter would otherwise
