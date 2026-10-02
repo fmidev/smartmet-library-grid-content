@@ -2555,6 +2555,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     // ### Checking if the filename already exists in the database.
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
+    const bool existingFile = (info != nullptr);
     if (info != nullptr)
     {
       // ### File with the same name already exists. Let's return
@@ -2608,14 +2609,18 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
     // ### Adding an event to the event list.
 
-    if (fileInfo.mFileId != mMaxFileId)
+    // (Comparing the file id to mMaxFileId reported the update of the most recently added
+    // file as FILE_ADDED, which the content caches ignore for a file they already have.)
+    // The content count tells the content caches to fetch the content of the file (as in
+    // the Redis implementation)
+    if (existingFile)
     {
       //printf("-- file update event\n");
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,len,0);
     }
     else
     {
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,len,0);
     }
 
     return Result::OK;
@@ -2669,6 +2674,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       // ### Checking if the filename already exists in the database.
 
       T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff->mFileInfo.mName);
+      const bool existingFile = (info != nullptr);
       if (info != nullptr)
       {
         //printf("** File exists %s\n",fileInfo.mName.c_str());
@@ -2723,14 +2729,16 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
           //mContentInfoList[0].addContentInfo(cInfo);
           tmpContentList.addContentInfo(info);
 
-          if (info->mFileId != mMaxFileId  &&  (requestFlags & 0x00000001) == 0)
+          if (existingFile  &&  (requestFlags & 0x00000001) == 0)
             tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
         }
       }
 
       // ### Adding an event to the event list.
 
-      if (ff->mFileInfo.mFileId != mMaxFileId)
+      // (Comparing the file id to mMaxFileId treated all but the last new file of the batch
+      // as existing files, so they got no FILE_ADDED events.)
+      if (existingFile)
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
