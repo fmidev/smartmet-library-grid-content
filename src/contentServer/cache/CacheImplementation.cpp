@@ -40,6 +40,19 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
 }
 
 
+// A generation event refers to a generation which could not be read from the content storage.
+// The event is not retried, so the failure must at least be visible in the logs.
+
+static void reportMissingGeneration(const char *eventName,T::GenerationId generationId,int result)
+{
+  Fmi::Exception exception(BCP,"Cannot read the generation of a content event from the content storage!");
+  exception.addParameter("Event",eventName);
+  exception.addParameter("GenerationId",std::to_string(generationId));
+  exception.addParameter("ServiceResult",getResultString(result));
+  exception.printError();
+}
+
+
 
 
 
@@ -7028,10 +7041,15 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
     }
 
     T::GenerationInfo generationInfo;
-    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) == Result::OK)
+    int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+    if (result != Result::OK)
     {
-      mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+      // Later update and status events for the generation will add it to the cache
+      reportMissingGeneration("GENERATION_ADDED",eventInfo.mId1,result);
+      return;
     }
+
+    mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
   }
   catch (...)
   {
@@ -7094,14 +7112,23 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
   try
   {
     T::GenerationInfo generationInfo;
-    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) != Result::OK)
+    int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+    if (result != Result::OK)
+    {
+      reportMissingGeneration("GENERATION_UPDATED",eventInfo.mId1,result);
       return;
+    }
 
     {
       AutoWriteLock lock(&mModificationLock);
       T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
       if (info)
         *info = generationInfo;
+      else
+      {
+        // The GENERATION_ADDED event failed to read the generation, repair the cache now
+        mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+      }
     }
 
     if (!mContentSwapEnabled)
@@ -7138,6 +7165,22 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
       T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
       if (info != nullptr)
         info->mStatus = eventInfo.mId2;
+      else
+      {
+        // The GENERATION_ADDED event failed to read the generation, repair the cache now.
+        // A generation normally becomes ready only after it has been added, so this
+        // event is usually the first chance to recover.
+
+        T::GenerationInfo generationInfo;
+        int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+        if (result == Result::OK)
+        {
+          generationInfo.mStatus = eventInfo.mId2;
+          mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+        }
+        else
+          reportMissingGeneration("GENERATION_STATUS_CHANGED",eventInfo.mId1,result);
+      }
     }
 
     if (!mContentSwapEnabled)
