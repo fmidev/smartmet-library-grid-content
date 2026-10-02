@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.10.2
-Release: 2%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -98,6 +98,13 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-3.fmi
+- Redis content storage skips file-ids still in use (and zero) when the 32-bit file-id counter
+  wraps around. Long-lived files keep their old small ids, so a wrapped counter would otherwise
+  give two files the same id. In production the counter was at 2.73e9 of 4.29e9 (wrap ~2028)
+- Show the full 64-bit last event id in the admin state information instead of a truncated
+  signed 32-bit value
+
 * Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-2.fmi
 - Content cache repairs a generation whose GENERATION_ADDED event failed to read it from the
   content storage: GENERATION_STATUS_CHANGED and GENERATION_UPDATED now add the missing generation

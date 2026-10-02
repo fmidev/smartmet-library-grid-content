@@ -28,6 +28,51 @@ namespace SmartMet
 namespace ContentServer
 {
 
+// Allocates a new file-id. File-ids used in a local storage cannot use more than 32 bits,
+// so the counter is used modulo 2^32. After the counter wraps around, the ids of the
+// long-lived files are still in use and must be skipped, otherwise two files would share
+// the same id. Zero is skipped too, since it means "no file". Returns false on a Redis error.
+
+static bool allocateFileId(redisContext *context,const std::string& tablePrefix,T::FileId& fileId)
+{
+  // Bounds the search in the unlikely case of a long run of reserved ids
+  const uint maxAttempts = 1000000;
+
+  for (uint attempt = 0; attempt < maxAttempts; attempt++)
+  {
+    redisReply *reply = static_cast<redisReply*>(redisCommand(context,"INCR %sfileCounter",tablePrefix.c_str()));
+    if (reply == nullptr)
+      return false;
+
+    fileId = reply->integer & 0xFFFFFFFF;
+    freeReplyObject(reply);
+
+    if (fileId == 0)
+      continue;
+
+    reply = static_cast<redisReply*>(redisCommand(context,"ZCOUNT %sfiles %lu %lu",tablePrefix.c_str(),fileId,fileId));
+    if (reply == nullptr)
+      return false;
+
+    if (reply->type != REDIS_REPLY_INTEGER)
+    {
+      freeReplyObject(reply);
+      return false;
+    }
+
+    bool used = (reply->integer != 0);
+    freeReplyObject(reply);
+
+    if (!used)
+      return true;
+  }
+
+  Fmi::Exception exception(BCP,"Cannot find an unused file-id!");
+  exception.addParameter("Attempts",std::to_string(maxAttempts));
+  throw exception;
+}
+
+
 class RedisProcessLock
 {
   public:
@@ -613,7 +658,7 @@ void RedisImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
     records->addAttribute("Content",cCount);
 
     auto events = parent->addAttribute("Events");
-    events->addAttribute("Last event id",mLastEvent.mEventId);
+    events->addAttribute("Last event id",std::to_string(mLastEvent.mEventId));
 
     ServiceInterface::getStateAttributes(parent);
   }
@@ -3037,19 +3082,15 @@ int RedisImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       // ### Generating a new file-id.
 
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
-      if (reply == nullptr)
+      if (!allocateFileId(mContext,mTablePrefix,fileInfo.mFileId))
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      fileInfo.mFileId = reply->integer & 0xFFFFFFFF;  // File-id used in a local storage cannot use more than 32 bits.
-      freeReplyObject(reply);
-
       // ### Adding the file information into the database.
 
-      reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str()));
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str()));
       if (reply == nullptr)
       {
         closeConnection();
@@ -3219,20 +3260,15 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
     {
       // ### Generating a new file-id.
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
-      if (reply == nullptr)
+      if (!allocateFileId(mContext,mTablePrefix,fileInfo.mFileId))
       {
         closeConnection();
         return Result::PERMANENT_STORAGE_ERROR;
       }
 
-      fileInfo.mFileId = reply->integer & 0xFFFFFFFF;  // File-id used in a local storage cannot use more than 32 bits.
-      fileInfo.mFlags = fileInfo.mFlags;
-      freeReplyObject(reply);
-
       // ### Adding the file information into the database.
 
-      reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str()));
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.getCsv().c_str()));
       if (reply == nullptr)
       {
         closeConnection();
@@ -3366,20 +3402,15 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       {
         // ### Generating a new file-id.
 
-        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sfileCounter",mTablePrefix.c_str()));
-        if (reply == nullptr)
+        if (!allocateFileId(mContext,mTablePrefix,ff->mFileInfo.mFileId))
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
         }
 
-        ff->mFileInfo.mFileId = reply->integer & 0xFFFFFFFF;  // File-id used in a local storage cannot use more than 32 bits.
-        ff->mFileInfo.mFlags = ff->mFileInfo.mFlags;
-        freeReplyObject(reply);
-
         // ### Adding the file information into the database.
 
-        reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff->mFileInfo.mFileId,ff->mFileInfo.getCsv().c_str()));
+        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff->mFileInfo.mFileId,ff->mFileInfo.getCsv().c_str()));
         if (reply == nullptr)
         {
           closeConnection();

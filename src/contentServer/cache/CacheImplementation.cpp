@@ -315,7 +315,7 @@ void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
     records->addAttribute("Content",ssp->mContentInfoList[0].getLength());
 
     auto events = parent->addAttribute("Events");
-    events->addAttribute("Last event id",mLastProcessedEventId);
+    events->addAttribute("Last event id",std::to_string(mLastProcessedEventId));
 
     auto swap = parent->addAttribute("Content Swap");
     if (!mContentSwapEnabled)
