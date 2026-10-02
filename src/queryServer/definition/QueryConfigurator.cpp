@@ -175,7 +175,12 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     if (timestepStr != nullptr)
     {
       if (strcasecmp(timestepStr,"data") == 0)
+      {
+        // The data times are used as such. (Without the flag the time range search expected a
+        // fixed timestep, which was zero, and returned no values.)
         query.mSearchType = Query::SearchType::TimeRange;
+        query.mFlags |= Query::Flags::TimeStepIsData;
+      }
       else
         timestep = timePeriodToSeconds(timestepStr);
     }
@@ -423,7 +428,11 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
     const char *typeStr = attributeList.getAttributeValue("type");
     const char *locationTypeStr = attributeList.getAttributeValue("locationType");
     const char *areaInterpolationMethodStr = attributeList.getAttributeValue("areaInterpolationMethod");
-    const char *timeInterpolationMethodStr = attributeList.getAttributeValue("timeIntepolationMethod");
+    // The attribute name used to be misspelled "timeIntepolationMethod", so the time
+    // interpolation method given by the callers was ignored. The old name is still accepted.
+    const char *timeInterpolationMethodStr = attributeList.getAttributeValue("timeInterpolationMethod");
+    if (timeInterpolationMethodStr == nullptr)
+      timeInterpolationMethodStr = attributeList.getAttributeValue("timeIntepolationMethod");
     const char *levelInterpolationMethodStr = attributeList.getAttributeValue("levelInterpolationMethod");
 
 

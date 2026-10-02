@@ -559,8 +559,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -613,8 +614,9 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -738,8 +740,9 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionI
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -793,8 +796,9 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointListAndTime(T::Sess
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -845,8 +849,9 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
   {
     T::AttributeList qAttributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
 

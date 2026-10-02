@@ -337,7 +337,8 @@ void ServiceImplementation::init(
     mFunctionCollection.addFunction("FEELS_LIKE",new Functions::Function_feelsLike());
 
     // Radians to degrees
-    mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply((360.0/2*3.1415926535)));
+    // (Was 360.0/2*3.1415926535, i.e. 180*pi, due to operator precedence)
+    mFunctionCollection.addFunction("RAD2DEG",new Functions::Function_multiply(360.0/(2*3.1415926535)));
 
     // Degrees to radians
     mFunctionCollection.addFunction("DEG2RAD",new Functions::Function_multiply((2*3.1415926535/360.0)));
@@ -380,6 +381,19 @@ void ServiceImplementation::init(
           mParameterAliasMappings.emplace_back(mapping);
         }
       }
+    }
+
+    // Load the producers and generations before accepting queries. Otherwise the queries made
+    // right after the start returned no data until the update thread had run for the first time.
+    try
+    {
+      checkProducerMapUpdates();
+      checkGenerationUpdates();
+    }
+    catch (...)
+    {
+      Fmi::Exception exception(BCP, "Initial producer and generation update failed, retrying later", nullptr);
+      exception.printError();
     }
 
     startUpdateProcessing();
