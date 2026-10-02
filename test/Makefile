@@ -50,5 +50,5 @@ test: $(PROG)
 	done; \
 	$$ok
 
-$(PROG) : % : %.cpp Makefile $(wildcard *.h) ../libsmartmet-grid-content.so
+$(PROG) : % : %.cpp Makefile $(wildcard *.h) $(shell find ../src -name "*.h") ../libsmartmet-grid-content.so
 	$(CXX) $(CFLAGS) $(DEFINES) -o $@ $@.cpp $(INCLUDES) $(LIBS)

@@ -126,6 +126,11 @@ FMI Grid Content library development files
 - Fixed a stack buffer overflow in alias files with long continued lines and an uninitialized
   read in 13-field mapping lines
 - Threads that were never started are no longer joined (undefined behaviour on destruction)
+- Content cache and merge server: the search structures are reference counted and published
+  under a lock, so a content update no longer deletes a structure that a long running request
+  still uses, and readers never see a partially built structure (found with ThreadSanitizer).
+  ABI change: CacheImplementation and MergeImplementation changed size, the grid engine and
+  smartmet-tools-grid must be rebuilt
 - ContentInfoList::getContentInfoByFileIdAndMessageIndex returns the found record
 - Added unit and integration tests (memory server, content cache, content lists, functions,
   parsers, in-process query server); CI runs them

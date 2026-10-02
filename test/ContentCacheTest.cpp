@@ -19,9 +19,11 @@
 
 #include <grid-files/identification/GridDef.h>
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <set>
+#include <thread>
 
 using namespace SmartMet;
 using namespace GridTest;
@@ -313,4 +315,70 @@ BOOST_DATA_TEST_CASE(randomized_modifications, bdata::make(MODES), swap)
   }
   cache.sync();
   requireSame(storage, cache);
+}
+
+BOOST_DATA_TEST_CASE(concurrent_updates_and_queries, bdata::make(MODES), swap)
+{
+  // A writer modifies the storage, a synchronizer thread applies the events to the cache and
+  // readers query the cache at the same time. Meant to be run also under ThreadSanitizer.
+  Storage storage;
+  Cache cache(storage, swap);
+  T::ProducerInfo p = makeProducer("P");
+  storage.addProducerInfo(SESSION, p);
+
+  std::atomic<bool> done{false};
+  std::atomic<long> queries{0};
+
+  std::thread synchronizer(
+      [&]
+      {
+        while (!done)
+          cache.sync();
+      });
+
+  std::vector<std::thread> readers;
+  for (int r = 0; r < 4; r++)
+  {
+    readers.emplace_back(
+        [&]
+        {
+          while (!done)
+          {
+            T::GenerationInfoList generations;
+            cache.getGenerationInfoList(SESSION, generations);
+            for (uint i = 0; i < generations.getLength(); i++)
+            {
+              T::ContentInfoList list;
+              cache.getContentListByGenerationId(
+                  SESSION, generations.getGenerationInfoByIndex(i)->mGenerationId, 0, 0, 100000, 0, list);
+            }
+            uint count = 0;
+            cache.getContentCount(SESSION, count);
+            queries++;
+          }
+        });
+  }
+
+  std::vector<T::GenerationId> generations;
+  for (int step = 0; step < 60; step++)
+  {
+    T::GenerationInfo g = makeGeneration(p.mProducerId, fmt::format("P:{}", step), BASE_TIME + step);
+    storage.addGenerationInfo(SESSION, g);
+    generations.push_back(g.mGenerationId);
+    addFiles(storage, p.mProducerId, g.mGenerationId, fmt::format("f{}", step), 2, PARAMS);
+    if (generations.size() > 5)
+    {
+      storage.deleteGenerationInfoById(SESSION, generations.front());
+      generations.erase(generations.begin());
+    }
+  }
+
+  done = true;
+  synchronizer.join();
+  for (auto &t : readers)
+    t.join();
+
+  cache.sync();
+  requireSame(storage, cache);
+  BOOST_TEST(queries > 0);
 }
