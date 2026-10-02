@@ -68,19 +68,24 @@ float Function_and::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
+    // Any false value decides, otherwise a missing value makes the result missing.
+    // (The result used to depend on the order of the parameters.)
     uint sz = parameters.size();
     if (sz < 2)
-      throw Fmi::Exception(BCP, "The parameters vector should contain at least two values!");
+      return ParamValueMissing;
 
+    bool missing = false;
     for (uint t=0; t<sz; t++)
     {
       if (parameters[t] == ParamValueMissing)
-        return ParamValueMissing;
-
-      if (parameters[t] == 0)
+        missing = true;
+      else if (parameters[t] == 0)
         return 0;
     }
-    return 1;
+
+    if (missing)
+      return ParamValueMissing;
+    return 1.0;
   }
   catch (...)
   {
@@ -98,19 +103,24 @@ double Function_and::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
+    // Any false value decides, otherwise a missing value makes the result missing.
+    // (The result used to depend on the order of the parameters.)
     uint sz = parameters.size();
     if (sz < 2)
-      throw Fmi::Exception(BCP, "The parameters vector should contain at least two values!");
+      return ParamValueMissing;
 
+    bool missing = false;
     for (uint t=0; t<sz; t++)
     {
       if (parameters[t] == ParamValueMissing)
-        return ParamValueMissing;
-
-      if (parameters[t] == 0)
+        missing = true;
+      else if (parameters[t] == 0)
         return 0;
     }
-    return 1;
+
+    if (missing)
+      return ParamValueMissing;
+    return 1.0;
   }
   catch (...)
   {
@@ -131,31 +141,26 @@ void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint sz = columns*rows;
     outParameters.reserve(sz);
     uint len = inParameters.size();
-
     if (len >= 2)
     {
       for (uint s=0; s<sz; s++)
       {
-        float val = 1;
-        for (uint t=0; t<len; t++)
+        // Same rules as in executeFunctionCall1. (A missing value used to give 1 in OR.)
+        bool missing = false;
+        bool decided = false;
+        for (uint t=0; t<len && !decided; t++)
         {
-          float val1 = ParamValueMissing;
-          if (s < inParameters[t].size())
-            val1 = inParameters[t][s];
-
-          if (val1 == ParamValueMissing)
-          {
-            val = ParamValueMissing;
-            t = len;
-          }
-
-          if (val1 == 0)
-          {
-            val = 0;
-            t = len;
-          }
+          if (s >= inParameters[t].size() || inParameters[t][s] == ParamValueMissing)
+            missing = true;
+          else if (inParameters[t][s] == 0)
+            decided = true;
         }
-        outParameters.emplace_back(val);
+        if (decided)
+          outParameters.emplace_back(0);
+        else if (missing)
+          outParameters.emplace_back(ParamValueMissing);
+        else
+          outParameters.emplace_back(1);
       }
     }
   }
@@ -178,31 +183,26 @@ void Function_and::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     uint sz = columns*rows;
     outParameters.reserve(sz);
     uint len = inParameters.size();
-
     if (len >= 2)
     {
       for (uint s=0; s<sz; s++)
       {
-        float val = 1;
-        for (uint t=0; t<len; t++)
+        // Same rules as in executeFunctionCall1. (A missing value used to give 1 in OR.)
+        bool missing = false;
+        bool decided = false;
+        for (uint t=0; t<len && !decided; t++)
         {
-          float val1 = ParamValueMissing;
-          if (s < inParameters[t].size())
-            val1 = inParameters[t][s];
-
-          if (val1 == ParamValueMissing)
-          {
-            val = ParamValueMissing;
-            t = len;
-          }
-
-          if (val1 == 0)
-          {
-            val = 0;
-            t = len;
-          }
+          if (s >= inParameters[t].size() || inParameters[t][s] == ParamValueMissing)
+            missing = true;
+          else if (inParameters[t][s] == 0)
+            decided = true;
         }
-        outParameters.emplace_back(val);
+        if (decided)
+          outParameters.emplace_back(0);
+        else if (missing)
+          outParameters.emplace_back(ParamValueMissing);
+        else
+          outParameters.emplace_back(1);
       }
     }
   }

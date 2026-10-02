@@ -71,6 +71,10 @@ float Function_change::executeFunctionCall1(std::vector<float>& parameters)
     if (len < 2)
       return ParamValueMissing;
 
+    // A missing first or last value must not be used as a number
+    if (parameters[len-1] == ParamValueMissing || parameters[0] == ParamValueMissing)
+      return ParamValueMissing;
+
     return parameters[len-1] - parameters[0];
   }
   catch (...)
@@ -91,6 +95,10 @@ double Function_change::executeFunctionCall1(std::vector<double>& parameters)
   {
     uint len = parameters.size();
     if (len < 2)
+      return ParamValueMissing;
+
+    // A missing first or last value must not be used as a number
+    if (parameters[len-1] == ParamValueMissing || parameters[0] == ParamValueMissing)
       return ParamValueMissing;
 
     return parameters[len-1] - parameters[0];
@@ -122,7 +130,8 @@ void Function_change::executeFunctionCall9(uint columns,uint rows,std::vector<st
       double val = ParamValueMissing;
       if (len >= 2)
       {
-        if (s < inParameters[len-1].size() &&  s < inParameters[0].size())
+        if (s < inParameters[len-1].size() &&  s < inParameters[0].size() &&
+            inParameters[len-1][s] != ParamValueMissing && inParameters[0][s] != ParamValueMissing)
           val = inParameters[len-1][s] - inParameters[0][s];
       }
       outParameters.emplace_back(val);
@@ -153,7 +162,8 @@ void Function_change::executeFunctionCall9(uint columns,uint rows,std::vector<st
       double val = ParamValueMissing;
       if (len >= 2)
       {
-        if (s < inParameters[len-1].size() &&  s < inParameters[0].size())
+        if (s < inParameters[len-1].size() &&  s < inParameters[0].size() &&
+            inParameters[len-1][s] != ParamValueMissing && inParameters[0][s] != ParamValueMissing)
           val = inParameters[len-1][s] - inParameters[0][s];
       }
       outParameters.emplace_back(val);

@@ -163,7 +163,8 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       if (s < inParameters[0].size())
       {
         value = inParameters[0][s];
-        for (uint t=1; t<len; t++)
+        // (A missing first value used to be subtracted from as a number)
+        for (uint t=1; t<len && value != ParamValueMissing; t++)
         {
           if (s < inParameters[t].size())
           {
@@ -239,7 +240,8 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
       if (s < inParameters[0].size())
       {
         value = inParameters[0][s];
-        for (uint t=1; t<len; t++)
+        // (A missing first value used to be subtracted from as a number)
+        for (uint t=1; t<len && value != ParamValueMissing; t++)
         {
           if (s < inParameters[t].size())
           {

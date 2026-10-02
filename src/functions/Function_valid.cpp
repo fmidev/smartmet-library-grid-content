@@ -117,15 +117,24 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 {
   try
   {
+    // The first valid value at each grid point. (The first non-empty grid used to be returned
+    // as such, with its missing values.)
+    uint sz = columns*rows;
     uint len = inParameters.size();
-
-    for (uint t=0; t<len; t++)
+    outParameters.clear();
+    outParameters.reserve(sz);
+    for (uint s=0; s<sz; s++)
     {
-      if (inParameters[t].size())
+      double val = ParamValueMissing;
+      for (uint t=0; t<len; t++)
       {
-        outParameters = inParameters[t];
-        return;
+        if (s < inParameters[t].size() && inParameters[t][s] != ParamValueMissing)
+        {
+          val = inParameters[t][s];
+          break;
+        }
       }
+      outParameters.emplace_back(val);
     }
   }
   catch (...)
@@ -144,14 +153,24 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 {
   try
   {
+    // The first valid value at each grid point. (The first non-empty grid used to be returned
+    // as such, with its missing values.)
+    uint sz = columns*rows;
     uint len = inParameters.size();
-    for (uint t=0; t<len; t++)
+    outParameters.clear();
+    outParameters.reserve(sz);
+    for (uint s=0; s<sz; s++)
     {
-      if (inParameters[t].size())
+      double val = ParamValueMissing;
+      for (uint t=0; t<len; t++)
       {
-        outParameters = inParameters[t];
-        return;
+        if (s < inParameters[t].size() && inParameters[t][s] != ParamValueMissing)
+        {
+          val = inParameters[t][s];
+          break;
+        }
       }
+      outParameters.emplace_back(val);
     }
   }
   catch (...)
