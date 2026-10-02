@@ -8,6 +8,8 @@
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
 #include <atomic>
+#include <memory>
+#include <shared_mutex>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 
 
@@ -225,6 +227,10 @@ class MergeImplementation : public ServiceInterface
   protected:
 
     T::EventId      addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags);
+    /*! \brief Returns the active search structure. The returned reference keeps it alive even if
+        a content update replaces it meanwhile. */
+    SearchStructure_sptr activeSearchStructure() const;
+
     virtual bool    isSessionValid(T::SessionId sessionId);
 
     virtual void    readContentList(uint contentStorageIndex,ContentServer_sptr contentStorage);
@@ -306,7 +312,8 @@ class MergeImplementation : public ServiceInterface
     uint                   mGenerationDeleteCounter;      //!< Running count of generation deletions since last reload.
     uint                   mGeometryDeleteCounter;        //!< Running count of geometry deletions since last reload.
     uint                   mActiveSearchStructure;        //!< Index (0 or 1) of the currently active SearchStructure.
-    SearchStructure*       mSearchStructurePtr[2];        //!< Double-buffered search structures for lock-free reads.
+    SearchStructure_sptr   mSearchStructurePtr[2];        //!< Double-buffered search structures. Readers hold a reference for the duration of a request.
+    mutable std::shared_mutex mSearchStructurePtrLock;    //!< Guards mSearchStructurePtr and mActiveSearchStructure (held only while copying or replacing a pointer).
     time_t                 mContentUpdateTime;            //!< Time of the last content update.
     bool                   mContentUpdateRequired;        //!< True when a content refresh is pending.
     uint                   mContentUpdateInterval;        //!< Minimum seconds between successive content updates.

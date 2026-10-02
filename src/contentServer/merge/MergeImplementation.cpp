@@ -159,17 +159,24 @@ MergeImplementation::~MergeImplementation()
       mThread = 0;
     }
 
-    if (mSearchStructurePtr[0])
-      delete mSearchStructurePtr[0];
-
-    if (mSearchStructurePtr[1])
-      delete mSearchStructurePtr[1];
   }
   catch (...)
   {
     Fmi::Exception exception(BCP,"Destructor failed",nullptr);
     exception.printError();
   }
+}
+
+
+
+
+
+/*! \brief Returns the active search structure (see the header). */
+
+SearchStructure_sptr MergeImplementation::activeSearchStructure() const
+{
+  std::shared_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+  return mSearchStructurePtr[mActiveSearchStructure];
 }
 
 
@@ -308,7 +315,7 @@ void MergeImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
   FUNCTION_TRACE
   try
   {
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return;
 
@@ -668,7 +675,7 @@ int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -725,7 +732,7 @@ int MergeImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -761,7 +768,7 @@ int MergeImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -791,7 +798,7 @@ int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     producerInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -896,7 +903,7 @@ int MergeImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -931,7 +938,7 @@ int MergeImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -958,7 +965,7 @@ int MergeImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1007,7 +1014,7 @@ int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1197,7 +1204,7 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1528,7 +1535,7 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1570,7 +1577,7 @@ int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1618,7 +1625,7 @@ int MergeImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1656,7 +1663,7 @@ int MergeImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1694,7 +1701,7 @@ int MergeImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1730,7 +1737,7 @@ int MergeImplementation::_getGenerationInfoListByProducerId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1770,7 +1777,7 @@ int MergeImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1811,7 +1818,7 @@ int MergeImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1838,7 +1845,7 @@ int MergeImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1873,7 +1880,7 @@ int MergeImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1915,7 +1922,7 @@ int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2083,7 +2090,7 @@ int MergeImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generati
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2120,7 +2127,7 @@ int MergeImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2156,7 +2163,7 @@ int MergeImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2191,7 +2198,7 @@ int MergeImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2227,7 +2234,7 @@ int MergeImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2261,7 +2268,7 @@ int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2601,7 +2608,7 @@ int MergeImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2639,7 +2646,7 @@ int MergeImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2677,7 +2684,7 @@ int MergeImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId start
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2718,7 +2725,7 @@ int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2759,7 +2766,7 @@ int MergeImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2805,7 +2812,7 @@ int MergeImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2847,7 +2854,7 @@ int MergeImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2887,7 +2894,7 @@ int MergeImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2927,7 +2934,7 @@ int MergeImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::So
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2961,7 +2968,7 @@ int MergeImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2995,7 +3002,7 @@ int MergeImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3028,7 +3035,7 @@ int MergeImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3062,7 +3069,7 @@ int MergeImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3512,7 +3519,7 @@ int MergeImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId
       return Result::DATA_NOT_FOUND;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3553,7 +3560,7 @@ int MergeImplementation::_getContentList(T::SessionId sessionId,T::FileId startF
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3590,7 +3597,7 @@ int MergeImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3631,7 +3638,7 @@ int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3677,7 +3684,7 @@ int MergeImplementation::_getContentListByFileName(T::SessionId sessionId,const 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3717,7 +3724,7 @@ int MergeImplementation::_getContentListByProducerId(T::SessionId sessionId,T::P
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 /*
@@ -3762,7 +3769,7 @@ int MergeImplementation::_getContentListByProducerName(T::SessionId sessionId,co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3806,7 +3813,7 @@ int MergeImplementation::_getContentListByGenerationId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3854,7 +3861,7 @@ int MergeImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3898,7 +3905,7 @@ int MergeImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3942,7 +3949,7 @@ int MergeImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3982,7 +3989,7 @@ int MergeImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4009,7 +4016,7 @@ int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4086,7 +4093,7 @@ int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4168,7 +4175,7 @@ int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4248,7 +4255,7 @@ int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4331,7 +4338,7 @@ int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4412,7 +4419,7 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4509,7 +4516,7 @@ int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
     contentInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4573,7 +4580,7 @@ int MergeImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4606,7 +4613,7 @@ int MergeImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4668,7 +4675,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4701,7 +4708,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4734,7 +4741,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4767,7 +4774,7 @@ int MergeImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::S
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4800,7 +4807,7 @@ int MergeImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4832,7 +4839,7 @@ int MergeImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4884,7 +4891,7 @@ int MergeImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4925,7 +4932,7 @@ int MergeImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4966,7 +4973,7 @@ int MergeImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5000,7 +5007,7 @@ int MergeImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::Se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5034,7 +5041,7 @@ int MergeImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5070,7 +5077,7 @@ int MergeImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5116,7 +5123,7 @@ int MergeImplementation::_getHashByProducerId(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5164,7 +5171,7 @@ int MergeImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       return Result::OK;
     }
 */
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -7002,7 +7009,7 @@ void MergeImplementation::processEvents(bool eventThread)
 
       PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents();%s",buf);
 
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock lock(&mContentTimeCache_modificationLock);
@@ -7081,7 +7088,7 @@ void MergeImplementation::updateContent()
     if (t1 == t2)
       return;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     // We create totally new search structure and replace the the old one.
 
     if (ssp)
@@ -7188,21 +7195,9 @@ void MergeImplementation::updateContent()
 
     mCachedFiles_totalWaitTime = 0;
 
-    auto nptr = new SearchStructure();
-    if (mActiveSearchStructure == 0)
-    {
-      if (mSearchStructurePtr[1])
-        delete mSearchStructurePtr[1];
-
-      mSearchStructurePtr[1] = nptr;
-    }
-    else
-    {
-      if (mSearchStructurePtr[0])
-        delete mSearchStructurePtr[0];
-
-       mSearchStructurePtr[0] = nptr;
-    }
+    // The new structure is filled first and published at the end. Readers still using the
+    // replaced structure keep it alive through their references.
+    auto nptr = std::make_shared<SearchStructure>();
 
     nptr->mProducerInfoList = mProducerInfoList;
     //PRINT_EVENT_LINE(mDebugLog,"** producerList copied");
@@ -7279,10 +7274,12 @@ void MergeImplementation::updateContent()
 
     PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping ended");
 
-    if (mActiveSearchStructure == 0)
-      mActiveSearchStructure = 1;
-    else
-      mActiveSearchStructure = 0;
+    {
+      std::unique_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+      const uint inactive = (mActiveSearchStructure == 0 ? 1 : 0);
+      mSearchStructurePtr[inactive] = nptr;
+      mActiveSearchStructure = inactive;
+    }
 
     mContentChangeTime = time(nullptr);
     mContentSwapCounter++;

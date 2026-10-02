@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <shared_mutex>
+
 #include "../definition/ServiceInterface.h"
 
 #include <grid-files/common/ModificationLock.h>
@@ -216,6 +219,11 @@ class CacheImplementation : public ServiceInterface
 
   protected:
 
+    /*! \brief Returns the active search structure. The returned reference keeps it alive even if
+        a content update replaces it meanwhile. (The structures used to be raw pointers that an
+        update deleted while long running requests could still use them.) */
+    SearchStructure_sptr activeSearchStructure() const;
+
     virtual bool    isSessionValid(T::SessionId sessionId);
 
     virtual void    readContentList();
@@ -306,7 +314,8 @@ class CacheImplementation : public ServiceInterface
     uint                   mFileCount;                    //!< Total number of cached files.
     uint                   mContentCount;                 //!< Total number of cached content records.
     uint                   mActiveSearchStructure;        //!< Index (0 or 1) of the currently active SearchStructure.
-    SearchStructure*       mSearchStructurePtr[2];        //!< Double-buffered search structures for lock-free reads.
+    SearchStructure_sptr   mSearchStructurePtr[2];        //!< Double-buffered search structures. Readers hold a reference for the duration of a request.
+    mutable std::shared_mutex mSearchStructurePtrLock;    //!< Guards mSearchStructurePtr and mActiveSearchStructure (held only while copying or replacing a pointer).
     std::size_t            mSsProducerHash;               //!< Hash of the producer list used to detect changes.
     std::size_t            mSsGenerationHash;             //!< Hash of the generation list used to detect changes.
     std::size_t            mSsGeometryHash;               //!< Hash of the geometry list used to detect changes.
