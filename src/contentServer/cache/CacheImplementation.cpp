@@ -4653,7 +4653,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::OK;
 
     if (mUpdateInProgress)
-      return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,maxRecords,startMessageIndex,contentInfoList);
+      return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;

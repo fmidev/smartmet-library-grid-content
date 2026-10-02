@@ -4620,8 +4620,10 @@ int MergeImplementation::_getContentParamListByGenerationId(T::SessionId session
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      if (info == nullptr)
+        continue;
 
-      if (info != nullptr  &&  (prev == nullptr ||
+      if ((prev == nullptr ||
           info->getFmiParameterName() != prev->getFmiParameterName() ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||

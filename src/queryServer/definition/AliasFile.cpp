@@ -241,7 +241,7 @@ bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
     if (p1 == std::string::npos)
       return false;
 
-    auto p2 = name.find(")",p1);
+    auto p2 = name.find(')',p1);
     if (p2 == std::string::npos)
       return false;
 

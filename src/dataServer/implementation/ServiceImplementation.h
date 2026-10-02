@@ -207,7 +207,7 @@ class ServiceImplementation : public ServiceInterface
      virtual void   readContentList(T::ContentInfoList& contentList);
      virtual void   removeOldCacheFiles(std::map<T::FileId,std::string>& cachedFilenames);
 
-     ServiceInterface*    getDataServerByFileId(T::FileId fileId);
+     ServiceInterface*    getDataServerByFileId(T::FileId fileId);  // Forwarding is not implemented: always nullptr
      GRID::GridFile_sptr  getGridFile(T::FileId fileId);
 
      T::EventId           mLastProcessedEventId;        //!< Event identifier of the last ContentServer event processed.

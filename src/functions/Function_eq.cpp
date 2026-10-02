@@ -1,5 +1,6 @@
 #include "Function_eq.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <cmath>
 
 
 namespace SmartMet
@@ -86,7 +87,7 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
+        if ((Int64)std::llround(parameters[0]*mp) == (Int64)std::llround(parameters[1]*mp))
           return 1.0;
 
         return 0.0;
@@ -131,7 +132,7 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
+        if ((Int64)std::llround(parameters[0]*mp) == (Int64)std::llround(parameters[1]*mp))
           return 1.0;
 
         return 0.0;
@@ -198,7 +199,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
+            if ((Int64)std::llround(mp*val1) == (Int64)std::llround(mp*val2))
               val = 1.0;
             else
               val = 0.0;
@@ -250,7 +251,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 
         if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
         {
-          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
+          if ((Int64)std::llround(mp*val1) == (Int64)std::llround(mp*val2))
             val = 1.0;
           else
             val = 0.0;
@@ -313,7 +314,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
+            if ((Int64)std::llround(mp*val1) == (Int64)std::llround(mp*val2))
               val = 1.0;
             else
               val = 0.0;
@@ -366,7 +367,7 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 
         if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
         {
-          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
+          if ((Int64)std::llround(mp*val1) == (Int64)std::llround(mp*val2))
             val = 1.0;
           else
             val = 0.0;

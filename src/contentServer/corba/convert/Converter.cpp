@@ -163,7 +163,7 @@ void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& tar
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::ContentInfo corbaObject = source[t];
+      const C::ContentInfo& corbaObject = source[t];
       T::ContentInfo *info = new T::ContentInfo();
       convert(corbaObject,*info);
       target.addContentInfo(info);
@@ -274,7 +274,7 @@ void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::FileInfo corbaObject = source[t];
+      const C::FileInfo& corbaObject = source[t];
       T::FileInfo *info = new T::FileInfo();
       convert(corbaObject,*info);
       target.addFileInfo(info);
@@ -374,7 +374,7 @@ void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& t
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::ProducerInfo corbaObject = source[t];
+      const C::ProducerInfo& corbaObject = source[t];
       T::ProducerInfo *info = new T::ProducerInfo();
       convert(corbaObject,*info);
       target.addProducerInfo(info);
@@ -487,7 +487,7 @@ void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoLis
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::GenerationInfo corbaObject = source[t];
+      const C::GenerationInfo& corbaObject = source[t];
       T::GenerationInfo *info = new T::GenerationInfo();
       convert(corbaObject,*info);
       target.addGenerationInfo(info);
@@ -698,7 +698,7 @@ void Converter::convert(const C::EventInfoList& source,T::EventInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::EventInfo corbaObject = source[t];
+      const C::EventInfo& corbaObject = source[t];
       T::EventInfo *info = new T::EventInfo();
       convert(corbaObject,*info);
       target.addEventInfo(info);
@@ -1410,7 +1410,7 @@ void Converter::convert(const C::LevelInfoList& source,T::LevelInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::LevelInfo corbaObject = source[t];
+      const C::LevelInfo& corbaObject = source[t];
       T::LevelInfo *info = new T::LevelInfo();
       convert(corbaObject,*info);
       target.addLevelInfo(info);

@@ -114,7 +114,7 @@ vpath %.o obj
 
 # The files to be compiled
 
-SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp src/*/sync/*.cpp ))
+SRCS     = $(patsubst src/%,%,$(wildcard src/*.cpp src/*/*.cpp src/*/definition/*.cpp src/*/cache/*.cpp src/*/redis/*.cpp src/*/memory/*.cpp src/*/merge/*.cpp src/*/postgresql/*.cpp src/*/http/*/*.cpp src/*/implementation/*.cpp))
 
 else
 
