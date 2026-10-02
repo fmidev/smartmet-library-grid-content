@@ -142,6 +142,7 @@ ServiceImplementation::ServiceImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mContentServerPtr = nullptr;
     mDataServerPtr = nullptr;
     mFunctionParamId = 1000;
@@ -224,7 +225,11 @@ ServiceImplementation::~ServiceImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
   }
   catch (...)
   {

@@ -63,6 +63,7 @@ CacheImplementation::CacheImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mImplementationType = Implementation::Cache;
     mContentStorage = nullptr;
     mContentStorageStartTime = 0;
@@ -134,7 +135,11 @@ CacheImplementation::~CacheImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
 
     if (mSearchStructurePtr[0])
       delete mSearchStructurePtr[0];

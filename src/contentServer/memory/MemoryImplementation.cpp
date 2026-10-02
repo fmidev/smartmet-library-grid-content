@@ -51,6 +51,7 @@ MemoryImplementation::MemoryImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mImplementationType = Implementation::Memory;
     mStartTime = time(nullptr);
 
@@ -120,7 +121,11 @@ MemoryImplementation::~MemoryImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
   }
   catch (...)
   {

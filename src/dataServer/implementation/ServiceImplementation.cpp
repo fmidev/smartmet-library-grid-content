@@ -71,6 +71,8 @@ ServiceImplementation::ServiceImplementation()
   FUNCTION_TRACE
   try
   {
+    mEventProcessingThread = 0;  // joined in the destructor only if the thread was started
+    mCacheProcessingThread = 0;  // joined in the destructor only if the thread was started
     mServerSessionId = 0;
     mServerId = 0;
     mContentServer = nullptr;
@@ -219,9 +221,16 @@ void ServiceImplementation::shutdown()
   {
     PRINT_DATA(mDebugLog,"*** SHUTDOWN ***\n");
     mShutdownRequested = true;
-    pthread_join(mEventProcessingThread, nullptr);
-    if (mFileCache_enabled)
+    if (mEventProcessingThread != 0)
+    {
+      pthread_join(mEventProcessingThread, nullptr);
+      mEventProcessingThread = 0;
+    }
+    if (mCacheProcessingThread != 0)
+    {
       pthread_join(mCacheProcessingThread, nullptr);
+      mCacheProcessingThread = 0;
+    }
   }
   catch (...)
   {
