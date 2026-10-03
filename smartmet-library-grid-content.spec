@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.2
-Release: 4%{?dist}.fmi
+Version: 26.10.3
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -38,7 +38,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.9.26
-BuildRequires: smartmet-library-grid-files-devel >= 26.9.26
+BuildRequires: smartmet-library-grid-files-devel >= 26.10.3
 BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
 BuildRequires: smartmet-library-spine-devel >= 26.9.26
 BuildRequires: postgresql15-devel
@@ -49,7 +49,7 @@ Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.9.26
-Requires: smartmet-library-grid-files >= 26.9.26
+Requires: smartmet-library-grid-files >= 26.10.3
 Requires: smartmet-library-macgyver >= 26.10.2
 Requires: smartmet-library-spine >= 26.9.26
 #TestRequires: %{smartmet_boost}-devel
@@ -60,7 +60,7 @@ Requires: smartmet-library-spine >= 26.9.26
 #TestRequires: luajit-devel
 #TestRequires: omniORB-devel >= 4.3.0
 #TestRequires: smartmet-library-gis-devel >= 26.9.26
-#TestRequires: smartmet-library-grid-files-devel >= 26.10.2-2
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.3
 #TestRequires: smartmet-library-macgyver-devel >= 26.10.2
 #TestRequires: smartmet-library-newbase-devel
 #TestRequires: smartmet-library-spine-devel >= 26.9.26
@@ -102,7 +102,7 @@ Requires: %{SPECNAME}
 Requires: smartmet-library-macgyver-devel >= 26.10.2
 Requires: smartmet-library-gis-devel >= 26.9.26
 Requires: smartmet-library-spine-devel >= 26.9.26
-Requires: smartmet-library-grid-files-devel >= 26.9.26
+Requires: smartmet-library-grid-files-devel >= 26.10.3
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -112,7 +112,7 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-4.fmi
+* Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
 - Memory content server: loading a content directory no longer loses all generations (the
   grid engine "file" content source served no data), deletions no longer use freed records
   for their events, file updates are reported as FILE_UPDATED with the content count, and the
