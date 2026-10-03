@@ -234,9 +234,11 @@ File ids are cut to 32 bits, and a file can hold at most 2^24 messages.
 
 Writers take the **ticket lock**: `INCR lockRequestCounter` returns a ticket, and the
 writer waits until `lockReleaseCounter + 1` equals its ticket. If the lock is not
-released in time, the waiter resets the release counter and proceeds. That keeps a
-crashed writer from blocking everyone forever, but a writer that is merely slow can
-then overlap with the next one.
+released in time, the waiter checks the holder: the holder records its ticket and Redis
+client id in `<prefix>lockOwner`, and the waiter resets the release counter and proceeds
+only if that client is no longer connected (the holder has crashed). A holder that is
+alive but slow keeps the lock. Holders running an older version register no owner and
+are treated as gone, as before.
 
 ## 7. Events and synchronisation
 
