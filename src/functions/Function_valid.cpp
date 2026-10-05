@@ -117,24 +117,18 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 {
   try
   {
-    // The first valid value at each grid point. (The first non-empty grid used to be returned
-    // as such, with its missing values.)
-    uint sz = columns*rows;
+    // The first available grid is returned as such, including its missing values. The
+    // parameters are listed in order of preference, typically a nowcast first and a longer
+    // range forecast after it, and a missing value in the preferred grid is valid information
+    // (for example no precipitation) which must not be filled from the less reliable grids.
     uint len = inParameters.size();
-    outParameters.clear();
-    outParameters.reserve(sz);
-    for (uint s=0; s<sz; s++)
+    for (uint t=0; t<len; t++)
     {
-      double val = ParamValueMissing;
-      for (uint t=0; t<len; t++)
+      if (inParameters[t].size())
       {
-        if (s < inParameters[t].size() && inParameters[t][s] != ParamValueMissing)
-        {
-          val = inParameters[t][s];
-          break;
-        }
+        outParameters = inParameters[t];
+        return;
       }
-      outParameters.emplace_back(val);
     }
   }
   catch (...)
@@ -153,24 +147,18 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 {
   try
   {
-    // The first valid value at each grid point. (The first non-empty grid used to be returned
-    // as such, with its missing values.)
-    uint sz = columns*rows;
+    // The first available grid is returned as such, including its missing values. The
+    // parameters are listed in order of preference, typically a nowcast first and a longer
+    // range forecast after it, and a missing value in the preferred grid is valid information
+    // (for example no precipitation) which must not be filled from the less reliable grids.
     uint len = inParameters.size();
-    outParameters.clear();
-    outParameters.reserve(sz);
-    for (uint s=0; s<sz; s++)
+    for (uint t=0; t<len; t++)
     {
-      double val = ParamValueMissing;
-      for (uint t=0; t<len; t++)
+      if (inParameters[t].size())
       {
-        if (s < inParameters[t].size() && inParameters[t][s] != ParamValueMissing)
-        {
-          val = inParameters[t][s];
-          break;
-        }
+        outParameters = inParameters[t];
+        return;
       }
-      outParameters.emplace_back(val);
     }
   }
   catch (...)

@@ -319,6 +319,8 @@ BOOST_DATA_TEST_CASE(grid_call_matches_scalar_call, bdata::make(names()), name)
   auto it = ARITY.find(name);
   if (name == "ADD")
     return;  // the grid version adds the external parameters, see below
+  if (name == "VALID")
+    return;  // the grid version selects a whole grid, see below
 
   Rng rnd{static_cast<unsigned>(std::hash<std::string>()(name)) + 1};
   const uint columns = 7;
@@ -358,6 +360,29 @@ BOOST_DATA_TEST_CASE(grid_call_matches_scalar_call, bdata::make(names()), name)
     if (!close(out[s], expected, 1e-5) && bad++ < 3)
       BOOST_ERROR((Case{name, pointParams[s], expected}) << ": grid " << out[s] << ", scalar " << expected);
   }
+}
+
+BOOST_AUTO_TEST_CASE(valid_grid_call_returns_the_first_available_grid)
+{
+  // A missing value in the preferred grid (say a nowcast) is information such as "no
+  // precipitation", it must not be filled from the later grids (say an older forecast)
+  Function_valid f;
+  const std::vector<double> ext;
+  std::vector<std::vector<double>> grids = {{}, {M, 2, M}, {3, 3, 3}};
+  std::vector<double> out;
+  f.executeFunctionCall9(3, 1, grids, ext, out);
+  BOOST_TEST_REQUIRE(out.size() == 3U);
+  BOOST_TEST(out[0] == M);
+  BOOST_TEST(out[1] == 2.0);
+  BOOST_TEST(out[2] == M);
+
+  std::vector<std::vector<float>> fgrids = {{}, {M, 2, M}, {3, 3, 3}};
+  std::vector<float> fout;
+  f.executeFunctionCall9(3, 1, fgrids, ext, fout);
+  BOOST_TEST_REQUIRE(fout.size() == 3U);
+  BOOST_TEST(fout[0] == static_cast<float>(M));
+  BOOST_TEST(fout[1] == 2.0F);
+  BOOST_TEST(fout[2] == static_cast<float>(M));
 }
 
 BOOST_AUTO_TEST_CASE(constant_functions_and_sequences)

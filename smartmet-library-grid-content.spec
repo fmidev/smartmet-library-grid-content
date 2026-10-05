@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.3
+Version: 26.10.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -60,7 +60,7 @@ Requires: smartmet-library-spine >= 26.9.26
 #TestRequires: luajit-devel
 #TestRequires: omniORB-devel >= 4.3.0
 #TestRequires: smartmet-library-gis-devel >= 26.9.26
-#TestRequires: smartmet-library-grid-files-devel >= 26.10.3
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.3-2
 #TestRequires: smartmet-library-macgyver-devel >= 26.10.2
 #TestRequires: smartmet-library-newbase-devel
 #TestRequires: smartmet-library-spine-devel >= 26.9.26
@@ -112,6 +112,11 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-1.fmi
+- Restored the grid version of VALID to return the first available grid as such. A missing value
+  in the preferred grid (e.g. VIRENWC) means no precipitation and must not be filled from an
+  older forecast (e.g. VIRE)
+
 * Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
 - Memory content server: loading a content directory no longer loses all generations (the
   grid engine "file" content source served no data), deletions no longer use freed records
