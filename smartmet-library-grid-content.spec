@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.10.5
-Release: 2%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-3.fmi
+- VALID for point queries also skips the parameters whose grid does not cover the point, so
+  a point outside the nowcast area gets the forecast value
+
 * Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-2.fmi
 - VALID for point queries now works like the grid version: the first parameter with data for
   the time is selected and its value is returned as such, a missing value is not filled from

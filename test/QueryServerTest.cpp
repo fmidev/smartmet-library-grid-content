@@ -227,7 +227,8 @@ BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
 {
   // VALID{nowcast;forecast} takes the first parameter which has data for the time, and its
   // value as such: a missing nowcast value (say no precipitation) is not filled from the
-  // forecast. Here pal starts at 05 UTC and does not cover 40N 10E, ECMWF covers both.
+  // forecast. A parameter without data for the time, or whose grid does not cover the point,
+  // is skipped. Here pal starts at 05 UTC and does not cover 40N 10E, ECMWF covers both.
   requireFixture(EC);
   withFmiErrors(
       [&]
@@ -282,9 +283,17 @@ BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
         BOOST_TEST_REQUIRE(ec != ParamValueMissing);
         BOOST_TEST(close(run(valid, "20080805T000000", LAT1, LON1), ec));
 
-        // The first one has data for the time but a missing value at the point: missing
-        BOOST_TEST_REQUIRE(run(fc, "20080805T060000", 40.0, 10.0) != ParamValueMissing);
-        BOOST_TEST(run(valid, "20080805T060000", 40.0, 10.0) == ParamValueMissing);
+        // The point is outside the grid of the first one: the second one
+        BOOST_TEST_REQUIRE(run(nwc, "20080805T060000", 40.0, 10.0) == ParamValueMissing);
+        const double south = run(fc, "20080805T060000", 40.0, 10.0);
+        BOOST_TEST_REQUIRE(south != ParamValueMissing);
+        BOOST_TEST(close(run(valid, "20080805T060000", 40.0, 10.0), south));
+
+        // The first one has a missing value inside its grid: missing. (Multiplying by the
+        // missing value gives a pal parameter which is missing everywhere.)
+        const std::string none = "MUL{" + nwc + ";-16777216}";
+        BOOST_TEST_REQUIRE(run(none, "20080805T060000", LAT1, LON1) == ParamValueMissing);
+        BOOST_TEST(run("VALID{" + none + ";" + fc + "}", "20080805T060000", LAT1, LON1) == ParamValueMissing);
       });
 }
 

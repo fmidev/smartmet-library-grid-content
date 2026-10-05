@@ -2616,6 +2616,41 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
 
 
+/*! \brief Query Server: Whether the parameter has data for the time step and its grid covers
+           the point. A point outside the grid gets a missing value from the data server, just
+           like a missing value inside the grid, so the coverage is checked from the geometry. */
+
+static bool hasDataAtPoint(const Query& query, const QueryParameter& qParam, uint timeIndex, uint valueIndex)
+{
+  try
+  {
+    if (timeIndex >= qParam.mValueList.size())
+      return false;
+
+    const auto& values = *qParam.mValueList[timeIndex];
+    T::GridValue rec;
+    if (!values.mValueList.getGridValueByIndex(valueIndex, rec))
+      return false;
+
+    // Area values (-1000,-1000) and other coordinate types are not checked
+    if (query.mCoordinateType != T::CoordinateTypeValue::LATLON_COORDINATES || values.mGeometryId == 0 ||
+        (rec.mX == -1000 && rec.mY == -1000))
+      return true;
+
+    double grid_i = 0;
+    double grid_j = 0;
+    return Identification::gridDef.getGridPointByGeometryIdAndLatLonCoordinates(values.mGeometryId, rec.mY, rec.mX, grid_i, grid_j);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Execute query functions. */
 
 void ServiceImplementation::executeQueryFunctions(Query& query)
@@ -2647,10 +2682,10 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       {
         std::string f = function.substr(0, 1);
 
-        // VALID selects the first parameter that has data, and returns its value as such like
-        // the grid version returns the first non-empty grid. A missing value of the preferred
-        // parameter (say no precipitation in a nowcast) must not be replaced by the value of a
-        // later parameter (say an older forecast), so parameters without data are left out.
+        // VALID selects the first parameter that has data for the time and covers the point, and
+        // returns its value as such. A missing value of the preferred parameter (say no
+        // precipitation in a nowcast) must not be replaced by the value of a later parameter (say
+        // an older forecast), so only the parameters without data or coverage are left out.
         const bool onlyAvailableParams = (strcasecmp(function.c_str(), "VALID") == 0);
 
         int tCount = 0;
@@ -2678,8 +2713,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             {
               double a = toDouble(it->second.c_str());
               QueryParameter* q = query.getQueryParameterPtr(it->first);
-              if (onlyAvailableParams && q != nullptr &&
-                  ((std::size_t)tCount >= q->mValueList.size() || q->mValueList[tCount]->mValueList.getLength() == 0))
+              if (onlyAvailableParams && q != nullptr && !hasDataAtPoint(query, *q, tCount, v))
                 continue;
 
               strParameters.push_back(it->second);
