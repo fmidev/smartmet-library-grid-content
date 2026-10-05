@@ -2647,6 +2647,12 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       {
         std::string f = function.substr(0, 1);
 
+        // VALID selects the first parameter that has data, and returns its value as such like
+        // the grid version returns the first non-empty grid. A missing value of the preferred
+        // parameter (say no precipitation in a nowcast) must not be replaced by the value of a
+        // later parameter (say an older forecast), so parameters without data are left out.
+        const bool onlyAvailableParams = (strcasecmp(function.c_str(), "VALID") == 0);
+
         int tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
@@ -2671,8 +2677,12 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
             {
               double a = toDouble(it->second.c_str());
-              strParameters.push_back(it->second);
               QueryParameter* q = query.getQueryParameterPtr(it->first);
+              if (onlyAvailableParams && q != nullptr &&
+                  ((std::size_t)tCount >= q->mValueList.size() || q->mValueList[tCount]->mValueList.getLength() == 0))
+                continue;
+
+              strParameters.push_back(it->second);
               std::vector<double> valueList;
               if (q != nullptr)
               {

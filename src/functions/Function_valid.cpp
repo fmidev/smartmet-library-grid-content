@@ -67,14 +67,11 @@ float Function_valid::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
-    uint len = parameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      auto val = parameters[t];
-      if (val != ParamValueMissing)
-        return val;
-    }
-    return ParamValueMissing;
+    // The first parameter as such, including a missing value, like the grid version returns
+    // the first available grid. The query server leaves out the parameters without data.
+    if (parameters.empty())
+      return ParamValueMissing;
+    return parameters[0];
   }
   catch (...)
   {
@@ -92,14 +89,11 @@ double Function_valid::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
-    uint len = parameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      auto val = parameters[t];
-      if (val != ParamValueMissing)
-        return val;
-    }
-    return ParamValueMissing;
+    // The first parameter as such, including a missing value, like the grid version returns
+    // the first available grid. The query server leaves out the parameters without data.
+    if (parameters.empty())
+      return ParamValueMissing;
+    return parameters[0];
   }
   catch (...)
   {

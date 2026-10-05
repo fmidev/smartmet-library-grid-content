@@ -220,7 +220,9 @@ const std::vector<Case> CASES = {
     {"NOT", {0}, 1},
     {"NOT", {3}, 0},
     {"NOT", {M}, M},
-    {"VALID", {M, M, 7, 8}, 7},
+    // The query server leaves out the parameters without data, a missing value is kept
+    {"VALID", {M, M, 7, 8}, M},
+    {"VALID", {7, 8}, 7},
     {"VALID", {M}, M},
     {"ROUND", {1.2345, 2}, 1.23},
     {"ROUND", {-1.5, 0}, -2},
@@ -319,8 +321,6 @@ BOOST_DATA_TEST_CASE(grid_call_matches_scalar_call, bdata::make(names()), name)
   auto it = ARITY.find(name);
   if (name == "ADD")
     return;  // the grid version adds the external parameters, see below
-  if (name == "VALID")
-    return;  // the grid version selects a whole grid, see below
 
   Rng rnd{static_cast<unsigned>(std::hash<std::string>()(name)) + 1};
   const uint columns = 7;

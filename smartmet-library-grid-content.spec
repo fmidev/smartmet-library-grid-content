@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.10.5
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,11 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-2.fmi
+- VALID for point queries now works like the grid version: the first parameter with data for
+  the time is selected and its value is returned as such, a missing value is not filled from
+  the later parameters
+
 * Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-1.fmi
 - Restored the grid version of VALID to return the first available grid as such. A missing value
   in the preferred grid (e.g. VIRENWC) means no precipitation and must not be filled from an

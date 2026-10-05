@@ -24,6 +24,7 @@ namespace
 {
 const std::string PAL = testData("grib/pal/200808050729_pal_skandinavia_pinta.grib");
 const std::string PRODUCER = "pal_skandinavia";
+const std::string EC = testData("grib/ecpinta/200808041930_ecmwf_eurooppa_pinta.grib");
 
 // Helsinki and a point in Lapland
 const double LON1 = 24.94;
@@ -219,6 +220,71 @@ BOOST_FIXTURE_TEST_CASE(execute_query_time_series, Fixture)
           const double expected = direct("Temperature", time, LAT1, LON1, T::AreaInterpolationMethod::Linear);
           BOOST_TEST_CONTEXT(time) { BOOST_TEST(close(gv.mValue, expected), "query " << gv.mValue << ", grib " << expected); }
         }
+      });
+}
+
+BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
+{
+  // VALID{nowcast;forecast} takes the first parameter which has data for the time, and its
+  // value as such: a missing nowcast value (say no precipitation) is not filled from the
+  // forecast. Here pal starts at 05 UTC and does not cover 40N 10E, ECMWF covers both.
+  requireFixture(EC);
+  withFmiErrors(
+      [&]
+      {
+        world = std::make_unique<GridWorld>();
+        world->addProducer(PRODUCER, "20080805T050000", {PAL});
+        world->addProducer("ecmwf_eurooppa_pinta", "20080804T120000", {EC});
+        world->start();
+
+        auto run = [&](const std::string &param, const std::string &time, double lat, double lon)
+        {
+          T::AttributeList attributes;
+          attributes.addAttribute("starttime", time);
+          attributes.addAttribute("endtime", time);
+          attributes.addAttribute("timestep", "data");
+          attributes.addAttribute("producer", PRODUCER);
+          attributes.addAttribute("param", param);
+          attributes.addAttribute("areaInterpolationMethod", "1");
+
+          QueryServer::Query q;
+          QueryServer::QueryConfigurator configurator;
+          configurator.configure(q, attributes);
+          q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+          T::Coordinate_vec point;
+          point.emplace_back(lon, lat);
+          q.mAreaCoordinates.push_back(point);
+          BOOST_TEST_REQUIRE(world->queryServer.executeQuery(0, q) == 0);
+
+          double value = ParamValueMissing;
+          for (const auto &qp : q.mQueryParameterList)
+          {
+            T::GridValue gv;
+            if (qp.mParam == param && !qp.mValueList.empty() &&
+                qp.mValueList[0]->mValueList.getGridValueByIndex(0, gv))
+              value = gv.mValue;
+          }
+          return value;
+        };
+
+        const std::string nwc = "Temperature:pal_skandinavia:5900";
+        const std::string fc = "Temperature:ecmwf_eurooppa_pinta:5903";
+        const std::string valid = "VALID{" + nwc + ";" + fc + "}";
+
+        // Both have data: the first one
+        const double helsinki = run(nwc, "20080805T060000", LAT1, LON1);
+        BOOST_TEST_REQUIRE(helsinki != ParamValueMissing);
+        BOOST_TEST(close(run(valid, "20080805T060000", LAT1, LON1), helsinki));
+
+        // The first one has no data for the time: the second one
+        BOOST_TEST_REQUIRE(run(nwc, "20080805T000000", LAT1, LON1) == ParamValueMissing);
+        const double ec = run(fc, "20080805T000000", LAT1, LON1);
+        BOOST_TEST_REQUIRE(ec != ParamValueMissing);
+        BOOST_TEST(close(run(valid, "20080805T000000", LAT1, LON1), ec));
+
+        // The first one has data for the time but a missing value at the point: missing
+        BOOST_TEST_REQUIRE(run(fc, "20080805T060000", 40.0, 10.0) != ParamValueMissing);
+        BOOST_TEST(run(valid, "20080805T060000", 40.0, 10.0) == ParamValueMissing);
       });
 }
 
