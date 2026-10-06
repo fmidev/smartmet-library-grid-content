@@ -3,7 +3,7 @@
 // Production runs these services behind Redis and CORBA, which makes them hard to test. Here
 // the content server is the in-memory implementation, the data server reads the GRIB files of
 // smartmet-test-data directly, and the query server is configured with the grid engine test
-// configuration (smartmet-engine-grid-test): producers, parameter mappings, aliases and Lua
+// configuration (smartmet-library-grid-files-test): producers, parameter mappings, aliases and Lua
 // functions. Files are registered the way filesys2smartmet registers them: one content record
 // per message, with the metadata grid-files identifies.
 

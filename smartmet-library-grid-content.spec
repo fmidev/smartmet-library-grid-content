@@ -64,7 +64,7 @@ Requires: smartmet-library-spine >= 26.9.26
 #TestRequires: smartmet-library-macgyver-devel >= 26.10.2
 #TestRequires: smartmet-library-newbase-devel
 #TestRequires: smartmet-library-spine-devel >= 26.9.26
-#TestRequires: smartmet-engine-grid-test
+#TestRequires: smartmet-library-grid-files-test >= 26.10.6
 #TestRequires: smartmet-test-data
 
 Provides: %{SPECNAME}

@@ -23,7 +23,7 @@ memory content server, content cache event following (`ContentCacheTest`, drives
 `CacheImplementation::processEvents` synchronously against a memory server), `ContentInfoList`
 property tests, functions, config file parsers and `QueryServerTest`, which runs content, data
 and query servers in-process (`QueryHarness.h`) on smartmet-test-data GRIBs with the
-smartmet-engine-grid-test configuration. Missing fixtures fail unless `GRID_TEST_ALLOW_SKIP=1`.
+smartmet-library-grid-files-test configuration. Missing fixtures fail unless `GRID_TEST_ALLOW_SKIP=1`.
 The tests use the installed grid-files; run them against a local build with
 `LD_LIBRARY_PATH=../../grid-files`.
 
