@@ -40,7 +40,7 @@ static bool allocateFileId(redisContext *context,const std::string& tablePrefix,
 
   for (uint attempt = 0; attempt < maxAttempts; attempt++)
   {
-    redisReply *reply = static_cast<redisReply*>(redisCommand(context,"INCR %sfileCounter",tablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(context,"INCR %sfileCounter",tablePrefix.c_str()));
     if (reply == nullptr)
       return false;
 
@@ -208,7 +208,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
     mFunction = function;
     mLine = line;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %slockRequestCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %slockRequestCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -225,7 +225,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
     // has crashed), never while the holder is alive but slow.
     auto registerOwner = [&]()
     {
-      redisReply *idReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT ID"));
+      auto *idReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT ID"));
       if (idReply == nullptr)
       {
         closeConnection();
@@ -234,7 +234,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
       const long long clientId = idReply->integer;
       freeReplyObject(idReply);
 
-      redisReply *setReply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockOwner %llu:%lld",mTablePrefix.c_str(),static_cast<unsigned long long>(lockRequestCounter),clientId));
+      auto *setReply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockOwner %llu:%lld",mTablePrefix.c_str(),static_cast<unsigned long long>(lockRequestCounter),clientId));
       if (setReply == nullptr)
       {
         closeConnection();
@@ -248,7 +248,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
     // themselves, and are treated as not alive like before.
     auto ownerAlive = [&](UInt64 releaseCounter) -> bool
     {
-      redisReply *ownerReply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockOwner",mTablePrefix.c_str()));
+      auto *ownerReply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockOwner",mTablePrefix.c_str()));
       if (ownerReply == nullptr)
       {
         closeConnection();
@@ -262,7 +262,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
       if (sscanf(owner.c_str(),"%llu:%lld",&ticket,&clientId) != 2 || ticket != releaseCounter + 1)
         return false;
 
-      redisReply *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
+      auto *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
       if (listReply == nullptr)
       {
         closeConnection();
@@ -283,7 +283,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
         return;
       }
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
       if (reply == nullptr)
       {
         closeConnection();
@@ -329,7 +329,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
           continue;
         }
 
-        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),lockRequestCounter-1));
+        auto *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),lockRequestCounter-1));
         if (reply == nullptr)
         {
           closeConnection();
@@ -365,7 +365,7 @@ void RedisImplementation::unlock(UInt64 key)
 
     AutoThreadLock lock(&mThreadLock);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -378,7 +378,7 @@ void RedisImplementation::unlock(UInt64 key)
 
     if (lockReleaseCounter < key)
     {
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),key));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockReleaseCounter %lu",mTablePrefix.c_str(),key));
       if (reply == nullptr)
       {
         closeConnection();
@@ -547,7 +547,7 @@ int RedisImplementation::openConnection()
 
     while (!mShutdownRequested)
     {
-      redisReply *reply = static_cast<redisReply*>(redisCommand(context,"PING"));
+      auto *reply = static_cast<redisReply*>(redisCommand(context,"PING"));
       if (reply != nullptr)
       {
         // Status and error replies carry a string, other reply types may not
@@ -572,7 +572,7 @@ int RedisImplementation::openConnection()
           // format string: a '%' in the password would otherwise be interpreted by
           // hiredis as a conversion (reading garbage varargs), and a space would split
           // it into two arguments.
-          redisReply *authReply = static_cast<redisReply*>(
+          auto *authReply = static_cast<redisReply*>(
               redisCommand(context,"AUTH %b",mRedisPassword.data(),mRedisPassword.size()));
           if (authReply != nullptr)
           {
@@ -795,7 +795,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     // Lets wait for awhile so that clients (like the grid-engine's ContentServer) receive this event)
     sleep(5);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sproducerCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sproducerCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -1058,7 +1058,7 @@ int RedisImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo
       return Result::PRODUCER_NAME_ALREADY_REGISTERED;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerInfo.mProducerId,producerInfo.mProducerId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerInfo.mProducerId,producerInfo.mProducerId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -1314,7 +1314,7 @@ int RedisImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
       {
         producerIdList.insert(info->mProducerId);
 
-        T::ProducerInfo *producerInfo = new T::ProducerInfo;
+        auto *producerInfo = new T::ProducerInfo;
         getProducerById(info->mProducerId,*producerInfo);
         producerInfoList.addProducerInfo(producerInfo);
       }
@@ -1377,7 +1377,7 @@ int RedisImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sproducers 0 %lu",mTablePrefix.c_str(),0xFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sproducers 0 %lu",mTablePrefix.c_str(),0xFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -1850,7 +1850,7 @@ int RedisImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
     if (info != nullptr)
       return Result::GENERATION_NAME_ALREADY_REGISTERED;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sgenerationCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %sgenerationCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -1910,7 +1910,7 @@ int RedisImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generation
     if (info != nullptr &&  info->mGenerationId != generationInfo.mGenerationId)
       return Result::GENERATION_NAME_ALREADY_REGISTERED;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -2481,7 +2481,7 @@ int RedisImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sgenerations 0 %lu",mTablePrefix.c_str(),0xFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sgenerations 0 %lu",mTablePrefix.c_str(),0xFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -2528,7 +2528,7 @@ int RedisImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::
     generationInfo.mStatus = status;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -2582,7 +2582,7 @@ int RedisImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
     generationInfo.mStatus = status;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationInfo.mGenerationId,generationInfo.mGenerationId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -2968,7 +2968,7 @@ int RedisImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sgeometries 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sgeometries 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -3020,7 +3020,7 @@ int RedisImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
     UInt64 id = getGeometryKey(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -3074,7 +3074,7 @@ int RedisImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::Ge
 
     UInt64 id = getGeometryKey(geometryInfo.mGenerationId,geometryInfo.mGeometryId,geometryInfo.mLevelId);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -3247,7 +3247,7 @@ int RedisImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
       }
     }
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.mFileId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileInfo.mFileId,fileInfo.mFileId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4091,7 +4091,7 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       if (getFileById(*it,*fileInfo) == Result::OK)
         fileInfoList.addFileInfo(fileInfo);
       else
@@ -4287,7 +4287,7 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sfiles 0 %lu",mTablePrefix.c_str(),0x7FFFFFFFFFFFFFFFUL));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sfiles 0 %lu",mTablePrefix.c_str(),0x7FFFFFFFFFFFFFFFUL));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4323,7 +4323,7 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4363,7 +4363,7 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4403,7 +4403,7 @@ int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),0,0x7FFFFFFFFFFFFFFFUL));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4479,7 +4479,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
     T::EventId eventId = 0;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %seventCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %seventCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4551,7 +4551,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     if (maxRecords > 10000)
       maxRecords = 10000;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sevents %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sevents %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4562,7 +4562,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::EventInfo *eventInfo = new T::EventInfo();
+        auto *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
 
         if (eventInfo->mType == EventType::FILE_ADDED)
@@ -4640,7 +4640,7 @@ int RedisImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sevents 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sevents 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -4767,7 +4767,7 @@ int RedisImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
     UInt64 id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6379,7 +6379,7 @@ int RedisImplementation::_getContentCount(T::SessionId sessionId,uint& count)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %scontent 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %scontent 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6517,7 +6517,7 @@ int RedisImplementation::deleteProducerById(T::ProducerId producerId,bool delete
     if (deleteGenerations)
       deleteGenerationListByProducerId(producerId,false,false,false);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6580,7 +6580,7 @@ int RedisImplementation::getProducerById(T::ProducerId producerId,T::ProducerInf
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sproducers %u %u",mTablePrefix.c_str(),producerId,producerId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6620,7 +6620,7 @@ int RedisImplementation::getProducerByName(std::string producerName,T::ProducerI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6665,7 +6665,7 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6676,7 +6676,7 @@ int RedisImplementation::getProducerList(T::ProducerInfoList& producerInfoList)
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ProducerInfo *producerInfo = new T::ProducerInfo();
+        auto *producerInfo = new T::ProducerInfo();
         producerInfo->setCsv(reply->element[t]->str);
         producerInfoList.addProducerInfo(producerInfo);
       }
@@ -6707,7 +6707,7 @@ int RedisImplementation::getProducerListBySourceId(T::SourceId sourceId,T::Produ
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sproducers 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6721,7 +6721,7 @@ int RedisImplementation::getProducerListBySourceId(T::SourceId sourceId,T::Produ
         T::SourceId sId = getCsvInt64Field(reply->element[t]->str,5);
         if (sId == sourceId)
         {
-          T::ProducerInfo *producerInfo = new T::ProducerInfo();
+          auto *producerInfo = new T::ProducerInfo();
           producerInfo->setCsv(reply->element[t]->str);
           producerInfoList.addProducerInfo(producerInfo);
         }
@@ -6751,7 +6751,7 @@ int RedisImplementation::getGenerationById(T::GenerationId generationId,T::Gener
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationId,generationId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgenerations %lu %lu",mTablePrefix.c_str(),generationId,generationId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6791,7 +6791,7 @@ int RedisImplementation::getGenerationByName(std::string generationName,T::Gener
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6836,7 +6836,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6847,7 +6847,7 @@ int RedisImplementation::getGenerationList(T::GenerationInfoList& generationInfo
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::GenerationInfo *generationInfo = new T::GenerationInfo();
+        auto *generationInfo = new T::GenerationInfo();
         generationInfo->setCsv(reply->element[t]->str);
         generationInfoList.addGenerationInfo(generationInfo);
       }
@@ -6878,7 +6878,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6907,7 +6907,7 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
 
     for (auto it=idList.begin(); it!=idList.end(); ++it)
     {
-      T::GenerationInfo *generationInfo = new T::GenerationInfo();
+      auto *generationInfo = new T::GenerationInfo();
       if (getGenerationById(*it,*generationInfo) == Result::OK)
       {
         generationInfoList.addGenerationInfo(generationInfo);
@@ -6942,7 +6942,7 @@ int RedisImplementation::getGenerationListByProducerId(T::ProducerId producerId,
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -6956,7 +6956,7 @@ int RedisImplementation::getGenerationListByProducerId(T::ProducerId producerId,
         T::ProducerId prodId = getCsvInt64Field(reply->element[t]->str,2);
         if (prodId == producerId)
         {
-          T::GenerationInfo *generationInfo = new T::GenerationInfo();
+          auto *generationInfo = new T::GenerationInfo();
           generationInfo->setCsv(reply->element[t]->str);
           generationInfoList.addGenerationInfo(generationInfo);
         }
@@ -6988,7 +6988,7 @@ int RedisImplementation::getGenerationListBySourceId(T::SourceId sourceId,T::Gen
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGE %sgenerations 0 -1",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7002,7 +7002,7 @@ int RedisImplementation::getGenerationListBySourceId(T::SourceId sourceId,T::Gen
         T::SourceId sId = getCsvInt64Field(reply->element[t]->str,8);
         if (sId == sourceId)
         {
-          T::GenerationInfo *generationInfo = new T::GenerationInfo();
+          auto *generationInfo = new T::GenerationInfo();
           generationInfo->setCsv(reply->element[t]->str);
           generationInfoList.addGenerationInfo(generationInfo);
         }
@@ -7041,7 +7041,7 @@ int RedisImplementation::deleteGenerationById(T::GenerationId generationId,bool 
     if (deleteGeometries)
       deleteGeometryListByGenerationId(generationId,false,false);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %u",mTablePrefix.c_str(),generationId,generationId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgenerations %lu %u",mTablePrefix.c_str(),generationId,generationId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7139,7 +7139,7 @@ int RedisImplementation::deleteFileById(T::FileId fileId,bool deleteContent)
     if (deleteContent)
       deleteContentByFileId(fileId);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileId,fileId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileId,fileId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7239,7 +7239,7 @@ int RedisImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileId,fileId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu",mTablePrefix.c_str(),fileId,fileId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7284,7 +7284,7 @@ int RedisImplementation::getFileList(T::FileId startFileId,int maxRecords,T::Fil
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL,maxRecords));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL,maxRecords));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7298,7 +7298,7 @@ int RedisImplementation::getFileList(T::FileId startFileId,int maxRecords,T::Fil
         T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
         if (fileId >= startFileId)
         {
-          T::FileInfo *fileInfo = new T::FileInfo();
+          auto *fileInfo = new T::FileInfo();
           fileInfo->setCsv(reply->element[t]->str);
           fileInfoList.addFileInfo(fileInfo);
         }
@@ -7336,7 +7336,7 @@ int RedisImplementation::getFileListByGenerationId(T::GenerationId generationId,
     {
       prevFileId = startFileId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
       if (reply == nullptr)
       {
         closeConnection();
@@ -7360,7 +7360,7 @@ int RedisImplementation::getFileListByGenerationId(T::GenerationId generationId,
             T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,4);
             if (genId == generationId)
             {
-              T::FileInfo *fileInfo = new T::FileInfo();
+              auto *fileInfo = new T::FileInfo();
               fileInfo->setCsv(reply->element[t]->str);
               fileInfoList.addFileInfo(fileInfo);
 
@@ -7411,7 +7411,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>
     {
       prevFileId = startFileId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
       if (reply == nullptr)
       {
         closeConnection();
@@ -7436,7 +7436,7 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>
             T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,4);
             if (generationIdList.find(genId) != generationIdList.end())
             {
-              T::FileInfo *fileInfo = new T::FileInfo();
+              auto *fileInfo = new T::FileInfo();
               fileInfo->setCsv(reply->element[t]->str);
               fileInfoList.addFileInfo(fileInfo);
               if (fileInfoList.getLength() == max)
@@ -7560,7 +7560,7 @@ int RedisImplementation::getFileListByProducerId(T::ProducerId producerId,T::Fil
     {
       prevFileId = startFileId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0x7FFFFFFFFFFFFFFFUL));
       if (reply == nullptr)
       {
         closeConnection();
@@ -7585,7 +7585,7 @@ int RedisImplementation::getFileListByProducerId(T::ProducerId producerId,T::Fil
             T::ProducerId prodId = getCsvInt64Field(reply->element[t]->str,3);
             if (prodId == producerId)
             {
-              T::FileInfo *fileInfo = new T::FileInfo();
+              auto *fileInfo = new T::FileInfo();
               fileInfo->setCsv(reply->element[t]->str);
               fileInfoList.addFileInfo(fileInfo);
 
@@ -7636,7 +7636,7 @@ int RedisImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId st
     {
       prevFileId = startFileId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFFFFFFFFFFUL));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sfiles %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startFileId,0xFFFFFFFFFFFFFFFFUL));
       if (reply == nullptr)
       {
         closeConnection();
@@ -7661,7 +7661,7 @@ int RedisImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId st
             T::SourceId sId = getCsvInt64Field(reply->element[t]->str,7);
             if (sId == sourceId)
             {
-              T::FileInfo *fileInfo = new T::FileInfo();
+              auto *fileInfo = new T::FileInfo();
               fileInfo->setCsv(reply->element[t]->str);
               fileInfoList.addFileInfo(fileInfo);
 
@@ -7712,7 +7712,7 @@ int RedisImplementation::deleteGeometryById(T::GenerationId generationId,T::Geom
     //if (deleteFiles)
     //  deleteFileListByGeneationAndGeometryId(generationId,geometryId);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7889,7 +7889,7 @@ int RedisImplementation::getGeometryById(T::GenerationId generationId,T::Geometr
 
     UInt64 id = getGeometryKey(generationId,geometryId,levelId);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7939,7 +7939,7 @@ int RedisImplementation::getGeometryList(T::GeometryInfoList& geometryInfoList)
     UInt64 endId = 0xFFFFFFFFFFFFFFFF;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7950,7 +7950,7 @@ int RedisImplementation::getGeometryList(T::GeometryInfoList& geometryInfoList)
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+        auto *geometryInfo = new T::GeometryInfo();
         geometryInfo->setCsv(reply->element[t]->str);
         geometryInfoList.addGeometryInfo(geometryInfo);
       }
@@ -7983,7 +7983,7 @@ int RedisImplementation::getGeometryListByProducerId(T::ProducerId producerId,T:
     UInt64 endId = 0xFFFFFFFFFFFFFFFF;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -7997,7 +7997,7 @@ int RedisImplementation::getGeometryListByProducerId(T::ProducerId producerId,T:
         T::ProducerId prodId = getCsvInt64Field(reply->element[t]->str,3);
         if (prodId == producerId)
         {
-          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          auto *geometryInfo = new T::GeometryInfo();
           geometryInfo->setCsv(reply->element[t]->str);
           geometryInfoList.addGeometryInfo(geometryInfo);
         }
@@ -8031,7 +8031,7 @@ int RedisImplementation::getGeometryListByGenerationId(T::GenerationId generatio
     UInt64 startId = getGeometryKey(generationId,0,0);
     UInt64 endId = getGeometryKey(generationId,0x00FFFFFF,0xFF);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8045,7 +8045,7 @@ int RedisImplementation::getGeometryListByGenerationId(T::GenerationId generatio
         T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,0);
         if (genId == generationId)
         {
-          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          auto *geometryInfo = new T::GeometryInfo();
           geometryInfo->setCsv(reply->element[t]->str);
           geometryInfoList.addGeometryInfo(geometryInfo);
         }
@@ -8078,7 +8078,7 @@ int RedisImplementation::getGeometryListBySourceId(T::SourceId sourceId,T::Geome
     UInt64 startId = 0;
     UInt64 endId = 0xFFFFFFFFFFFFFFFF;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8092,7 +8092,7 @@ int RedisImplementation::getGeometryListBySourceId(T::SourceId sourceId,T::Geome
         T::SourceId sId = getCsvInt64Field(reply->element[t]->str,4);
         if (sId == sourceId)
         {
-          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          auto *geometryInfo = new T::GeometryInfo();
           geometryInfo->setCsv(reply->element[t]->str);
           geometryInfoList.addGeometryInfo(geometryInfo);
         }
@@ -8126,7 +8126,7 @@ int RedisImplementation::getGeometryListByGenerationIdList(std::set<T::Generatio
     UInt64 startId = 0;
     UInt64 endId = 0xFFFFFFFFFFFFFFFF;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sgeometries %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8140,7 +8140,7 @@ int RedisImplementation::getGeometryListByGenerationIdList(std::set<T::Generatio
         T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,0);
         if (generationIdList.find(genId) != generationIdList.end())
         {
-          T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+          auto *geometryInfo = new T::GeometryInfo();
           geometryInfo->setCsv(reply->element[t]->str);
           geometryInfoList.addGeometryInfo(geometryInfo);
         }
@@ -8171,7 +8171,7 @@ int RedisImplementation::deleteContent(T::FileId fileId,T::MessageIndex messageI
 
     UInt64 id = getContentKey(fileId,messageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8391,7 +8391,7 @@ int RedisImplementation::setContent(T::ContentInfo& contentInfo)
 
     UInt64 id = getContentKey(contentInfo.mFileId,contentInfo.mMessageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZREMRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8433,7 +8433,7 @@ int RedisImplementation::getContent(T::FileId fileId,T::MessageIndex messageInde
 
     UInt64 id = getContentKey(fileId,messageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),id,id));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8482,7 +8482,7 @@ int RedisImplementation::getContent(T::FileId startFileId,T::MessageIndex startM
     uint max = (uint)abs(maxRecords);
     UInt64 startId = getContentKey(startFileId,startMessageIndex);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,max));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF,max));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8498,7 +8498,7 @@ int RedisImplementation::getContent(T::FileId startFileId,T::MessageIndex startM
 
         if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
+          auto *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(contentInfo);
         }
@@ -8538,7 +8538,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -8609,7 +8609,7 @@ int RedisImplementation::getContentByGenerationId(T::GenerationId generationId,T
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -8638,7 +8638,7 @@ int RedisImplementation::getContentByGenerationId(T::GenerationId generationId,T
 
             if (genId == generationId)
             {
-              T::ContentInfo *contentInfo = new T::ContentInfo();
+              auto *contentInfo = new T::ContentInfo();
               contentInfo->setCsv(reply->element[t]->str);
 
               contentInfoList.addContentInfo(contentInfo);
@@ -8692,7 +8692,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<T::GenerationId>&
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -8721,7 +8721,7 @@ int RedisImplementation::getContentByGenerationIdList(std::set<T::GenerationId>&
 
             if (generationIdList.find(genId) != generationIdList.end())
             {
-              T::ContentInfo *contentInfo = new T::ContentInfo();
+              auto *contentInfo = new T::ContentInfo();
               contentInfo->setCsv(reply->element[t]->str);
 
               contentInfoList.addContentInfo(contentInfo);
@@ -8814,7 +8814,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8828,7 +8828,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
         uint id = getCsvInt64Field(reply->element[t]->str,9);
         if (id == fmiId)
         {
-          T::ContentInfo *info = new T::ContentInfo();
+          auto *info = new T::ContentInfo();
           info->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(info);
         }
@@ -8907,7 +8907,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -8918,7 +8918,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
         if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
@@ -9013,7 +9013,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9024,7 +9024,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
         if (info->mGenerationId == generationId)
@@ -9124,7 +9124,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9135,7 +9135,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
         if (info->mProducerId == producerId)
@@ -9188,7 +9188,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(T::GenerationId ge
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9199,7 +9199,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(T::GenerationId ge
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
+        auto *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
         if (contentInfo->mGenerationId == generationId  &&  contentInfo->mForecastTimeUTC >= startTime  &&  contentInfo->mForecastTimeUTC <= endTime)
@@ -9246,7 +9246,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
     }
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),0,0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9257,7 +9257,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
     {
       for (uint t = 0; t < reply->elements; t++)
       {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
+        auto *contentInfo = new T::ContentInfo();
         contentInfo->setCsv(reply->element[t]->str);
 
         sprintf(tmp,"%lu;%d;%d;%d;%s",contentInfo->mGenerationId,contentInfo->mGeometryId,contentInfo->mForecastType,contentInfo->mForecastNumber,contentInfo->getForecastTime());
@@ -9301,7 +9301,7 @@ int RedisImplementation::getContentByProducerId(T::ProducerId producerId,T::File
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -9330,7 +9330,7 @@ int RedisImplementation::getContentByProducerId(T::ProducerId producerId,T::File
 
             if (producerId == prodId)
             {
-              T::ContentInfo *contentInfo = new T::ContentInfo();
+              auto *contentInfo = new T::ContentInfo();
               contentInfo->setCsv(reply->element[t]->str);
 
               contentInfoList.addContentInfo(contentInfo);
@@ -9384,7 +9384,7 @@ int RedisImplementation::getContentBySourceId(T::SourceId sourceId,T::FileId sta
     {
       prevStartId = startId;
 
-      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
+      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu LIMIT 0 10000",mTablePrefix.c_str(),startId,0xFFFFFFFFFFFFFFFF));
       if (reply == nullptr)
       {
         closeConnection();
@@ -9412,7 +9412,7 @@ int RedisImplementation::getContentBySourceId(T::SourceId sourceId,T::FileId sta
             T::SourceId sId = getCsvInt64Field(reply->element[t]->str,26);
             if (sId == sourceId)
             {
-              T::ContentInfo *contentInfo = new T::ContentInfo();
+              auto *contentInfo = new T::ContentInfo();
               contentInfo->setCsv(reply->element[t]->str);
               contentInfoList.addContentInfo(contentInfo);
 
@@ -9460,7 +9460,7 @@ int RedisImplementation::getContentByFileId(T::FileId fileId,T::ContentInfoList&
     UInt64 startId = getContentKey(fileId,0);
     UInt64 endId = getContentKey(fileId,0xFFFFF);
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),startId,endId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %scontent %lu %lu",mTablePrefix.c_str(),startId,endId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9474,7 +9474,7 @@ int RedisImplementation::getContentByFileId(T::FileId fileId,T::ContentInfoList&
         T::FileId fId = getCsvInt64Field(reply->element[t]->str,0);
         if (fId == fileId)
         {
-          T::ContentInfo *contentInfo = new T::ContentInfo();
+          auto *contentInfo = new T::ContentInfo();
           contentInfo->setCsv(reply->element[t]->str);
           contentInfoList.addContentInfo(contentInfo);
         }
@@ -9509,14 +9509,14 @@ T::EventId RedisImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %seventCounter",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"INCR %seventCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    T::EventId eventId = (T::EventId)reply->integer;
+    auto eventId = (T::EventId)reply->integer;
     freeReplyObject(reply);
 
     T::EventInfo eventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
@@ -9557,7 +9557,7 @@ void RedisImplementation::truncateEvents()
     uint maxEvents = 3000000;
     uint count = 0;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sevents 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZCOUNT %sevents 0 %lu",mTablePrefix.c_str(),0xFFFFFFFFFFFFFFFF));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9602,7 +9602,7 @@ int RedisImplementation::addFilename(std::string filename,T::FileId fileId)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HSET %sfilenames %s %u",mTablePrefix.c_str(),filename.c_str(),fileId));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"HSET %sfilenames %s %u",mTablePrefix.c_str(),filename.c_str(),fileId));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9633,7 +9633,7 @@ T::FileId RedisImplementation::getFileId(std::string filename)
     if (!isConnectionValid())
       return 0;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HGET %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"HGET %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9667,7 +9667,7 @@ int RedisImplementation::deleteFilename(std::string filename)
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HDEL %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"HDEL %sfilenames %s",mTablePrefix.c_str(),filename.c_str()));
     if (reply == nullptr)
     {
       closeConnection();
@@ -9701,7 +9701,7 @@ void RedisImplementation::getFilenames(std::map<std::string,T::FileId>& fileList
       return;
 
 
-    redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"HGETALL %sfilenames",mTablePrefix.c_str()));
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"HGETALL %sfilenames",mTablePrefix.c_str()));
     if (reply == nullptr)
     {
        closeConnection();

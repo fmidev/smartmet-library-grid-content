@@ -3302,7 +3302,7 @@ void ServerInterface::addFileInfoWithContentList(T::RequestMessage& request,T::R
     uint len = csvLines.size();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
+      auto *info = new T::ContentInfo(csvLines[t].c_str());
       contentInfoList.addContentInfo(info);
     }
 
@@ -3389,7 +3389,7 @@ void ServerInterface::addFileInfoListWithContent(T::RequestMessage& request,T::R
       uint len = csvLines.size();
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
+        auto *info = new T::ContentInfo(csvLines[t].c_str());
         fc.mContentInfoList.addContentInfo(info);
       }
 
@@ -4929,7 +4929,7 @@ void ServerInterface::addContentList(T::RequestMessage& request,T::ResponseMessa
     uint len = csvLines.size();
     for (uint t=0; t<len; t++)
     {
-      T::ContentInfo *info = new T::ContentInfo(csvLines[t].c_str());
+      auto *info = new T::ContentInfo(csvLines[t].c_str());
       contentInfoList.addContentInfo(info);
     }
 

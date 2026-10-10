@@ -84,7 +84,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        Int64  key = (Int64)std::llround(val*mul);
+        auto  key = (Int64)std::llround(val*mul);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
@@ -141,7 +141,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        Int64  key = (Int64)std::llround(val*mul);
+        auto  key = (Int64)std::llround(val*mul);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
@@ -204,7 +204,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          Int64  key = (Int64)std::llround(val*mul);
+          auto  key = (Int64)std::llround(val*mul);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;
@@ -273,7 +273,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          Int64  key = (Int64)std::llround(val*mul);
+          auto  key = (Int64)std::llround(val*mul);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;

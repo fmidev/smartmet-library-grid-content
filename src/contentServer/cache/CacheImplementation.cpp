@@ -27,7 +27,7 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
   try
   {
     Fmi::set_thread_name("cs-cache-evt");
-    CacheImplementation *service = (CacheImplementation*)arg;
+    auto *service = (CacheImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
   }
@@ -7602,7 +7602,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           *p = '\0';
           if (s == bufStr.data())
           {
-            T::FileInfo *fileInfo = new T::FileInfo();
+            auto *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
 
             if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == nullptr)
@@ -7616,7 +7616,7 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
           }
           else
           {
-            T::ContentInfo *contentInfo = new T::ContentInfo();
+            auto *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
             if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
             {

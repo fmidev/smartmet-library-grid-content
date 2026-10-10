@@ -240,7 +240,7 @@ void ServiceImplementation::updateUsers()
 
         if (c > 3)
         {
-          UserInfo *user = new UserInfo();
+          auto *user = new UserInfo();
 
           if (field[0][0] != '\0')
             user->setUserId(atoi(field[0]));
@@ -307,7 +307,7 @@ int ServiceImplementation::_addUser(T::SessionId sessionId,UserInfo& userInfo)
   FUNCTION_TRACE
   try
   {
-    UserInfo *user = new UserInfo();
+    auto *user = new UserInfo();
     *user = userInfo;
 
     UserInfo_sptr u(user);

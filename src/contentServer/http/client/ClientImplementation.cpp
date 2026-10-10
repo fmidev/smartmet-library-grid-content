@@ -373,7 +373,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -415,7 +415,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -456,7 +456,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -995,7 +995,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1036,7 +1036,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1077,7 +1077,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1118,7 +1118,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1159,7 +1159,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1571,7 +1571,7 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1611,7 +1611,7 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1651,7 +1651,7 @@ int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1691,7 +1691,7 @@ int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -2339,7 +2339,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId star
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2382,7 +2382,7 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2423,7 +2423,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T:
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2466,7 +2466,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2509,7 +2509,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2552,7 +2552,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2730,7 +2730,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::S
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2867,7 +2867,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::EventInfo *info = new T::EventInfo();
+        auto *info = new T::EventInfo();
         info->setCsv(lines[t]);
         eventInfoList.addEventInfo(info);
       }
@@ -3284,7 +3284,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId,T::FileId start
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3325,7 +3325,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,T::File
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3368,7 +3368,7 @@ int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3409,7 +3409,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3453,7 +3453,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,T::
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3497,7 +3497,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3542,7 +3542,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3586,7 +3586,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3629,7 +3629,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3672,7 +3672,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3716,7 +3716,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,T::So
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3766,7 +3766,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3817,7 +3817,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3868,7 +3868,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3917,7 +3917,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3967,7 +3967,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -4016,7 +4016,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -4093,7 +4093,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentParamList.addContentInfo(info);
       }
@@ -4663,7 +4663,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
       uint len = response.getLinesByKey("levelInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::LevelInfo *info = new T::LevelInfo();
+        auto *info = new T::LevelInfo();
         info->setCsv(lines[t]);
         levelInfoList.addLevelInfo(info);
       }
@@ -4683,7 +4683,7 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
 {
   try
   {
-    T::ResponseMessage *response = (T::ResponseMessage*)userdata;
+    auto *response = (T::ResponseMessage*)userdata;
 
     for (size_t t=0; t<nmemb; t++)
     {

@@ -23,8 +23,8 @@ int generationInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -39,8 +39,8 @@ int generationInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -55,8 +55,8 @@ int generationInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(3,(*obj2));
   }
@@ -71,8 +71,8 @@ int generationInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(4,(*obj2));
   }
@@ -88,8 +88,8 @@ int generationInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(5,(*obj2));
   }
@@ -423,7 +423,7 @@ void GenerationInfoList::increaseSize(uint newSize)
       return;
     }
 
-    GenerationInfoPtr *newArray = new GenerationInfoPtr[newSize];
+    auto *newArray = new GenerationInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)

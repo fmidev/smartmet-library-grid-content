@@ -140,7 +140,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {
-        float c = (float)sqrt(a*a+b*b);
+        auto c = (float)sqrt(a*a+b*b);
         outParameters.emplace_back(c);
       }
       else
@@ -183,7 +183,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {
-        double c = (double)sqrt(a*a+b*b);
+        auto c = (double)sqrt(a*a+b*b);
         outParameters.emplace_back(c);
       }
       else

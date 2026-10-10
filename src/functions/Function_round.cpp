@@ -74,7 +74,7 @@ float Function_round::executeFunctionCall1(std::vector<float>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[1]);
-        Int64  nw = (Int64)std::llround(parameters[0]*mp);
+        auto  nw = (Int64)std::llround(parameters[0]*mp);
         return (float)nw/mp;
       }
       else
@@ -104,7 +104,7 @@ double Function_round::executeFunctionCall1(std::vector<double>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[1]);
-        Int64  nw = (Int64)std::llround(parameters[0]*mp);
+        auto  nw = (Int64)std::llround(parameters[0]*mp);
         return (double)nw/mp;
       }
       else
@@ -146,7 +146,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
           float val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            Int64  nw = (Int64)std::llround(val1*mp);
+            auto  nw = (Int64)std::llround(val1*mp);
             val = (float)nw/mp;
           }
         }
@@ -185,7 +185,7 @@ void Function_round::executeFunctionCall9(uint columns,uint rows,std::vector<std
           double val1 = inParameters[0][s];
           if (val1 != ParamValueMissing)
           {
-            Int64  nw = (Int64)std::llround(val1*mp);
+            auto  nw = (Int64)std::llround(val1*mp);
             val = (double)nw/mp;
           }
         }

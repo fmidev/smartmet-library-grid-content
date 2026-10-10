@@ -25,8 +25,8 @@ int fileInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    FileInfoPtr *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
-    FileInfoPtr *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
+    auto *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
+    auto *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -42,8 +42,8 @@ int fileInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    FileInfoPtr *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
-    FileInfoPtr *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
+    auto *obj1 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val1));
+    auto *obj2 = const_cast<FileInfoPtr*>(reinterpret_cast<const FileInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -316,7 +316,7 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
     }
 
     uint newSize = len1 + len2 + 100;
-    FileInfoPtr *newArray = new FileInfoPtr[newSize];
+    auto *newArray = new FileInfoPtr[newSize];
     uint a = 0;
     uint b = 0;
 
@@ -467,7 +467,7 @@ void FileInfoList::increaseSizeNoLock(uint newSize)
       return;
     }
 
-    FileInfoPtr *newArray = new FileInfoPtr[newSize];
+    auto *newArray = new FileInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)

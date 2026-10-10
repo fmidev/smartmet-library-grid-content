@@ -25,8 +25,8 @@ int contentInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -41,8 +41,8 @@ int contentInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -57,8 +57,8 @@ int contentInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(3,(*obj2));
   }
@@ -72,8 +72,8 @@ int contentInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(4,(*obj2));
   }
@@ -87,8 +87,8 @@ int contentInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(5,(*obj2));
   }
@@ -103,8 +103,8 @@ int contentInfo_compare_6(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(6,(*obj2));
   }
@@ -119,8 +119,8 @@ int contentInfo_compare_7(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(7,(*obj2));
   }
@@ -135,8 +135,8 @@ int contentInfo_compare_8(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(8,(*obj2));
   }
@@ -152,8 +152,8 @@ int contentInfo_compare_9(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(9,(*obj2));
   }
@@ -168,8 +168,8 @@ int contentInfo_compare_10(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(10,(*obj2));
   }
@@ -185,8 +185,8 @@ int contentInfo_compare_11(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(11,(*obj2));
   }
@@ -201,8 +201,8 @@ int contentInfo_compare_12(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(12,(*obj2));
   }
@@ -217,8 +217,8 @@ int contentInfo_compare_13(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(13,(*obj2));
   }
@@ -232,8 +232,8 @@ int contentInfo_compare_14(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(14,(*obj2));
   }
@@ -247,8 +247,8 @@ int contentInfo_compare_15(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(15,(*obj2));
   }
@@ -263,8 +263,8 @@ int contentInfo_compare_16(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(16,(*obj2));
   }
@@ -279,8 +279,8 @@ int contentInfo_compare_17(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(17,(*obj2));
   }
@@ -295,8 +295,8 @@ int contentInfo_compare_18(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(18,(*obj2));
   }
@@ -312,8 +312,8 @@ int contentInfo_compare_19(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(19,(*obj2));
   }
@@ -328,8 +328,8 @@ int contentInfo_compare_20(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    ContentInfoPtr *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
-    ContentInfoPtr *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
+    auto *obj1 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val1));
+    auto *obj2 = const_cast<ContentInfoPtr*>(reinterpret_cast<const ContentInfoPtr *>(_val2));
 
     return (*obj1)->compare(20,(*obj2));
   }
@@ -821,7 +821,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     }
 
     uint newSize = len1 + len2 + 100;
-    ContentInfoPtr *newArray = new ContentInfoPtr[newSize];
+    auto *newArray = new ContentInfoPtr[newSize];
     uint a = 0;
     uint b = 0;
 
@@ -922,7 +922,7 @@ void ContentInfoList::setSize(uint newSize)
       return;
     }
 
-    ContentInfoPtr *newArray = new ContentInfoPtr[newSize];
+    auto *newArray = new ContentInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)

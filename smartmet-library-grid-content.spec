@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.5
-Release: 3%{?dist}.fmi
+Version: 26.10.10
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Oct 10 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.10-1.fmi
+- Use auto and return {} where clang-tidy suggests it, no functional changes
+
 * Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-3.fmi
 - VALID for point queries also skips the parameters whose grid does not cover the point, so
   a point outside the nowcast area gets the forecast value

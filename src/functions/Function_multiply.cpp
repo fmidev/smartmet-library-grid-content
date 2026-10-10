@@ -280,7 +280,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        float c = C_FLOAT(a * mMultiplyer);
+        auto c = C_FLOAT(a * mMultiplyer);
         outParameters.emplace_back(c);
       }
       else
@@ -316,7 +316,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        double c = C_DOUBLE(a * mMultiplyer);
+        auto c = C_DOUBLE(a * mMultiplyer);
         outParameters.emplace_back(c);
       }
       else

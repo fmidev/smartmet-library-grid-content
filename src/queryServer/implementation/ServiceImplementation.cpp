@@ -120,7 +120,7 @@ static void* queryServer_updateThread(void *arg)
   try
   {
     Fmi::set_thread_name("upd-qs");
-    ServiceImplementation *service = static_cast<ServiceImplementation*>(arg);
+    auto *service = static_cast<ServiceImplementation*>(arg);
     service->updateProcessing();
     return nullptr;
   }
@@ -283,7 +283,7 @@ void ServiceImplementation::init(
     mLuaFileCollection.init(luaFiles);
 
     mFunctionCollection.addFunction("K2C",new Functions::Function_add(-273.15));
-    Functions::Function_sequence *k2f = new Functions::Function_sequence();
+    auto *k2f = new Functions::Function_sequence();
     k2f->addFunction(new Functions::Function_add(-273.15));
     k2f->addFunction(new Functions::Function_multiply(1.8));
     k2f->addFunction(new Functions::Function_add(32.0));
@@ -5981,7 +5981,7 @@ bool ServiceImplementation::getGridFiles(
         if (qParam.mPrecision < 0)
           qParam.mPrecision = pInfo.mDefaultPrecision;
 
-        uchar *data = new uchar[sz];
+        auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
         UInt64 fsize = memoryWriter.getMaxWritePosition();
@@ -6045,7 +6045,7 @@ bool ServiceImplementation::getGridFiles(
         if (qParam.mPrecision < 0)
           qParam.mPrecision = pInfo.mDefaultPrecision;
 
-        uchar *data = new uchar[sz];
+        auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
         UInt64 fsize = memoryWriter.getMaxWritePosition();
@@ -6096,7 +6096,7 @@ bool ServiceImplementation::getGridFiles(
         if (qParam.mPrecision < 0)
           qParam.mPrecision = pInfo.mDefaultPrecision;
 
-        uchar *data = new uchar[sz];
+        auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
         UInt64 fsize = memoryWriter.getMaxWritePosition();
@@ -6148,7 +6148,7 @@ bool ServiceImplementation::getGridFiles(
         if (qParam.mPrecision < 0)
           qParam.mPrecision = pInfo.mDefaultPrecision;
 
-        uchar *data = new uchar[sz];
+        auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
         newGridFile.write(memoryWriter);
         UInt64 fsize = memoryWriter.getMaxWritePosition();
@@ -12147,7 +12147,7 @@ void ServiceImplementation::checkProducerMapUpdates()
     T::ProducerInfoList producerInfoList;
     if (mContentServerPtr->getProducerInfoList(0,producerInfoList) == 0)
     {
-      Producer_map *prodMap = new Producer_map();
+      auto *prodMap = new Producer_map();
       uint len = producerInfoList.getLength();
       for (uint t=0; t<len; t++)
       {
@@ -12185,7 +12185,7 @@ void ServiceImplementation::checkGenerationUpdates()
     if ((currentTime - mGenerationInfoList_checkTime) < mGenerationInfoList_checkInterval)
       return;
 
-    T::GenerationInfoList *generationInfoList = new T::GenerationInfoList();
+    auto *generationInfoList = new T::GenerationInfoList();
     if (mContentServerPtr->getGenerationInfoList(0,*generationInfoList) == 0)
     {
       generationInfoList->sort(T::GenerationInfo::ComparisonMethod::producerId);

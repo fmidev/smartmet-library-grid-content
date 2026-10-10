@@ -28,7 +28,7 @@ static void* MemoryImplementation_syncProcessingThread(void *arg)
   try
   {
     Fmi::set_thread_name("cs-mem-sync");
-    MemoryImplementation *service = (MemoryImplementation*)arg;
+    auto *service = (MemoryImplementation*)arg;
     service->syncProcessingThread();
     return nullptr;
   }
@@ -3639,7 +3639,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     T::EventInfo *event = eventList.getFirstEvent();
     while (event != nullptr)
     {
-      T::EventInfo *eventInfo = new T::EventInfo(*event);
+      auto *eventInfo = new T::EventInfo(*event);
       if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
@@ -5672,7 +5672,7 @@ T::EventId MemoryImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,U
     mMaxEventId++;
     T::EventId eventId = mMaxEventId;
 
-    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
+    auto *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
     mEventInfoList.addEventInfo(eventInfo);
 
     return eventId;
@@ -5715,7 +5715,7 @@ void MemoryImplementation::readProducerList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ProducerInfo *rec = new T::ProducerInfo();
+        auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
         if (rec->mProducerId > mMaxProducerId)
@@ -5768,7 +5768,7 @@ void MemoryImplementation::readGenerationList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GenerationInfo *rec = new T::GenerationInfo();
+        auto *rec = new T::GenerationInfo();
         rec->setCsv(st);
 
         if (rec->mGenerationId > mMaxGenerationId)
@@ -5821,7 +5821,7 @@ void MemoryImplementation::readGeometryList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GeometryInfo *rec = new T::GeometryInfo();
+        auto *rec = new T::GeometryInfo();
         rec->setCsv(st);
 
         mGeometryInfoList.addGeometryInfo(rec);
@@ -5869,7 +5869,7 @@ void MemoryImplementation::readFileList()
         if (p != nullptr)
           *p = '\0';
 
-        T::FileInfo *rec = new T::FileInfo();
+        auto *rec = new T::FileInfo();
         rec->setCsv(st);
 
         if (rec->mFileId > mMaxFileId)
@@ -5920,7 +5920,7 @@ void MemoryImplementation::readContentList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ContentInfo *rec = new T::ContentInfo();
+        auto *rec = new T::ContentInfo();
         rec->setCsv(st);
         mContentInfoList[0].addContentInfo(rec);
       }
@@ -6025,7 +6025,7 @@ bool MemoryImplementation::syncProducerList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ProducerInfo *rec = new T::ProducerInfo();
+        auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
         if (rec->mProducerId > mMaxProducerId)
@@ -6127,7 +6127,7 @@ bool MemoryImplementation::syncGenerationList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GenerationInfo *rec = new T::GenerationInfo();
+        auto *rec = new T::GenerationInfo();
         rec->setCsv(st);
 
         if (rec->mGenerationId > mMaxGenerationId)
@@ -6237,7 +6237,7 @@ bool MemoryImplementation::syncGeometryList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GeometryInfo *rec = new T::GeometryInfo();
+        auto *rec = new T::GeometryInfo();
         rec->setCsv(st);
 
         T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(rec->mGenerationId,rec->mGeometryId,rec->mLevelId);
@@ -6337,7 +6337,7 @@ bool MemoryImplementation::syncFileList()
         if (p != nullptr)
           *p = '\0';
 
-        T::FileInfo *rec = new T::FileInfo();
+        auto *rec = new T::FileInfo();
         rec->setCsv(st);
 
         if (rec->mFileId > mMaxFileId)
@@ -6474,7 +6474,7 @@ bool MemoryImplementation::syncContentList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ContentInfo *rec = new T::ContentInfo();
+        auto *rec = new T::ContentInfo();
         rec->setCsv(st);
 
         T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);

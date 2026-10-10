@@ -164,7 +164,7 @@ void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& tar
     for (uint t=0; t<len; t++)
     {
       const C::ContentInfo& corbaObject = source[t];
-      T::ContentInfo *info = new T::ContentInfo();
+      auto *info = new T::ContentInfo();
       convert(corbaObject,*info);
       target.addContentInfo(info);
     }
@@ -275,7 +275,7 @@ void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
     for (uint t=0; t<len; t++)
     {
       const C::FileInfo& corbaObject = source[t];
-      T::FileInfo *info = new T::FileInfo();
+      auto *info = new T::FileInfo();
       convert(corbaObject,*info);
       target.addFileInfo(info);
     }
@@ -375,7 +375,7 @@ void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& t
     for (uint t=0; t<len; t++)
     {
       const C::ProducerInfo& corbaObject = source[t];
-      T::ProducerInfo *info = new T::ProducerInfo();
+      auto *info = new T::ProducerInfo();
       convert(corbaObject,*info);
       target.addProducerInfo(info);
     }
@@ -488,7 +488,7 @@ void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoLis
     for (uint t=0; t<len; t++)
     {
       const C::GenerationInfo& corbaObject = source[t];
-      T::GenerationInfo *info = new T::GenerationInfo();
+      auto *info = new T::GenerationInfo();
       convert(corbaObject,*info);
       target.addGenerationInfo(info);
     }
@@ -593,7 +593,7 @@ void Converter::convert(const C::GeometryInfoList& source,T::GeometryInfoList& t
     for (uint t=0; t<len; t++)
     {
       C::GeometryInfo corbaObject = source[t];
-      T::GeometryInfo *info = new T::GeometryInfo();
+      auto *info = new T::GeometryInfo();
       convert(corbaObject,*info);
       target.addGeometryInfo(info);
     }
@@ -699,7 +699,7 @@ void Converter::convert(const C::EventInfoList& source,T::EventInfoList& target)
     for (uint t=0; t<len; t++)
     {
       const C::EventInfo& corbaObject = source[t];
-      T::EventInfo *info = new T::EventInfo();
+      auto *info = new T::EventInfo();
       convert(corbaObject,*info);
       target.addEventInfo(info);
     }
@@ -1411,7 +1411,7 @@ void Converter::convert(const C::LevelInfoList& source,T::LevelInfoList& target)
     for (uint t=0; t<len; t++)
     {
       const C::LevelInfo& corbaObject = source[t];
-      T::LevelInfo *info = new T::LevelInfo();
+      auto *info = new T::LevelInfo();
       convert(corbaObject,*info);
       target.addLevelInfo(info);
     }

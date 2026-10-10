@@ -29,7 +29,7 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
   try
   {
     Fmi::set_thread_name("ds-event");
-    ServiceImplementation *service = (ServiceImplementation*)arg;
+    auto *service = (ServiceImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
   }
@@ -49,7 +49,7 @@ static void* ServiceImplementation_cacheProcessingThread(void *arg)
   try
   {
     Fmi::set_thread_name("ds-cache");
-    ServiceImplementation *service = (ServiceImplementation*)arg;
+    auto *service = (ServiceImplementation*)arg;
     service->cacheProcessingThread();
     return nullptr;
   }
@@ -733,7 +733,7 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId
     if (message == nullptr)
       return Result::DATA_NOT_FOUND;
 
-    uchar *fileStartAddr = (uchar*)gridFile->getMemoryPtr();
+    auto *fileStartAddr = (uchar*)gridFile->getMemoryPtr();
     if (fileStartAddr == nullptr)
       return Result::DATA_NOT_FOUND;
 
@@ -6165,7 +6165,7 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
           }
           else
           {
-            T::ContentInfo *contentInfo = new T::ContentInfo();
+            auto *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
             contentList.addContentInfo(contentInfo);
           }

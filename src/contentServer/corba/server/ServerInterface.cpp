@@ -283,7 +283,7 @@ SmartMet::C::Result ServerInterface::getProducerInfoById(SmartMet::C::SessionId 
   try
   {
     T::ProducerInfo sProducerInfo;
-    C::ProducerInfo *corbaProducerInfo = new C::ProducerInfo();
+    auto *corbaProducerInfo = new C::ProducerInfo();
     producerInfo = corbaProducerInfo;
 
     if (mService == nullptr)
@@ -316,7 +316,7 @@ SmartMet::C::Result ServerInterface::getProducerInfoByName(SmartMet::C::SessionI
   try
   {
     T::ProducerInfo sProducerInfo;
-    C::ProducerInfo *corbaProducerInfo = new C::ProducerInfo();
+    auto *corbaProducerInfo = new C::ProducerInfo();
     producerInfo = corbaProducerInfo;
 
     if (mService == nullptr)
@@ -349,7 +349,7 @@ SmartMet::C::Result ServerInterface::getProducerInfoList(SmartMet::C::SessionId 
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
+    auto *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -382,7 +382,7 @@ SmartMet::C::Result ServerInterface::getProducerInfoListByParameter(SmartMet::C:
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
+    auto *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -415,7 +415,7 @@ SmartMet::C::Result ServerInterface::getProducerInfoListBySourceId(SmartMet::C::
   try
   {
     T::ProducerInfoList sProducerInfoList;
-    C::ProducerInfoList *corbaProducerInfoList = new C::ProducerInfoList();
+    auto *corbaProducerInfoList = new C::ProducerInfoList();
     producerInfoList = corbaProducerInfoList;
 
     if (mService == nullptr)
@@ -480,7 +480,7 @@ SmartMet::C::Result ServerInterface::getProducerNameAndGeometryList(SmartMet::C:
   try
   {
     std::set<std::string> sList;
-    C::StringList *corbaList = new C::StringList();
+    auto *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -513,7 +513,7 @@ SmartMet::C::Result ServerInterface::getProducerParameterList(SmartMet::C::Sessi
   try
   {
     std::set<std::string> sList;
-    C::StringList *corbaList = new C::StringList();
+    auto *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -546,7 +546,7 @@ SmartMet::C::Result ServerInterface::getProducerParameterListByProducerId(SmartM
   try
   {
     std::set<std::string> sList;
-    C::StringList *corbaList = new C::StringList();
+    auto *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -784,7 +784,7 @@ SmartMet::C::Result ServerInterface::getGenerationIdGeometryIdAndForecastTimeLis
   try
   {
     std::set<std::string> sList;
-    C::StringList *corbaList = new C::StringList();
+    auto *corbaList = new C::StringList();
     list = corbaList;
 
     if (mService == nullptr)
@@ -816,7 +816,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoById(SmartMet::C::SessionI
   try
   {
     T::GenerationInfo sGenerationInfo;
-    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
+    auto *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -849,7 +849,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoByName(SmartMet::C::Sessio
   try
   {
     T::GenerationInfo sGenerationInfo;
-    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
+    auto *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -882,7 +882,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoList(SmartMet::C::SessionI
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
+    auto *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -915,7 +915,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByGeometryId(SmartMet:
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
+    auto *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -948,7 +948,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerId(SmartMet:
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
+    auto *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -981,7 +981,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListByProducerName(SmartMe
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
+    auto *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -1014,7 +1014,7 @@ SmartMet::C::Result ServerInterface::getGenerationInfoListBySourceId(SmartMet::C
   try
   {
     T::GenerationInfoList sGenerationInfoList;
-    C::GenerationInfoList *corbaGenerationInfoList = new C::GenerationInfoList();
+    auto *corbaGenerationInfoList = new C::GenerationInfoList();
     generationInfoList = corbaGenerationInfoList;
 
     if (mService == nullptr)
@@ -1047,7 +1047,7 @@ SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerIdAndStatus(
   try
   {
     T::GenerationInfo sGenerationInfo;
-    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
+    auto *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -1080,7 +1080,7 @@ SmartMet::C::Result ServerInterface::getLastGenerationInfoByProducerNameAndStatu
   try
   {
     T::GenerationInfo sGenerationInfo;
-    C::GenerationInfo *corbaGenerationInfo = new C::GenerationInfo();
+    auto *corbaGenerationInfo = new C::GenerationInfo();
     generationInfo = corbaGenerationInfo;
 
     if (mService == nullptr)
@@ -1354,7 +1354,7 @@ SmartMet::C::Result ServerInterface::getGeometryInfoList(SmartMet::C::SessionId 
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
+    auto *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1387,7 +1387,7 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListByGenerationId(SmartMet:
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
+    auto *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1419,7 +1419,7 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListByProducerId(SmartMet::C
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
+    auto *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1451,7 +1451,7 @@ SmartMet::C::Result ServerInterface::getGeometryInfoListBySourceId(SmartMet::C::
   try
   {
     T::GeometryInfoList sGeometryInfoList;
-    C::GeometryInfoList *corbaGeometryInfoList = new C::GeometryInfoList();
+    auto *corbaGeometryInfoList = new C::GeometryInfoList();
     geometryInfoList = corbaGeometryInfoList;
 
     if (mService == nullptr)
@@ -1941,7 +1941,7 @@ SmartMet::C::Result ServerInterface::getFileInfoById(SmartMet::C::SessionId sess
   try
   {
     T::FileInfo sFileInfo;
-    C::FileInfo *corbaFileInfo = new C::FileInfo();
+    auto *corbaFileInfo = new C::FileInfo();
     fileInfo = corbaFileInfo;
 
     if (mService == nullptr)
@@ -1974,7 +1974,7 @@ SmartMet::C::Result ServerInterface::getFileInfoByName(SmartMet::C::SessionId se
   try
   {
     T::FileInfo sFileInfo;
-    C::FileInfo *corbaFileInfo = new C::FileInfo();
+    auto *corbaFileInfo = new C::FileInfo();
     fileInfo = corbaFileInfo;
 
     if (mService == nullptr)
@@ -2007,7 +2007,7 @@ SmartMet::C::Result ServerInterface::getFileInfoList(SmartMet::C::SessionId sess
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2040,7 +2040,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListByFileIdList(SmartMet::C::Se
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     std::vector<T::FileId> sFileIdList;
@@ -2076,7 +2076,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListByProducerId(SmartMet::C::Se
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2109,7 +2109,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListByProducerName(SmartMet::C::
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2141,7 +2141,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListByGenerationId(SmartMet::C::
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2174,7 +2174,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListByGenerationName(SmartMet::C
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2207,7 +2207,7 @@ SmartMet::C::Result ServerInterface::getFileInfoListBySourceId(SmartMet::C::Sess
   try
   {
     T::FileInfoList sFileInfoList;
-    C::FileInfoList *corbaFileInfoList = new C::FileInfoList();
+    auto *corbaFileInfoList = new C::FileInfoList();
     fileInfoList = corbaFileInfoList;
 
     if (mService == nullptr)
@@ -2399,7 +2399,7 @@ SmartMet::C::Result ServerInterface::getLastEventInfo(SmartMet::C::SessionId ses
   try
   {
     T::EventInfo sEventInfo;
-    C::EventInfo *corbaEventInfo = new C::EventInfo();
+    auto *corbaEventInfo = new C::EventInfo();
     eventInfo = corbaEventInfo;
 
     if (mService == nullptr)
@@ -2432,7 +2432,7 @@ SmartMet::C::Result ServerInterface::getEventInfoList(SmartMet::C::SessionId ses
   try
   {
     T::EventInfoList sEventInfoList;
-    C::EventInfoList *corbaEventInfoList = new C::EventInfoList();
+    auto *corbaEventInfoList = new C::EventInfoList();
     eventInfoList = corbaEventInfoList;
 
     if (mService == nullptr)
@@ -2777,7 +2777,7 @@ SmartMet::C::Result ServerInterface::getContentInfo(SmartMet::C::SessionId sessi
   try
   {
     T::ContentInfo sContentInfo;
-    C::ContentInfo *corbaContentInfo = new C::ContentInfo();
+    auto *corbaContentInfo = new C::ContentInfo();
     contentInfo = corbaContentInfo;
 
     if (mService == nullptr)
@@ -2810,7 +2810,7 @@ SmartMet::C::Result ServerInterface::getContentList(SmartMet::C::SessionId sessi
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2843,7 +2843,7 @@ SmartMet::C::Result ServerInterface::getContentListByFileId(SmartMet::C::Session
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2876,7 +2876,7 @@ SmartMet::C::Result ServerInterface::getContentListByFileIdList(SmartMet::C::Ses
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     std::vector<T::FileId> sFileIdList;
@@ -2912,7 +2912,7 @@ SmartMet::C::Result ServerInterface::getContentListByFileName(SmartMet::C::Sessi
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2945,7 +2945,7 @@ SmartMet::C::Result ServerInterface::getContentListByProducerId(SmartMet::C::Ses
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -2978,7 +2978,7 @@ SmartMet::C::Result ServerInterface::getContentListByProducerName(SmartMet::C::S
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3011,7 +3011,7 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationId(SmartMet::C::S
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3044,7 +3044,7 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationName(SmartMet::C:
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3077,7 +3077,7 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationIdAndTimeRange(Sm
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3110,7 +3110,7 @@ SmartMet::C::Result ServerInterface::getContentListByGenerationNameAndTimeRange(
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3143,7 +3143,7 @@ SmartMet::C::Result ServerInterface::getContentListBySourceId(SmartMet::C::Sessi
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3176,7 +3176,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameter(SmartMet::C::Sess
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3209,7 +3209,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationId(Sm
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3242,7 +3242,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndGenerationName(
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3275,7 +3275,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerId(Smar
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3308,7 +3308,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameterAndProducerName(Sm
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3341,7 +3341,7 @@ SmartMet::C::Result ServerInterface::getContentListByParameterGenerationIdAndFor
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3374,7 +3374,7 @@ SmartMet::C::Result ServerInterface::getContentListOfInvalidIntegrity(SmartMet::
   try
   {
     T::ContentInfoList sContentInfoList;
-    C::ContentInfoList *corbaContentInfoList = new C::ContentInfoList();
+    auto *corbaContentInfoList = new C::ContentInfoList();
     contentInfoList = corbaContentInfoList;
 
     if (mService == nullptr)
@@ -3407,7 +3407,7 @@ SmartMet::C::Result ServerInterface::getContentGeometryIdListByGenerationId(Smar
   try
   {
     std::set<T::GeometryId> sGeometryIdList;
-    C::GeometryIdList *corbaGeometryIdList = new C::GeometryIdList();
+    auto *corbaGeometryIdList = new C::GeometryIdList();
     geometryIdList = corbaGeometryIdList;
 
     if (mService == nullptr)
@@ -3441,7 +3441,7 @@ SmartMet::C::Result ServerInterface::getContentParamListByGenerationId(SmartMet:
   try
   {
     T::ContentInfoList sContentParamList;
-    C::ContentInfoList *corbaContentParamList = new C::ContentInfoList();
+    auto *corbaContentParamList = new C::ContentInfoList();
     contentParamList = corbaContentParamList;
 
     if (mService == nullptr)
@@ -3474,7 +3474,7 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationId(SmartM
   try
   {
     std::set<std::string> sParamKeyList;
-    C::StringList *corbaParamKeyList = new C::StringList();
+    auto *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
@@ -3507,7 +3507,7 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationAndGeomet
   try
   {
     std::set<std::string> sParamKeyList;
-    C::StringList *corbaParamKeyList = new C::StringList();
+    auto *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
@@ -3540,7 +3540,7 @@ SmartMet::C::Result ServerInterface::getContentParamKeyListByGenerationGeometryA
   try
   {
     std::set<std::string> sParamKeyList;
-    C::StringList *corbaParamKeyList = new C::StringList();
+    auto *corbaParamKeyList = new C::StringList();
     paramKeyList = corbaParamKeyList;
 
     if (mService == nullptr)
@@ -3573,7 +3573,7 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationId(SmartMet::
   try
   {
     std::set<std::string> sContentTimeList;
-    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
+    auto *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3675,7 +3675,7 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationAndGeometryId
   try
   {
     std::set<std::string> sContentTimeList;
-    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
+    auto *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3707,7 +3707,7 @@ SmartMet::C::Result ServerInterface::getContentTimeListByGenerationGeometryAndLe
   try
   {
     std::set<std::string> sContentTimeList;
-    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
+    auto *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3740,7 +3740,7 @@ SmartMet::C::Result ServerInterface::getContentLevelListByGenerationGeometryAndL
   try
   {
     std::set<T::ParamLevel> sContentLevelList;
-    C::LevelList *corbaContentLevelList = new C::LevelList();
+    auto *corbaContentLevelList = new C::LevelList();
     contentLevelList = corbaContentLevelList;
 
     if (mService == nullptr)
@@ -3773,7 +3773,7 @@ SmartMet::C::Result ServerInterface::getContentLevelListByParameterGenerationGeo
   try
   {
     std::set<T::ParamLevel> sContentLevelList;
-    C::LevelList *corbaContentLevelList = new C::LevelList();
+    auto *corbaContentLevelList = new C::LevelList();
     contentLevelList = corbaContentLevelList;
 
     if (mService == nullptr)
@@ -3806,7 +3806,7 @@ SmartMet::C::Result ServerInterface::getContentTimeListByProducerId(SmartMet::C:
   try
   {
     std::set<std::string> sContentTimeList;
-    C::TimeStringList *corbaContentTimeList = new C::TimeStringList();
+    auto *corbaContentTimeList = new C::TimeStringList();
     contentTimeList = corbaContentTimeList;
 
     if (mService == nullptr)
@@ -3903,7 +3903,7 @@ SmartMet::C::Result ServerInterface::getLevelInfoList(SmartMet::C::SessionId ses
   try
   {
     T::LevelInfoList sLevelInfoList;
-    C::LevelInfoList *corbaLevelInfoList = new C::LevelInfoList();
+    auto *corbaLevelInfoList = new C::LevelInfoList();
     levelInfoList = corbaLevelInfoList;
 
     if (mService == nullptr)

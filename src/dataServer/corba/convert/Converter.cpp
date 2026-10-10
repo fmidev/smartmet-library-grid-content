@@ -226,7 +226,7 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
     for (uint t=0; t<len; t++)
     {
       const C::AttributeRec& corbaObject = source[t];
-      T::Attribute *attr = new T::Attribute();
+      auto *attr = new T::Attribute();
       convert(corbaObject,*attr);
       target.addAttribute(attr);
     }
@@ -511,7 +511,7 @@ void Converter::convert(const C::ValueRecordList& source,T::ValueRecordList& tar
     for (uint t=0; t<len; t++)
     {
       C::ValueRecord corbaObject = source[t];
-      T::ValueRecord *obj = new T::ValueRecord();
+      auto *obj = new T::ValueRecord();
       convert(corbaObject,*obj);
       target.addValueRecord(obj);
     }

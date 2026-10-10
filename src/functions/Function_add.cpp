@@ -155,7 +155,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a + b);
+        auto c = (double)(a + b);
         outParameters.emplace_back(c);
       }
       else
@@ -197,7 +197,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a + b);
+        auto c = (double)(a + b);
         outParameters.emplace_back(c);
       }
       else

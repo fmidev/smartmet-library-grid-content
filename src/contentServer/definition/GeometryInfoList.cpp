@@ -23,8 +23,8 @@ int geometryInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -39,8 +39,8 @@ int geometryInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -55,8 +55,8 @@ int geometryInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(3,(*obj2));
   }
@@ -71,8 +71,8 @@ int geometryInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(4,(*obj2));
   }
@@ -88,8 +88,8 @@ int geometryInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(5,(*obj2));
   }
@@ -423,7 +423,7 @@ void GeometryInfoList::increaseSize(uint newSize)
       return;
     }
 
-    GeometryInfoPtr *newArray = new GeometryInfoPtr[newSize];
+    auto *newArray = new GeometryInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)

@@ -419,7 +419,7 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
     for (uint t=0; t<len; t++)
     {
       const C::AttributeRec& corbaObject = source[t];
-      T::Attribute *attr = new T::Attribute();
+      auto *attr = new T::Attribute();
       convert(corbaObject,*attr);
       target.addAttribute(attr);
     }
@@ -564,7 +564,7 @@ void Converter::convert(C::GridPointValueList& source,T::GridPointValueList& tar
     for (uint t=0; t<len; t++)
     {
       C::GridPointValue corbaObject = source[t];
-      T::GridPointValue *obj = new T::GridPointValue();
+      auto *obj = new T::GridPointValue();
       convert(corbaObject,*obj);
       target.addGridPointValue(obj);
     }
@@ -862,7 +862,7 @@ void Converter::convert(C::ParameterValuesList& source,QueryServer::ParameterVal
     for (uint t=0; t<len; t++)
     {
       C::ParameterValues corbaObject = source[t];
-      QueryServer::ParameterValues *obj = new QueryServer::ParameterValues();
+      auto *obj = new QueryServer::ParameterValues();
       convert(corbaObject,*obj);
       target.emplace_back(std::shared_ptr<QueryServer::ParameterValues>(obj));
     }

@@ -116,7 +116,7 @@ SmartMet::C::Result ServerInterface::getProducerList(SmartMet::C::SessionId sess
 
     string_vec sProducerList;
 
-    C::StringList *corbaProducerList = new C::StringList();
+    auto *corbaProducerList = new C::StringList();
     producerList = corbaProducerList;
 
     int result = mService->getProducerList(sessionId,sProducerList);
@@ -149,7 +149,7 @@ SmartMet::C::Result ServerInterface::getValuesByGridPoint(SmartMet::C::SessionId
     T::GridPointValueList sValueList;
     T::ContentInfoList sContentInfoList;
 
-    C::GridPointValueList *corbaValueList = new C::GridPointValueList();
+    auto *corbaValueList = new C::GridPointValueList();
     valueList = corbaValueList;
 
     ContentServer::Corba::Converter::convert(contentInfoList,sContentInfoList);

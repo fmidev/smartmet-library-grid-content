@@ -29,7 +29,7 @@ static void* MergeImplementation_eventProcessingThread(void *arg)
   try
   {
     Fmi::set_thread_name("cs-merge-evt");
-    MergeImplementation *service = (MergeImplementation*)arg;
+    auto *service = (MergeImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
   }
@@ -3095,7 +3095,7 @@ T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
   {
     mEventCounter++;
 
-    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,mEventCounter,eventType,id1,id2,id3,flags,"");
+    auto *eventInfo = new T::EventInfo(mStartTime,mEventCounter,eventType,id1,id2,id3,flags,"");
     eventInfo->mServerTime = mStartTime;
     mEventInfoList.addEventInfo(eventInfo);
 
@@ -3184,7 +3184,7 @@ int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     T::EventInfo *event = eventList.getFirstEvent();
     while (event != nullptr)
     {
-      T::EventInfo *eventInfo = new T::EventInfo(*event);
+      auto *eventInfo = new T::EventInfo(*event);
       if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
@@ -6201,7 +6201,7 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
           *p = '\0';
           if (s == bufStr.data())
           {
-            T::FileInfo *fileInfo = new T::FileInfo();
+            auto *fileInfo = new T::FileInfo();
             fileInfo->setCsv(s);
 
             if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
@@ -6220,7 +6220,7 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
           }
           else
           {
-            T::ContentInfo *contentInfo = new T::ContentInfo();
+            auto *contentInfo = new T::ContentInfo();
             contentInfo->setCsv(s);
 
             T::FileId newFileId = getNewFileId(contentStorageIndex,contentInfo->mFileId);

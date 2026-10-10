@@ -59,7 +59,7 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
     for (uint t=0; t<sz; t++)
     {
       ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      ValueRecord *rec = new ValueRecord();
+      auto *rec = new ValueRecord();
       rec->mFileId = contentInfo->mFileId;
       rec->mMessageIndex = contentInfo->mMessageIndex;
       rec->mCoordinateType = coordinateType;

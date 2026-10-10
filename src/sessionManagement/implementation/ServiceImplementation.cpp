@@ -69,7 +69,7 @@ int ServiceImplementation::_createSession(T::SessionId sessionId,SessionInfo& se
   FUNCTION_TRACE
   try
   {
-    SessionInfo *session = new SessionInfo();
+    auto *session = new SessionInfo();
     sessionInfo.setSessionId(session->getSessionId());
     *session = sessionInfo;
 

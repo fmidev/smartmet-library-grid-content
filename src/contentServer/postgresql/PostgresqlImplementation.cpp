@@ -904,7 +904,7 @@ int PostgresqlImplementation::_getProducerInfoListByParameter(T::SessionId sessi
       {
         producerIdList.insert(info->mProducerId);
 
-        T::ProducerInfo *producerInfo = new T::ProducerInfo;
+        auto *producerInfo = new T::ProducerInfo;
         getProducerById(info->mProducerId,*producerInfo);
         producerInfoList.addProducerInfo(producerInfo);
       }
@@ -2452,7 +2452,7 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+      auto *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
@@ -2537,7 +2537,7 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+      auto *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
@@ -2621,7 +2621,7 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+      auto *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
@@ -2705,7 +2705,7 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GeometryInfo *geometryInfo = new T::GeometryInfo();
+      auto *geometryInfo = new T::GeometryInfo();
 
       geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
@@ -2989,7 +2989,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
           {
             T::ContentInfo *cInfo = ff->mContentInfoList.getContentInfoByIndex(t);
 
-            T::ContentInfo *contentInfo = new T::ContentInfo(*cInfo);
+            auto *contentInfo = new T::ContentInfo(*cInfo);
             contentInfo->mFileId = fileInfo.mFileId;
             contentInfoList.addContentInfo(contentInfo);
           }
@@ -3523,7 +3523,7 @@ int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionI
 
     for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       if (getFileById(*it,*fileInfo) == Result::OK)
         fileInfoList.addFileInfo(fileInfo);
       else
@@ -4087,7 +4087,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::EventInfo *eventInfo = new T::EventInfo();
+      auto *eventInfo = new T::EventInfo();
       eventInfo->mEventId = atoll(PQgetvalue(res, i, 0));
       eventInfo->mType = atoll(PQgetvalue(res, i, 1));
       std::string eventTime = PQgetvalue(res, i, 2);
@@ -6149,7 +6149,7 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ProducerInfo *producerInfo = new T::ProducerInfo();
+      auto *producerInfo = new T::ProducerInfo();
       producerInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       producerInfo->mName = PQgetvalue(res, i, 1);
       producerInfo->mTitle = PQgetvalue(res, i, 2);
@@ -6218,7 +6218,7 @@ int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ProducerInfo *producerInfo = new T::ProducerInfo();
+      auto *producerInfo = new T::ProducerInfo();
       producerInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
       producerInfo->mName = PQgetvalue(res, i, 1);
       producerInfo->mTitle = PQgetvalue(res, i, 2);
@@ -6446,7 +6446,7 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GenerationInfo *generationInfo = new T::GenerationInfo();
+      auto *generationInfo = new T::GenerationInfo();
 
       generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
@@ -6550,7 +6550,7 @@ int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId produc
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GenerationInfo *generationInfo = new T::GenerationInfo();
+      auto *generationInfo = new T::GenerationInfo();
 
       generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
@@ -6633,7 +6633,7 @@ int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::GenerationInfo *generationInfo = new T::GenerationInfo();
+      auto *generationInfo = new T::GenerationInfo();
 
       generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
       generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
@@ -7588,7 +7588,7 @@ int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
       fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
@@ -7674,7 +7674,7 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
       fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
@@ -7839,7 +7839,7 @@ int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
       fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
@@ -7925,7 +7925,7 @@ int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::File
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::FileInfo *fileInfo = new T::FileInfo();
+      auto *fileInfo = new T::FileInfo();
       fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
       fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
@@ -8610,7 +8610,7 @@ int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex s
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -8794,7 +8794,7 @@ int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generatio
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -8918,7 +8918,7 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::Generatio
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9057,7 +9057,7 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9208,7 +9208,7 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9359,7 +9359,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9509,7 +9509,7 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9618,7 +9618,7 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::Generation
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9752,7 +9752,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
       const std::string tmp = fmt::format("{};{};{};{};{}",PQgetvalue(res, i, 6),PQgetvalue(res, i, 7),PQgetvalue(res, i, 13),PQgetvalue(res, i, 14),PQgetvalue(res, i, 10));
       if (searchList.find(tmp) != searchList.end())
       {
-        T::ContentInfo *contentInfo = new T::ContentInfo();
+        auto *contentInfo = new T::ContentInfo();
 
         contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
         contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9865,7 +9865,7 @@ int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T:
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -9977,7 +9977,7 @@ int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileI
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
@@ -10087,7 +10087,7 @@ int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfo
 
     for (int i = 0; i < rowCount; i++)
     {
-      T::ContentInfo *contentInfo = new T::ContentInfo();
+      auto *contentInfo = new T::ContentInfo();
 
       contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
       contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));

@@ -15,7 +15,7 @@ static void* Server_maintenanceThread(void *arg)
   try
   {
     Fmi::set_thread_name("qs-maint");
-    Server *server = static_cast<Server*>(arg);
+    auto *server = static_cast<Server*>(arg);
     server->run();
     return nullptr;
   }
