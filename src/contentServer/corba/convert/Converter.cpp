@@ -746,7 +746,7 @@ void Converter::convert(const C::StringList& source,string_vec& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.emplace_back(std::string(source[t]));
+      target.emplace_back(source[t]);
     }
   }
   catch (...)

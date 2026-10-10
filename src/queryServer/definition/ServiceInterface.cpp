@@ -575,7 +575,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
 
     query.mCoordinateType = coordinateType;
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
@@ -692,7 +692,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     query.mCoordinateType = coordinateType;
 
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
@@ -756,7 +756,7 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionI
 
     query.mCoordinateType = coordinateType;
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     if (query.mQueryParameterList.size() == 1)

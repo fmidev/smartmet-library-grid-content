@@ -96,7 +96,7 @@ void AliasFileCollection::init()
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
-      mAliasFileList.emplace_back(AliasFile(*it,mDuplicatesAllowed));
+      mAliasFileList.emplace_back(*it,mDuplicatesAllowed);
     }
 
     for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)

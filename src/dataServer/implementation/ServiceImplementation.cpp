@@ -13,7 +13,7 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/thread/thread.hpp>
-#include <signal.h>
+#include <csignal>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 

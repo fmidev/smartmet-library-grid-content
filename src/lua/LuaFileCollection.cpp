@@ -91,7 +91,7 @@ void LuaFileCollection::init()
 
     for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
     {
-      mLuaFileList.emplace_back(LuaFile(*it));
+      mLuaFileList.emplace_back(*it);
     }
 
     for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)

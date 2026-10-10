@@ -1,6 +1,6 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <time.h>
+#include <ctime>
 #include <macgyver/Hash.h>
 
 

@@ -2,7 +2,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AdditionalParameters.h>
 #include <grid-files/common/ShowFunction.h>
-#include <time.h>
+#include <ctime>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

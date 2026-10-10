@@ -4,7 +4,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/GeneralDefinitions.h>
 #include <grid-files/common/StringFactory.h>
-#include <string.h>
+#include <cstring>
 
 
 namespace SmartMet

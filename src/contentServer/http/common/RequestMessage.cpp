@@ -612,7 +612,7 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        values.emplace_back(std::string(s+len+1));
+        values.emplace_back(s+len+1);
       }
     }
 
