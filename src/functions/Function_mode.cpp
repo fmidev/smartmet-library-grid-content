@@ -99,12 +99,12 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+    for (auto & it : valueCount)
     {
-      if (it->second > maxVal)
+      if (it.second > maxVal)
       {
-        maxVal = it->second;
-        maxKey = it->first;
+        maxVal = it.second;
+        maxKey = it.first;
       }
     }
 
@@ -156,12 +156,12 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+    for (auto & it : valueCount)
     {
-      if (it->second > maxVal)
+      if (it.second > maxVal)
       {
-        maxVal = it->second;
-        maxKey = it->first;
+        maxVal = it.second;
+        maxKey = it.first;
       }
     }
 
@@ -222,12 +222,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+        for (auto & it : valueCount)
         {
-          if (it->second > maxVal)
+          if (it.second > maxVal)
           {
-            maxVal = it->second;
-            maxKey = it->first;
+            maxVal = it.second;
+            maxKey = it.first;
           }
         }
 
@@ -291,12 +291,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+        for (auto & it : valueCount)
         {
-          if (it->second > maxVal)
+          if (it.second > maxVal)
           {
-            maxVal = it->second;
-            maxKey = it->first;
+            maxVal = it.second;
+            maxKey = it.first;
           }
         }
 

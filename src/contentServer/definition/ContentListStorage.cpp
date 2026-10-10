@@ -13,8 +13,8 @@ ContentListStorage::ContentListStorage()
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mContentLists[t].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    for (auto & mContentList : mContentLists)
+      mContentList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
   }
   catch (...)
   {
@@ -34,8 +34,8 @@ ContentListStorage::ContentListStorage(const ContentListStorage& contentListStor
     for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
       mContentLists[t] = contentListStorage.mContentLists[t];
 
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mContentLists[t].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    for (auto & mContentList : mContentLists)
+      mContentList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
   }
   catch (...)
   {
@@ -91,8 +91,8 @@ void ContentListStorage::clear()
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mContentLists[t].clear();
+    for (auto & mContentList : mContentLists)
+      mContentList.clear();
   }
   catch (...)
   {
@@ -225,8 +225,8 @@ uint ContentListStorage::deleteMarkedContent()
   try
   {
     uint cnt = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      cnt += mContentLists[t].deleteMarkedContent();
+    for (auto & mContentList : mContentLists)
+      cnt += mContentList.deleteMarkedContent();
 
     return cnt;
   }
@@ -378,11 +378,11 @@ ContentInfo* ContentListStorage::getContentInfoByIndex(uint index) const
   try
   {
     uint len = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (const auto & mContentList : mContentLists)
     {
-      len = mContentLists[t].getLength();
+      len = mContentList.getLength();
       if (index < len)
-        return mContentLists[t].getContentInfoByIndex(index);
+        return mContentList.getContentInfoByIndex(index);
 
       index -= len;
     }
@@ -442,9 +442,9 @@ void ContentListStorage::getContentInfoList(ContentInfoList& contentInfoList)
     uint len = getLength();
     contentInfoList.clear();
     contentInfoList.setSize(len+10);
-    for (uint t=0; t< MAX_CONTENT_SOURCES; t++)
+    for (auto & mContentList : mContentLists)
     {
-      mContentLists[t].getContentInfoListNoClear(contentInfoList);
+      mContentList.getContentInfoListNoClear(contentInfoList);
     }
   }
   catch (...)
@@ -650,8 +650,8 @@ std::size_t ContentListStorage::getHash()
   try
   {
     std::size_t hash = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      hash += mContentLists[t].getHash();
+    for (auto & mContentList : mContentLists)
+      hash += mContentList.getHash();
 
     return hash;
   }
@@ -711,8 +711,8 @@ uint ContentListStorage::getLength()const
   try
   {
     uint len = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      len += mContentLists[t].getLength();
+    for (const auto & mContentList : mContentLists)
+      len += mContentList.getLength();
 
     return len;
   }
@@ -731,8 +731,8 @@ void ContentListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mContentLists[t].print(stream,level,optionFlags);
+    for (auto & mContentList : mContentLists)
+      mContentList.print(stream,level,optionFlags);
   }
   catch (...)
   {

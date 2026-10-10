@@ -1462,10 +1462,10 @@ int PostgresqlImplementation::_deleteGenerationInfoListByIdList(T::SessionId ses
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
-      deleteGenerationById(*it,true,true,true);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0,"");
+      deleteGenerationById(it,true,true,true);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0,"");
     }
 
     return Result::OK;
@@ -2963,10 +2963,10 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
 
     T::FileInfoList fileInfoList;
 
-    for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
+    for (auto & ff : fileAndContentList)
     {
       //ff->mFileInfo.print(std::cout,0,0);
-      fileInfoList.addFileInfo(new T::FileInfo(ff->mFileInfo));
+      fileInfoList.addFileInfo(new T::FileInfo(ff.mFileInfo));
     }
 
     T::EventInfoList eventInfoList;
@@ -2974,20 +2974,20 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
     addFileList(fileInfoList);
 
     T::ContentInfoList contentInfoList;
-    for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
+    for (auto & ff : fileAndContentList)
     {
-      uint len = ff->mContentInfoList.getLength();
+      uint len = ff.mContentInfoList.getLength();
       if (len > 0)
       {
         T::FileInfo fileInfo;
-        int result = getFileByName(ff->mFileInfo.mName,fileInfo);
+        int result = getFileByName(ff.mFileInfo.mName,fileInfo);
         if (result == Result::OK)
         {
-          ff->mFileInfo.mFileId = fileInfo.mFileId;
+          ff.mFileInfo.mFileId = fileInfo.mFileId;
 
           for (uint t=0; t<len; t++)
           {
-            T::ContentInfo *cInfo = ff->mContentInfoList.getContentInfoByIndex(t);
+            T::ContentInfo *cInfo = ff.mContentInfoList.getContentInfoByIndex(t);
 
             auto *contentInfo = new T::ContentInfo(*cInfo);
             contentInfo->mFileId = fileInfo.mFileId;
@@ -3244,17 +3244,17 @@ int PostgresqlImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T
       }
     }
 
-    for (auto it=fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
       T::ContentInfoList contentList;
-      getContentByFileId(*it,contentList);
+      getContentByFileId(it,contentList);
       if (contentList.getLength() == 0)
       {
         T::FileInfo fileInfo;
-        if (getFileById(*it,fileInfo) == Result::OK)
+        if (getFileById(it,fileInfo) == Result::OK)
         {
-          deleteFileById(*it,false);
-          addEvent(EventType::FILE_DELETED,*it,fileInfo.mFileType,0,0,"");
+          deleteFileById(it,false);
+          addEvent(EventType::FILE_DELETED,it,fileInfo.mFileType,0,0,"");
         }
       }
     }
@@ -3399,13 +3399,13 @@ int PostgresqlImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessi
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
       T::FileInfo fileInfo;
-      if (getFileById(*it,fileInfo) == Result::OK)
+      if (getFileById(it,fileInfo) == Result::OK)
       {
-        deleteFileById(*it,true);
-        addEvent(EventType::FILE_DELETED,*it,0,0,0,"");
+        deleteFileById(it,true);
+        addEvent(EventType::FILE_DELETED,it,0,0,0,"");
       }
     }
 
@@ -3521,10 +3521,10 @@ int PostgresqlImplementation::_getFileInfoListByFileIdList(T::SessionId sessionI
 
     fileInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       auto *fileInfo = new T::FileInfo();
-      if (getFileById(*it,*fileInfo) == Result::OK)
+      if (getFileById(it,*fileInfo) == Result::OK)
         fileInfoList.addFileInfo(fileInfo);
       else
         delete fileInfo;
@@ -4684,10 +4684,10 @@ int PostgresqlImplementation::_getContentListByFileIdList(T::SessionId sessionId
 
     contentInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      getContentByFileId(*it,contentList);
+      getContentByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
     return Result::OK;
@@ -8346,9 +8346,9 @@ int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<T::Genera
     if (!isConnectionValid())
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
-      deleteContentByGenerationId(*it);
+      deleteContentByGenerationId(it);
     }
 
     return Result::OK;
@@ -8887,12 +8887,12 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::Generatio
     sql += "  generationId IN (";
 
     const std::size_t pp = sql.size();
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
       if (sql.size() != pp)
         sql += ",";
 
-      sql += fmt::format("{}", *it);
+      sql += fmt::format("{}", it);
     }
 
     sql += fmt::format(") AND ((fileId = {} AND messageIndex>={}) OR fileId > {})\n", startFileId, startMessageIndex, startFileId);
@@ -9681,9 +9681,9 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
     std::set<std::string> searchList;
 
-    for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
+    for (auto & it : forecastTimeList)
     {
-      std::string st = fmt::format("{};{};{};{};{}",it->mGenerationId,static_cast<int>(it->mGeometryId),static_cast<int>(it->mForecastType),static_cast<int>(it->mForecastNumber),it->mForecastTime);
+      std::string st = fmt::format("{};{};{};{};{}",it.mGenerationId,static_cast<int>(it.mGeometryId),static_cast<int>(it.mForecastType),static_cast<int>(it.mForecastNumber),it.mForecastTime);
       if (searchList.find(st) == searchList.end())
         searchList.insert(st);
     }
@@ -9721,12 +9721,12 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
     sql += "  generationId IN (";
 
     const std::size_t pp = sql.size();
-    for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
+    for (auto & it : forecastTimeList)
     {
       if (sql.size() != pp)
         sql += ",";
 
-      sql += fmt::format("{}", it->mGenerationId);
+      sql += fmt::format("{}", it.mGenerationId);
     }
 
     sql += ")\n";

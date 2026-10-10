@@ -109,10 +109,10 @@ LuaFile::~LuaFile()
 {
   try
   {
-    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    for (auto & t : mLuaState)
     {
-      if (mLuaState[t] != nullptr)
-        lua_close((lua_State*)mLuaState[t]);
+      if (t != nullptr)
+        lua_close((lua_State*)t);
     }
   }
   catch (...)
@@ -207,11 +207,11 @@ void LuaFile::releaseLuaState(UInt64 key)
 {
   try
   {
-    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    for (unsigned long & t : mStateKey)
     {
-      if (mStateKey[t] == key)
+      if (t == key)
       {
-        mStateKey[t] = 0;
+        t = 0;
         return;
       }
     }
@@ -246,9 +246,9 @@ bool LuaFile::checkUpdates()
       while (!ind)
       {
         uint count = 0;
-        for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+        for (unsigned long t : mStateKey)
         {
-          if (mStateKey[t] == 0)
+          if (t == 0)
             count++;
         }
 
@@ -259,12 +259,12 @@ bool LuaFile::checkUpdates()
       }
 
 
-      for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+      for (auto & t : mLuaState)
       {
-        if (mLuaState[t] != nullptr)
+        if (t != nullptr)
         {
-          lua_close((lua_State*)mLuaState[t]);
-          mLuaState[t] = nullptr;
+          lua_close((lua_State*)t);
+          t = nullptr;
         }
       }
 
@@ -1572,8 +1572,8 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "LuaFile\n";
     stream << space(level) << "- mFilename  = " << mFilename << "\n";
 
-    for (auto it = mFunctions.begin(); it != mFunctions.end(); ++it)
-      it->second.print(stream,level+2,optionFlags);
+    for (auto & mFunction : mFunctions)
+      mFunction.second.print(stream,level+2,optionFlags);
   }
   catch (...)
   {
@@ -1591,23 +1591,23 @@ void LuaFile::loadFile()
 {
   try
   {
-    for (uint t=0; t<NUM_OF_LUA_HANDLES; t++)
+    for (auto & t : mLuaState)
     {
-      if (mLuaState[t] != nullptr)
+      if (t != nullptr)
       {
-        lua_close((lua_State*)mLuaState[t]);
-        mLuaState[t] = nullptr;
+        lua_close((lua_State*)t);
+        t = nullptr;
       }
 
-      mLuaState[t] = luaL_newstate();
-      luaL_openlibs((lua_State*)mLuaState[t]);
+      t = luaL_newstate();
+      luaL_openlibs((lua_State*)t);
 
-      if (luaL_dofile((lua_State*)mLuaState[t],mFilename.c_str()) != 0)
+      if (luaL_dofile((lua_State*)t,mFilename.c_str()) != 0)
       {
         Fmi::Exception exception(BCP, "Cannot load a LUA file!");
         exception.addParameter("Filename",mFilename);
-        exception.addParameter("Lua message",lua_tostring((lua_State*)mLuaState[t], -1));
-        lua_pop((lua_State*)mLuaState[t], 1);
+        exception.addParameter("Lua message",lua_tostring((lua_State*)t, -1));
+        lua_pop((lua_State*)t, 1);
         throw exception;
       }
     }

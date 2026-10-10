@@ -756,9 +756,9 @@ int ServiceImplementation::_getGridMessageBytes(T::SessionId sessionId,T::FileId
       std::set<T::FilePosition> positions;
       message->getSectionPositions(positions);
 
-      for (auto it = positions.begin(); it != positions.end(); ++it)
+      for (unsigned long position : positions)
       {
-        messageSections.emplace_back(*it - messagePosition);
+        messageSections.emplace_back(position - messagePosition);
       }
     }
 
@@ -787,9 +787,9 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
     if (strcasecmp(propertyName,"dem") == 0 && mDem)
     {
       values.reserve(latlonCoordinates.size());
-      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      for (auto & latlonCoordinate : latlonCoordinates)
       {
-        auto val = mDem->elevation(it->x(),it->y());
+        auto val = mDem->elevation(latlonCoordinate.x(),latlonCoordinate.y());
         values.push_back(val);
       }
       return Result::OK;
@@ -798,9 +798,9 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
     if (strcasecmp(propertyName,"covertype") == 0 && mLandCover)
     {
       values.reserve(latlonCoordinates.size());
-      for (auto it = latlonCoordinates.begin(); it != latlonCoordinates.end(); ++it)
+      for (auto & latlonCoordinate : latlonCoordinates)
       {
-        auto val = mLandCover->coverType(it->x(),it->y());
+        auto val = mLandCover->coverType(latlonCoordinate.x(),latlonCoordinate.y());
         values.push_back(val);
       }
       return Result::OK;
@@ -6841,12 +6841,12 @@ void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filename
   FUNCTION_TRACE
   try
   {
-    for (auto it = filenames.begin(); it != filenames.end(); ++it)
+    for (auto & filename : filenames)
     {
       if (mShutdownRequested)
         return;
 
-      const char *sourceFile = it->second.c_str();
+      const char *sourceFile = filename.second.c_str();
       auto source_fsize = getFileSize(sourceFile);
 
       if (source_fsize > 0)
@@ -6876,7 +6876,7 @@ void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filename
 
         if (source_fsize == target_fsize)
         {
-          GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(it->first);
+          GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(filename.first);
           if (gridFile)
           {
             PRINT_DATA(mDebugLog,"Using the local cache file:\n");
@@ -6908,12 +6908,12 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
     // ### Counting hash value for the files that should be in the cache:
 
     std::set<std::string> hashList;
-    for (auto it = cachedFilenames.begin(); it != cachedFilenames.end(); ++it)
+    for (auto & cachedFilename : cachedFilenames)
     {
       if (mShutdownRequested)
         return;
 
-      const char *cacheFile = it->second.c_str();
+      const char *cacheFile = cachedFilename.second.c_str();
       std::string hash;
       getFileNameHash(cacheFile,hash);
       hashList.insert(hash);
@@ -6931,14 +6931,14 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
 
     // ### Removing files that should not be in the cache directory:
 
-    for (auto it = fileList.begin(); it != fileList.end(); ++it)
+    for (auto & it : fileList)
     {
       if (mShutdownRequested)
         return;
 
-      if (hashList.find(it->second) == hashList.end())
+      if (hashList.find(it.second) == hashList.end())
       {
-        std::string filePath = mFileCache_directory + "/" + it->second;
+        std::string filePath = mFileCache_directory + "/" + it.second;
         PRINT_DATA(mDebugLog,"Removing cached file: %s\n",filePath.c_str());
         remove(filePath.c_str());
         mFileCache_fileCount--;
@@ -6993,8 +6993,8 @@ void ServiceImplementation::cacheProcessingThread()
         // server does not switch its search structure before the required files are in the cache.
 
         std::set<T::FileId> fileIdList;
-        for (auto it = cachedFilenames.begin(); it != cachedFilenames.end(); ++it)
-          fileIdList.insert(it->first);
+        for (auto & cachedFilename : cachedFilenames)
+          fileIdList.insert(cachedFilename.first);
 
         mContentServer->updateCachedFiles(mServerSessionId,fileIdList);
 

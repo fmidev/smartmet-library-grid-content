@@ -1432,9 +1432,9 @@ void ServerInterface::getProducerNameAndGeometryList(T::RequestMessage& request,
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=list.begin(); it!=list.end(); ++it)
+      for (const auto & it : list)
       {
-        response.addLine("line",*it);
+        response.addLine("line",it);
       }
     }
     else
@@ -1490,9 +1490,9 @@ void ServerInterface::getProducerParameterList(T::RequestMessage& request,T::Res
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=list.begin(); it!=list.end(); ++it)
+      for (const auto & it : list)
       {
-        response.addLine("line",*it);
+        response.addLine("line",it);
       }
     }
     else
@@ -1556,9 +1556,9 @@ void ServerInterface::getProducerParameterListByProducerId(T::RequestMessage& re
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=list.begin(); it!=list.end(); ++it)
+      for (const auto & it : list)
       {
-        response.addLine("line",*it);
+        response.addLine("line",it);
       }
     }
     else
@@ -1771,9 +1771,9 @@ void ServerInterface::deleteGenerationInfoListByIdList(T::RequestMessage& reques
 
     std::set<T::GenerationId> generationIdList;
 
-    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    for (auto & csvLine : csvLines)
     {
-      generationIdList.insert(toInt64(it->c_str()));
+      generationIdList.insert(toInt64(csvLine.c_str()));
     }
 
     int result = mService->deleteGenerationInfoListByIdList(sessionId,generationIdList);
@@ -1931,9 +1931,9 @@ void ServerInterface::getGenerationIdGeometryIdAndForecastTimeList(T::RequestMes
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=list.begin(); it!=list.end(); ++it)
+      for (const auto & it : list)
       {
-        response.addLine("line",*it);
+        response.addLine("line",it);
       }
     }
     else
@@ -4006,9 +4006,9 @@ void ServerInterface::getFileInfoListByFileIdList(T::RequestMessage& request,T::
     }
 
     std::vector<T::FileId> fileIdList;
-    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    for (auto & csvLine : csvLines)
     {
-      fileIdList.emplace_back(toInt64(it->c_str()));
+      fileIdList.emplace_back(toInt64(csvLine.c_str()));
     }
 
     T::FileInfoList fileInfoList;
@@ -4417,9 +4417,9 @@ void ServerInterface::deleteFileInfoListByFileIdList(T::RequestMessage& request,
 
     std::set<T::FileId> fileIdList;
 
-    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    for (auto & csvLine : csvLines)
     {
-      fileIdList.insert(toInt64(it->c_str()));
+      fileIdList.insert(toInt64(csvLine.c_str()));
     }
 
     int result = mService->deleteFileInfoListByFileIdList(sessionId,fileIdList);
@@ -5428,9 +5428,9 @@ void ServerInterface::getContentListByFileId(T::RequestMessage& request,T::Respo
     }
 
     std::vector<T::FileId> fileIdList;
-    for (auto it=csvLines.begin(); it!=csvLines.end(); ++it)
+    for (auto & csvLine : csvLines)
     {
-      fileIdList.emplace_back(toInt64(it->c_str()));
+      fileIdList.emplace_back(toInt64(csvLine.c_str()));
     }
 
 
@@ -6968,9 +6968,9 @@ void ServerInterface::getContentGeometryIdListByGenerationId(T::RequestMessage& 
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=geometryIdList.begin(); it!=geometryIdList.end(); ++it)
+      for (int it : geometryIdList)
       {
-        response.addLine("geometryId",*it);
+        response.addLine("geometryId",it);
       }
     }
     else
@@ -7080,9 +7080,9 @@ void ServerInterface::getContentParamKeyListByGenerationId(T::RequestMessage& re
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      for (const auto & it : paramKeyList)
       {
-        response.addLine("paramKey",*it);
+        response.addLine("paramKey",it);
       }
     }
     else
@@ -7146,9 +7146,9 @@ void ServerInterface::getContentParamKeyListByGenerationAndGeometryId(T::Request
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      for (const auto & it : paramKeyList)
       {
-        response.addLine("paramKey",*it);
+        response.addLine("paramKey",it);
       }
     }
     else
@@ -7220,9 +7220,9 @@ void ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::Re
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=paramKeyList.begin(); it!=paramKeyList.end(); ++it)
+      for (const auto & it : paramKeyList)
       {
-        response.addLine("paramKey",*it);
+        response.addLine("paramKey",it);
       }
     }
     else
@@ -7271,9 +7271,9 @@ void ServerInterface::getContentTimeListByGenerationId(T::RequestMessage& reques
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      for (const auto & it : contentTimeList)
       {
-        response.addLine("contentTime",*it);
+        response.addLine("contentTime",it);
       }
     }
     else
@@ -7437,9 +7437,9 @@ void ServerInterface::getContentTimeListByGenerationAndGeometryId(T::RequestMess
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      for (const auto & it : contentTimeList)
       {
-        response.addLine("contentTime",*it);
+        response.addLine("contentTime",it);
       }
     }
     else
@@ -7503,9 +7503,9 @@ void ServerInterface::getContentTimeListByGenerationGeometryAndLevelId(T::Reques
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      for (const auto & it : contentTimeList)
       {
-        response.addLine("contentTime",*it);
+        response.addLine("contentTime",it);
       }
     }
     else
@@ -7569,9 +7569,9 @@ void ServerInterface::getContentLevelListByGenerationGeometryAndLevelId(T::Reque
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentLevelList.begin(); it!=contentLevelList.end(); ++it)
+      for (int it : contentLevelList)
       {
-        response.addLine("level",*it);
+        response.addLine("level",it);
       }
     }
     else
@@ -7643,9 +7643,9 @@ void ServerInterface::getContentLevelListByParameterGenerationGeometryAndLevelId
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentLevelList.begin(); it!=contentLevelList.end(); ++it)
+      for (int it : contentLevelList)
       {
-        response.addLine("level",*it);
+        response.addLine("level",it);
       }
     }
     else
@@ -7694,9 +7694,9 @@ void ServerInterface::getContentTimeListByProducerId(T::RequestMessage& request,
     response.addLine("result",result);
     if (result == Result::OK)
     {
-      for (auto it=contentTimeList.begin(); it!=contentTimeList.end(); ++it)
+      for (const auto & it : contentTimeList)
       {
-        response.addLine("contentTime",*it);
+        response.addLine("contentTime",it);
       }
     }
     else

@@ -89,14 +89,14 @@ void LuaFileCollection::init()
   {
     AutoWriteLock lock(&mModificationLock);
 
-    for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
+    for (auto & mFilename : mFilenames)
     {
-      mLuaFileList.emplace_back(*it);
+      mLuaFileList.emplace_back(mFilename);
     }
 
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
-      it->init();
+      it.init();
     }
   }
   catch (...)
@@ -140,9 +140,9 @@ bool LuaFileCollection::checkUpdates(bool force)
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
 
-      for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+      for (auto & it : mLuaFileList)
       {
-        if (it->checkUpdates())
+        if (it.checkUpdates())
           result = true;
       }
       mLastCheck = tt;
@@ -167,9 +167,9 @@ uint LuaFileCollection::getFunction(const std::string& functionName,std::string&
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
-      uint functionType = it->getFunction(functionName,function);
+      uint functionType = it.getFunction(functionName,function);
       if (functionType != 0)
         return functionType;
     }
@@ -192,9 +192,9 @@ bool LuaFileCollection::getFunction(const std::string& functionName,const uint f
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
-      if (it->getFunction(functionName,function) == functionType)
+      if (it.getFunction(functionName,function) == functionType)
         return true;
     }
     return false;
@@ -216,13 +216,13 @@ std::string LuaFileCollection::executeFunctionCall5(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 5)
       {
-        return it->executeFunctionCall5(functionName,language,parameters);
+        return it.executeFunctionCall5(functionName,language,parameters);
       }
     }
 
@@ -247,13 +247,13 @@ std::string LuaFileCollection::executeFunctionCall5(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 5)
       {
-        return it->executeFunctionCall5(functionName,language,parameters);
+        return it.executeFunctionCall5(functionName,language,parameters);
       }
     }
 
@@ -278,13 +278,13 @@ float LuaFileCollection::executeFunctionCall1(const std::string& function,std::v
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 1)
       {
-        return it->executeFunctionCall1(functionName,parameters);
+        return it.executeFunctionCall1(functionName,parameters);
       }
     }
 
@@ -309,13 +309,13 @@ double LuaFileCollection::executeFunctionCall1(const std::string& function,std::
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 1)
       {
-        return it->executeFunctionCall1(functionName,parameters);
+        return it.executeFunctionCall1(functionName,parameters);
       }
     }
 
@@ -340,13 +340,13 @@ double LuaFileCollection::executeFunctionCall2(const std::string& function,const
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 2)
       {
-        return it->executeFunctionCall2(functionName,str);
+        return it.executeFunctionCall2(functionName,str);
       }
     }
 
@@ -369,13 +369,13 @@ void LuaFileCollection::executeFunctionCall4(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 4)
       {
-        it->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
+        it.executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
         return;
       }
     }
@@ -401,13 +401,13 @@ void LuaFileCollection::executeFunctionCall4(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 4)
       {
-        it->executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
+        it.executeFunctionCall4(functionName,columns,rows,inParameters1,inParameters2,angles,outParameters);
         return;
       }
     }
@@ -433,13 +433,13 @@ std::string LuaFileCollection::executeFunctionCall6(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 6)
       {
-        return it->executeFunctionCall6(functionName,params);
+        return it.executeFunctionCall6(functionName,params);
       }
     }
 
@@ -474,13 +474,13 @@ std::string LuaFileCollection::executeFunctionCall6(
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 6)
       {
-        return it->executeFunctionCall6(functionName,producerName,
+        return it.executeFunctionCall6(functionName,producerName,
             parameterName,parameterKeyType,parameterKey,parameterLevelId,
             parameterLevel,forecastType,forecastNumber,interpolationMethod);
       }
@@ -507,13 +507,13 @@ void LuaFileCollection::executeFunctionCall8(const std::string& function,const c
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 8)
       {
-        it->executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
+        it.executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
         return;
       }
     }
@@ -539,13 +539,13 @@ void LuaFileCollection::executeFunctionCall8(const std::string& function,const c
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 8)
       {
-        it->executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
+        it.executeFunctionCall8(functionName,subfunction,columns,rows,inParameters,extParameters,outParameters);
         return;
       }
     }
@@ -571,13 +571,13 @@ void LuaFileCollection::executeFunctionCall9(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 9)
       {
-        it->executeFunctionCall9(functionName,columns,rows,inParameters,extParameters,outParameters);
+        it.executeFunctionCall9(functionName,columns,rows,inParameters,extParameters,outParameters);
         return;
       }
     }
@@ -603,13 +603,13 @@ void LuaFileCollection::executeFunctionCall9(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
+    for (auto & it : mLuaFileList)
     {
       std::string functionName;
-      uint type = it->getFunction(function,functionName);
+      uint type = it.getFunction(function,functionName);
       if (type == 9)
       {
-        it->executeFunctionCall9(functionName,columns,rows,inParameters,extParameters,outParameters);
+        it.executeFunctionCall9(functionName,columns,rows,inParameters,extParameters,outParameters);
         return;
       }
     }
@@ -636,8 +636,8 @@ void LuaFileCollection::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "LuaFileCollection\n";
 
-    for (auto it = mLuaFileList.begin(); it != mLuaFileList.end(); ++it)
-      it->print(stream,level+1,optionFlags);
+    for (auto & it : mLuaFileList)
+      it.print(stream,level+1,optionFlags);
   }
   catch (...)
   {

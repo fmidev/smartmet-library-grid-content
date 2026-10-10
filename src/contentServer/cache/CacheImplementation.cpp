@@ -1795,9 +1795,9 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     ssp->mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -3285,9 +3285,9 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (mContentSwapEnabled &&  sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
-        T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+        T::FileInfo *info = mFileInfoList.getFileInfoById(it);
         if (info != nullptr)
           fileInfoList.addFileInfo(info->duplicate());
       }
@@ -3300,9 +3300,9 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
     AutoReadLock readLock(&mSearchModificationLock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -4367,10 +4367,10 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (mContentSwapEnabled &&  sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
         T::ContentInfoList contentList;
-        mContentInfoList.getContentInfoListByFileId(*it,contentList);
+        mContentInfoList.getContentInfoListByFileId(it,contentList);
         contentInfoList.addContentInfoList(contentList);
       }
       return Result::OK;
@@ -4386,10 +4386,10 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
     AutoReadLock readLock(mlock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      ssp->mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      ssp->mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -6478,9 +6478,9 @@ int CacheImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::F
           mCachedFiles.erase(*it);
       }
 
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long it : fileIdList)
       {
-        mCachedFiles.insert(*it);
+        mCachedFiles.insert(it);
       }
     }
 
@@ -8826,8 +8826,8 @@ void CacheImplementation::updateContent()
       ssp->mFileInfoList.setLockingEnabled(true);
       ssp->mFileInfoListByName.setLockingEnabled(true);
 
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        ssp->mContentInfoList[t].setLockingEnabled(true);
+      for (auto & t : ssp->mContentInfoList)
+        t.setLockingEnabled(true);
 
       // Removing information that is marked to be deleted
 
@@ -8953,9 +8953,9 @@ void CacheImplementation::updateContent()
 
         mContentInfoList.setReleaseObjects(false);
         ssp->mContentInfoList[0].setReleaseObjects(false);
-        for (int t=0; t<CONTENT_LIST_COUNT; t++)
+        for (auto & t : ssp->mContentInfoList)
         {
-          ssp->mContentInfoList[t].addContentInfoList(mContentInfoList);
+          t.addContentInfoList(mContentInfoList);
         }
         ssp->mContentInfoList[0].setReleaseObjects(true);
         mContentInfoList.clear();
@@ -9010,8 +9010,8 @@ void CacheImplementation::updateContent()
       ssp->mFileInfoList.setLockingEnabled(false);
       ssp->mFileInfoListByName.setLockingEnabled(false);
 
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        ssp->mContentInfoList[t].setLockingEnabled(false);
+      for (auto & t : ssp->mContentInfoList)
+        t.setLockingEnabled(false);
 
       mContentChangeTime = time(nullptr);
 

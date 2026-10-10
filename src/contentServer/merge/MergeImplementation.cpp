@@ -212,10 +212,10 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
     mSessionId = sessionId;
     mDataServerSessionId = dataServerSessionId;
 
-    for (auto it = contentStorages.begin(); it != contentStorages.end(); ++it)
+    for (auto & contentStorage : contentStorages)
     {
       ContentSource source;
-      source.mContentStorage = *it;
+      source.mContentStorage = contentStorage;
       mContentSources.push_back(source);
     }
 
@@ -1587,9 +1587,9 @@ int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     ssp->mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -2716,9 +2716,9 @@ int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
-        T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+        T::FileInfo *info = mFileInfoList.getFileInfoById(it);
         if (info != nullptr)
           fileInfoList.addFileInfo(info->duplicate());
       }
@@ -2731,9 +2731,9 @@ int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
     AutoReadLock readLock(&mSearchModificationLock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -3629,10 +3629,10 @@ int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
         T::ContentInfoList contentList;
-        mContentInfoList.getContentInfoListByFileId(*it,contentList);
+        mContentInfoList.getContentInfoListByFileId(it,contentList);
         contentInfoList.addContentInfoList(contentList);
       }
       return Result::OK;
@@ -3642,10 +3642,10 @@ int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      ssp->mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      ssp->mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 

@@ -144,8 +144,8 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     double b = mValueToAdd;
     if (extParameters.size() > 0)
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (double extParameter : extParameters)
+        b = b + extParameter;
     }
     uint len = inParameters[0].size();
     outParameters.reserve(len);
@@ -186,8 +186,8 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
     double b = mValueToAdd;
     if (extParameters.size() > 0)
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (double extParameter : extParameters)
+        b = b + extParameter;
     }
     uint len = inParameters[0].size();
     outParameters.reserve(len);

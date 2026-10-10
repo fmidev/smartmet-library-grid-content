@@ -3,6 +3,7 @@
 #include <grid-files/common/AdditionalParameters.h>
 #include <grid-files/common/ShowFunction.h>
 #include <ctime>
+#include <ranges>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -207,9 +208,9 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     {
       std::vector<std::string> partList;
       splitString(hourStr,',',partList);
-      for (auto it = partList.begin(); it != partList.end(); ++it)
+      for (auto & it : partList)
       {
-        sprintf(tmp,"%02d00",toInt32(it->c_str()));
+        sprintf(tmp,"%02d00",toInt32(it.c_str()));
         timeList.insert(tmp);
       }
     }
@@ -265,13 +266,13 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       std::vector<std::string> tList;
       splitString(timeListStr,',',tList);
 
-      for (auto it = tList.begin(); it != tList.end(); ++it)
+      for (auto & it : tList)
       {
         time_t tim = 0;
         if (timezoneStr != nullptr)
-          tim = localTimeToTimeT(it->c_str(),timezoneStr);
+          tim = localTimeToTimeT(it.c_str(),timezoneStr);
         else
-          tim = localTimeToTimeT(it->c_str(),"");
+          tim = localTimeToTimeT(it.c_str(),"");
 
         struct tm tt;
         gmtime_r(&tim,&tt);
@@ -446,14 +447,14 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
       levels.insert(0);
 
     uint levelCount = 0;
-    for (auto level = levels.rbegin(); level != levels.rend(); ++level)
+    for (double level : std::ranges::reverse_view(levels))
     {
       if (paramStr != nullptr)
       {
         std::vector<std::string> paramList;
         splitString(paramStr,',',paramList);
 
-        for (auto p = paramList.begin(); p != paramList.end(); ++p)
+        for (auto & p : paramList)
         {
           QueryParameter param;
           //param.mId;
@@ -463,14 +464,14 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
           if (locationTypeStr != nullptr)
             param.mLocationType = toUInt8(locationTypeStr);
 
-          param.mParam = *p;
-          param.mOrigParam = *p;
+          param.mParam = p;
+          param.mOrigParam = p;
           //param.mSymbolicName = *p;
           //param.mParameterKeyType;
           //param.mParameterKey = *p;
           //param.mParameterLevelIdType;
           //param.mParameterLevelId;
-          param.mParameterLevel = *level;
+          param.mParameterLevel = level;
           //param.mForecastType;
           //param.mForecastNumber;
           if (areaInterpolationMethodStr)
@@ -497,7 +498,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
           //param.mTimestepSizeInMinutes;
           //param.mFlags;
 
-          if (AdditionalParameters::isAdditionalParameter(p->c_str()))
+          if (AdditionalParameters::isAdditionalParameter(p.c_str()))
           {
             if (levelCount == 0)
             {

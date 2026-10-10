@@ -30,9 +30,9 @@ FunctionCollection::~FunctionCollection()
 {
   try
   {
-    for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
+    for (auto & it : mFunctionList)
     {
-      delete it->second;
+      delete it.second;
     }
   }
   catch (...)
@@ -275,10 +275,10 @@ void FunctionCollection::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
+    for (auto & it : mFunctionList)
     {
       stream << space(level) << "FunctionCollection\n";
-      stream << space(level+1) << it->first << "\n";
+      stream << space(level+1) << it.first << "\n";
     }
   }
   catch (...)

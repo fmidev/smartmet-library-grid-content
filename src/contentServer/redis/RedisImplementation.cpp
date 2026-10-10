@@ -2044,10 +2044,10 @@ int RedisImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
     deleteFileListByGenerationIdList(generationIdList,false);
     deleteGeometryListByGenerationIdList(generationIdList,false,false);
 
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
-      deleteGenerationById(*it,false,false,false);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+      deleteGenerationById(it,false,false,false);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
     }
 
     return Result::OK;
@@ -3441,12 +3441,12 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
     T::ProducerInfo producerInfo;
     T::GenerationInfo generationInfo;
 
-    for (auto ff = fileAndContentList.begin();ff != fileAndContentList.end(); ++ff)
+    for (auto & ff : fileAndContentList)
     {
-      if (ff->mFileInfo.mProducerId != producerInfo.mProducerId &&  getProducerById(ff->mFileInfo.mProducerId,producerInfo) != Result::OK)
+      if (ff.mFileInfo.mProducerId != producerInfo.mProducerId &&  getProducerById(ff.mFileInfo.mProducerId,producerInfo) != Result::OK)
         return Result::UNKNOWN_PRODUCER_ID;
 
-      if (ff->mFileInfo.mGenerationId != generationInfo.mGenerationId  && getGenerationById(ff->mFileInfo.mGenerationId,generationInfo) != Result::OK)
+      if (ff.mFileInfo.mGenerationId != generationInfo.mGenerationId  && getGenerationById(ff.mFileInfo.mGenerationId,generationInfo) != Result::OK)
         return Result::UNKNOWN_GENERATION_ID;
 
       if (producerInfo.mProducerId != generationInfo.mProducerId)
@@ -3454,14 +3454,14 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
       // ### Checking if the filename already exists in the database.
 
-      T::FileId fileId = getFileId(ff->mFileInfo.mName);
+      T::FileId fileId = getFileId(ff.mFileInfo.mName);
       if (fileId > 0)
       {
         T::FileInfo fInfo;
         if (getFileById(fileId,fInfo) != Result::OK)
         {
           // The filename exists, but the actual FileInfo record does not.
-          deleteFilename(ff->mFileInfo.mName);
+          deleteFilename(ff.mFileInfo.mName);
           fileId = 0;
         }
       }
@@ -3471,18 +3471,18 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
         // ### File with the same name already exists. Let's return
         // ### the current file-id.
 
-        ff->mFileInfo.mFileId = fileId;
+        ff.mFileInfo.mFileId = fileId;
 
         // ### Deleting old content information.
 
         if (requestFlags & 0x00000001)
-          deleteContentByFileId(ff->mFileInfo.mFileId);
+          deleteContentByFileId(ff.mFileInfo.mFileId);
       }
       else
       {
         // ### Generating a new file-id.
 
-        if (!allocateFileId(mContext,mTablePrefix,ff->mFileInfo.mFileId))
+        if (!allocateFileId(mContext,mTablePrefix,ff.mFileInfo.mFileId))
         {
           closeConnection();
           return Result::PERMANENT_STORAGE_ERROR;
@@ -3490,7 +3490,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
         // ### Adding the file information into the database.
 
-        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff->mFileInfo.mFileId,ff->mFileInfo.getCsv().c_str()));
+        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff.mFileInfo.mFileId,ff.mFileInfo.getCsv().c_str()));
         if (reply == nullptr)
         {
           closeConnection();
@@ -3502,26 +3502,26 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
         // ### Adding the filename into the database. This needs to be added to another
         // ### table so that we can fetch it fast.
 
-        addFilename(ff->mFileInfo.mName,ff->mFileInfo.mFileId);
+        addFilename(ff.mFileInfo.mName,ff.mFileInfo.mFileId);
       }
 
 
       // ### Adding the content information into the database.
 
-      uint len = ff->mContentInfoList.getLength();
+      uint len = ff.mContentInfoList.getLength();
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
+        T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
         if (info != nullptr)
         {
           // ### Making sure that content data matches the file data.
 
-          info->mFileId = ff->mFileInfo.mFileId;
+          info->mFileId = ff.mFileInfo.mFileId;
           if (info->mFileType == 0)
-            info->mFileType = ff->mFileInfo.mFileType;
+            info->mFileType = ff.mFileInfo.mFileType;
 
-          info->mProducerId = ff->mFileInfo.mProducerId;
-          info->mGenerationId = ff->mFileInfo.mGenerationId;
+          info->mProducerId = ff.mFileInfo.mProducerId;
+          info->mGenerationId = ff.mFileInfo.mGenerationId;
           info->mFlags = info->mFlags;
 
           T::ContentInfo contentInfo;
@@ -3552,11 +3552,11 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       if (fileId > 0)
       {
         if (requestFlags & 0x00000001)
-          addEvent(EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0);
+          addEvent(EventType::FILE_UPDATED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,0,0);
       }
       else
       {
-        addEvent(EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0);
+        addEvent(EventType::FILE_ADDED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,len,0);
       }
     }
     return Result::OK;
@@ -3803,18 +3803,18 @@ int RedisImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
       }
     }
 
-    for (auto it=fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
       T::ContentInfoList contentList;
-      getContentByFileId(*it,contentList);
+      getContentByFileId(it,contentList);
       if (contentList.getLength() == 0)
       {
         T::FileInfo fileInfo;
-        if (getFileById(*it,fileInfo) == Result::OK)
+        if (getFileById(it,fileInfo) == Result::OK)
         {
           deleteFilename(fileInfo.mName);
-          deleteFileById(*it,false);
-          addEvent(EventType::FILE_DELETED,*it,fileInfo.mFileType,0,0);
+          deleteFileById(it,false);
+          addEvent(EventType::FILE_DELETED,it,fileInfo.mFileType,0,0);
         }
       }
     }
@@ -3962,14 +3962,14 @@ int RedisImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
       T::FileInfo fileInfo;
-      if (getFileById(*it,fileInfo) == Result::OK)
+      if (getFileById(it,fileInfo) == Result::OK)
       {
         deleteFilename(fileInfo.mName);
-        deleteFileById(*it,true);
-        addEvent(EventType::FILE_DELETED,*it,0,0,0);
+        deleteFileById(it,true);
+        addEvent(EventType::FILE_DELETED,it,0,0,0);
       }
     }
 
@@ -4089,10 +4089,10 @@ int RedisImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
 
     fileInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       auto *fileInfo = new T::FileInfo();
-      if (getFileById(*it,*fileInfo) == Result::OK)
+      if (getFileById(it,*fileInfo) == Result::OK)
         fileInfoList.addFileInfo(fileInfo);
       else
         delete fileInfo;
@@ -5271,10 +5271,10 @@ int RedisImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
     contentInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      getContentByFileId(*it,contentList);
+      getContentByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
     return Result::OK;
@@ -6905,10 +6905,10 @@ int RedisImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,
 
     freeReplyObject(reply);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
       auto *generationInfo = new T::GenerationInfo();
-      if (getGenerationById(*it,*generationInfo) == Result::OK)
+      if (getGenerationById(it,*generationInfo) == Result::OK)
       {
         generationInfoList.addGenerationInfo(generationInfo);
       }
@@ -9237,9 +9237,9 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
     std::set<std::string> searchList;
 
     char tmp[1000];
-    for (auto it = forecastTimeList.begin(); it != forecastTimeList.end(); ++it)
+    for (auto & it : forecastTimeList)
     {
-      snprintf(tmp,sizeof(tmp),"%lu;%d;%d;%d;%s",it->mGenerationId,it->mGeometryId,it->mForecastType,it->mForecastNumber,it->mForecastTime.c_str());
+      snprintf(tmp,sizeof(tmp),"%lu;%d;%d;%d;%s",it.mGenerationId,it.mGeometryId,it.mForecastType,it.mForecastNumber,it.mForecastTime.c_str());
       std::string st = tmp;
       if (searchList.find(st) == searchList.end())
         searchList.insert(st);
@@ -9742,12 +9742,12 @@ void RedisImplementation::syncFilenames()
     std::map<std::string,T::FileId> fileList;
     getFilenames(fileList);
 
-    for (auto it = fileList.begin(); it != fileList.end(); ++it)
+    for (auto & it : fileList)
     {
       T::FileInfo fileInfo;
-      if (getFileById(it->second,fileInfo) != Result::OK)
+      if (getFileById(it.second,fileInfo) != Result::OK)
       {
-        deleteFilename(it->first);
+        deleteFilename(it.first);
       }
     }
   }

@@ -768,9 +768,9 @@ void Converter::convert(std::set<std::string>& source,C::TimeStringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto & it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -815,9 +815,9 @@ void Converter::convert(std::set<std::string>& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto & it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -863,9 +863,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -912,9 +912,9 @@ void Converter::convert(std::vector<UInt64>& source,C::FileIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -961,9 +961,9 @@ void Converter::convert(std::set<UInt64>& source,C::GenerationIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1010,9 +1010,9 @@ void Converter::convert(std::set<UInt64>& source,C::FileIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1059,9 +1059,9 @@ void Converter::convert(std::set<int>& source,C::GeometryIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1107,9 +1107,9 @@ void Converter::convert(std::set<int>& source,C::LevelList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }

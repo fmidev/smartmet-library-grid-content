@@ -120,10 +120,10 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 
     {
       AutoReadLock readLock(&mModificationLock);
-      for (auto session = mSessions.begin(); session != mSessions.end(); ++session)
+      for (auto & mSession : mSessions)
       {
-        if (session->second->getExpirationTime() < currentTime)
-          expiredSessions.push_back(session->first);
+        if (mSession.second->getExpirationTime() < currentTime)
+          expiredSessions.push_back(mSession.first);
       }
 
       if (expiredSessions.size() == 0)
@@ -132,9 +132,9 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 
     AutoWriteLock writeLock(&mModificationLock);
 
-    for (auto it = expiredSessions.begin(); it != expiredSessions.end(); ++it)
+    for (unsigned long & expiredSession : expiredSessions)
     {
-      mSessions.erase(*it);
+      mSessions.erase(expiredSession);
     }
 
     return Result::OK;

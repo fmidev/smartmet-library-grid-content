@@ -1,6 +1,7 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <ctime>
+#include <ranges>
 #include <macgyver/Hash.h>
 
 
@@ -103,18 +104,18 @@ std::size_t Query::getHash()
     std::size_t hash = 0;
     Fmi::hash_merge(hash,mSearchType);
 
-    for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (auto & it : mProducerNameList)
+      Fmi::hash_merge(hash,it);
 
-    for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (long it : mForecastTimeList)
+      Fmi::hash_merge(hash,it);
 
     Fmi::hash_merge(hash,mAttributeList.getHash());
     Fmi::hash_merge(hash,mCoordinateType);
 
-    for (auto coordinates = mAreaCoordinates.begin(); coordinates != mAreaCoordinates.end(); ++coordinates)
+    for (auto & mAreaCoordinate : mAreaCoordinates)
     {
-      for (auto it = coordinates->begin(); it != coordinates->end(); ++it)
+      for (auto it = mAreaCoordinate.begin(); it != mAreaCoordinate.end(); ++it)
       {
         Fmi::hash_merge(hash,it->x());
         Fmi::hash_merge(hash,it->y());
@@ -123,8 +124,8 @@ std::size_t Query::getHash()
 
     Fmi::hash_merge(hash,mRadius);
 
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
-      Fmi::hash_merge(hash,it->getHash());
+    for (auto & it : mQueryParameterList)
+      Fmi::hash_merge(hash,it.getHash());
 
     Fmi::hash_merge(hash,mTimezone);
     Fmi::hash_merge(hash,mStartTime);
@@ -133,8 +134,8 @@ std::size_t Query::getHash()
     Fmi::hash_merge(hash,mTimestepSizeInMinutes);
     Fmi::hash_merge(hash,mAnalysisTime);
 
-    for (auto it = mGeometryIdList.begin(); it != mGeometryIdList.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (int it : mGeometryIdList)
+      Fmi::hash_merge(hash,it);
 
     Fmi::hash_merge(hash,mLanguage);
     Fmi::hash_merge(hash,mGenerationFlags);
@@ -159,9 +160,9 @@ bool Query::parameterInQuery(const std::string& param)
 {
   try
   {
-    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
+    for (auto & it : std::ranges::reverse_view(mQueryParameterList))
     {
-      if (it->mParam == param  ||  it->mSymbolicName == param)
+      if (it.mParam == param  ||  it.mSymbolicName == param)
         return true;
     }
     return false;
@@ -183,9 +184,9 @@ uint Query::getValuesPerTimeStep()
   try
   {
     uint valueCount = 0;
-    for (auto param = mQueryParameterList.begin(); param != mQueryParameterList.end(); ++param)
+    for (auto & param : mQueryParameterList)
     {
-      for (auto vList = param->mValueList.begin(); vList != param->mValueList.end(); ++vList)
+      for (auto vList = param.mValueList.begin(); vList != param.mValueList.end(); ++vList)
       {
         uint vCount = (*vList)->mValueList.getLength();
         if (vCount > valueCount)
@@ -210,10 +211,10 @@ QueryParameter* Query::getQueryParameterPtr(const std::string& param)
 {
   try
   {
-    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
+    for (auto & it : std::ranges::reverse_view(mQueryParameterList))
     {
-      if (it->mParam == param  ||  it->mSymbolicName == param)
-        return &(*it);
+      if (it.mParam == param  ||  it.mSymbolicName == param)
+        return &it;
     }
     return nullptr;
   }
@@ -233,10 +234,10 @@ QueryParameter* Query::getQueryParameterPtr(uint id)
 {
   try
   {
-    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
+    for (auto & it : std::ranges::reverse_view(mQueryParameterList))
     {
-      if (it->mId == id)
-        return &(*it);
+      if (it.mId == id)
+        return &it;
     }
     return nullptr;
   }
@@ -256,9 +257,9 @@ void Query::getResultProducerIdList(std::set<T::ProducerId>& producerIdList)
 {
   try
   {
-    for (auto param = mQueryParameterList.begin(); param != mQueryParameterList.end(); ++param)
+    for (auto & param : mQueryParameterList)
     {
-      for (auto val = param->mValueList.begin(); val != param->mValueList.end(); val++)
+      for (auto val = param.mValueList.begin(); val != param.mValueList.end(); val++)
       {
         //if (producerIdList.find((*val)->mProducerId) == producerIdList.end())
           producerIdList.insert((*val)->mProducerId);
@@ -309,9 +310,9 @@ void Query::removeAggregationValues()
   {
     //return;
 
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    for (auto & it : mQueryParameterList)
     {
-      it->removeAggregationValues();
+      it.removeAggregationValues();
     }
   }
   catch (...)
@@ -334,9 +335,9 @@ void Query::removeAggregationTimes()
     if (mAggregationTimes.size() == 0)
       return;
 
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    for (auto & it : mQueryParameterList)
     {
-      it->removeTimes(mAggregationTimes);
+      it.removeTimes(mAggregationTimes);
     }
   }
   catch (...)
@@ -357,11 +358,11 @@ void Query::removeInternalAggregationValues()
   {
     //return;
 
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    for (auto & it : mQueryParameterList)
     {
-      it->removeInternalAggregationValues();
-      if (it->mFlags & QueryParameter::Flags::InternalAggregationParameter)
-        it->removeAggregationValues();
+      it.removeInternalAggregationValues();
+      if (it.mFlags & QueryParameter::Flags::InternalAggregationParameter)
+        it.removeAggregationValues();
     }
   }
   catch (...)
@@ -381,9 +382,9 @@ void Query::updateForecastTimeList()
   try
   {
     mForecastTimeList.clear();
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
+    for (auto & it : mQueryParameterList)
     {
-      it->updateForecastTimeList(mForecastTimeList);
+      it.updateForecastTimeList(mForecastTimeList);
     }
   }
   catch (...)
@@ -427,38 +428,38 @@ void Query::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mGenerationFlags        = " << mGenerationFlags << "\n";
 
     stream << space(level) << "- mGeometryIdList         = \n";
-    for (auto it = mGeometryIdList.begin(); it != mGeometryIdList.end(); ++it)
-      stream << space(level) << "   * " << *it << "\n";
+    for (int it : mGeometryIdList)
+      stream << space(level) << "   * " << it << "\n";
 
     stream << space(level) << "- mAttributeList          = \n";
     mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mForecastTimeList\n";
-    for (auto it = mForecastTimeList.begin(); it != mForecastTimeList.end(); ++it)
-      stream << space(level) << "   * " << utcTimeFromTimeT(*it) << "\n";
+    for (long it : mForecastTimeList)
+      stream << space(level) << "   * " << utcTimeFromTimeT(it) << "\n";
 
     stream << space(level) << "- mAggregationTimes\n";
-    for (auto it = mAggregationTimes.begin(); it != mAggregationTimes.end(); ++it)
-      stream << space(level) << "   * " << utcTimeFromTimeT(*it) << "\n";
+    for (long mAggregationTime : mAggregationTimes)
+      stream << space(level) << "   * " << utcTimeFromTimeT(mAggregationTime) << "\n";
 
     stream << space(level) << "- mProducerNameList       = \n";
-    for (auto it = mProducerNameList.begin(); it != mProducerNameList.end(); ++it)
-      stream << space(level) << "   * " << *it << "\n";
+    for (auto & it : mProducerNameList)
+      stream << space(level) << "   * " << it << "\n";
 
     stream << space(level) << "- mAreaCoordinates        = \n";
-    for (auto cList = mAreaCoordinates.begin(); cList != mAreaCoordinates.end(); ++cList)
+    for (auto & mAreaCoordinate : mAreaCoordinates)
     {
-      stream << space(level) << "  * mCoordinates (" << cList->size() << " coordinates)\n";
-      if (cList->size() < 20)
+      stream << space(level) << "  * mCoordinates (" << mAreaCoordinate.size() << " coordinates)\n";
+      if (mAreaCoordinate.size() < 20)
       {
-        for (auto it = cList->begin(); it != cList->end(); ++it)
+        for (auto it = mAreaCoordinate.begin(); it != mAreaCoordinate.end(); ++it)
           stream << space(level) << "     * " << it->x() << "," << it->y() << "\n";
       }
     }
 
     stream << space(level) << "- mQueryParameterList     = \n";
-    for (auto it = mQueryParameterList.begin(); it != mQueryParameterList.end(); ++it)
-      it->print(stream,level+2,optionFlags);
+    for (auto & it : mQueryParameterList)
+      it.print(stream,level+2,optionFlags);
 
   }
   catch (...)

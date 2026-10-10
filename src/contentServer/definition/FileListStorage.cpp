@@ -12,9 +12,9 @@ FileListStorage::FileListStorage()
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      mFileLists[t].setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
+      mFileList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
 
     }
   }
@@ -93,8 +93,8 @@ void FileListStorage::clear()
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mFileLists[t].clear();
+    for (auto & mFileList : mFileLists)
+      mFileList.clear();
   }
   catch (...)
   {
@@ -166,11 +166,11 @@ bool FileListStorage::deleteFileInfoByIndex(uint index)
   try
   {
     uint len = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      len = mFileLists[t].getLength();
+      len = mFileList.getLength();
       if (index < len)
-        return mFileLists[t].deleteFileInfoByIndex(index);
+        return mFileList.deleteFileInfoByIndex(index);
 
       index -= len;
     }
@@ -191,9 +191,9 @@ bool FileListStorage::deleteFileInfoByName(const std::string& filename)
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      if (mFileLists[t].deleteFileInfoByName(filename))
+      if (mFileList.deleteFileInfoByName(filename))
         return true;
     }
     return false;
@@ -256,8 +256,8 @@ uint FileListStorage::deleteMarkedFiles()
   try
   {
     uint cnt = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      cnt += mFileLists[t].deleteMarkedFiles();
+    for (auto & mFileList : mFileLists)
+      cnt += mFileList.deleteMarkedFiles();
 
     return cnt;
   }
@@ -312,9 +312,9 @@ FileInfo* FileListStorage::getFileInfoByName(const std::string& filename)
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      FileInfo *info = mFileLists[t].getFileInfoByName(filename);
+      FileInfo *info = mFileList.getFileInfoByName(filename);
       if (info)
         return info;
     }
@@ -335,9 +335,9 @@ bool FileListStorage::getFileInfoByName(const std::string& filename,FileInfo& fi
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      if (mFileLists[t].getFileInfoByName(filename,fileInfo))
+      if (mFileList.getFileInfoByName(filename,fileInfo))
         return true;
     }
     return false;
@@ -358,11 +358,11 @@ FileInfo* FileListStorage::getFileInfoByIndex(uint index)
   try
   {
     uint len = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      len = mFileLists[t].getLength();
+      len = mFileList.getLength();
       if (index < len)
-        return mFileLists[t].getFileInfoByIndex(index);
+        return mFileList.getFileInfoByIndex(index);
 
       index -= len;
     }
@@ -437,9 +437,9 @@ void FileListStorage::getFileInfoList(FileInfoList& fileInfoList)
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
+    for (auto & mFileList : mFileLists)
     {
-      mFileLists[t].getFileInfoListNoClear(fileInfoList);
+      mFileList.getFileInfoListNoClear(fileInfoList);
     }
   }
   catch (...)
@@ -594,8 +594,8 @@ std::size_t FileListStorage::getHash()
   try
   {
     std::size_t hash = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      hash += mFileLists[t].getHash();
+    for (auto & mFileList : mFileLists)
+      hash += mFileList.getHash();
 
     return hash;
   }
@@ -672,8 +672,8 @@ uint FileListStorage::getLength()
   try
   {
     uint len = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      len += mFileLists[t].getLength();
+    for (auto & mFileList : mFileLists)
+      len += mFileList.getLength();
 
     return len;
   }
@@ -693,8 +693,8 @@ uint FileListStorage::markDeleted()
   try
   {
     uint cnt = 0;
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      cnt += mFileLists[t].markDeleted();
+    for (auto & mFileList : mFileLists)
+      cnt += mFileList.markDeleted();
 
     return cnt;
   }
@@ -810,8 +810,8 @@ void FileListStorage::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    for (uint t=0; t<MAX_CONTENT_SOURCES; t++)
-      mFileLists[t].print(stream,level,optionFlags);
+    for (auto & mFileList : mFileLists)
+      mFileList.print(stream,level,optionFlags);
   }
   catch (...)
   {

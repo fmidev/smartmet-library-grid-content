@@ -94,9 +94,9 @@ std::string QueryStreamer::getChunk()
         return "";
       }
 
-      for (auto it = query.mQueryParameterList.begin(); it != query.mQueryParameterList.end(); ++it)
+      for (auto & it : query.mQueryParameterList)
       {
-        for (auto v = it->mValueList.begin(); v != it->mValueList.end(); ++v)
+        for (auto v = it.mValueList.begin(); v != it.mValueList.end(); ++v)
         {
           uint alen = (*v)->mValueData.size();
           for (uint a=0; a<alen; a++)

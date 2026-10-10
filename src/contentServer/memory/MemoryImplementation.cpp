@@ -1512,10 +1512,10 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
     mGeometryInfoList.deleteGeometryInfoListByGenerationIdList(generationIdList);
 
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
-      mGenerationInfoList.deleteGenerationInfoById(*it);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+      mGenerationInfoList.deleteGenerationInfoById(it);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
     }
 
     return Result::OK;
@@ -1753,9 +1753,9 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
     mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -2609,9 +2609,9 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
         cInfo->mGenerationId = fileInfo.mGenerationId;
         cInfo->mFlags = cInfo->mFlags;
 
-        for (int t=0; t<CONTENT_LIST_COUNT; t++)
+        for (auto & t : mContentInfoList)
         {
-          mContentInfoList[t].addContentInfo(cInfo);
+          t.addContentInfo(cInfo);
         }
       }
     }
@@ -2664,13 +2664,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
     T::EventInfoList tmpEventList;
 
-    for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
+    for (auto & ff : fileAndContentList)
     {
-      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff->mFileInfo.mProducerId);
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff.mFileInfo.mProducerId);
       if (producerInfo == nullptr)
         return Result::UNKNOWN_PRODUCER_ID;
 
-      T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(ff->mFileInfo.mGenerationId);
+      T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(ff.mFileInfo.mGenerationId);
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
@@ -2682,7 +2682,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
       // ### Checking if the filename already exists in the database.
 
-      T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff->mFileInfo.mName);
+      T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff.mFileInfo.mName);
       const bool existingFile = (info != nullptr);
       if (info != nullptr)
       {
@@ -2690,12 +2690,12 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
         // ### File with the same name already exists. Let's return
         // ### the current file-id.
 
-        ff->mFileInfo.mFileId = info->mFileId;
+        ff.mFileInfo.mFileId = info->mFileId;
 
         // ### Deleting old content information.
 
         if (requestFlags & 0x00000001)
-          mContentInfoList[0].markDeletedByFileId(ff->mFileInfo.mFileId);
+          mContentInfoList[0].markDeletedByFileId(ff.mFileInfo.mFileId);
       }
       else
       {
@@ -2704,9 +2704,9 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
         mMaxFileId++;
 
-        ff->mFileInfo.mFileId = mMaxFileId;
+        ff.mFileInfo.mFileId = mMaxFileId;
 
-        info = ff->mFileInfo.duplicate();
+        info = ff.mFileInfo.duplicate();
 
         tmpFileList.addFileInfo(info);
         //mFileInfoList.addFileInfo(info);
@@ -2716,22 +2716,22 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
       // ### Adding the content information into the database.
 
-      uint len = ff->mContentInfoList.getLength();
+      uint len = ff.mContentInfoList.getLength();
       //printf("-- contentList %u\n",len);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
+        T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
         if (info != nullptr)
         {
           //T::ContentInfo *cInfo = info->duplicate();
           // ### Making sure that content data matches the file data.
 
-          info->mFileId = ff->mFileInfo.mFileId;
+          info->mFileId = ff.mFileInfo.mFileId;
           if (info->mFileType == 0)
-            info->mFileType = ff->mFileInfo.mFileType;
+            info->mFileType = ff.mFileInfo.mFileType;
 
-          info->mProducerId = ff->mFileInfo.mProducerId;
-          info->mGenerationId = ff->mFileInfo.mGenerationId;
+          info->mProducerId = ff.mFileInfo.mProducerId;
+          info->mGenerationId = ff.mFileInfo.mGenerationId;
           info->mFlags = info->mFlags;
 
 
@@ -2751,12 +2751,12 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
-          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0,""));
+          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,0,0,""));
       }
       else
       {
         //printf("-- file add event\n");
-        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0,""));
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,len,0,""));
       }
     }
 
@@ -2769,9 +2769,9 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     mFileInfoList.addFileInfoList(tmpFileList);
     mFileInfoListByName.addFileInfoList(tmpFileList);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (auto & t : mContentInfoList)
     {
-      mContentInfoList[t].addContentInfoList(tmpContentList);
+      t.addContentInfoList(tmpContentList);
     }
 
     auto it = tmpEventList.getFirstEvent();
@@ -2881,21 +2881,21 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     AutoWriteLock lock(&mModificationLock);
 
 
-    for (auto fTime = forecastTimeList.begin(); fTime != forecastTimeList.end(); ++fTime)
+    for (auto & fTime : forecastTimeList)
     {
-      auto forecastTimeUTC = utcTimeToTimeT(fTime->mForecastTime);
+      auto forecastTimeUTC = utcTimeToTimeT(fTime.mForecastTime);
 
       T::ContentInfoList contentInfoList;
-      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(fTime->mGenerationId);
+      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(fTime.mGenerationId);
       if (generationInfo != nullptr)
       {
-        mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationInfo->mProducerId,fTime->mGenerationId,fTime->mGeometryId,0,0,1000000,contentInfoList);
+        mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationInfo->mProducerId,fTime.mGenerationId,fTime.mGeometryId,0,0,1000000,contentInfoList);
         uint len = contentInfoList.getLength();
         for (uint t=0; t<len; t++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-          if (info->mForecastType == fTime->mForecastType  &&
-              info->mForecastNumber == fTime->mForecastNumber &&
+          if (info->mForecastType == fTime.mForecastType  &&
+              info->mForecastNumber == fTime.mForecastNumber &&
               info->mForecastTimeUTC == forecastTimeUTC)
           {
             T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
@@ -3181,9 +3181,9 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     mFileInfoListByName.deleteFileInfoByFileIdList(fileIdList);
     mFileInfoList.deleteFileInfoByFileIdList(fileIdList);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
-      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      addEvent(EventType::FILE_DELETED,it,0,0,0);
     }
 
     return Result::OK;
@@ -3297,9 +3297,9 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
     fileInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -3757,9 +3757,9 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
       return Result::CONTENT_ALREADY_EXISTS;
 
     cInfo = contentInfo.duplicate();
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (auto & t : mContentInfoList)
     {
-      mContentInfoList[t].addContentInfo(cInfo);
+      t.addContentInfo(cInfo);
     }
 
     addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
@@ -4267,10 +4267,10 @@ int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
 
     contentInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -6061,14 +6061,14 @@ bool MemoryImplementation::syncProducerList()
     }
 
     int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (unsigned int & it : idList)
     {
-      mProducerInfoList.deleteProducerInfoById(*it);
-      mGenerationInfoList.deleteGenerationInfoListByProducerId(*it);
-      mFileInfoListByName.deleteFileInfoByProducerId(*it);
-      mFileInfoList.deleteFileInfoByProducerId(*it);
-      count += mContentInfoList[0].markDeletedByProducerId(*it);
-      addEvent(EventType::PRODUCER_DELETED,*it,0,0,0);
+      mProducerInfoList.deleteProducerInfoById(it);
+      mGenerationInfoList.deleteGenerationInfoListByProducerId(it);
+      mFileInfoListByName.deleteFileInfoByProducerId(it);
+      mFileInfoList.deleteFileInfoByProducerId(it);
+      count += mContentInfoList[0].markDeletedByProducerId(it);
+      addEvent(EventType::PRODUCER_DELETED,it,0,0,0);
     }
 
     if (count > 0)
@@ -6172,13 +6172,13 @@ bool MemoryImplementation::syncGenerationList()
     }
 
     int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (unsigned long & it : idList)
     {
-      mGenerationInfoList.deleteGenerationInfoById(*it);
-      mFileInfoListByName.deleteFileInfoByGenerationId(*it);
-      mFileInfoList.deleteFileInfoByGenerationId(*it);
-      count += mContentInfoList[0].markDeletedByGenerationId(*it);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+      mGenerationInfoList.deleteGenerationInfoById(it);
+      mFileInfoListByName.deleteFileInfoByGenerationId(it);
+      mFileInfoList.deleteFileInfoByGenerationId(it);
+      count += mContentInfoList[0].markDeletedByGenerationId(it);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
     }
 
     if (count > 0)
@@ -6278,10 +6278,10 @@ bool MemoryImplementation::syncGeometryList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (auto & it : idList)
     {
-      mGeometryInfoList.deleteGeometryInfoById(it->mGenerationId,it->mGeometryId,it->mLevelId);
-      addEvent(EventType::GEOMETRY_DELETED,it->mGenerationId,it->mGeometryId,it->mLevelId,0);
+      mGeometryInfoList.deleteGeometryInfoById(it.mGenerationId,it.mGeometryId,it.mLevelId);
+      addEvent(EventType::GEOMETRY_DELETED,it.mGenerationId,it.mGeometryId,it.mLevelId,0);
     }
 
     mGeometryStorage_modificationTime = getFileModificationTime(filename);
@@ -6388,15 +6388,15 @@ bool MemoryImplementation::syncFileList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    for (auto name = nameList.begin(); name != nameList.end(); ++name)
-      mFileInfoListByName.deleteFileInfoByName(*name);
+    for (auto & name : nameList)
+      mFileInfoListByName.deleteFileInfoByName(name);
 
     int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (unsigned long & it : idList)
     {
-      mFileInfoList.deleteFileInfoById(*it);
-      count += mContentInfoList[0].markDeletedByFileId(*it);
-      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      mFileInfoList.deleteFileInfoById(it);
+      count += mContentInfoList[0].markDeletedByFileId(it);
+      addEvent(EventType::FILE_DELETED,it,0,0,0);
       if ((mMaxEventId - startEventId) > maxLen)
       {
         if (count > 0)

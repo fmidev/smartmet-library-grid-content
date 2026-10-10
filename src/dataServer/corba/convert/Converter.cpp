@@ -965,9 +965,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }

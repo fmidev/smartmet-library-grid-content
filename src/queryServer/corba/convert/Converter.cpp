@@ -56,9 +56,9 @@ void Converter::convert(T::GeometryId_set& source,C::GeometryIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -111,9 +111,9 @@ void Converter::convert(std::set<time_t>& source,C::TimestampList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -160,9 +160,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -209,9 +209,9 @@ void Converter::convert(std::vector<int>& source,C::LevelList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -257,9 +257,9 @@ void Converter::convert(string_set& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto & it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -304,9 +304,9 @@ void Converter::convert(string_vec& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (auto & it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }

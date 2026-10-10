@@ -211,11 +211,11 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
       return false;
     }
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    for (auto & it : mAliasVector)
     {
-      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
+      if (strcasecmp(it.mName.c_str(),name.c_str()) == 0)
       {
-        alias = it->mAliasString;
+        alias = it.mAliasString;
         return true;
       }
     }
@@ -284,10 +284,10 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
       return;
     }
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    for (auto & it : mAliasVector)
     {
-      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
-        aliasList.emplace_back(it->mAliasString);
+      if (strcasecmp(it.mName.c_str(),name.c_str()) == 0)
+        aliasList.emplace_back(it.mAliasString);
     }
   }
   catch (...)
@@ -417,11 +417,11 @@ void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "AliasFileCollection\n";
-    for (auto it = mAliasList.begin(); it != mAliasList.end(); ++it)
-      it->second.print(stream,level+1,optionFlags);
+    for (auto & it : mAliasList)
+      it.second.print(stream,level+1,optionFlags);
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
-      it->print(stream,level+1,optionFlags);
+    for (auto & it : mAliasVector)
+      it.print(stream,level+1,optionFlags);
   }
   catch (...)
   {

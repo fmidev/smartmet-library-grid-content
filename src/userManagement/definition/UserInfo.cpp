@@ -84,16 +84,16 @@ void UserInfo::updateUserInfo(UserInfo& sessionInfo)
     auto attrGroupList = sessionInfo.getAttributeGroupList();
     AutoWriteLock writeLock(&mModificationLock);
 
-    for (auto g = attrGroupList.begin(); g != attrGroupList.end(); ++g)
+    for (auto & g : attrGroupList)
     {
-      auto group = mAttributeGroups.find(g->first);
+      auto group = mAttributeGroups.find(g.first);
       if (group == mAttributeGroups.end())
       {
-        mAttributeGroups.insert(std::pair<std::string,AttributeList>(g->first,g->second));
+        mAttributeGroups.insert(std::pair<std::string,AttributeList>(g.first,g.second));
       }
       else
       {
-        for (auto a = g->second.begin(); a != g->second.end(); ++a)
+        for (auto a = g.second.begin(); a != g.second.end(); ++a)
         {
 
           auto attr = group->second.find(a->first);
@@ -688,11 +688,11 @@ void UserInfo::getAttributes(const char *attributeGroup,AttributeList& attribute
       return;
     }
 
-    for (auto it = attributeList.begin(); it != attributeList.end(); ++it)
+    for (auto & it : attributeList)
     {
-      auto attr = group->second.find(it->first);
+      auto attr = group->second.find(it.first);
       if (attr != group->second.end())
-        it->second = attr->second;
+        it.second = attr->second;
     }
   }
   catch (...)
@@ -889,13 +889,13 @@ void UserInfo::setAttributes(const char *attributeGroup,AttributeList& attribute
       return;
     }
 
-    for (auto it = attributeList.begin(); it != attributeList.end(); ++it)
+    for (auto & it : attributeList)
     {
-      auto attr = group->second.find(it->first);
+      auto attr = group->second.find(it.first);
       if (attr != group->second.end())
-        attr->second = it->second;
+        attr->second = it.second;
       else
-        group->second.insert(std::pair<std::string,std::string>(it->first,it->second));
+        group->second.insert(std::pair<std::string,std::string>(it.first,it.second));
     }
   }
   catch (...)
@@ -962,9 +962,9 @@ void UserInfo::deleteAttributes(const char *attributeGroup,std::vector<std::stri
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto it = attributeNameList.begin(); it != attributeNameList.end(); ++it)
+    for (auto & it : attributeNameList)
     {
-      group->second.erase(*it);
+      group->second.erase(it);
     }
   }
   catch (...)
@@ -994,20 +994,20 @@ void UserInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mEndTime          = " << mEndTime << "\n";
     stream << space(level) << "- mStatus           = " << mStatus << "\n";
     stream << space(level) << "- mAttributeGroups  = " << mAttributeGroups.size() << " (items)\n";
-    for (auto group = mAttributeGroups.begin(); group != mAttributeGroups.end(); ++group)
+    for (auto & mAttributeGroup : mAttributeGroups)
     {
-      stream << space(level+2) << "* " << group->first << "\n";
-      for (auto it = group->second.begin(); it != group->second.end(); ++it)
+      stream << space(level+2) << "* " << mAttributeGroup.first << "\n";
+      for (auto it = mAttributeGroup.second.begin(); it != mAttributeGroup.second.end(); ++it)
         stream << space(level+4) << "- " << it->first << " = " << it->second << "\n";
     }
 
     stream << space(level) << "- mUserGroups       = " << mUserGroups.size() << " (items)\n";
-    for (auto g = mUserGroups.begin(); g != mUserGroups.end(); ++g)
-      stream << space(level+2) << "* " << *g << "\n";
+    for (const auto & mUserGroup : mUserGroups)
+      stream << space(level+2) << "* " << mUserGroup << "\n";
 
     stream << space(level) << "- mUserPermissions  = " << mUserPermissions.size() << " (items)\n";
-    for (auto p = mUserPermissions.begin(); p != mUserPermissions.end(); ++p)
-      stream << space(level+2) << "* " << *p << "\n";
+    for (const auto & mUserPermission : mUserPermissions)
+      stream << space(level+2) << "* " << mUserPermission << "\n";
   }
   catch (...)
   {

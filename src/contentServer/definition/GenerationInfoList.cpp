@@ -7,6 +7,8 @@
 #include <grid-files/common/ShowFunction.h>
 #include <macgyver/Hash.h>
 
+#include <ranges>
+
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
@@ -2187,16 +2189,16 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     analysisTimes.reserve(sz);
     if (!reverseOrder)
     {
-      for (auto it = newList.begin(); it != newList.end(); ++it)
+      for (const auto & it : newList)
       {
-        analysisTimes.emplace_back(*it);
+        analysisTimes.emplace_back(it);
       }
     }
     else
     {
-      for (auto it = newList.rbegin(); it != newList.rend(); ++it)
+      for (const auto & it : std::ranges::reverse_view(newList))
       {
-        analysisTimes.emplace_back(*it);
+        analysisTimes.emplace_back(it);
       }
     }
   }

@@ -759,8 +759,8 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
     request.addLine("method","deleteGenerationInfoListByIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=generationIdList.begin(); it!=generationIdList.end(); ++it)
-      request.addLine("generationId",*it);
+    for (unsigned long it : generationIdList)
+      request.addLine("generationId",it);
 
 
     T::ResponseMessage response;
@@ -2011,9 +2011,9 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     request.addLine("method","deleteFileInfoListByForecastTimeList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it = forecastTimeList.begin();it != forecastTimeList.end();++it)
+    for (auto & it : forecastTimeList)
     {
-      request.addLine("forecastTime",it->getCsv());
+      request.addLine("forecastTime",it.getCsv());
     }
 
     T::ResponseMessage response;
@@ -2229,8 +2229,8 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     request.addLine("method","deleteFileInfoListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long it : fileIdList)
+      request.addLine("fileId",it);
 
 
     T::ResponseMessage response;
@@ -2368,8 +2368,8 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
     request.addLine("method","getFileInfoListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long & it : fileIdList)
+      request.addLine("fileId",it);
 
     T::ResponseMessage response;
 
@@ -3354,8 +3354,8 @@ int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
     request.addLine("method","getContentListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long & it : fileIdList)
+      request.addLine("fileId",it);
 
     T::ResponseMessage response;
 
