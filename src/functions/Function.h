@@ -41,8 +41,8 @@ class Function
 };
 
 
-typedef Function* FunctionPtr;          //!< Non-owning pointer to a Function.
-typedef std::vector<FunctionPtr> FunctionPtr_vec;  //!< Ordered list of non-owning Function pointers.
+using FunctionPtr = Function*;          //!< Non-owning pointer to a Function.
+using FunctionPtr_vec = std::vector<FunctionPtr>;  //!< Ordered list of non-owning Function pointers.
 
 
 }  // namespace Functions

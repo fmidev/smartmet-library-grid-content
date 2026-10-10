@@ -29,8 +29,8 @@ class Alias
 };
 
 
-typedef std::unordered_map<std::string,Alias> Alias_map;  //!< Hash map from alias name to Alias record.
-typedef std::vector<Alias> Alias_vec;                      //!< Ordered list of Alias records (supports duplicates).
+using Alias_map = std::unordered_map<std::string,Alias>;  //!< Hash map from alias name to Alias record.
+using Alias_vec = std::vector<Alias>;                      //!< Ordered list of Alias records (supports duplicates).
 
 
 }  // namespace QueryServer

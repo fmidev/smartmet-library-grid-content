@@ -68,9 +68,9 @@ class ParameterValues
 };
 
 
-typedef std::shared_ptr<ParameterValues> ParameterValues_sptr;             //!< Shared pointer to a ParameterValues record.
-typedef std::vector<ParameterValues> ParameterValues_vec;                  //!< Owned vector of ParameterValues records.
-typedef std::vector<ParameterValues_sptr> ParameterValues_sptr_vec;        //!< Vector of shared pointers to ParameterValues records.
+using ParameterValues_sptr = std::shared_ptr<ParameterValues>;             //!< Shared pointer to a ParameterValues record.
+using ParameterValues_vec = std::vector<ParameterValues>;                  //!< Owned vector of ParameterValues records.
+using ParameterValues_sptr_vec = std::vector<ParameterValues_sptr>;        //!< Vector of shared pointers to ParameterValues records.
 
 
 }  // namespace QueryServer

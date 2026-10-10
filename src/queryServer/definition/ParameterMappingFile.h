@@ -13,8 +13,8 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::map<std::string,ParameterMapping_vec> MappingSearch;        //!< Map from parameter name to matching ParameterMapping records.
-typedef std::shared_ptr<MappingSearch> MappingSearch_sptr;               //!< Shared pointer to a MappingSearch map.
+using MappingSearch = std::map<std::string,ParameterMapping_vec>;        //!< Map from parameter name to matching ParameterMapping records.
+using MappingSearch_sptr = std::shared_ptr<MappingSearch>;               //!< Shared pointer to a MappingSearch map.
 
 // ====================================================================================
 /*! \brief Loads and indexes a file of ParameterMapping definitions.
@@ -59,7 +59,7 @@ class ParameterMappingFile
 };
 
 
-typedef std::vector<ParameterMappingFile> ParamMappingFile_vec;  //!< Ordered collection of ParameterMappingFile objects.
+using ParamMappingFile_vec = std::vector<ParameterMappingFile>;  //!< Ordered collection of ParameterMappingFile objects.
 
 
 }  // namespace QueryServer

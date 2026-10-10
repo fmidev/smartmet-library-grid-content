@@ -12,7 +12,7 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::shared_ptr<ServiceInterface> QueryServer_sptr;  //!< Shared pointer to a QueryServer ServiceInterface.
+using QueryServer_sptr = std::shared_ptr<ServiceInterface>;  //!< Shared pointer to a QueryServer ServiceInterface.
 
 // ====================================================================================
 /*! \brief HTTP content streamer that executes a list of queries and delivers results chunk-by-chunk.
@@ -42,7 +42,7 @@ class QueryStreamer : public Spine::HTTP::ContentStreamer
 };
 
 
-typedef std::shared_ptr<QueryStreamer> QueryStreamer_sptr;  //!< Shared pointer to a QueryStreamer.
+using QueryStreamer_sptr = std::shared_ptr<QueryStreamer>;  //!< Shared pointer to a QueryStreamer.
 
 
 }  // namespace QueryServer

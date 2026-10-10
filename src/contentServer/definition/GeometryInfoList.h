@@ -12,7 +12,7 @@ namespace T
 {
 
 
-typedef std::vector<GeometryInfo*> GeometryInfo_pvec;  //!< Convenience vector of GeometryInfo pointers.
+using GeometryInfo_pvec = std::vector<GeometryInfo*>;  //!< Convenience vector of GeometryInfo pointers.
 
 // ====================================================================================
 /*! \brief Sorted, indexed container of GeometryInfo pointers with thread-safe access.
@@ -87,7 +87,7 @@ class GeometryInfoList
     uint                mComparisonMethod;  //!< Current sort order (one of GeometryInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GeometryInfoList> GeometryInfoList_sptr;  //!< Shared-ownership pointer to a GeometryInfoList.
+using GeometryInfoList_sptr = std::shared_ptr<GeometryInfoList>;  //!< Shared-ownership pointer to a GeometryInfoList.
 
 
 }

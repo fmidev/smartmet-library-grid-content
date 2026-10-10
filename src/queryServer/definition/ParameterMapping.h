@@ -64,7 +64,7 @@ class ParameterMapping
 
 
 
-typedef std::vector<ParameterMapping> ParameterMapping_vec;  //!< Ordered list of ParameterMapping records.
+using ParameterMapping_vec = std::vector<ParameterMapping>;  //!< Ordered list of ParameterMapping records.
 
 
 }  // namespace QueryServer

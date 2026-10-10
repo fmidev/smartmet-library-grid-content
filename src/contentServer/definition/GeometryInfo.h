@@ -77,7 +77,7 @@ class GeometryInfo
 };
 
 
-typedef GeometryInfo* GeometryInfoPtr;  //!< Non-owning pointer to a GeometryInfo record.
+using GeometryInfoPtr = GeometryInfo*;  //!< Non-owning pointer to a GeometryInfo record.
 
 
 

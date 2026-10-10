@@ -59,7 +59,7 @@ class GridData
 };
 
 
-typedef GridData* GridData_ptr;  //!< Non-owning pointer to a GridData.
+using GridData_ptr = GridData*;  //!< Non-owning pointer to a GridData.
 
 }
 }  // namespace SmartMet

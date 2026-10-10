@@ -43,7 +43,7 @@ class ParameterDef
 
 
 
-typedef std::vector<ParameterDef> ParameterDef_vec;  //!< Vector of ParameterDef objects.
+using ParameterDef_vec = std::vector<ParameterDef>;  //!< Vector of ParameterDef objects.
 
 
 }  // namespace QueryServer

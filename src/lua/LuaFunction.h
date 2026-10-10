@@ -32,7 +32,7 @@ class LuaFunction
 };
 
 
-typedef std::unordered_map<std::string,LuaFunction> LuaFunction_map;  //!< Map from function name to LuaFunction descriptor.
+using LuaFunction_map = std::unordered_map<std::string,LuaFunction>;  //!< Map from function name to LuaFunction descriptor.
 
 
 }  // namespace Lua

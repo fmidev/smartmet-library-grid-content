@@ -23,10 +23,10 @@ namespace ContentServer
 
 //#define CONTENT_LIST_COUNT 2
 
-typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;  //!< Map from generation id to a set of forecast time strings.
+using ContentTimeCache = std::map<T::GenerationId,std::set<std::string>>;  //!< Map from generation id to a set of forecast time strings.
 
-typedef std::shared_ptr<ContentServer::ServiceInterface> ContentServer_sptr;      //!< Shared pointer to a ServiceInterface backend.
-typedef std::vector<ContentServer_sptr> ContentServer_sptr_vec;                    //!< Ordered collection of ServiceInterface backends.
+using ContentServer_sptr = std::shared_ptr<ContentServer::ServiceInterface>;      //!< Shared pointer to a ServiceInterface backend.
+using ContentServer_sptr_vec = std::vector<ContentServer_sptr>;                    //!< Ordered collection of ServiceInterface backends.
 
 // ====================================================================================
 /*! \brief Tracks the sync state for one backend ServiceInterface in a merge scenario.

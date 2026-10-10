@@ -35,7 +35,7 @@ struct StartUpCacheIndexRec
 };
 
 
-typedef std::map<UInt64,StartUpCacheIndexRec> StartUpIndexMap;  //!< Map from composite key to start-up cache index record.
+using StartUpIndexMap = std::map<UInt64,StartUpCacheIndexRec>;  //!< Map from composite key to start-up cache index record.
 
 
 // ====================================================================================

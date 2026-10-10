@@ -12,7 +12,7 @@ namespace T
 {
 
 
-typedef std::vector<GenerationInfo*> GenerationInfo_pvec;  //!< Convenience vector of GenerationInfo pointers.
+using GenerationInfo_pvec = std::vector<GenerationInfo*>;  //!< Convenience vector of GenerationInfo pointers.
 
 // ====================================================================================
 /*! \brief Sorted, indexed container of GenerationInfo pointers with thread-safe access.
@@ -105,7 +105,7 @@ class GenerationInfoList
     uint                mComparisonMethod;  //!< Current sort order (one of GenerationInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;  //!< Shared-ownership pointer to a GenerationInfoList.
+using GenerationInfoList_sptr = std::shared_ptr<GenerationInfoList>;  //!< Shared-ownership pointer to a GenerationInfoList.
 
 
 }

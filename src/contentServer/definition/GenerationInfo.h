@@ -84,7 +84,7 @@ class GenerationInfo
 };
 
 
-typedef GenerationInfo* GenerationInfoPtr;  //!< Non-owning pointer to a GenerationInfo record.
+using GenerationInfoPtr = GenerationInfo*;  //!< Non-owning pointer to a GenerationInfo record.
 
 
 }

@@ -102,7 +102,7 @@ class Query
 };
 
 
-typedef std::vector<Query> Query_vec;  //!< Ordered list of Query objects.
+using Query_vec = std::vector<Query>;  //!< Ordered list of Query objects.
 
 
 }  // namespace QueryServer

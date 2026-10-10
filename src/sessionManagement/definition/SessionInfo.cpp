@@ -43,8 +43,7 @@ SessionInfo::SessionInfo()
 /*! \brief Destructor. */
 
 SessionInfo::~SessionInfo()
-{
-}
+= default;
 
 
 

@@ -41,8 +41,7 @@ ServiceImplementation::ServiceImplementation()
 /*! \brief Destructor. */
 
 ServiceImplementation::~ServiceImplementation()
-{
-}
+= default;
 
 
 

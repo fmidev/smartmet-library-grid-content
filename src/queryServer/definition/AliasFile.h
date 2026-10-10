@@ -51,7 +51,7 @@ class AliasFile
 
 
 
-typedef std::vector<AliasFile> AliasFile_vec;  //!< Ordered collection of AliasFile objects.
+using AliasFile_vec = std::vector<AliasFile>;  //!< Ordered collection of AliasFile objects.
 
 
 }  // namespace QueryServer

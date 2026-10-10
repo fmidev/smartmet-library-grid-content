@@ -9,7 +9,7 @@ namespace SmartMet
 namespace T
 {
 
-typedef std::vector<ParameterLevelInfo*> ParameterLevelInfo_pvec;  //!< Convenience vector of ParameterLevelInfo pointers.
+using ParameterLevelInfo_pvec = std::vector<ParameterLevelInfo*>;  //!< Convenience vector of ParameterLevelInfo pointers.
 
 // ====================================================================================
 /*! \brief Simple container of ParameterLevelInfo pointers for parameter-level enumeration.

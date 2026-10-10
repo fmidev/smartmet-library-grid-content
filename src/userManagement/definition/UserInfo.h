@@ -11,8 +11,8 @@ namespace SmartMet
 namespace UserManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
-typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
+using AttributeList = std::map<std::string,std::string>;           //!< Map of attribute name to value within one group.
+using AttributeGroupList = std::map<std::string,AttributeList>;    //!< Map of attribute group name to its AttributeList.
 
 // ====================================================================================
 /*! \brief Record describing a registered user with credentials, groups, permissions, and attributes.
@@ -92,8 +92,8 @@ class UserInfo
 };
 
 
-typedef std::shared_ptr<UserInfo> UserInfo_sptr;                    //!< Shared pointer to a UserInfo record.
-typedef std::map<uint,UserInfo_sptr> UserInfo_sptr_map;             //!< Map from user id to UserInfo shared pointer.
+using UserInfo_sptr = std::shared_ptr<UserInfo>;                    //!< Shared pointer to a UserInfo record.
+using UserInfo_sptr_map = std::map<uint,UserInfo_sptr>;             //!< Map from user id to UserInfo shared pointer.
 
 
 

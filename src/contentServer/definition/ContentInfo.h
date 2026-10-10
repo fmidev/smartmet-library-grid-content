@@ -409,7 +409,7 @@ class ContentInfo
 };
 
 
-typedef ContentInfo* ContentInfoPtr;  //!< Non-owning pointer to a ContentInfo record.
+using ContentInfoPtr = ContentInfo*;  //!< Non-owning pointer to a ContentInfo record.
 
 
 }

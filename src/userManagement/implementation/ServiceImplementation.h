@@ -11,8 +11,8 @@ namespace SmartMet
 namespace UserManagement
 {
 
-typedef std::set<std::string> GroupPermissions;              //!< Set of permission strings for one user group.
-typedef std::map<std::string,GroupPermissions> GroupPermissionList;  //!< Map from group name to its GroupPermissions.
+using GroupPermissions = std::set<std::string>;              //!< Set of permission strings for one user group.
+using GroupPermissionList = std::map<std::string,GroupPermissions>;  //!< Map from group name to its GroupPermissions.
 
 // ====================================================================================
 /*! \brief In-memory implementation of the UserManagement ServiceInterface.

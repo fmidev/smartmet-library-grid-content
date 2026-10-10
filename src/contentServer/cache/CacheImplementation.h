@@ -20,7 +20,7 @@ namespace ContentServer
 
 #define CONTENT_LIST_COUNT 2
 
-typedef std::map<T::GenerationId,std::set<std::string>> ContentTimeCache;  //!< Map from generation id to a set of forecast time strings.
+using ContentTimeCache = std::map<T::GenerationId,std::set<std::string>>;  //!< Map from generation id to a set of forecast time strings.
 
 // ====================================================================================
 /*! \brief Snapshot of all indexed metadata used for lock-free read queries.

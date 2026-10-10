@@ -12,8 +12,8 @@ namespace SmartMet
 namespace SessionManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
-typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
+using AttributeList = std::map<std::string,std::string>;           //!< Map of attribute name to value within one group.
+using AttributeGroupList = std::map<std::string,AttributeList>;    //!< Map of attribute group name to its AttributeList.
 
 // ====================================================================================
 /*! \brief Record describing an active user session with its attributes and timeout.
@@ -85,8 +85,8 @@ class SessionInfo
 };
 
 
-typedef std::shared_ptr<SessionInfo> SessionInfo_sptr;                          //!< Shared pointer to a SessionInfo record.
-typedef std::map<T::SessionId,SessionInfo_sptr> SessionInfo_sptr_map;           //!< Map from session id to SessionInfo shared pointer.
+using SessionInfo_sptr = std::shared_ptr<SessionInfo>;                          //!< Shared pointer to a SessionInfo record.
+using SessionInfo_sptr_map = std::map<T::SessionId,SessionInfo_sptr>;           //!< Map from session id to SessionInfo shared pointer.
 
 
 

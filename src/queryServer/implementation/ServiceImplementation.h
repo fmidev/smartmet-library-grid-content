@@ -20,15 +20,15 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::vector<std::pair<std::string,T::GeometryId>>     Producer_vec;               //!< Ordered list of (producer name, geometry id) pairs.
-typedef std::unordered_map<std::string,T::ProducerInfo>       Producer_map;               //!< Map from producer name to ProducerInfo.
-typedef std::shared_ptr<Producer_map>                         Producer_map_sptr;          //!< Shared pointer to a Producer_map.
-typedef ContentServer::ServiceInterface*                      ContentServer_ptr;          //!< Non-owning pointer to a ContentServer service.
-typedef DataServer::ServiceInterface*                         DataServer_ptr;             //!< Non-owning pointer to a DataServer service.
-typedef std::shared_ptr<ParameterMapping_vec>                 ParameterMapping_vec_sptr;  //!< Shared pointer to a ParameterMapping vector.
-typedef boost::unordered_map<size_t,ParameterMapping_vec_sptr>  ParameterMappingCache;   //!< Hash cache from query hash to resolved ParameterMapping vector.
-typedef std::shared_ptr<std::vector<std::string>>             StringVector_sptr;          //!< Shared pointer to a string vector.
-typedef std::unordered_map<std::string,Producer_vec>          Altenative_map;             //!< Map from producer name to its alternative (concatenated) producers.
+using Producer_vec = std::vector<std::pair<std::string,T::GeometryId>>;               //!< Ordered list of (producer name, geometry id) pairs.
+using Producer_map = std::unordered_map<std::string,T::ProducerInfo>;               //!< Map from producer name to ProducerInfo.
+using Producer_map_sptr = std::shared_ptr<Producer_map>;          //!< Shared pointer to a Producer_map.
+using ContentServer_ptr = ContentServer::ServiceInterface*;          //!< Non-owning pointer to a ContentServer service.
+using DataServer_ptr = DataServer::ServiceInterface*;             //!< Non-owning pointer to a DataServer service.
+using ParameterMapping_vec_sptr = std::shared_ptr<ParameterMapping_vec>;  //!< Shared pointer to a ParameterMapping vector.
+using ParameterMappingCache = boost::unordered_map<size_t,ParameterMapping_vec_sptr>;   //!< Hash cache from query hash to resolved ParameterMapping vector.
+using StringVector_sptr = std::shared_ptr<std::vector<std::string>>;          //!< Shared pointer to a string vector.
+using Altenative_map = std::unordered_map<std::string,Producer_vec>;             //!< Map from producer name to its alternative (concatenated) producers.
 
 
 // ====================================================================================
@@ -42,8 +42,8 @@ class CacheEntry
     UInt64                     producerHash;         //!< Hash of the producer state when this entry was built.
 };
 
-typedef std::shared_ptr<CacheEntry> CacheEntry_sptr;                                          //!< Shared pointer to a CacheEntry.
-typedef std::unordered_map<T::ProducerId,CacheEntry_sptr> ProducerGenarationListCache;        //!< Cache of CacheEntry records keyed by producer id.
+using CacheEntry_sptr = std::shared_ptr<CacheEntry>;                                          //!< Shared pointer to a CacheEntry.
+using ProducerGenarationListCache = std::unordered_map<T::ProducerId,CacheEntry_sptr>;        //!< Cache of CacheEntry records keyed by producer id.
 
 // ====================================================================================
 /*! \brief Internal cache entry holding a ContentInfoList for a specific query. */
@@ -56,9 +56,9 @@ class ContentCacheEntry
     T::GenerationId generationId;        //!< Generation identifier for which the content was cached.
 };
 
-typedef std::shared_ptr<ContentCacheEntry> ContentCacheEntry_sptr;                            //!< Shared pointer to a ContentCacheEntry.
+using ContentCacheEntry_sptr = std::shared_ptr<ContentCacheEntry>;                            //!< Shared pointer to a ContentCacheEntry.
 
-typedef std::unordered_map<std::size_t,ContentCacheEntry_sptr> ContentCache;                  //!< Hash cache from query hash to ContentCacheEntry.
+using ContentCache = std::unordered_map<std::size_t,ContentCacheEntry_sptr>;                  //!< Hash cache from query hash to ContentCacheEntry.
 
 
 // ====================================================================================
@@ -71,7 +71,7 @@ class ContentSearchCacheEntry
     UInt64 producerHash;                                   //!< Producer state hash when this entry was built.
     T::GenerationId generationId;                          //!< Generation identifier for this cache entry.
 };
-typedef std::unordered_map<std::size_t,ContentSearchCacheEntry> ContentSearchCache;           //!< Hash cache from query hash to ContentSearchCacheEntry.
+using ContentSearchCache = std::unordered_map<std::size_t,ContentSearchCacheEntry>;           //!< Hash cache from query hash to ContentSearchCacheEntry.
 
 
 // ====================================================================================
@@ -96,12 +96,12 @@ class HeightRec
     T::ParamValue height2_2;     //!< Height (m) corresponding to level2_2 at time2.
 };
 
-typedef std::vector<HeightRec> HeightRec_vec;                                                 //!< Ordered list of HeightRec records.
+using HeightRec_vec = std::vector<HeightRec>;                                                 //!< Ordered list of HeightRec records.
 
-typedef Fmi::Cache::Cache<std::size_t,HeightRec> HeightCache;                                 //!< LRU cache from query hash to HeightRec.
-typedef Fmi::Cache::Cache<std::size_t,std::size_t> LevelCache;                                //!< LRU cache from query hash to resolved level index.
-typedef Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>> HeightVecCache;     //!< LRU cache from query hash to height value vector.
-typedef Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr> LevelContentCache;              //!< LRU cache from query hash to ContentCacheEntry for level queries.
+using HeightCache = Fmi::Cache::Cache<std::size_t,HeightRec>;                                 //!< LRU cache from query hash to HeightRec.
+using LevelCache = Fmi::Cache::Cache<std::size_t,std::size_t>;                                //!< LRU cache from query hash to resolved level index.
+using HeightVecCache = Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>>;     //!< LRU cache from query hash to height value vector.
+using LevelContentCache = Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr>;              //!< LRU cache from query hash to ContentCacheEntry for level queries.
 
 
 // ====================================================================================
@@ -119,7 +119,7 @@ class HeightConversion
     double          multiplier;       //!< Scale factor applied to the height values.
 };
 
-typedef std::unordered_map<std::size_t,HeightConversion> HeightConversionMap;                 //!< Map from hash key to HeightConversion rule.
+using HeightConversionMap = std::unordered_map<std::size_t,HeightConversion>;                 //!< Map from hash key to HeightConversion rule.
 
 
 // ====================================================================================

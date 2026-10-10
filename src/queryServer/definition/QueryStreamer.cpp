@@ -31,8 +31,7 @@ QueryStreamer::QueryStreamer()
 /*! \brief Query Server: Destructor. */
 
 QueryStreamer::~QueryStreamer()
-{
-}
+= default;
 
 
 

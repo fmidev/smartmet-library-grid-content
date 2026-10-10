@@ -145,7 +145,7 @@ class FileInfo
 };
 
 
-typedef FileInfo* FileInfoPtr;  //!< Non-owning pointer to a FileInfo record.
+using FileInfoPtr = FileInfo*;  //!< Non-owning pointer to a FileInfo record.
 
 
 

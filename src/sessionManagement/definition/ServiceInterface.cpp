@@ -35,8 +35,7 @@ ServiceInterface::ServiceInterface()
 /*! \brief Destructor. */
 
 ServiceInterface::~ServiceInterface()
-{
-}
+= default;
 
 
 

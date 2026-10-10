@@ -31,7 +31,7 @@ class UnitConversion
 };
 
 
-typedef std::vector<UnitConversion> UnitConversion_vec;  //!< Ordered list of UnitConversion rules.
+using UnitConversion_vec = std::vector<UnitConversion>;  //!< Ordered list of UnitConversion rules.
 
 
 }  // namespace QueryServer

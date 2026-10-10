@@ -128,7 +128,7 @@ class LuaHandle
     UInt64   mKey;         //!< Unique key used to return this slot to the pool.
 };
 
-typedef std::vector<LuaFile> LuaFile_vec;  //!< Ordered collection of LuaFile objects.
+using LuaFile_vec = std::vector<LuaFile>;  //!< Ordered collection of LuaFile objects.
 
 
 }  // namespace Lua
