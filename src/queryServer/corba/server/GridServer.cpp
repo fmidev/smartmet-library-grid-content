@@ -207,7 +207,7 @@ void GridServer::shutdown()
 {
   try
   {
-    mOrb->shutdown(0);
+    mOrb->shutdown(false);
     pthread_join(mThread, nullptr);
   }
   catch (...)

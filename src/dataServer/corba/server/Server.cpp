@@ -172,7 +172,7 @@ void Server::shutdown()
 {
   try
   {
-    mOrb->shutdown(0);
+    mOrb->shutdown(false);
   }
   catch (...)
   {
