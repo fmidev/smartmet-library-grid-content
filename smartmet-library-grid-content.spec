@@ -118,6 +118,7 @@ FMI Grid Content library development files
 - Use = default and using declarations where clang-tidy suggests it, no functional changes
 - Remove redundant void parameter lists and use bool literals, no functional changes
 - Use emplace and C++ standard library headers where clang-tidy suggests it, no functional changes
+- Use raw string literals and std::make_shared where clang-tidy suggests it, no functional changes
 
 * Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-3.fmi
 - VALID for point queries also skips the parameters whose grid does not cover the point, so

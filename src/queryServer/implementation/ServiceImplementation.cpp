@@ -18,6 +18,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include <chrono>
 #include <deque>
+#include <memory>
 #include <thread>
 #include <unordered_set>
 #include "../../functions/Function_add.h"
@@ -1528,7 +1529,7 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
         return;
       }
 
-      mappings.reset(new ParameterMapping_vec);
+      mappings = std::make_shared<ParameterMapping_vec>();
 
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
@@ -1602,7 +1603,7 @@ void ServiceImplementation::getParameterMappings(
         return;
       }
 
-      mappings.reset(new ParameterMapping_vec);
+      mappings = std::make_shared<ParameterMapping_vec>();
 
       for (auto m = mParameterMappings.begin(); m != mParameterMappings.end(); ++m)
       {
@@ -4319,7 +4320,7 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
         mContentCache_misses++;
 
-        entry.reset(new ContentCacheEntry());
+        entry = std::make_shared<ContentCacheEntry>();
         newEntry = true;
       }
     }
@@ -11497,7 +11498,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     }
     else
     {
-      entry.reset(new ContentCacheEntry());
+      entry = std::make_shared<ContentCacheEntry>();
       mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,0,entry->contentInfoList);
       entry->generationId = heightGenerationId;
       entry->producerHash = heightProducerId;
@@ -11744,7 +11745,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
     }
     else
     {
-      firstValueVec.reset(new T::ParamValue_vec());
+      firstValueVec = std::make_shared<T::ParamValue_vec>();
       int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,first->mFileId,first->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*firstValueVec);
       if (result1 != 0)
       {
@@ -11771,7 +11772,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
     }
     else
     {
-      lastValueVec.reset(new T::ParamValue_vec());
+      lastValueVec = std::make_shared<T::ParamValue_vec>();
       int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,last->mFileId,last->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*lastValueVec);
       if (result1 != 0)
       {
@@ -11809,7 +11810,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
       }
       else
       {
-        middleValueVec.reset(new T::ParamValue_vec());
+        middleValueVec = std::make_shared<T::ParamValue_vec>();
         int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,mid->mFileId,mid->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*middleValueVec);
         if (result1 != 0)
         {
@@ -12015,7 +12016,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     else
     {
       //mContentCache_misses++;
-      entry.reset(new ContentCacheEntry());
+      entry = std::make_shared<ContentCacheEntry>();
       mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,0,entry->contentInfoList);
       entry->generationId = heightGenerationId;
       entry->producerHash = heightProducerId;
