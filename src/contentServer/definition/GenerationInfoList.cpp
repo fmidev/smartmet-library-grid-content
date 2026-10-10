@@ -2189,14 +2189,14 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     analysisTimes.reserve(sz);
     if (!reverseOrder)
     {
-      for (const auto & it : newList)
+      for (const auto& it : newList)
       {
         analysisTimes.emplace_back(it);
       }
     }
     else
     {
-      for (const auto & it : std::ranges::reverse_view(newList))
+      for (const auto& it : std::ranges::reverse_view(newList))
       {
         analysisTimes.emplace_back(it);
       }

@@ -193,7 +193,7 @@ void QueryParameter::getValueListSize(int& columns,int& rows)
       return;
 
     rows = mValueList.size();
-    for (auto & it : mValueList)
+    for (auto& it : mValueList)
     {
       int len = it->mValueList.getLength();
       if (len > columns)
@@ -313,7 +313,7 @@ void QueryParameter::removeTimes(std::set<time_t>& times)
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto & it : valueList)
+    for (auto& it : valueList)
     {
       if (times.find(it->mForecastTimeUTC) == times.end())
         mValueList.emplace_back(it);
@@ -338,7 +338,7 @@ void QueryParameter::removeAggregationValues()
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto & it : valueList)
+    for (auto& it : valueList)
     {
       if ((it->mFlags & ParameterValues::Flags::AggregationValue) == 0)
         mValueList.emplace_back(it);
@@ -363,7 +363,7 @@ void QueryParameter::removeInternalAggregationValues()
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto & it : valueList)
+    for (auto& it : valueList)
     {
       if ((it->mFlags & ParameterValues::Flags::InternalAggregationValue) == 0)
         mValueList.emplace_back(it);
@@ -385,7 +385,7 @@ void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
 {
   try
   {
-    for (auto & it : mValueList)
+    for (auto& it : mValueList)
     {
       mForecastTimeList.insert(it->mForecastTimeUTC);
     }
@@ -482,7 +482,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mFunctionParams           = \n";
-    for (auto & mFunctionParam : mFunctionParams)
+    for (auto& mFunctionParam : mFunctionParams)
     {
       stream << space(level) << "   * " << mFunctionParam.first << ":" << mFunctionParam.second << "\n";
     }
@@ -518,7 +518,7 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << "\n";
 
     stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";
-    for (auto & it : mValueList)
+    for (auto& it : mValueList)
     {
       it->print(stream,level+2,optionFlags);
     }

@@ -89,12 +89,12 @@ void LuaFileCollection::init()
   {
     AutoWriteLock lock(&mModificationLock);
 
-    for (auto & mFilename : mFilenames)
+    for (auto& mFilename : mFilenames)
     {
       mLuaFileList.emplace_back(mFilename);
     }
 
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       it.init();
     }
@@ -140,7 +140,7 @@ bool LuaFileCollection::checkUpdates(bool force)
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
 
-      for (auto & it : mLuaFileList)
+      for (auto& it : mLuaFileList)
       {
         if (it.checkUpdates())
           result = true;
@@ -167,7 +167,7 @@ uint LuaFileCollection::getFunction(const std::string& functionName,std::string&
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       uint functionType = it.getFunction(functionName,function);
       if (functionType != 0)
@@ -192,7 +192,7 @@ bool LuaFileCollection::getFunction(const std::string& functionName,const uint f
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       if (it.getFunction(functionName,function) == functionType)
         return true;
@@ -216,7 +216,7 @@ std::string LuaFileCollection::executeFunctionCall5(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -247,7 +247,7 @@ std::string LuaFileCollection::executeFunctionCall5(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -278,7 +278,7 @@ float LuaFileCollection::executeFunctionCall1(const std::string& function,std::v
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -309,7 +309,7 @@ double LuaFileCollection::executeFunctionCall1(const std::string& function,std::
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -340,7 +340,7 @@ double LuaFileCollection::executeFunctionCall2(const std::string& function,const
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -369,7 +369,7 @@ void LuaFileCollection::executeFunctionCall4(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -401,7 +401,7 @@ void LuaFileCollection::executeFunctionCall4(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -433,7 +433,7 @@ std::string LuaFileCollection::executeFunctionCall6(const std::string& function,
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -474,7 +474,7 @@ std::string LuaFileCollection::executeFunctionCall6(
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -507,7 +507,7 @@ void LuaFileCollection::executeFunctionCall8(const std::string& function,const c
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -539,7 +539,7 @@ void LuaFileCollection::executeFunctionCall8(const std::string& function,const c
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -571,7 +571,7 @@ void LuaFileCollection::executeFunctionCall9(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -603,7 +603,7 @@ void LuaFileCollection::executeFunctionCall9(const std::string& function,uint co
   try
   {
     AutoReadLock lock(&mModificationLock);
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
     {
       std::string functionName;
       uint type = it.getFunction(function,functionName);
@@ -636,7 +636,7 @@ void LuaFileCollection::print(std::ostream& stream,uint level,uint optionFlags)
   {
     stream << space(level) << "LuaFileCollection\n";
 
-    for (auto & it : mLuaFileList)
+    for (auto& it : mLuaFileList)
       it.print(stream,level+1,optionFlags);
   }
   catch (...)

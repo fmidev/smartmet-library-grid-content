@@ -140,7 +140,7 @@ uint ParameterMappingFile::getNumberOfMappings()
 
     AutoReadLock lock(&mModificationLock);
     uint cnt = 0;
-    for (auto & it : *mMappingSearch)
+    for (auto& it : *mMappingSearch)
     {
       cnt = cnt + it.second.size();
     }
@@ -172,7 +172,7 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
     if (s == mMappingSearch->end())
       return nullptr;
 
-    for (auto & it : s->second)
+    for (auto& it : s->second)
     {
       if (it.mProducerName == mapping.mProducerName  &&
         it.mParameterName == mapping.mParameterName  &&
@@ -213,7 +213,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
     if (s == mMappingSearch->end())
       return;
 
-    for (auto & it : s->second)
+    for (auto& it : s->second)
     {
       if (!it.mIgnore  &&  (geometryId < 0 ||  it.mGeometryId == geometryId))
       {
@@ -259,7 +259,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
-      for (auto & it : s->second)
+      for (auto& it : s->second)
       {
         if (!it.mIgnore)
         {
@@ -305,7 +305,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
       return;
 
 
-    for (auto & it : s->second)
+    for (auto& it : s->second)
     {
       if (!it.mIgnore)
       {
@@ -347,7 +347,7 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
 
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : *mMappingSearch)
+    for (auto& it : *mMappingSearch)
     {
       for (auto m = it.second.begin(); m != it.second.end(); ++m)
       {
@@ -359,7 +359,7 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
         {
           const char *unit = partList[sz-1].c_str();
 
-          for (auto & unitConversion : unitConversions)
+          for (auto& unitConversion : unitConversions)
           {
             if (strcasecmp(unit,unitConversion.mSourceUnit.c_str()) == 0)
             {
@@ -408,7 +408,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
-      for (auto & it : s->second)
+      for (auto& it : s->second)
       {
         if (!it.mIgnore)
         {
@@ -458,7 +458,7 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
     auto s = mMappingReverseSearch->find(key);
     if (s != mMappingReverseSearch->end())
     {
-      for (auto & it : s->second)
+      for (auto& it : s->second)
       {
         if (!it.mIgnore)
         {
@@ -498,7 +498,7 @@ void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
     auto msearch = std::make_unique<MappingSearch>();
     auto mreverseSearch = std::make_unique<MappingSearch>();
 
-    for (auto & mapping : mappings)
+    for (auto& mapping : mappings)
     {
       std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
@@ -704,7 +704,7 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : *mMappingSearch)
+    for (auto& it : *mMappingSearch)
     {
       stream << it.first << "\n";
       for (auto s = it.second.begin(); s != it.second.end(); ++s)

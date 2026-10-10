@@ -99,7 +99,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto & it : valueCount)
+    for (auto& it : valueCount)
     {
       if (it.second > maxVal)
       {
@@ -156,7 +156,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto & it : valueCount)
+    for (auto& it : valueCount)
     {
       if (it.second > maxVal)
       {
@@ -222,7 +222,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto & it : valueCount)
+        for (auto& it : valueCount)
         {
           if (it.second > maxVal)
           {
@@ -291,7 +291,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto & it : valueCount)
+        for (auto& it : valueCount)
         {
           if (it.second > maxVal)
           {

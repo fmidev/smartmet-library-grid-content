@@ -117,7 +117,7 @@ void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
     mAddress = sessionInfo.getAddress();
     mUserInfo = sessionInfo.mUserInfo;
 
-    for (auto & g : attrGroupList)
+    for (auto& g : attrGroupList)
     {
       auto group = mAttributeGroups.find(g.first);
       if (group == mAttributeGroups.end())
@@ -581,7 +581,7 @@ void SessionInfo::getAttributes(const char *attributeGroup,AttributeList& attrib
       return;
     }
 
-    for (auto & it : attributeList)
+    for (auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -816,7 +816,7 @@ void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attrib
       return;
     }
 
-    for (auto & it : attributeList)
+    for (auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -889,7 +889,7 @@ void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::s
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto & it : attributeNameList)
+    for (auto& it : attributeNameList)
     {
       group->second.erase(it);
     }
@@ -921,7 +921,7 @@ void SessionInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mKey              = " << mKey << "\n";
     stream << space(level) << "- mAddress          = " << mAddress << "\n";
     stream << space(level) << "- mAttributeGroups  = " << mAttributeGroups.size() << " (items)\n";
-    for (auto & mAttributeGroup : mAttributeGroups)
+    for (auto& mAttributeGroup : mAttributeGroups)
     {
       stream << space(level+2) << "* " << mAttributeGroup.first << "\n";
       for (auto it = mAttributeGroup.second.begin(); it != mAttributeGroup.second.end(); ++it)

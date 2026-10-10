@@ -768,7 +768,7 @@ void Converter::convert(std::set<std::string>& source,C::TimeStringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (const auto & it : source)
+    for (const auto& it : source)
     {
       target[t] = CORBA::string_dup(it.c_str());
       t++;
@@ -815,7 +815,7 @@ void Converter::convert(std::set<std::string>& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (const auto & it : source)
+    for (const auto& it : source)
     {
       target[t] = CORBA::string_dup(it.c_str());
       t++;

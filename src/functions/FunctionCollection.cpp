@@ -30,7 +30,7 @@ FunctionCollection::~FunctionCollection()
 {
   try
   {
-    for (auto & it : mFunctionList)
+    for (auto& it : mFunctionList)
     {
       delete it.second;
     }
@@ -275,7 +275,7 @@ void FunctionCollection::print(std::ostream& stream,uint level,uint optionFlags)
 {
   try
   {
-    for (auto & it : mFunctionList)
+    for (auto& it : mFunctionList)
     {
       stream << space(level) << "FunctionCollection\n";
       stream << space(level+1) << it.first << "\n";

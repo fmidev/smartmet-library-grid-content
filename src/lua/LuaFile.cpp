@@ -109,7 +109,7 @@ LuaFile::~LuaFile()
 {
   try
   {
-    for (auto & t : mLuaState)
+    for (auto& t : mLuaState)
     {
       if (t != nullptr)
         lua_close((lua_State*)t);
@@ -259,7 +259,7 @@ bool LuaFile::checkUpdates()
       }
 
 
-      for (auto & t : mLuaState)
+      for (auto& t : mLuaState)
       {
         if (t != nullptr)
         {
@@ -1572,7 +1572,7 @@ void LuaFile::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "LuaFile\n";
     stream << space(level) << "- mFilename  = " << mFilename << "\n";
 
-    for (auto & mFunction : mFunctions)
+    for (auto& mFunction : mFunctions)
       mFunction.second.print(stream,level+2,optionFlags);
   }
   catch (...)
@@ -1591,7 +1591,7 @@ void LuaFile::loadFile()
 {
   try
   {
-    for (auto & t : mLuaState)
+    for (auto& t : mLuaState)
     {
       if (t != nullptr)
       {

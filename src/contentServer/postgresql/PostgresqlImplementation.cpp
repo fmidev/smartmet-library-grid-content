@@ -2963,7 +2963,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
 
     T::FileInfoList fileInfoList;
 
-    for (auto & ff : fileAndContentList)
+    for (auto& ff : fileAndContentList)
     {
       //ff->mFileInfo.print(std::cout,0,0);
       fileInfoList.addFileInfo(new T::FileInfo(ff.mFileInfo));
@@ -2974,7 +2974,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
     addFileList(fileInfoList);
 
     T::ContentInfoList contentInfoList;
-    for (auto & ff : fileAndContentList)
+    for (auto& ff : fileAndContentList)
     {
       uint len = ff.mContentInfoList.getLength();
       if (len > 0)
@@ -9681,7 +9681,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
 
     std::set<std::string> searchList;
 
-    for (auto & it : forecastTimeList)
+    for (auto& it : forecastTimeList)
     {
       std::string st = fmt::format("{};{};{};{};{}",it.mGenerationId,static_cast<int>(it.mGeometryId),static_cast<int>(it.mForecastType),static_cast<int>(it.mForecastNumber),it.mForecastTime);
       if (searchList.find(st) == searchList.end())
@@ -9721,7 +9721,7 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
     sql += "  generationId IN (";
 
     const std::size_t pp = sql.size();
-    for (auto & it : forecastTimeList)
+    for (auto& it : forecastTimeList)
     {
       if (sql.size() != pp)
         sql += ",";

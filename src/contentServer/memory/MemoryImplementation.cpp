@@ -2609,7 +2609,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
         cInfo->mGenerationId = fileInfo.mGenerationId;
         cInfo->mFlags = cInfo->mFlags;
 
-        for (auto & t : mContentInfoList)
+        for (auto& t : mContentInfoList)
         {
           t.addContentInfo(cInfo);
         }
@@ -2664,7 +2664,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
     T::EventInfoList tmpEventList;
 
-    for (auto & ff : fileAndContentList)
+    for (auto& ff : fileAndContentList)
     {
       T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff.mFileInfo.mProducerId);
       if (producerInfo == nullptr)
@@ -2769,7 +2769,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     mFileInfoList.addFileInfoList(tmpFileList);
     mFileInfoListByName.addFileInfoList(tmpFileList);
 
-    for (auto & t : mContentInfoList)
+    for (auto& t : mContentInfoList)
     {
       t.addContentInfoList(tmpContentList);
     }
@@ -2881,7 +2881,7 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     AutoWriteLock lock(&mModificationLock);
 
 
-    for (auto & fTime : forecastTimeList)
+    for (auto& fTime : forecastTimeList)
     {
       auto forecastTimeUTC = utcTimeToTimeT(fTime.mForecastTime);
 
@@ -3757,7 +3757,7 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
       return Result::CONTENT_ALREADY_EXISTS;
 
     cInfo = contentInfo.duplicate();
-    for (auto & t : mContentInfoList)
+    for (auto& t : mContentInfoList)
     {
       t.addContentInfo(cInfo);
     }
@@ -6278,7 +6278,7 @@ bool MemoryImplementation::syncGeometryList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    for (auto & it : idList)
+    for (auto& it : idList)
     {
       mGeometryInfoList.deleteGeometryInfoById(it.mGenerationId,it.mGeometryId,it.mLevelId);
       addEvent(EventType::GEOMETRY_DELETED,it.mGenerationId,it.mGeometryId,it.mLevelId,0);
@@ -6388,7 +6388,7 @@ bool MemoryImplementation::syncFileList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    for (auto & name : nameList)
+    for (auto& name : nameList)
       mFileInfoListByName.deleteFileInfoByName(name);
 
     int count = 0;

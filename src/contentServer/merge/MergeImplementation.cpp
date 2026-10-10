@@ -212,7 +212,7 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
     mSessionId = sessionId;
     mDataServerSessionId = dataServerSessionId;
 
-    for (auto & contentStorage : contentStorages)
+    for (auto& contentStorage : contentStorages)
     {
       ContentSource source;
       source.mContentStorage = contentStorage;

@@ -670,7 +670,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 
     char tmp[10000];
     char *p = tmp;
-    for (auto & time : times)
+    for (auto& time : times)
     {
       if (p != tmp)
         p += sprintf(p,",");
@@ -702,7 +702,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     uint len =  query.mForecastTimeList.size();
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == len)
     {
-      for (auto & it : query.mQueryParameterList[0].mValueList)
+      for (auto& it : query.mQueryParameterList[0].mValueList)
       {
         auto valuePtr = it->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)

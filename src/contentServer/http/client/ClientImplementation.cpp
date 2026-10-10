@@ -2011,7 +2011,7 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     request.addLine("method","deleteFileInfoListByForecastTimeList");
     request.addLine("sessionId",sessionId);
 
-    for (auto & it : forecastTimeList)
+    for (auto& it : forecastTimeList)
     {
       request.addLine("forecastTime",it.getCsv());
     }

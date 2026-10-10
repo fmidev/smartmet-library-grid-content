@@ -8826,7 +8826,7 @@ void CacheImplementation::updateContent()
       ssp->mFileInfoList.setLockingEnabled(true);
       ssp->mFileInfoListByName.setLockingEnabled(true);
 
-      for (auto & t : ssp->mContentInfoList)
+      for (auto& t : ssp->mContentInfoList)
         t.setLockingEnabled(true);
 
       // Removing information that is marked to be deleted
@@ -8953,7 +8953,7 @@ void CacheImplementation::updateContent()
 
         mContentInfoList.setReleaseObjects(false);
         ssp->mContentInfoList[0].setReleaseObjects(false);
-        for (auto & t : ssp->mContentInfoList)
+        for (auto& t : ssp->mContentInfoList)
         {
           t.addContentInfoList(mContentInfoList);
         }
@@ -9010,7 +9010,7 @@ void CacheImplementation::updateContent()
       ssp->mFileInfoList.setLockingEnabled(false);
       ssp->mFileInfoListByName.setLockingEnabled(false);
 
-      for (auto & t : ssp->mContentInfoList)
+      for (auto& t : ssp->mContentInfoList)
         t.setLockingEnabled(false);
 
       mContentChangeTime = time(nullptr);

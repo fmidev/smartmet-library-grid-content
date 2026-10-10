@@ -677,14 +677,14 @@ void ProducerInfoList::sortByName()
     std::vector<ProducerInfo*>  newList;
     std::set<std::string> nameList;
 
-    for (auto & it : mList)
+    for (auto& it : mList)
     {
       nameList.insert(it->mName);
     }
 
-    for (const auto & n : nameList)
+    for (const auto& n : nameList)
     {
-      for (auto & it : mList)
+      for (auto& it : mList)
       {
         if (it->mName == n)
         {

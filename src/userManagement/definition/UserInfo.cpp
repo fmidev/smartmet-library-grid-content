@@ -84,7 +84,7 @@ void UserInfo::updateUserInfo(UserInfo& sessionInfo)
     auto attrGroupList = sessionInfo.getAttributeGroupList();
     AutoWriteLock writeLock(&mModificationLock);
 
-    for (auto & g : attrGroupList)
+    for (auto& g : attrGroupList)
     {
       auto group = mAttributeGroups.find(g.first);
       if (group == mAttributeGroups.end())
@@ -688,7 +688,7 @@ void UserInfo::getAttributes(const char *attributeGroup,AttributeList& attribute
       return;
     }
 
-    for (auto & it : attributeList)
+    for (auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -889,7 +889,7 @@ void UserInfo::setAttributes(const char *attributeGroup,AttributeList& attribute
       return;
     }
 
-    for (auto & it : attributeList)
+    for (auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -962,7 +962,7 @@ void UserInfo::deleteAttributes(const char *attributeGroup,std::vector<std::stri
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto & it : attributeNameList)
+    for (auto& it : attributeNameList)
     {
       group->second.erase(it);
     }
@@ -994,7 +994,7 @@ void UserInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mEndTime          = " << mEndTime << "\n";
     stream << space(level) << "- mStatus           = " << mStatus << "\n";
     stream << space(level) << "- mAttributeGroups  = " << mAttributeGroups.size() << " (items)\n";
-    for (auto & mAttributeGroup : mAttributeGroups)
+    for (auto& mAttributeGroup : mAttributeGroups)
     {
       stream << space(level+2) << "* " << mAttributeGroup.first << "\n";
       for (auto it = mAttributeGroup.second.begin(); it != mAttributeGroup.second.end(); ++it)
@@ -1002,11 +1002,11 @@ void UserInfo::print(std::ostream& stream,uint level,uint optionFlags)
     }
 
     stream << space(level) << "- mUserGroups       = " << mUserGroups.size() << " (items)\n";
-    for (const auto & mUserGroup : mUserGroups)
+    for (const auto& mUserGroup : mUserGroups)
       stream << space(level+2) << "* " << mUserGroup << "\n";
 
     stream << space(level) << "- mUserPermissions  = " << mUserPermissions.size() << " (items)\n";
-    for (const auto & mUserPermission : mUserPermissions)
+    for (const auto& mUserPermission : mUserPermissions)
       stream << space(level+2) << "* " << mUserPermission << "\n";
   }
   catch (...)

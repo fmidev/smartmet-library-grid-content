@@ -208,7 +208,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     {
       std::vector<std::string> partList;
       splitString(hourStr,',',partList);
-      for (auto & it : partList)
+      for (auto& it : partList)
       {
         sprintf(tmp,"%02d00",toInt32(it.c_str()));
         timeList.insert(tmp);
@@ -266,7 +266,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
       std::vector<std::string> tList;
       splitString(timeListStr,',',tList);
 
-      for (auto & it : tList)
+      for (auto& it : tList)
       {
         time_t tim = 0;
         if (timezoneStr != nullptr)
@@ -454,7 +454,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
         std::vector<std::string> paramList;
         splitString(paramStr,',',paramList);
 
-        for (auto & p : paramList)
+        for (auto& p : paramList)
         {
           QueryParameter param;
           //param.mId;

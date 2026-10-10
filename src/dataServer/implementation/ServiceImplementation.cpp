@@ -787,7 +787,7 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
     if (strcasecmp(propertyName,"dem") == 0 && mDem)
     {
       values.reserve(latlonCoordinates.size());
-      for (auto & latlonCoordinate : latlonCoordinates)
+      for (auto& latlonCoordinate : latlonCoordinates)
       {
         auto val = mDem->elevation(latlonCoordinate.x(),latlonCoordinate.y());
         values.push_back(val);
@@ -798,7 +798,7 @@ int ServiceImplementation::_getPropertyValuesByCoordinates(T::SessionId sessionI
     if (strcasecmp(propertyName,"covertype") == 0 && mLandCover)
     {
       values.reserve(latlonCoordinates.size());
-      for (auto & latlonCoordinate : latlonCoordinates)
+      for (auto& latlonCoordinate : latlonCoordinates)
       {
         auto val = mLandCover->coverType(latlonCoordinate.x(),latlonCoordinate.y());
         values.push_back(val);
@@ -6841,7 +6841,7 @@ void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filename
   FUNCTION_TRACE
   try
   {
-    for (auto & filename : filenames)
+    for (auto& filename : filenames)
     {
       if (mShutdownRequested)
         return;
@@ -6908,7 +6908,7 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
     // ### Counting hash value for the files that should be in the cache:
 
     std::set<std::string> hashList;
-    for (auto & cachedFilename : cachedFilenames)
+    for (auto& cachedFilename : cachedFilenames)
     {
       if (mShutdownRequested)
         return;
@@ -6931,7 +6931,7 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
 
     // ### Removing files that should not be in the cache directory:
 
-    for (auto & it : fileList)
+    for (auto& it : fileList)
     {
       if (mShutdownRequested)
         return;
@@ -6993,7 +6993,7 @@ void ServiceImplementation::cacheProcessingThread()
         // server does not switch its search structure before the required files are in the cache.
 
         std::set<T::FileId> fileIdList;
-        for (auto & cachedFilename : cachedFilenames)
+        for (auto& cachedFilename : cachedFilenames)
           fileIdList.insert(cachedFilename.first);
 
         mContentServer->updateCachedFiles(mServerSessionId,fileIdList);

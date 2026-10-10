@@ -120,7 +120,7 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 
     {
       AutoReadLock readLock(&mModificationLock);
-      for (auto & mSession : mSessions)
+      for (auto& mSession : mSessions)
       {
         if (mSession.second->getExpirationTime() < currentTime)
           expiredSessions.push_back(mSession.first);

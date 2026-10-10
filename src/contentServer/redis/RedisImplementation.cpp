@@ -3441,7 +3441,7 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
     T::ProducerInfo producerInfo;
     T::GenerationInfo generationInfo;
 
-    for (auto & ff : fileAndContentList)
+    for (auto& ff : fileAndContentList)
     {
       if (ff.mFileInfo.mProducerId != producerInfo.mProducerId &&  getProducerById(ff.mFileInfo.mProducerId,producerInfo) != Result::OK)
         return Result::UNKNOWN_PRODUCER_ID;
@@ -9237,7 +9237,7 @@ int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTim
     std::set<std::string> searchList;
 
     char tmp[1000];
-    for (auto & it : forecastTimeList)
+    for (auto& it : forecastTimeList)
     {
       snprintf(tmp,sizeof(tmp),"%lu;%d;%d;%d;%s",it.mGenerationId,it.mGeometryId,it.mForecastType,it.mForecastNumber,it.mForecastTime.c_str());
       std::string st = tmp;
@@ -9742,7 +9742,7 @@ void RedisImplementation::syncFilenames()
     std::map<std::string,T::FileId> fileList;
     getFilenames(fileList);
 
-    for (auto & it : fileList)
+    for (auto& it : fileList)
     {
       T::FileInfo fileInfo;
       if (getFileById(it.second,fileInfo) != Result::OK)

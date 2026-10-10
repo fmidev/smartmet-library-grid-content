@@ -170,7 +170,7 @@ void GridFileManager::deleteFilesByProducerId(T::ProducerId producerId)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getProducerId() == producerId)
           idList.emplace_back(it.first);
@@ -203,7 +203,7 @@ void GridFileManager::deleteFilesByGenerationId(T::GenerationId generationId)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getGenerationId() == generationId)
           idList.emplace_back(it.first);
@@ -236,7 +236,7 @@ void GridFileManager::deleteFilesBySourceId(T::SourceId sourceId)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getSourceId() == sourceId)
           idList.emplace_back(it.first);
@@ -270,7 +270,7 @@ void GridFileManager::deleteFilesByStorageId(T::StorageId storageId)
       T::FileId id = ((UInt64)storageId << 32);
 
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if ((it.second->getFileId() & 0xFFFFFFFF00000000UL) == id)
           idList.emplace_back(it.first);
@@ -303,7 +303,7 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getAccessTime() < accessTime  &&
             (it.second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected) == 0  &&
@@ -338,7 +338,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getCheckTime() < checkTime)
           idList.emplace_back(it.first);
@@ -371,7 +371,7 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
     std::vector<T::FileId> idList;
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto & it : mFileList)
+      for (auto& it : mFileList)
       {
         if (it.second->getDeletionTime() != 0  &&  it.second->getDeletionTime() < deletionTime)
           idList.emplace_back(it.first);
@@ -441,7 +441,7 @@ void GridFileManager::getFilesToBeCached(std::map<T::FileId,std::string>& filena
     time_t deletionTime = time(nullptr) + 180;
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       if (!it.second->isNetworkFile()  &&  (it.second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&
           (it.second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady) == 0 &&
@@ -471,7 +471,7 @@ void GridFileManager::getFilesInCache(std::map<T::FileId,std::string>& filenames
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       if (!it.second->isNetworkFile()  &&  (it.second->getFlags() &  GRID::GridFile::Flags::LocalCacheExpected)  &&  (it.second->getFlags() &  GRID::GridFile::Flags::LocalCacheReady))
       {
@@ -498,7 +498,7 @@ void GridFileManager::getRequestCounters(GRID::RequestCounters& requestCounters,
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       if (it.second->isNetworkFile())
       {
@@ -532,7 +532,7 @@ void GridFileManager::resetRequestCounters()
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       //if (it->second->isNetworkFile())
         it.second->resetRequestCounters();
@@ -610,7 +610,7 @@ void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> paren
     uint cachedCount = 0;
     time_t deletionTime = time(nullptr) + 180;
 
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       GRID::GridFile_sptr gridFile = it.second;
       if (gridFile->isMemoryMapped())
@@ -652,7 +652,7 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
     AutoReadLock lock(&mModificationLock);
     stream << space(level) << "GridFileManager\n";
     stream << space(level) << "- numberOfFiles = " << getFileCount() << "\n";
-    for (auto & it : mFileList)
+    for (auto& it : mFileList)
     {
       it.second->print(stream,level+1,optionFlags);
     }

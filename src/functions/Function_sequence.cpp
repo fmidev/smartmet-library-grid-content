@@ -51,7 +51,7 @@ Function_sequence::~Function_sequence()
 {
   try
   {
-    for (auto & it : mFunctionList)
+    for (auto& it : mFunctionList)
     {
       delete it;
     }
@@ -96,7 +96,7 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
 
     float val = parameters[0];
 
-    for (auto & it : mFunctionList)
+    for (auto& it : mFunctionList)
     {
       std::vector<float> params;
       params.emplace_back(val);
@@ -126,7 +126,7 @@ double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
 
     double val = parameters[0];
 
-    for (auto & it : mFunctionList)
+    for (auto& it : mFunctionList)
     {
       std::vector<double> params;
       params.emplace_back(val);

@@ -94,12 +94,12 @@ void AliasFileCollection::init()
 
     AutoWriteLock lock(&mModificationLock);
 
-    for (auto & mFilename : mFilenames)
+    for (auto& mFilename : mFilenames)
     {
       mAliasFileList.emplace_back(mFilename,mDuplicatesAllowed);
     }
 
-    for (auto & it : mAliasFileList)
+    for (auto& it : mAliasFileList)
     {
       it.init();
     }
@@ -165,7 +165,7 @@ bool AliasFileCollection::checkUpdates(bool force)
     time_t tt = time(nullptr);
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
-      for (auto & it : mAliasFileList)
+      for (auto& it : mAliasFileList)
       {
         if (it.checkUpdates())
           result = true;
@@ -192,7 +192,7 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mAliasFileList)
+    for (auto& it : mAliasFileList)
     {
       if (it.getAlias(name,alias))
         return true;
@@ -217,7 +217,7 @@ void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto & it : mAliasFileList)
+    for (auto& it : mAliasFileList)
     {
       it.getAliasList(name,aliasList);
     }
@@ -276,7 +276,7 @@ void AliasFileCollection::print(std::ostream& stream,uint level,uint optionFlags
     AutoReadLock lock(&mModificationLock);
 
     stream << space(level) << "AliasFileCollection\n";
-    for (auto & it : mAliasFileList)
+    for (auto& it : mAliasFileList)
     {
       it.print(stream,level+1,optionFlags);
     }

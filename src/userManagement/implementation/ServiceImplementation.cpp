@@ -257,14 +257,14 @@ void ServiceImplementation::updateUsers()
           {
             std::vector<std::string> list;
             splitString(field[4],',',list);
-            for (auto & it : list)
+            for (auto& it : list)
             {
               user->addUserGroup(it.c_str());
 
               auto group = mGroups.find(it);
               if (group != mGroups.end())
               {
-                for (const auto & p : group->second)
+                for (const auto& p : group->second)
                   user->addPermission(p.c_str());
               }
             }

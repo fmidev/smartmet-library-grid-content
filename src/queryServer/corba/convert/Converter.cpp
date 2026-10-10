@@ -257,7 +257,7 @@ void Converter::convert(string_set& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (const auto & it : source)
+    for (const auto& it : source)
     {
       target[t] = CORBA::string_dup(it.c_str());
       t++;
@@ -304,7 +304,7 @@ void Converter::convert(string_vec& source,C::StringList& target)
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto & it : source)
+    for (auto& it : source)
     {
       target[t] = CORBA::string_dup(it.c_str());
       t++;
