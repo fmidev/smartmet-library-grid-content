@@ -135,7 +135,7 @@ class ServiceImplementation : public ServiceInterface
 {
   public:
                     ServiceImplementation();
-     virtual        ~ServiceImplementation();
+     ~ServiceImplementation() override;
 
      void           init(
                        ContentServer::ServiceInterface *contentServerPtr,
@@ -152,23 +152,23 @@ class ServiceImplementation : public ServiceInterface
                        bool checkGeometryStatus,
                        bool dataServerMethodsEnabled);
 
-     void           getCacheStats(Fmi::Cache::CacheStatistics& statistics) const;
-     void           getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
+     void           getCacheStats(Fmi::Cache::CacheStatistics& statistics) const override;
+     void           getStateAttributes(std::shared_ptr<T::AttributeNode> parent) override;
      void           initContentCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
      void           initContentSearchCache(std::size_t maxRecordsPerThread,uint clearIntervalInSeconds);
 
-     void           shutdown();
-     void           setDem(std::shared_ptr<Fmi::DEM> dem);
-     void           setLandCover(std::shared_ptr<Fmi::LandCover> landCover);
+     void           shutdown() override;
+     void           setDem(std::shared_ptr<Fmi::DEM> dem) override;
+     void           setLandCover(std::shared_ptr<Fmi::LandCover> landCover) override;
      void           updateProcessing();
 
   protected:
 
      // Methods that can be called through the service interface
 
-     int            _executeQuery(T::SessionId sessionId,Query& query);
+     int            _executeQuery(T::SessionId sessionId,Query& query) override;
 
-     int            _getProducerList(T::SessionId sessionId,string_vec& producerList);
+     int            _getProducerList(T::SessionId sessionId,string_vec& producerList) override;
 
      int            _getValuesByGridPoint(
                        T::SessionId sessionId,
@@ -177,7 +177,7 @@ class ServiceImplementation : public ServiceInterface
                        double x,
                        double y,
                        short areaInterpolationMethod,
-                       T::GridPointValueList& valueList);
+                       T::GridPointValueList& valueList) override;
 
   private:
 

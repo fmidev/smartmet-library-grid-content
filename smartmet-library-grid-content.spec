@@ -114,6 +114,7 @@ FMI Grid Content library development files
 %changelog
 * Sat Oct 10 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.10-1.fmi
 - Use auto and return {} where clang-tidy suggests it, no functional changes
+- Mark overriding methods override and use nullptr, no functional changes
 
 * Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-3.fmi
 - VALID for point queries also skips the parameters whose grid does not cover the point, so

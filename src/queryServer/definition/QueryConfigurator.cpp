@@ -153,7 +153,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
   try
   {
     char tmp[1000];
-    time_t currentTime = time(0);
+    time_t currentTime = time(nullptr);
 
     time_t startTime = currentTime;
     int startStep = 0;

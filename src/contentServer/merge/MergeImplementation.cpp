@@ -5541,7 +5541,7 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
     mContentInfoList.deleteContentInfoByStorageId(contentStorageIndex);
 
     // Switching the search structure
-    mContentUpdateTime = time(0) - mContentUpdateInterval;
+    mContentUpdateTime = time(nullptr) - mContentUpdateInterval;
 
     addEvent(EventType::STORAGE_CLEAR,contentStorageIndex,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
   }

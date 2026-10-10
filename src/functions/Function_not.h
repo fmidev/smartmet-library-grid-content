@@ -18,17 +18,17 @@ class Function_not : public Function
   public:
                       Function_not();
                       Function_not(const Function_not& function);
-    virtual           ~Function_not();
+    ~Function_not() override;
 
     // Type 1: Takes one or several parameters, returns one value
-    virtual float     executeFunctionCall1(std::vector<float>& parameters);
-    virtual double    executeFunctionCall1(std::vector<double>& parameters);
+    float     executeFunctionCall1(std::vector<float>& parameters) override;
+    double    executeFunctionCall1(std::vector<double>& parameters) override;
 
     // Type 9: Takes 1 to N vectors and returns one vector
-    virtual void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters);
-    virtual void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters);
+    void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters) override;
+    void      executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters) override;
 
-    virtual Function* duplicate();
+    Function* duplicate() override;
 };
 
 

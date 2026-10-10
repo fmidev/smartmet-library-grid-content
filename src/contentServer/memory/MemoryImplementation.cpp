@@ -272,7 +272,7 @@ void MemoryImplementation::syncProcessingThread()
       try
       {
 
-        time_t tt = time(0) - delay;
+        time_t tt = time(nullptr) - delay;
 
         snprintf(filename,sizeof(filename),"%s/producers.csv",mContentDir.c_str());
         time_t t1 = getFileModificationTime(filename);

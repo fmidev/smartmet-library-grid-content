@@ -56,7 +56,7 @@ AttributeList* SessionInfo::getAttributeList(const char *attributeGroup)
   {
     auto group = mAttributeGroups.find(attributeGroup);
     if (group == mAttributeGroups.end())
-      return NULL;
+      return nullptr;
 
     return &(group->second);
   }

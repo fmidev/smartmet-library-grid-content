@@ -438,7 +438,7 @@ void GridFileManager::getFilesToBeCached(std::map<T::FileId,std::string>& filena
     std::set<T::GenerationId> idList;
     generationInfoList.getGenerationIdListByStatus(T::GenerationInfo::Status::Ready,idList);
 
-    time_t deletionTime = time(0) + 180;
+    time_t deletionTime = time(nullptr) + 180;
     AutoReadLock lock(&mModificationLock);
 
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
@@ -608,7 +608,7 @@ void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> paren
     uint mmapCount = 0;
     uint cacheExpectedCount = 0;
     uint cachedCount = 0;
-    time_t deletionTime = time(0) + 180;
+    time_t deletionTime = time(nullptr) + 180;
 
     for ( auto it = mFileList.begin(); it != mFileList.end(); ++it  )
     {

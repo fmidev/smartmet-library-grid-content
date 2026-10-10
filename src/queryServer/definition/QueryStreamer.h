@@ -26,12 +26,12 @@ class QueryStreamer : public Spine::HTTP::ContentStreamer
 {
   public:
                         QueryStreamer();
-    virtual             ~QueryStreamer();
+    ~QueryStreamer() override;
 
     void                init(T::SessionId sessionId,QueryServer_sptr queryServerPtr);
     void                addQuery(Query& query);
 
-    virtual std::string getChunk();
+    std::string getChunk() override;
 
   protected:
 

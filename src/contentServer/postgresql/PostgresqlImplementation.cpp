@@ -3006,7 +3006,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
     {
       T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
       //addEvent(EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0);
-      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0,fileInfo->getCsv().c_str()));
+      eventInfoList.addEventInfo(new T::EventInfo(time(nullptr),0,EventType::FILE_ADDED,fileInfo->mFileId,fileInfo->mFileType,0,0,fileInfo->getCsv().c_str()));
     }
 
     addEventInfoList(eventInfoList);
@@ -4276,7 +4276,7 @@ int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentI
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
       //addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0);
-      eventInfoList.addEventInfo(new T::EventInfo(time(0),0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,info->getCsv().c_str()));
+      eventInfoList.addEventInfo(new T::EventInfo(time(nullptr),0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,info->getCsv().c_str()));
     }
     addEventInfoList(eventInfoList);
 

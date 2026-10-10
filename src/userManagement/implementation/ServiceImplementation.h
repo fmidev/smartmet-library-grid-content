@@ -26,26 +26,26 @@ class ServiceImplementation : public ServiceInterface
 {
   public:
                     ServiceImplementation();
-     virtual        ~ServiceImplementation();
+     ~ServiceImplementation() override;
 
-     virtual void   shutdown();
+     void   shutdown() override;
      virtual void   init(const char *groupFilename,const char *userFilename);
      virtual void   update();
 
   protected:
 
-     virtual int    _addUser(T::SessionId sessionId,UserInfo& userInfo);
-     virtual int    _deleteUser(T::SessionId sessionId,uint userId);
-     virtual int    _updateUserInfo(T::SessionId sessionId,UserInfo& userInfo);
-     virtual int    _getUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue);
-     virtual int    _getUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList);
-     virtual int    _getUserInfo(T::SessionId sessionId,uint userId,UserInfo& userInfo);
-     virtual int    _getUserInfoByUsername(T::SessionId sessionId,const char *username,UserInfo& userInfo);
-     virtual int    _setUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue);
-     virtual int    _setUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList);
-     virtual int    _deleteUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName);
-     virtual int    _deleteUserAttributeGroup(T::SessionId sessionId,uint userId,const char *attributeGroup);
-     virtual int    _deleteUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList);
+     int    _addUser(T::SessionId sessionId,UserInfo& userInfo) override;
+     int    _deleteUser(T::SessionId sessionId,uint userId) override;
+     int    _updateUserInfo(T::SessionId sessionId,UserInfo& userInfo) override;
+     int    _getUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue) override;
+     int    _getUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList) override;
+     int    _getUserInfo(T::SessionId sessionId,uint userId,UserInfo& userInfo) override;
+     int    _getUserInfoByUsername(T::SessionId sessionId,const char *username,UserInfo& userInfo) override;
+     int    _setUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue) override;
+     int    _setUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList) override;
+     int    _deleteUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName) override;
+     int    _deleteUserAttributeGroup(T::SessionId sessionId,uint userId,const char *attributeGroup) override;
+     int    _deleteUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList) override;
 
      virtual void   updateGroups();
      virtual void   updateUsers();

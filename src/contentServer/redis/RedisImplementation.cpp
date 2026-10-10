@@ -539,7 +539,7 @@ int RedisImplementation::openConnection()
       mSourceInfo = "Redis:" + mRedisAddress + ":" + std::to_string(mRedisPort);
     }
 
-    if (context == NULL)
+    if (context == nullptr)
     {
       mSourceInfo = "Redis:CONNECTION_ERROR";
       return Result::PERMANENT_STORAGE_ERROR;

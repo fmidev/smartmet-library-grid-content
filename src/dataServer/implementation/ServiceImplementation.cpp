@@ -91,7 +91,7 @@ ServiceImplementation::ServiceImplementation()
     mFileCache_enabled = false;
     mFileCache_fileCount = 0;
 
-    mStartTime = time(0);
+    mStartTime = time(nullptr);
   }
   catch (...)
   {
@@ -6229,7 +6229,7 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
   {
     auto storageFile = mGridFileManager.getFileByIdNoMapping(eventInfo.mId1);
     if (storageFile)
-      storageFile->setDeletionTime(time(0) + 300);
+      storageFile->setDeletionTime(time(nullptr) + 300);
 
     // mGridFileManager.deleteFileById(eventInfo.mId1);
   }
@@ -7004,7 +7004,7 @@ void ServiceImplementation::cacheProcessingThread()
         // it might take awhile before server gets all necessary information related
         // to the current files.
 
-        if (time(0) > (mStartTime + 600))
+        if (time(nullptr) > (mStartTime + 600))
         {
           removeOldCacheFiles(cachedFilenames);
         }

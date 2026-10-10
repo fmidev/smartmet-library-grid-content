@@ -8889,7 +8889,7 @@ void CacheImplementation::updateContent()
         for (uint t=0; t<len; t++)
         {
           T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
-          if (info != NULL)
+          if (info != nullptr)
             ssp->mProducerInfoList.addProducerInfo(info->duplicate());
         }
         mProducerInfoList.clear();
@@ -8906,7 +8906,7 @@ void CacheImplementation::updateContent()
         for (uint t=0; t<len; t++)
         {
           T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
-          if (info != NULL)
+          if (info != nullptr)
             ssp->mGeometryInfoList.addGeometryInfo(info->duplicate());
         }
         mGeometryInfoList.clear();
@@ -8922,7 +8922,7 @@ void CacheImplementation::updateContent()
         for (uint t=0; t<len; t++)
         {
           T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
-          if (info != NULL)
+          if (info != nullptr)
             ssp->mGenerationInfoList.addGenerationInfo(info->duplicate());
         }
         mGenerationInfoList.clear();

@@ -21,25 +21,25 @@ class ServiceImplementation : public ServiceInterface
 {
   public:
                     ServiceImplementation();
-     virtual        ~ServiceImplementation();
+     ~ServiceImplementation() override;
 
-     virtual void   shutdown();
+     void   shutdown() override;
 
   protected:
 
-     virtual int    _createSession(T::SessionId sessionId,SessionInfo& sessionInfo);
-     virtual int    _deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId);
-     virtual int    _deleteExpiredSessions(T::SessionId sessionId);
-     virtual int    _updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId);
-     virtual int    _updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo);
-     virtual int    _getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue);
-     virtual int    _getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList);
-     virtual int    _getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo);
-     virtual int    _setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue);
-     virtual int    _setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList);
-     virtual int    _deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName);
-     virtual int    _deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup);
-     virtual int    _deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList);
+     int    _createSession(T::SessionId sessionId,SessionInfo& sessionInfo) override;
+     int    _deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId) override;
+     int    _deleteExpiredSessions(T::SessionId sessionId) override;
+     int    _updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId) override;
+     int    _updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo) override;
+     int    _getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue) override;
+     int    _getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList) override;
+     int    _getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo) override;
+     int    _setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue) override;
+     int    _setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList) override;
+     int    _deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName) override;
+     int    _deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup) override;
+     int    _deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList) override;
 
 
      SessionInfo_sptr_map mSessions;          //!< In-memory map of active sessions keyed by session id.

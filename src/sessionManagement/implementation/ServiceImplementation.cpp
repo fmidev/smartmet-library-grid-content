@@ -117,7 +117,7 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
   try
   {
     std::vector<T::SessionId> expiredSessions;
-    time_t currentTime = time(0);
+    time_t currentTime = time(nullptr);
 
     {
       AutoReadLock readLock(&mModificationLock);
