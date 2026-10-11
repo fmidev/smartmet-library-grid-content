@@ -1,6 +1,6 @@
 #include "Function_feelsLike.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <math.h>
+#include <cmath>
 
 
 namespace SmartMet
