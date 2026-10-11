@@ -31,7 +31,7 @@ Function_sequence::Function_sequence(const Function_sequence& function)
 {
   try
   {
-    for (auto it : function.mFunctionList)
+    for (auto *it : function.mFunctionList)
     {
       mFunctionList.emplace_back(it->duplicate());
     }

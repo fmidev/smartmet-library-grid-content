@@ -42,8 +42,7 @@ SessionInfo::SessionInfo()
 
 /*! \brief Destructor. */
 
-SessionInfo::~SessionInfo()
-= default;
+SessionInfo::~SessionInfo() = default;
 
 
 

@@ -31,8 +31,7 @@ UserInfo::UserInfo()
 
 /*! \brief Destructor. */
 
-UserInfo::~UserInfo()
-= default;
+UserInfo::~UserInfo() = default;
 
 
 
