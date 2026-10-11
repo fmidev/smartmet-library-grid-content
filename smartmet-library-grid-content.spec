@@ -37,10 +37,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.9.26
-BuildRequires: smartmet-library-grid-files-devel >= 26.10.3
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
-BuildRequires: smartmet-library-spine-devel >= 26.9.26
+BuildRequires: smartmet-library-gis-devel >= 26.10.11
+BuildRequires: smartmet-library-grid-files-devel >= 26.10.11
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.11
+BuildRequires: smartmet-library-spine-devel >= 26.10.11
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -48,10 +48,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.9.26
-Requires: smartmet-library-grid-files >= 26.10.3
-Requires: smartmet-library-macgyver >= 26.10.2
-Requires: smartmet-library-spine >= 26.9.26
+Requires: smartmet-library-gis >= 26.10.11
+Requires: smartmet-library-grid-files >= 26.10.11
+Requires: smartmet-library-macgyver >= 26.10.11
+Requires: smartmet-library-spine >= 26.10.11
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: %{smartmet_fmt_devel}
 #TestRequires: gcc-c++
@@ -59,12 +59,12 @@ Requires: smartmet-library-spine >= 26.9.26
 #TestRequires: gdal312-devel
 #TestRequires: luajit-devel
 #TestRequires: omniORB-devel >= 4.3.0
-#TestRequires: smartmet-library-gis-devel >= 26.9.26
-#TestRequires: smartmet-library-grid-files-devel >= 26.10.3-2
-#TestRequires: smartmet-library-macgyver-devel >= 26.10.2
+#TestRequires: smartmet-library-gis-devel >= 26.10.11
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.11
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.11
 #TestRequires: smartmet-library-newbase-devel
-#TestRequires: smartmet-library-spine-devel >= 26.9.26
-#TestRequires: smartmet-library-grid-files-test >= 26.10.6
+#TestRequires: smartmet-library-spine-devel >= 26.10.11
+#TestRequires: smartmet-library-grid-files-test >= 26.10.11
 #TestRequires: smartmet-test-data
 
 Provides: %{SPECNAME}
@@ -99,10 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 26.10.2
-Requires: smartmet-library-gis-devel >= 26.9.26
-Requires: smartmet-library-spine-devel >= 26.9.26
-Requires: smartmet-library-grid-files-devel >= 26.10.3
+Requires: smartmet-library-macgyver-devel >= 26.10.11
+Requires: smartmet-library-gis-devel >= 26.10.11
+Requires: smartmet-library-spine-devel >= 26.10.11
+Requires: smartmet-library-grid-files-devel >= 26.10.11
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -114,8 +114,6 @@ FMI Grid Content library development files
 %changelog
 * Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
 - Failed file writes, closes and seeks are now reported instead of being ignored
-
-* Sat Oct 10 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.10-1.fmi
 - Use auto and return {} where clang-tidy suggests it, no functional changes
 - Mark overriding methods override and use nullptr, no functional changes
 - Use = default and using declarations where clang-tidy suggests it, no functional changes
