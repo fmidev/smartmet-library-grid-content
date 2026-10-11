@@ -1,4 +1,5 @@
 #include "RedisImplementation.h"
+#include <macgyver/StringConversion.h>
 #include <macgyver/Exception.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
@@ -257,10 +258,15 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
       std::string owner = (ownerReply->str != nullptr ? ownerReply->str : "");
       freeReplyObject(ownerReply);
 
-      unsigned long long ticket = 0;
-      long long clientId = 0;
-      if (sscanf(owner.c_str(),"%llu:%lld",&ticket,&clientId) != 2 || ticket != releaseCounter + 1)
+      // The owner is "<ticket>:<client id>"
+      const auto colon = owner.find(':');
+      if (colon == std::string::npos)
         return false;
+      const auto ticket = Fmi::stoul_opt(owner.substr(0,colon));
+      const auto client = Fmi::stol_opt(owner.substr(colon+1));
+      if (!ticket || !client || *ticket != releaseCounter + 1)
+        return false;
+      const long long clientId = *client;
 
       auto *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
       if (listReply == nullptr)

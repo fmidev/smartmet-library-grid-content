@@ -1375,7 +1375,7 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
               cellWidthStr == nullptr && cellHeightStr == nullptr  &&
-              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+              (gridSizeStr == nullptr ||  toInt32(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
@@ -1467,7 +1467,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
               cellWidthStr == nullptr && cellHeightStr == nullptr  &&
-              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+              (gridSizeStr == nullptr ||  toInt32(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
@@ -1828,7 +1828,7 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
               cellWidthStr == nullptr && cellHeightStr == nullptr  &&
-              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+              (gridSizeStr == nullptr ||  toInt32(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message1->getGridGeometryId()));
           }
@@ -1999,7 +1999,7 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
 
           if (gridWidthStr == nullptr && gridHeightStr == nullptr && llboxStr == nullptr && centerStr == nullptr  &&
               cellWidthStr == nullptr && cellHeightStr == nullptr  &&
-              (gridSizeStr == nullptr ||  atoi(gridSizeStr) == 1))
+              (gridSizeStr == nullptr ||  toInt32(gridSizeStr) == 1))
           {
             attributeList.addAttribute("grid.geometryId",std::to_string(message->getGridGeometryId()));
           }

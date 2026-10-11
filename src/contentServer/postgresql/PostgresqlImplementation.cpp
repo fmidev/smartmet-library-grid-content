@@ -2372,13 +2372,13 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Gen
 
     for (int i = 0; i < rowCount; i++)
     {
-      geometryInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo.mGenerationId = atoll(PQgetvalue(res, i, 1));
-      geometryInfo.mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo.mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo.mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo.mStorageId = atoi(PQgetvalue(res, i, 5));
-      geometryInfo.mSourceId = atoi(PQgetvalue(res, i, 6));
+      geometryInfo.mProducerId = toInt32(PQgetvalue(res, i, 0));
+      geometryInfo.mGenerationId = toInt64(PQgetvalue(res, i, 1));
+      geometryInfo.mGeometryId = toInt32(PQgetvalue(res, i, 2));
+      geometryInfo.mLevelId = toInt32(PQgetvalue(res, i, 3));
+      geometryInfo.mFlags = toInt32(PQgetvalue(res, i, 4));
+      geometryInfo.mStorageId = toInt32(PQgetvalue(res, i, 5));
+      geometryInfo.mSourceId = toInt32(PQgetvalue(res, i, 6));
 
       std::string modificationTime = PQgetvalue(res, i, 7);
       geometryInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -2386,7 +2386,7 @@ int PostgresqlImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Gen
       std::string deletionTime = PQgetvalue(res, i, 8);
       geometryInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo.mStatus = atoi(PQgetvalue(res, i, 9));
+      geometryInfo.mStatus = toInt32(PQgetvalue(res, i, 9));
     }
 
     PQclear(res);
@@ -2454,13 +2454,13 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
     {
       auto *geometryInfo = new T::GeometryInfo();
 
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mStorageId = atoi(PQgetvalue(res, i, 5));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 6));
+      geometryInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = toInt64(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = toInt32(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = toInt32(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      geometryInfo->mStorageId = toInt32(PQgetvalue(res, i, 5));
+      geometryInfo->mSourceId = toInt32(PQgetvalue(res, i, 6));
 
       std::string modificationTime = PQgetvalue(res, i, 7);
       geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -2468,7 +2468,7 @@ int PostgresqlImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geo
       std::string deletionTime = PQgetvalue(res, i, 8);
       geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 9));
+      geometryInfo->mStatus = toInt32(PQgetvalue(res, i, 9));
 
       geometryInfoList.addGeometryInfo(geometryInfo);
     }
@@ -2539,12 +2539,12 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
     {
       auto *geometryInfo = new T::GeometryInfo();
 
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = toInt64(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = toInt32(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = toInt32(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = toInt32(PQgetvalue(res, i, 5));
 
       std::string modificationTime = PQgetvalue(res, i, 6);
       geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -2552,7 +2552,7 @@ int PostgresqlImplementation::_getGeometryInfoListByGenerationId(T::SessionId se
       std::string deletionTime = PQgetvalue(res, i, 7);
       geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+      geometryInfo->mStatus = toInt32(PQgetvalue(res, i, 8));
 
       geometryInfoList.addGeometryInfo(geometryInfo);
     }
@@ -2623,12 +2623,12 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
     {
       auto *geometryInfo = new T::GeometryInfo();
 
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = toInt64(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = toInt32(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = toInt32(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = toInt32(PQgetvalue(res, i, 5));
 
       std::string modificationTime = PQgetvalue(res, i, 6);
       geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -2636,7 +2636,7 @@ int PostgresqlImplementation::_getGeometryInfoListByProducerId(T::SessionId sess
       std::string deletionTime = PQgetvalue(res, i, 7);
       geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+      geometryInfo->mStatus = toInt32(PQgetvalue(res, i, 8));
 
       geometryInfoList.addGeometryInfo(geometryInfo);
     }
@@ -2707,12 +2707,12 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
     {
       auto *geometryInfo = new T::GeometryInfo();
 
-      geometryInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
-      geometryInfo->mGenerationId = atoll(PQgetvalue(res, i, 1));
-      geometryInfo->mGeometryId = atoi(PQgetvalue(res, i, 2));
-      geometryInfo->mLevelId = atoi(PQgetvalue(res, i, 3));
-      geometryInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      geometryInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
+      geometryInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
+      geometryInfo->mGenerationId = toInt64(PQgetvalue(res, i, 1));
+      geometryInfo->mGeometryId = toInt32(PQgetvalue(res, i, 2));
+      geometryInfo->mLevelId = toInt32(PQgetvalue(res, i, 3));
+      geometryInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      geometryInfo->mSourceId = toInt32(PQgetvalue(res, i, 5));
 
       std::string modificationTime = PQgetvalue(res, i, 6);
       geometryInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -2720,7 +2720,7 @@ int PostgresqlImplementation::_getGeometryInfoListBySourceId(T::SessionId sessio
       std::string deletionTime = PQgetvalue(res, i, 7);
       geometryInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      geometryInfo->mStatus = atoi(PQgetvalue(res, i, 8));
+      geometryInfo->mStatus = toInt32(PQgetvalue(res, i, 8));
 
       geometryInfoList.addGeometryInfo(geometryInfo);
     }
@@ -3945,7 +3945,7 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     if (rowCount == 0)
       return 0;
 
-    eventId = atoll(PQgetvalue(res, 0, 0));
+    eventId = toInt64(PQgetvalue(res, 0, 0));
 
     PQclear(res);
 
@@ -3992,15 +3992,15 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
     if (rowCount != 1)
       return Result::DATA_NOT_FOUND;
 
-    mLastEvent.mEventId = atoll(PQgetvalue(res, 0, 0));
-    mLastEvent.mType = atoll(PQgetvalue(res, 0, 1));
+    mLastEvent.mEventId = toInt64(PQgetvalue(res, 0, 0));
+    mLastEvent.mType = toInt64(PQgetvalue(res, 0, 1));
     std::string eventTime = PQgetvalue(res, 0, 2);
     mLastEvent.mEventTime = utcTimeToTimeT(eventTime);
     mLastEvent.mServerTime = mStartTime;
-    mLastEvent.mId1 = atoll(PQgetvalue(res, 0, 3));
-    mLastEvent.mId2 = atoll(PQgetvalue(res, 0, 4));
-    mLastEvent.mId3 = atoll(PQgetvalue(res, 0, 5));
-    mLastEvent.mFlags = atoll(PQgetvalue(res, 0, 6));
+    mLastEvent.mId1 = toInt64(PQgetvalue(res, 0, 3));
+    mLastEvent.mId2 = toInt64(PQgetvalue(res, 0, 4));
+    mLastEvent.mId3 = toInt64(PQgetvalue(res, 0, 5));
+    mLastEvent.mFlags = toInt64(PQgetvalue(res, 0, 6));
     mLastEvent.mEventData = PQgetvalue(res, 0, 7);
 
     PQclear(res);
@@ -4088,15 +4088,15 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
     for (int i = 0; i < rowCount; i++)
     {
       auto *eventInfo = new T::EventInfo();
-      eventInfo->mEventId = atoll(PQgetvalue(res, i, 0));
-      eventInfo->mType = atoll(PQgetvalue(res, i, 1));
+      eventInfo->mEventId = toInt64(PQgetvalue(res, i, 0));
+      eventInfo->mType = toInt64(PQgetvalue(res, i, 1));
       std::string eventTime = PQgetvalue(res, i, 2);
       eventInfo->mEventTime = utcTimeToTimeT(eventTime);
       eventInfo->mServerTime = mStartTime;
-      eventInfo->mId1 = atoll(PQgetvalue(res, i, 3));
-      eventInfo->mId2 = atoll(PQgetvalue(res, i, 4));
-      eventInfo->mId3 = atoll(PQgetvalue(res, i, 5));
-      eventInfo->mFlags = atoll(PQgetvalue(res, i, 6));
+      eventInfo->mId1 = toInt64(PQgetvalue(res, i, 3));
+      eventInfo->mId2 = toInt64(PQgetvalue(res, i, 4));
+      eventInfo->mId3 = toInt64(PQgetvalue(res, i, 5));
+      eventInfo->mFlags = toInt64(PQgetvalue(res, i, 6));
       eventInfo->mEventData = PQgetvalue(res, i, 7);
 
       eventInfoList.addEventInfo(eventInfo);
@@ -5820,7 +5820,7 @@ uint PostgresqlImplementation::getCount(const char *sql)
     if (rowCount == 0)
       return 0;
 
-    count = atoll(PQgetvalue(res, 0, 0));
+    count = toInt64(PQgetvalue(res, 0, 0));
 
     PQclear(res);
 
@@ -6017,13 +6017,13 @@ int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::Produc
 
     for (int i = 0; i < rowCount; i++)
     {
-      producerInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
+      producerInfo.mProducerId = toInt32(PQgetvalue(res, i, 0));
       producerInfo.mName = PQgetvalue(res, i, 1);
       producerInfo.mTitle = PQgetvalue(res, i, 2);
       producerInfo.mDescription = PQgetvalue(res, i, 3);
-      producerInfo.mFlags = atoi(PQgetvalue(res, i, 4));
-      producerInfo.mSourceId = atoi(PQgetvalue(res, i, 5));
-      producerInfo.mStatus = atoi(PQgetvalue(res, i, 6));
+      producerInfo.mFlags = toInt32(PQgetvalue(res, i, 4));
+      producerInfo.mSourceId = toInt32(PQgetvalue(res, i, 5));
+      producerInfo.mStatus = toInt32(PQgetvalue(res, i, 6));
     }
 
     PQclear(res);
@@ -6084,13 +6084,13 @@ int PostgresqlImplementation::getProducerByName(std::string producerName,T::Prod
 
     for (int i = 0; i < rowCount; i++)
     {
-      producerInfo.mProducerId = atoi(PQgetvalue(res, i, 0));
+      producerInfo.mProducerId = toInt32(PQgetvalue(res, i, 0));
       producerInfo.mName = PQgetvalue(res, i, 1);
       producerInfo.mTitle = PQgetvalue(res, i, 2);
       producerInfo.mDescription = PQgetvalue(res, i, 3);
-      producerInfo.mFlags = atoi(PQgetvalue(res, i, 4));
-      producerInfo.mSourceId = atoi(PQgetvalue(res, i, 5));
-      producerInfo.mStatus = atoi(PQgetvalue(res, i, 6));
+      producerInfo.mFlags = toInt32(PQgetvalue(res, i, 4));
+      producerInfo.mSourceId = toInt32(PQgetvalue(res, i, 5));
+      producerInfo.mStatus = toInt32(PQgetvalue(res, i, 6));
     }
 
     PQclear(res);
@@ -6150,13 +6150,13 @@ int PostgresqlImplementation::getProducerList(T::ProducerInfoList& producerInfoL
     for (int i = 0; i < rowCount; i++)
     {
       auto *producerInfo = new T::ProducerInfo();
-      producerInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      producerInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
       producerInfo->mName = PQgetvalue(res, i, 1);
       producerInfo->mTitle = PQgetvalue(res, i, 2);
       producerInfo->mDescription = PQgetvalue(res, i, 3);
-      producerInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      producerInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-      producerInfo->mStatus = atoi(PQgetvalue(res, i, 6));
+      producerInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      producerInfo->mSourceId = toInt32(PQgetvalue(res, i, 5));
+      producerInfo->mStatus = toInt32(PQgetvalue(res, i, 6));
       producerInfoList.addProducerInfo(producerInfo);
     }
 
@@ -6219,13 +6219,13 @@ int PostgresqlImplementation::getProducerListBySourceId(T::SourceId sourceId,T::
     for (int i = 0; i < rowCount; i++)
     {
       auto *producerInfo = new T::ProducerInfo();
-      producerInfo->mProducerId = atoi(PQgetvalue(res, i, 0));
+      producerInfo->mProducerId = toInt32(PQgetvalue(res, i, 0));
       producerInfo->mName = PQgetvalue(res, i, 1);
       producerInfo->mTitle = PQgetvalue(res, i, 2);
       producerInfo->mDescription = PQgetvalue(res, i, 3);
-      producerInfo->mFlags = atoi(PQgetvalue(res, i, 4));
-      producerInfo->mSourceId = atoi(PQgetvalue(res, i, 5));
-      producerInfo->mStatus = atoi(PQgetvalue(res, i, 6));
+      producerInfo->mFlags = toInt32(PQgetvalue(res, i, 4));
+      producerInfo->mSourceId = toInt32(PQgetvalue(res, i, 5));
+      producerInfo->mStatus = toInt32(PQgetvalue(res, i, 6));
       producerInfoList.addProducerInfo(producerInfo);
     }
 
@@ -6290,14 +6290,14 @@ int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::
 
     for (int i = 0; i < rowCount; i++)
     {
-      generationInfo.mGenerationId = atoll(PQgetvalue(res, i, 0));
-      generationInfo.mGenerationType = atoi(PQgetvalue(res, i, 1));
-      generationInfo.mProducerId = atoi(PQgetvalue(res, i, 2));
+      generationInfo.mGenerationId = toInt64(PQgetvalue(res, i, 0));
+      generationInfo.mGenerationType = toInt32(PQgetvalue(res, i, 1));
+      generationInfo.mProducerId = toInt32(PQgetvalue(res, i, 2));
       generationInfo.mName = PQgetvalue(res, i, 3);
       generationInfo.mDescription = PQgetvalue(res, i, 4);
       generationInfo.mAnalysisTime = PQgetvalue(res, i, 5);
-      generationInfo.mFlags = atoi(PQgetvalue(res, i, 6));
-      generationInfo.mSourceId = atoi(PQgetvalue(res, i, 7));
+      generationInfo.mFlags = toInt32(PQgetvalue(res, i, 6));
+      generationInfo.mSourceId = toInt32(PQgetvalue(res, i, 7));
 
       std::string modificationTime = PQgetvalue(res, i, 8);
       generationInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -6305,7 +6305,7 @@ int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::
       std::string deletionTime = PQgetvalue(res, i, 9);
       generationInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      generationInfo.mStatus = atoi(PQgetvalue(res, i, 10));
+      generationInfo.mStatus = toInt32(PQgetvalue(res, i, 10));
     }
 
     PQclear(res);
@@ -6369,14 +6369,14 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
 
     for (int i = 0; i < rowCount; i++)
     {
-      generationInfo.mGenerationId = atoll(PQgetvalue(res, i, 0));
-      generationInfo.mGenerationType = atoi(PQgetvalue(res, i, 1));
-      generationInfo.mProducerId = atoi(PQgetvalue(res, i, 2));
+      generationInfo.mGenerationId = toInt64(PQgetvalue(res, i, 0));
+      generationInfo.mGenerationType = toInt32(PQgetvalue(res, i, 1));
+      generationInfo.mProducerId = toInt32(PQgetvalue(res, i, 2));
       generationInfo.mName = PQgetvalue(res, i, 3);
       generationInfo.mDescription = PQgetvalue(res, i, 4);
       generationInfo.mAnalysisTime = PQgetvalue(res, i, 5);
-      generationInfo.mFlags = atoi(PQgetvalue(res, i, 6));
-      generationInfo.mSourceId = atoi(PQgetvalue(res, i, 7));
+      generationInfo.mFlags = toInt32(PQgetvalue(res, i, 6));
+      generationInfo.mSourceId = toInt32(PQgetvalue(res, i, 7));
 
       std::string modificationTime = PQgetvalue(res, i, 8);
       generationInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -6384,7 +6384,7 @@ int PostgresqlImplementation::getGenerationByName(std::string generationName,T::
       std::string deletionTime = PQgetvalue(res, i, 9);
       generationInfo.mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      generationInfo.mStatus = atoi(PQgetvalue(res, i, 10));
+      generationInfo.mStatus = toInt32(PQgetvalue(res, i, 10));
     }
 
     PQclear(res);
@@ -6448,14 +6448,14 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
     {
       auto *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
-      generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
-      generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
+      generationInfo->mGenerationId = toInt64(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationType = toInt32(PQgetvalue(res, i, 1));
+      generationInfo->mProducerId = toInt32(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
       generationInfo->mDescription = PQgetvalue(res, i, 4);
       generationInfo->mAnalysisTime = PQgetvalue(res, i, 5);
-      generationInfo->mFlags = atoi(PQgetvalue(res, i, 6));
-      generationInfo->mSourceId = atoi(PQgetvalue(res, i, 7));
+      generationInfo->mFlags = toInt32(PQgetvalue(res, i, 6));
+      generationInfo->mSourceId = toInt32(PQgetvalue(res, i, 7));
 
       std::string modificationTime = PQgetvalue(res, i, 8);
       generationInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -6463,7 +6463,7 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
       std::string deletionTime = PQgetvalue(res, i, 9);
       generationInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      generationInfo->mStatus = atoi(PQgetvalue(res, i, 10));
+      generationInfo->mStatus = toInt32(PQgetvalue(res, i, 10));
 
       generationInfoList.addGenerationInfo(generationInfo);
     }
@@ -6552,14 +6552,14 @@ int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId produc
     {
       auto *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
-      generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
-      generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
+      generationInfo->mGenerationId = toInt64(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationType = toInt32(PQgetvalue(res, i, 1));
+      generationInfo->mProducerId = toInt32(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
       generationInfo->mDescription = PQgetvalue(res, i, 4);
       generationInfo->mAnalysisTime = PQgetvalue(res, i, 5);
-      generationInfo->mFlags = atoi(PQgetvalue(res, i, 6));
-      generationInfo->mSourceId = atoi(PQgetvalue(res, i, 7));
+      generationInfo->mFlags = toInt32(PQgetvalue(res, i, 6));
+      generationInfo->mSourceId = toInt32(PQgetvalue(res, i, 7));
 
       std::string modificationTime = PQgetvalue(res, i, 8);
       generationInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -6567,7 +6567,7 @@ int PostgresqlImplementation::getGenerationListByProducerId(T::ProducerId produc
       std::string deletionTime = PQgetvalue(res, i, 9);
       generationInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      generationInfo->mStatus = atoi(PQgetvalue(res, i, 10));
+      generationInfo->mStatus = toInt32(PQgetvalue(res, i, 10));
 
       generationInfoList.addGenerationInfo(generationInfo);
     }
@@ -6635,14 +6635,14 @@ int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T
     {
       auto *generationInfo = new T::GenerationInfo();
 
-      generationInfo->mGenerationId = atoll(PQgetvalue(res, i, 0));
-      generationInfo->mGenerationType = atoi(PQgetvalue(res, i, 1));
-      generationInfo->mProducerId = atoi(PQgetvalue(res, i, 2));
+      generationInfo->mGenerationId = toInt64(PQgetvalue(res, i, 0));
+      generationInfo->mGenerationType = toInt32(PQgetvalue(res, i, 1));
+      generationInfo->mProducerId = toInt32(PQgetvalue(res, i, 2));
       generationInfo->mName = PQgetvalue(res, i, 3);
       generationInfo->mDescription = PQgetvalue(res, i, 4);
       generationInfo->mAnalysisTime = PQgetvalue(res, i, 5);
-      generationInfo->mFlags = atoi(PQgetvalue(res, i, 6));
-      generationInfo->mSourceId = atoi(PQgetvalue(res, i, 7));
+      generationInfo->mFlags = toInt32(PQgetvalue(res, i, 6));
+      generationInfo->mSourceId = toInt32(PQgetvalue(res, i, 7));
 
       std::string modificationTime = PQgetvalue(res, i, 8);
       generationInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -6650,7 +6650,7 @@ int PostgresqlImplementation::getGenerationListBySourceId(T::SourceId sourceId,T
       std::string deletionTime = PQgetvalue(res, i, 9);
       generationInfo->mDeletionTime = utcTimeToTimeT(deletionTime);
 
-      generationInfo->mStatus = atoi(PQgetvalue(res, i, 10));
+      generationInfo->mStatus = toInt32(PQgetvalue(res, i, 10));
 
       generationInfoList.addGenerationInfo(generationInfo);
     }
@@ -6909,7 +6909,7 @@ int PostgresqlImplementation::addFileList(T::FileInfoList& fileInfoList)
     T::FileId maxFileId = 0;
     int rowCount = PQntuples(res);
     if (rowCount > 0)
-      maxFileId = atoll(PQgetvalue(res, 0, 0)) & 0xFFFFFFFF;
+      maxFileId = toInt64(PQgetvalue(res, 0, 0)) & 0xFFFFFFFF;
 
     PQclear(res);
 
@@ -7425,16 +7425,16 @@ int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo
 
     for (int i = 0; i < rowCount; i++)
     {
-      fileInfo.mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo.mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo.mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo.mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo.mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo.mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo.mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo.mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo.mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo.mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo.mServer = PQgetvalue(res, i, 5);
-      fileInfo.mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo.mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo.mName = PQgetvalue(res, i, 7);
-      fileInfo.mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo.mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo.mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo.mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -7505,16 +7505,16 @@ int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fi
 
     for (int i = 0; i < rowCount; i++)
     {
-      fileInfo.mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo.mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo.mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo.mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo.mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo.mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo.mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo.mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo.mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo.mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo.mServer = PQgetvalue(res, i, 5);
-      fileInfo.mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo.mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo.mName = PQgetvalue(res, i, 7);
-      fileInfo.mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo.mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo.mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo.mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -7589,16 +7589,16 @@ int PostgresqlImplementation::getFileList(T::FileId startFileId,int maxRecords,T
     for (int i = 0; i < rowCount; i++)
     {
       auto *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo->mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo->mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo->mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo->mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
-      fileInfo->mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo->mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo->mName = PQgetvalue(res, i, 7);
-      fileInfo->mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo->mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo->mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo->mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -7675,16 +7675,16 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
     for (int i = 0; i < rowCount; i++)
     {
       auto *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo->mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo->mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo->mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo->mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
-      fileInfo->mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo->mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo->mName = PQgetvalue(res, i, 7);
-      fileInfo->mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo->mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo->mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo->mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -7840,16 +7840,16 @@ int PostgresqlImplementation::getFileListByProducerId(T::ProducerId producerId,T
     for (int i = 0; i < rowCount; i++)
     {
       auto *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo->mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo->mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo->mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo->mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
-      fileInfo->mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo->mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo->mName = PQgetvalue(res, i, 7);
-      fileInfo->mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo->mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo->mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo->mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -7926,16 +7926,16 @@ int PostgresqlImplementation::getFileListBySourceId(T::SourceId sourceId,T::File
     for (int i = 0; i < rowCount; i++)
     {
       auto *fileInfo = new T::FileInfo();
-      fileInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      fileInfo->mProducerId = atoi(PQgetvalue(res, i, 1));
-      fileInfo->mGenerationId = atoll(PQgetvalue(res, i, 2));
-      fileInfo->mProtocol = atoi(PQgetvalue(res, i, 3));
-      fileInfo->mServerType = atoi(PQgetvalue(res, i, 4));
+      fileInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      fileInfo->mProducerId = toInt32(PQgetvalue(res, i, 1));
+      fileInfo->mGenerationId = toInt64(PQgetvalue(res, i, 2));
+      fileInfo->mProtocol = toInt32(PQgetvalue(res, i, 3));
+      fileInfo->mServerType = toInt32(PQgetvalue(res, i, 4));
       fileInfo->mServer = PQgetvalue(res, i, 5);
-      fileInfo->mFileType = atoi(PQgetvalue(res, i, 6));
+      fileInfo->mFileType = toInt32(PQgetvalue(res, i, 6));
       fileInfo->mName = PQgetvalue(res, i, 7);
-      fileInfo->mFlags = atoi(PQgetvalue(res, i, 8));
-      fileInfo->mSourceId = atoi(PQgetvalue(res, i, 9));
+      fileInfo->mFlags = toInt32(PQgetvalue(res, i, 8));
+      fileInfo->mSourceId = toInt32(PQgetvalue(res, i, 9));
 
       std::string modificationTime = PQgetvalue(res, i, 10);
       fileInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -8500,28 +8500,28 @@ int PostgresqlImplementation::getContent(T::FileId fileId,T::MessageIndex messag
     if (rowCount == 0)
       return Result::DATA_NOT_FOUND;
 
-    contentInfo.mFileId = atoll(PQgetvalue(res, 0, 0));
-    contentInfo.mMessageIndex = atoi(PQgetvalue(res, 0, 1));
-    contentInfo.mFileType = atoi(PQgetvalue(res, 0, 2));
-    contentInfo.mFilePosition = atoll(PQgetvalue(res, 0, 3));
-    contentInfo.mMessageSize = atoi(PQgetvalue(res, 0, 4));
-    contentInfo.mProducerId = atoi(PQgetvalue(res, 0, 5));
-    contentInfo.mGenerationId = atoll(PQgetvalue(res, 0, 6));
-    contentInfo.mGeometryId = atoi(PQgetvalue(res, 0, 7));
-    contentInfo.mFmiParameterId = atoi(PQgetvalue(res, 0, 8));
+    contentInfo.mFileId = toInt64(PQgetvalue(res, 0, 0));
+    contentInfo.mMessageIndex = toInt32(PQgetvalue(res, 0, 1));
+    contentInfo.mFileType = toInt32(PQgetvalue(res, 0, 2));
+    contentInfo.mFilePosition = toInt64(PQgetvalue(res, 0, 3));
+    contentInfo.mMessageSize = toInt32(PQgetvalue(res, 0, 4));
+    contentInfo.mProducerId = toInt32(PQgetvalue(res, 0, 5));
+    contentInfo.mGenerationId = toInt64(PQgetvalue(res, 0, 6));
+    contentInfo.mGeometryId = toInt32(PQgetvalue(res, 0, 7));
+    contentInfo.mFmiParameterId = toInt32(PQgetvalue(res, 0, 8));
     contentInfo.setFmiParameterName(PQgetvalue(res, 0, 9));
     contentInfo.setForecastTime(PQgetvalue(res, 0, 10));
-    contentInfo.mFmiParameterLevelId = atoi(PQgetvalue(res, 0, 11));
-    contentInfo.mParameterLevel = atoi(PQgetvalue(res, 0, 12));
-    contentInfo.mForecastType = atoi(PQgetvalue(res, 0, 13));
-    contentInfo.mForecastNumber = atoi(PQgetvalue(res, 0, 14));
-    contentInfo.mFlags = atoi(PQgetvalue(res, 0, 15));
-    contentInfo.mSourceId = atoi(PQgetvalue(res, 0, 16));
-    contentInfo.mAggregationId = atoi(PQgetvalue(res, 0, 17));
-    contentInfo.mAggregationPeriod = atoi(PQgetvalue(res, 0, 18));
-    contentInfo.mProcessingTypeId = atoi(PQgetvalue(res, 0, 19));
-    contentInfo.mProcessingTypeValue1 = atof(PQgetvalue(res, 0, 20));
-    contentInfo.mProcessingTypeValue2 = atof(PQgetvalue(res, 0, 21));
+    contentInfo.mFmiParameterLevelId = toInt32(PQgetvalue(res, 0, 11));
+    contentInfo.mParameterLevel = toInt32(PQgetvalue(res, 0, 12));
+    contentInfo.mForecastType = toInt32(PQgetvalue(res, 0, 13));
+    contentInfo.mForecastNumber = toInt32(PQgetvalue(res, 0, 14));
+    contentInfo.mFlags = toInt32(PQgetvalue(res, 0, 15));
+    contentInfo.mSourceId = toInt32(PQgetvalue(res, 0, 16));
+    contentInfo.mAggregationId = toInt32(PQgetvalue(res, 0, 17));
+    contentInfo.mAggregationPeriod = toInt32(PQgetvalue(res, 0, 18));
+    contentInfo.mProcessingTypeId = toInt32(PQgetvalue(res, 0, 19));
+    contentInfo.mProcessingTypeValue1 = toDouble(PQgetvalue(res, 0, 20));
+    contentInfo.mProcessingTypeValue2 = toDouble(PQgetvalue(res, 0, 21));
 
     std::string modificationTime = PQgetvalue(res, 0, 22);
     contentInfo.mModificationTime = utcTimeToTimeT(modificationTime);
@@ -8612,28 +8612,28 @@ int PostgresqlImplementation::getContent(T::FileId startFileId,T::MessageIndex s
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -8796,28 +8796,28 @@ int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generatio
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -8920,28 +8920,28 @@ int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::Generatio
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -8983,7 +8983,7 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
@@ -8991,11 +8991,11 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -9003,7 +9003,7 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
         break;
 
       default:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
     }
 
@@ -9059,28 +9059,28 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9122,7 +9122,7 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
@@ -9130,11 +9130,11 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -9142,7 +9142,7 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
         break;
 
       default:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
     }
 
@@ -9210,28 +9210,28 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9273,7 +9273,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
@@ -9281,11 +9281,11 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -9293,7 +9293,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
         break;
 
       default:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
     }
 
@@ -9361,28 +9361,28 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9423,7 +9423,7 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
     switch (parameterKeyType)
     {
       case T::ParamKeyTypeValue::FMI_ID:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
 
       case T::ParamKeyTypeValue::FMI_NAME:
@@ -9431,11 +9431,11 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
         break;
 
       case T::ParamKeyTypeValue::GRIB_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByGribId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByGribId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_ID:
-        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(atoi(parameterKey.c_str()));
+        paramId = Identification::gridDef.getFmiParameterIdByNewbaseId(toInt32(parameterKey.c_str()));
         break;
 
       case T::ParamKeyTypeValue::NEWBASE_NAME:
@@ -9443,7 +9443,7 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
         break;
 
       default:
-        paramId = atoi(parameterKey.c_str());
+        paramId = toInt32(parameterKey.c_str());
         break;
     }
 
@@ -9511,28 +9511,28 @@ int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId p
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9620,28 +9620,28 @@ int PostgresqlImplementation::getContentByGenerationIdAndTimeRange(T::Generation
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9754,28 +9754,28 @@ int PostgresqlImplementation::getContentByForecastTimeList(std::vector<T::Foreca
       {
         auto *contentInfo = new T::ContentInfo();
 
-        contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-        contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-        contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-        contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-        contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-        contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-        contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-        contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-        contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+        contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+        contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+        contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+        contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+        contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+        contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+        contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+        contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+        contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
         contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
         contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-        contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-        contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-        contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-        contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-        contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-        contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-        contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-        contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-        contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-        contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-        contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+        contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+        contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+        contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+        contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+        contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+        contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+        contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+        contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+        contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+        contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+        contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
         std::string modificationTime = PQgetvalue(res, i, 22);
         contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9867,28 +9867,28 @@ int PostgresqlImplementation::getContentByProducerId(T::ProducerId producerId,T:
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -9979,28 +9979,28 @@ int PostgresqlImplementation::getContentBySourceId(T::SourceId sourceId,T::FileI
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);
@@ -10089,28 +10089,28 @@ int PostgresqlImplementation::getContentByFileId(T::FileId fileId,T::ContentInfo
     {
       auto *contentInfo = new T::ContentInfo();
 
-      contentInfo->mFileId = atoll(PQgetvalue(res, i, 0));
-      contentInfo->mMessageIndex = atoi(PQgetvalue(res, i, 1));
-      contentInfo->mFileType = atoi(PQgetvalue(res, i, 2));
-      contentInfo->mFilePosition = atoll(PQgetvalue(res, i, 3));
-      contentInfo->mMessageSize = atoi(PQgetvalue(res, i, 4));
-      contentInfo->mProducerId = atoi(PQgetvalue(res, i, 5));
-      contentInfo->mGenerationId = atoll(PQgetvalue(res, i, 6));
-      contentInfo->mGeometryId = atoi(PQgetvalue(res, i, 7));
-      contentInfo->mFmiParameterId = atoi(PQgetvalue(res, i, 8));
+      contentInfo->mFileId = toInt64(PQgetvalue(res, i, 0));
+      contentInfo->mMessageIndex = toInt32(PQgetvalue(res, i, 1));
+      contentInfo->mFileType = toInt32(PQgetvalue(res, i, 2));
+      contentInfo->mFilePosition = toInt64(PQgetvalue(res, i, 3));
+      contentInfo->mMessageSize = toInt32(PQgetvalue(res, i, 4));
+      contentInfo->mProducerId = toInt32(PQgetvalue(res, i, 5));
+      contentInfo->mGenerationId = toInt64(PQgetvalue(res, i, 6));
+      contentInfo->mGeometryId = toInt32(PQgetvalue(res, i, 7));
+      contentInfo->mFmiParameterId = toInt32(PQgetvalue(res, i, 8));
       contentInfo->setFmiParameterName(PQgetvalue(res, i, 9));
       contentInfo->setForecastTime(PQgetvalue(res, i, 10));
-      contentInfo->mFmiParameterLevelId = atoi(PQgetvalue(res, i, 11));
-      contentInfo->mParameterLevel = atoi(PQgetvalue(res, i, 12));
-      contentInfo->mForecastType = atoi(PQgetvalue(res, i, 13));
-      contentInfo->mForecastNumber = atoi(PQgetvalue(res, i, 14));
-      contentInfo->mFlags = atoi(PQgetvalue(res, i, 15));
-      contentInfo->mSourceId = atoi(PQgetvalue(res, i, 16));
-      contentInfo->mAggregationId = atoi(PQgetvalue(res, i, 17));
-      contentInfo->mAggregationPeriod = atoi(PQgetvalue(res, i, 18));
-      contentInfo->mProcessingTypeId = atoi(PQgetvalue(res, i, 19));
-      contentInfo->mProcessingTypeValue1 = atof(PQgetvalue(res, i, 20));
-      contentInfo->mProcessingTypeValue2 = atof(PQgetvalue(res, i, 21));
+      contentInfo->mFmiParameterLevelId = toInt32(PQgetvalue(res, i, 11));
+      contentInfo->mParameterLevel = toInt32(PQgetvalue(res, i, 12));
+      contentInfo->mForecastType = toInt32(PQgetvalue(res, i, 13));
+      contentInfo->mForecastNumber = toInt32(PQgetvalue(res, i, 14));
+      contentInfo->mFlags = toInt32(PQgetvalue(res, i, 15));
+      contentInfo->mSourceId = toInt32(PQgetvalue(res, i, 16));
+      contentInfo->mAggregationId = toInt32(PQgetvalue(res, i, 17));
+      contentInfo->mAggregationPeriod = toInt32(PQgetvalue(res, i, 18));
+      contentInfo->mProcessingTypeId = toInt32(PQgetvalue(res, i, 19));
+      contentInfo->mProcessingTypeValue1 = toDouble(PQgetvalue(res, i, 20));
+      contentInfo->mProcessingTypeValue2 = toDouble(PQgetvalue(res, i, 21));
 
       std::string modificationTime = PQgetvalue(res, i, 22);
       contentInfo->mModificationTime = utcTimeToTimeT(modificationTime);

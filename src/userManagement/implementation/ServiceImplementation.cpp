@@ -242,7 +242,7 @@ void ServiceImplementation::updateUsers()
           auto *user = new UserInfo();
 
           if (field[0][0] != '\0')
-            user->setUserId(atoi(field[0]));
+            user->setUserId(toInt32(field[0]));
 
           if (field[1][0] != '\0')
             user->setUsername(field[1]);

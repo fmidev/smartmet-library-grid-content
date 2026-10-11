@@ -1941,7 +1941,7 @@ bool ServiceImplementation::parseFunction(
 
     int contourCoordinateType = 0;
     if (contourCoordinateTypeStr)
-      contourCoordinateType = atoi(contourCoordinateTypeStr);
+      contourCoordinateType = toInt32(contourCoordinateTypeStr);
 
 
     PRINT_DATA(mDebugLog, "%s   + Parse parameter : %s\n", space(recursionCounter).c_str(), paramStr.c_str());
@@ -4544,7 +4544,7 @@ bool ServiceImplementation::getSpecialValues(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -4883,7 +4883,7 @@ bool ServiceImplementation::getValueVectors(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -5437,7 +5437,7 @@ bool ServiceImplementation::getGridFiles(
     for (auto& propertie : properties)
     {
       //std::cout << "PROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-      oldProperties.insert(std::pair<uint,Int64 >(propertie.propertyId,atoll(propertie.propertyValue.c_str())));
+      oldProperties.insert(std::pair<uint,Int64 >(propertie.propertyId,toInt64(propertie.propertyValue.c_str())));
     }
 
     uint version = 0;
@@ -5780,7 +5780,7 @@ bool ServiceImplementation::getGridFiles(
 
       if (geometryIdStr)
       {
-        GRIB1::GridDef_sptr def = Identification::gridDef.getGrib1DefinitionByGeometryId(atoi(geometryIdStr));
+        GRIB1::GridDef_sptr def = Identification::gridDef.getGrib1DefinitionByGeometryId(toInt32(geometryIdStr));
         if (def)
         {
           newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::DataRepresentationType,def->getTemplateNumber()));
@@ -5791,7 +5791,7 @@ bool ServiceImplementation::getGridFiles(
           for (auto& tmpPropertie : tmpProperties)
           {
             //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,atoll(tmpPropertie.propertyValue.c_str())));
+            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
           }
         }
       }
@@ -5856,7 +5856,7 @@ bool ServiceImplementation::getGridFiles(
       if (geometryIdStr)
       {
         //Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,latLonCoordinates,width,height);
-        GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(atoi(geometryIdStr));
+        GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(toInt32(geometryIdStr));
         if (def)
         {
           //printf("TEMPLATE %d\n",def->getTemplateNumber());
@@ -5873,7 +5873,7 @@ bool ServiceImplementation::getGridFiles(
           for (auto& tmpPropertie : tmpProperties)
           {
             //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,atoll(tmpPropertie.propertyValue.c_str())));
+            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
           }
         }
       }
@@ -6338,7 +6338,7 @@ bool ServiceImplementation::getPointValuesByHeight(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -6659,7 +6659,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -6903,7 +6903,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
         for (auto it = functionParams.begin(); it != functionParams.end(); ++it)
         {
           if (*it != "$")
-            modificationParameters.push_back(atof(it->c_str()));
+            modificationParameters.push_back(toDouble(it->c_str()));
         }
         conversionByFunction = false;
       }
@@ -7285,7 +7285,7 @@ bool ServiceImplementation::getPointValues(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -7577,7 +7577,7 @@ bool ServiceImplementation::getCircleValues(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -7978,7 +7978,7 @@ bool ServiceImplementation::getPolygonValues(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
@@ -9333,7 +9333,7 @@ bool ServiceImplementation::getVerticalValueVectors(
         for (auto& functionParam : functionParams)
         {
           if (functionParam != "$")
-            modificationParameters.push_back(atof(functionParam.c_str()));
+            modificationParameters.push_back(toDouble(functionParam.c_str()));
         }
         conversionByFunction = false;
       }
