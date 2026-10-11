@@ -5725,7 +5725,7 @@ void MemoryImplementation::readProducerList()
 
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mProducerStorage_modificationTime = getFileModificationTime(filename);
   }
@@ -5777,7 +5777,7 @@ void MemoryImplementation::readGenerationList()
         mGenerationInfoList.addGenerationInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -5827,7 +5827,7 @@ void MemoryImplementation::readGeometryList()
         mGeometryInfoList.addGeometryInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mGeometryStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -5878,7 +5878,7 @@ void MemoryImplementation::readFileList()
         mFileInfoList.addFileInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mFileStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -5925,7 +5925,7 @@ void MemoryImplementation::readContentList()
         mContentInfoList[0].addContentInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mContentStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -6045,7 +6045,7 @@ bool MemoryImplementation::syncProducerList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::ProducerId> idList;
     mProducerInfoList.getLength();
@@ -6156,7 +6156,7 @@ bool MemoryImplementation::syncGenerationList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::GenerationId> idList;
     mGenerationInfoList.getLength();
@@ -6263,7 +6263,7 @@ bool MemoryImplementation::syncGeometryList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::GeometryInfo> idList;
     mGeometryInfoList.getLength();
@@ -6371,7 +6371,7 @@ bool MemoryImplementation::syncFileList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::FileId> idList;
     std::vector<std::string> nameList;
@@ -6503,7 +6503,7 @@ bool MemoryImplementation::syncContentList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {

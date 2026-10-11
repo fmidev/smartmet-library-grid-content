@@ -168,7 +168,7 @@ void ServiceImplementation::updateGroups()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
   }
   catch (...)
   {
@@ -277,7 +277,7 @@ void ServiceImplementation::updateUsers()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
   }
   catch (...)
   {

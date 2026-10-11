@@ -531,7 +531,8 @@ void EventInfoList::writeToFile(const std::string& filename)
       it = it->nextItem;
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

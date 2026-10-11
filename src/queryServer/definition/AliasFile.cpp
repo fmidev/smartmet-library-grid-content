@@ -396,7 +396,7 @@ void AliasFile::loadFile()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mLastModified = getFileModificationTime(mFilename.c_str());
   }

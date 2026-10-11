@@ -899,7 +899,7 @@ void ServiceImplementation::loadProducerFile()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mProducerFile_modificationTime = getFileModificationTime(mProducerFile.c_str());
   }
@@ -977,7 +977,7 @@ void ServiceImplementation::loadUnitConversionFile()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
   }
   catch (...)
   {
@@ -1074,7 +1074,7 @@ void ServiceImplementation::loadHeightConversionFile()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mHeightConversionsFile_modificationTime = getFileModificationTime(mHeightConversionsFile.c_str());
   }

@@ -783,7 +783,8 @@ void ProducerInfoList::writeToFile(const std::string& filename)
       fprintf(file,"%s\n",mList[t]->getCsv().c_str());
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

@@ -7459,7 +7459,8 @@ void ContentInfoList::writeToFile(const std::string& filename,const char *filemo
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

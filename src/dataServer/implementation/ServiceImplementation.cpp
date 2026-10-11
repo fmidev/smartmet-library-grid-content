@@ -6940,7 +6940,7 @@ void ServiceImplementation::removeOldCacheFiles(std::map<T::FileId,std::string>&
       {
         std::string filePath = mFileCache_directory + "/" + it.second;
         PRINT_DATA(mDebugLog,"Removing cached file: %s\n",filePath.c_str());
-        remove(filePath.c_str());
+        (void)remove(filePath.c_str());
         mFileCache_fileCount--;
       }
     }

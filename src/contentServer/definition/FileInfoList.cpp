@@ -2437,7 +2437,8 @@ void FileInfoList::writeToFile(const std::string& filename,const char *filemode)
       fprintf(file,"%s\n",mArray[t]->getCsv().c_str());
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

@@ -1809,7 +1809,8 @@ void GeometryInfoList::writeToFile(const std::string& filename)
       if (info != nullptr && (info->mFlags & T::GeometryInfo::Flags::DeletedGeometry) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {
