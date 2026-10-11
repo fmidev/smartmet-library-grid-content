@@ -19,7 +19,6 @@
 #include <chrono>
 #include <deque>
 #include <memory>
-#include <ranges>
 #include <thread>
 #include <unordered_set>
 #include "../../functions/Function_add.h"
@@ -2711,14 +2710,14 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             std::vector<double> parameters;
             std::vector<std::string> strParameters;
 
-            for (auto& mFunctionParam : qParam->mFunctionParams)
+            for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
             {
-              double a = toDouble(mFunctionParam.second.c_str());
-              QueryParameter* q = query.getQueryParameterPtr(mFunctionParam.first);
+              double a = toDouble(it->second.c_str());
+              QueryParameter* q = query.getQueryParameterPtr(it->first);
               if (onlyAvailableParams && q != nullptr && !hasDataAtPoint(query, *q, tCount, v))
                 continue;
 
-              strParameters.push_back(mFunctionParam.second);
+              strParameters.push_back(it->second);
               std::vector<double> valueList;
               if (q != nullptr)
               {
@@ -2775,14 +2774,14 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
               }
               else
               {
-                for (double & aa : valueList)
+                for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
                 {
-                  parameters.emplace_back(aa);
+                  parameters.emplace_back(*aa);
                   if (q)
-                    areaParameters.emplace_back(aa);
+                    areaParameters.emplace_back(*aa);
                   else
                   if (v == 0)
-                    extParameters.emplace_back(aa);
+                    extParameters.emplace_back(*aa);
                 }
               }
             }
@@ -2890,8 +2889,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
             // This is an area function call.
 
             std::string func = function.substr(1);
-            for (double & areaParameter : areaParameters)
-              extParameters.push_back(areaParameter);
+            for (auto it = areaParameters.begin();it != areaParameters.end();++it)
+              extParameters.push_back(*it);
 
             auto functionPtr = mFunctionCollection.getFunction(func);
             if (functionPtr)
@@ -3590,7 +3589,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
         std::set<T::GeometryId> tmpGeomIdList;
 
 
-        for (long fTime : std::ranges::reverse_view(*forecastTimeList))
+        for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
         {
           std::shared_ptr<ParameterValues> valueList = std::make_shared<ParameterValues>();
           tmpValueList.emplace_back(valueList);
@@ -3627,9 +3626,9 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
               if (qParam->mType != QueryParameter::Type::PointValues &&  tmpGeomIdList.size() == 0)
               {
-                for (auto& tmpProducer : tmpProducers)
+                for (auto pp = tmpProducers.begin(); pp != tmpProducers.end(); ++pp)
                 {
-                  tmpGeomIdList.insert(tmpProducer.second);
+                  tmpGeomIdList.insert(pp->second);
                 }
               }
 
@@ -3642,7 +3641,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               //printf("SEARCH %s %u\n",producerStr.c_str(),producerId);
 
               getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                  queryFlags, fTime, false, *valueList, producerStr);
+                  queryFlags, *fTime, false, *valueList, producerStr);
 
               //printf("SEARCH RESULT %s %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),valueList->mFlags);
               bool concat = false;
@@ -3681,8 +3680,8 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                     }
                     else
                     {
-                      for (auto& gg : vec->second)
-                        tmpGeomIdList.insert(gg.second);
+                      for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
+                        tmpGeomIdList.insert(gg->second);
                     }
 
 
@@ -3692,7 +3691,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                       geomIdListPtr = &tmpGeomIdList;
                       std::string maxAnalysisTime;
                       getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                          queryFlags, fTime, false, *valueList, producerStr);
+                          queryFlags, *fTime, false, *valueList, producerStr);
 
                       concat = true;
                     }
@@ -3775,16 +3774,16 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
           if (valueList->mValueList.getLength() == 0)
           {
             //valueList->mForecastTime = utcTimeFromTimeT(*fTime);
-            valueList->mForecastTimeUTC = fTime;
+            valueList->mForecastTimeUTC = *fTime;
           }
 
           //if (query.mForecastTimeList.find(*fTime) == query.mForecastTimeList.end())
           //  valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
         }
 
-        for (auto& aa : std::ranges::reverse_view(tmpValueList))
+        for (auto aa = tmpValueList.rbegin(); aa != tmpValueList.rend(); aa++)
         {
-          qParam->mValueList.emplace_back(aa);
+          qParam->mValueList.emplace_back(*aa);
         }
 
       }

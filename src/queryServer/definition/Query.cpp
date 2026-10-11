@@ -1,7 +1,6 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <ctime>
-#include <ranges>
 #include <macgyver/Hash.h>
 
 
@@ -160,9 +159,9 @@ bool Query::parameterInQuery(const std::string& param)
 {
   try
   {
-    for (auto& it : std::ranges::reverse_view(mQueryParameterList))
+    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
     {
-      if (it.mParam == param  ||  it.mSymbolicName == param)
+      if (it->mParam == param  ||  it->mSymbolicName == param)
         return true;
     }
     return false;
@@ -211,10 +210,10 @@ QueryParameter* Query::getQueryParameterPtr(const std::string& param)
 {
   try
   {
-    for (auto& it : std::ranges::reverse_view(mQueryParameterList))
+    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
     {
-      if (it.mParam == param  ||  it.mSymbolicName == param)
-        return &it;
+      if (it->mParam == param  ||  it->mSymbolicName == param)
+        return &(*it);
     }
     return nullptr;
   }
@@ -234,10 +233,10 @@ QueryParameter* Query::getQueryParameterPtr(uint id)
 {
   try
   {
-    for (auto& it : std::ranges::reverse_view(mQueryParameterList))
+    for (auto it = mQueryParameterList.rbegin(); it != mQueryParameterList.rend(); ++it)
     {
-      if (it.mId == id)
-        return &it;
+      if (it->mId == id)
+        return &(*it);
     }
     return nullptr;
   }

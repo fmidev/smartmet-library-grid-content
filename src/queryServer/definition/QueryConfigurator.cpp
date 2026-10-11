@@ -3,7 +3,6 @@
 #include <grid-files/common/AdditionalParameters.h>
 #include <grid-files/common/ShowFunction.h>
 #include <ctime>
-#include <ranges>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -447,14 +446,14 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
       levels.insert(0);
 
     uint levelCount = 0;
-    for (double level : std::ranges::reverse_view(levels))
+    for (auto level = levels.rbegin(); level != levels.rend(); ++level)
     {
       if (paramStr != nullptr)
       {
         std::vector<std::string> paramList;
         splitString(paramStr,',',paramList);
 
-        for (auto& p : paramList)
+        for (auto p = paramList.begin(); p != paramList.end(); ++p)
         {
           QueryParameter param;
           //param.mId;
@@ -464,14 +463,14 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
           if (locationTypeStr != nullptr)
             param.mLocationType = toUInt8(locationTypeStr);
 
-          param.mParam = p;
-          param.mOrigParam = p;
+          param.mParam = *p;
+          param.mOrigParam = *p;
           //param.mSymbolicName = *p;
           //param.mParameterKeyType;
           //param.mParameterKey = *p;
           //param.mParameterLevelIdType;
           //param.mParameterLevelId;
-          param.mParameterLevel = level;
+          param.mParameterLevel = *level;
           //param.mForecastType;
           //param.mForecastNumber;
           if (areaInterpolationMethodStr)
@@ -498,7 +497,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
           //param.mTimestepSizeInMinutes;
           //param.mFlags;
 
-          if (AdditionalParameters::isAdditionalParameter(p.c_str()))
+          if (AdditionalParameters::isAdditionalParameter(p->c_str()))
           {
             if (levelCount == 0)
             {
