@@ -115,6 +115,7 @@ FMI Grid Content library development files
 * Tue Oct 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.13-1.fmi
 - Declare member functions and parameters const where nothing is modified (const correctness), no functional changes
 - Requires 26.10.13 versions of spine, grid-files due to their ABI changes
+- Fixed reading a missing group field from user definitions with only four fields
 
 * Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
 - Failed file writes, closes and seeks are now reported instead of being ignored

@@ -252,7 +252,7 @@ void ServiceImplementation::updateUsers()
           if (field[3][0] != '\0')
             user->setFullName(field[3]);
 
-          if (field[4][0] != '\0')
+          if (c > 4 && field[4][0] != '\0')
           {
             std::vector<std::string> list;
             splitString(field[4],',',list);
