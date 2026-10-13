@@ -22,7 +22,7 @@ class Alias
                    //Alias(const Alias& alias);
     virtual        ~Alias();
 
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string    mName;        //!< Alias name (must be unique within the owning AliasFile).
     std::string    mAliasString; //!< Canonical parameter name or expression the alias expands to.

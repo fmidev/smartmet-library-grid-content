@@ -78,14 +78,14 @@ class ContentInfoList
     ContentInfo*        getContentInfoByIndex(uint index) const;
     ContentInfo*        getContentInfoByIndexNoCheck(uint index);
     bool                getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo);
-    ContentInfo*        getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
+    ContentInfo*        getContentInfoByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo);
 
     ContentInfo*        getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime);
     ContentInfo*        getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime);
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
 
-    void                getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
+    void                getContentInfoListByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
     void                getContentInfoList(ContentInfoList& contentInfoList);
     void                getContentInfoListNoClear(ContentInfoList& contentInfoList);
     void                getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
@@ -139,7 +139,7 @@ class ContentInfoList
     void                getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<T::GenerationId>& generationIdList);
 
     void                getContentLevelListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
-    void                getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
+    void                getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,const std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
 
     void                getForecastTimeList(std::set<std::string>& forecastTimeList);
     void                getForecastTimeList(std::set<time_t>& forecastTimeList);
@@ -167,13 +167,13 @@ class ContentInfoList
 
     uint                getSize() const;
     void                setSize(uint newSize);
-    bool                getReleaseObjects();
+    bool                getReleaseObjects() const;
     void                setContentInfoByIndex(uint index,ContentInfo *contentInfo);
     void                print(std::ostream& stream,uint level,uint optionFlags);
     void                lock();
     void                unlock();
 
-    uint                getComparisonMethod();
+    uint                getComparisonMethod() const;
     void                setComparisonMethod(uint comparisonMethod);
     void                setLockingEnabled(bool lockingEnabled);
     void                setReleaseObjects(bool releaseObjects);

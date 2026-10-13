@@ -1626,7 +1626,7 @@ void GeometryInfoList::getGeometryInfoListBySourceId(T::SourceId sourceId,Geomet
 
 /*! \brief Return the number of entries in the list. */
 
-uint GeometryInfoList::getLength()
+uint GeometryInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -1664,7 +1664,7 @@ uint GeometryInfoList::getSize() const
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool GeometryInfoList::getReleaseObjects()
+bool GeometryInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try

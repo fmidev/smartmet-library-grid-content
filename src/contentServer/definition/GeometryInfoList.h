@@ -51,12 +51,12 @@ class GeometryInfoList
     void                getGeometryInfoListByProducerId(T::ProducerId producerId,GeometryInfoList& geometryInfoList);
     void                getGeometryInfoListByProducerIdAndStatus(T::ProducerId producerId,GeometryInfoList& geometryInfoList,uchar geometryStatus);
     void                getGeometryInfoListBySourceId(T::SourceId sourceId,GeometryInfoList& geometryInfoList);
-    uint                getLength();
+    uint                getLength() const;
     std::size_t         getHash();
     std::size_t         getHashByProducerId(T::ProducerId producerId);
     std::size_t         getHashByStorageId(T::StorageId storageId);
     ModificationLock*   getModificationLockPtr();
-    bool                getReleaseObjects();
+    bool                getReleaseObjects() const;
     uint                getSize() const;
     uint                markDeleted();
     uint                markDeletedById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId);

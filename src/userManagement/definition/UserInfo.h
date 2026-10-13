@@ -31,10 +31,10 @@ class UserInfo
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
-    time_t              getStartTime();
-    time_t              getEndTime();
-    uchar               getStatus();
-    uint                getUserId();
+    time_t              getStartTime() const;
+    time_t              getEndTime() const;
+    uchar               getStatus() const;
+    uint                getUserId() const;
     void                setStatus(uchar status);
     void                setUserId(uint userId);
     void                setFullName(const char *fullName);
@@ -67,10 +67,10 @@ class UserInfo
     void                setAttribute(const char *attributeGroup,const char *attributeName,uint attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue);
-    void                setAttributes(const char *attributeGroup,AttributeList& attributeList);
+    void                setAttributes(const char *attributeGroup,const AttributeList& attributeList);
     void                deleteAttribute(const char *attributeGroup,const char *attributeName);
     void                deleteAttributeGroup(const char *attributeGroup);
-    void                deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList);
+    void                deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList);
     void                updateUserInfo(UserInfo& sessionInfo);
 
     void                print(std::ostream& stream,uint level,uint optionFlags);

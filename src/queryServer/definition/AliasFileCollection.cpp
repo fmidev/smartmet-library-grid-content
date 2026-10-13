@@ -30,7 +30,7 @@ AliasFileCollection::AliasFileCollection()
 
 /*! \brief Query Server: Constructor. */
 
-AliasFileCollection::AliasFileCollection(string_vec& filenames)
+AliasFileCollection::AliasFileCollection(const string_vec& filenames)
 {
   try
   {

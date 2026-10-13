@@ -2088,7 +2088,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(T::SourceId sourceId,Ge
 
 /*! \brief Return the number of entries in the list. */
 
-uint GenerationInfoList::getLength()
+uint GenerationInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -2126,7 +2126,7 @@ uint GenerationInfoList::getSize() const
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool GenerationInfoList::getReleaseObjects()
+bool GenerationInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try

@@ -8387,7 +8387,7 @@ int RedisImplementation::deleteContentBySourceId(T::SourceId sourceId)
 
 /*! \brief Redis backend helper: low-level write of a content record into the content sorted set. */
 
-int RedisImplementation::setContent(T::ContentInfo& contentInfo)
+int RedisImplementation::setContent(const T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -9230,7 +9230,7 @@ int RedisImplementation::getContentByGenerationIdAndTimeRange(T::GenerationId ge
 
 /*! \brief Redis backend helper: low-level fetch of content records matching the given forecast-time list. */
 
-int RedisImplementation::getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByForecastTimeList(const std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

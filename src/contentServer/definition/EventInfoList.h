@@ -37,8 +37,8 @@ class EventInfoList
     EventInfo*      getLastEvent();
     void            getEventInfoList(T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList);
     EventInfo*      getEventInfo(T::EventId  eventId);
-    uint            getLength();
-    uint            getMaxLength();
+    uint            getLength() const;
+    uint            getMaxLength() const;
     void            lock();
     void            unlock();
     void            setMaxLength(uint maxLength);

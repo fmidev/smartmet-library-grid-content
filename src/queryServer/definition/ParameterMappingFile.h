@@ -36,14 +36,14 @@ class ParameterMappingFile
     virtual bool          checkUpdates();
     virtual void          getAliasMappings(ParameterMapping_vec& mappings,UnitConversion_vec& unitConversions);
     std::string           getFilename();
-    ParameterMapping*     getMapping(ParameterMapping& mapping);
+    ParameterMapping*     getMapping(const ParameterMapping& mapping);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappingsByParamKey(const std::string& producerName,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
-    void                  setParameterMappings(ParameterMapping_vec& mappings);
+    void                  setParameterMappings(const ParameterMapping_vec& mappings);
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:

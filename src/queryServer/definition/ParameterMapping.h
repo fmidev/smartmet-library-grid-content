@@ -27,7 +27,7 @@ class ParameterMapping
     virtual std::size_t         getHash();
     virtual std::size_t         getKeyHash();
 
-    void                        print(std::ostream& stream,uint level,uint optionFlags);
+    void                        print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string                 mProducerName;              //!< Name of the producer this mapping applies to (empty = any).
     std::string                 mParameterName;             //!< Human-readable parameter name used in queries.

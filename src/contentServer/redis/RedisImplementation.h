@@ -228,7 +228,7 @@ class RedisImplementation : public ServiceInterface
      int            getFileListByProducerId(T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);
 
-     int            setContent(T::ContentInfo& contentInfo);
+     int            setContent(const T::ContentInfo& contentInfo);
      int            deleteContent(T::FileId fileId,T::MessageIndex messageIndex);
      int            deleteContentByFileId(T::FileId fileId);
      int            deleteContentByGenerationId(T::GenerationId generationId);
@@ -242,7 +242,7 @@ class RedisImplementation : public ServiceInterface
      int            getContentByGenerationId(T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByGenerationIdAndTimeRange(T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList);
-     int            getContentByForecastTimeList(std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList);
+     int            getContentByForecastTimeList(const std::vector<T::ForecastTime>& forecastTimeList,T::ContentInfoList& contentInfoList);
      int            getContentByProducerId(T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentBySourceId(T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList);
      int            getContentByParameterId(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ContentInfoList& contentInfoList);

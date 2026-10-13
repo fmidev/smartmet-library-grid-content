@@ -28,22 +28,22 @@ class ContentInfo
 
     ContentInfo&       operator=(const ContentInfo& contentInfo);
 
-    std::string        getCsv();
+    std::string        getCsv() const;
     std::string        getCsvHeader();
 
-    char*              getForecastTime();
+    char*              getForecastTime() const;
     void               setForecastTime(time_t ftime);
     void               setForecastTime(const char *ftime);
     void               setForecastTime(const std::string& ftime);
 
-    char*              getFmiParameterName();
+    char*              getFmiParameterName() const;
     void               setFmiParameterName(const char *name);
     void               setFmiParameterName(const std::string& name);
 
     void               setCsv(const char *csv);
     void               setCsv(const std::string& csv);
     ContentInfo*       duplicate();
-    void               print(std::ostream& stream,uint level,uint optionFlags);
+    void               print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::FileId          mFileId;                //!< Identifier of the file that contains this content record.
     T::MessageIndex    mMessageIndex;          //!< Zero-based index of the GRIB message within its file.
@@ -107,7 +107,7 @@ class ContentInfo
 
   public:
 
-    inline int compare(uint comparisonMethod,ContentInfo *contentInfo)
+    inline int compare(uint comparisonMethod,ContentInfo *contentInfo) const
     {
       try
       {

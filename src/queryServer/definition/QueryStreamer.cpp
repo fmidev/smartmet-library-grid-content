@@ -58,7 +58,7 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
 
 /*! \brief Query Server: Add query. */
 
-void QueryStreamer::addQuery(Query& query)
+void QueryStreamer::addQuery(const Query& query)
 {
   try
   {

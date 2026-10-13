@@ -149,7 +149,7 @@ std::size_t ParameterMapping::getKeyHash()
 
 /*! \brief Query Server: Print. */
 
-void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags)
+void ParameterMapping::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

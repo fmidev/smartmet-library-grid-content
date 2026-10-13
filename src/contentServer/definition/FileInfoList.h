@@ -69,8 +69,8 @@ class FileInfoList
     std::size_t    getHashByProducerId(T::ProducerId producerId);
     std::size_t    getHashByGenerationId(T::GenerationId generationId);
     time_t         getLastFileDeletionTimeByGenerationId(T::GenerationId generationId);
-    uint           getLength();
-    bool           getReleaseObjects();
+    uint           getLength() const;
+    bool           getReleaseObjects() const;
     void           increaseSize(uint newSize);
     void           increaseSizeNoLock(uint newSize);
     uint           markDeleted();

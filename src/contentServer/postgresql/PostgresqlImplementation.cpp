@@ -7213,7 +7213,7 @@ int PostgresqlImplementation::deleteFileListByGenerationId(T::GenerationId gener
 
 /*! \brief PostgreSQL backend: deletes files matching the given list of generation ids and optionally their content. */
 
-int PostgresqlImplementation::deleteFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,bool deleteContent)
+int PostgresqlImplementation::deleteFileListByGenerationIdList(const std::set<T::GenerationId>& generationIdList,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -7710,7 +7710,7 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
 
 /*! \brief PostgreSQL backend: queries the database for files matching the given list of generation ids. */
 
-int PostgresqlImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListByGenerationIdList(const std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8078,7 +8078,7 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
 
 /*! \brief PostgreSQL backend: inserts a list of content records into the database. */
 
-int PostgresqlImplementation::addContentList(T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::addContentList(const T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8338,7 +8338,7 @@ int PostgresqlImplementation::deleteContentByGenerationId(T::GenerationId genera
 
 /*! \brief PostgreSQL backend: deletes content records matching the given list of generation ids. */
 
-int PostgresqlImplementation::deleteContentByGenerationIdList(std::set<T::GenerationId>& generationIdList)
+int PostgresqlImplementation::deleteContentByGenerationIdList(const std::set<T::GenerationId>& generationIdList)
 {
   FUNCTION_TRACE
   try
@@ -8400,7 +8400,7 @@ int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
 
 /*! \brief PostgreSQL backend: updates a content record in the database. */
 
-int PostgresqlImplementation::setContent(T::ContentInfo& contentInfo)
+int PostgresqlImplementation::setContent(const T::ContentInfo& contentInfo)
 {
   FUNCTION_TRACE
   try
@@ -8844,7 +8844,7 @@ int PostgresqlImplementation::getContentByGenerationId(T::GenerationId generatio
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given list of generation ids. */
 
-int PostgresqlImplementation::getContentByGenerationIdList(std::set<T::GenerationId>& generationIdList,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByGenerationIdList(const std::set<T::GenerationId>& generationIdList,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

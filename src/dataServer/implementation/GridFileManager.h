@@ -57,7 +57,7 @@ class GridFileManager
 
     void                deleteFileNoLock(T::FileId fileId,bool sentMessageToContentServer);
     void                deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool sentMessageToContentServer);
-    void                deleteFilesNoLock(std::set<T::FileId>& fileIdList,bool sentMessageToContentServer);
+    void                deleteFilesNoLock(const std::set<T::FileId>& fileIdList,bool sentMessageToContentServer);
 
   private:
 

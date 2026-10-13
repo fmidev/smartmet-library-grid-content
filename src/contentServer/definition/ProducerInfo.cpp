@@ -136,7 +136,7 @@ ProducerInfo& ProducerInfo::operator=(const ProducerInfo& producerInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string ProducerInfo::getCsv()
+std::string ProducerInfo::getCsv() const
 {
   try
   {
@@ -273,7 +273,7 @@ ProducerInfo* ProducerInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

@@ -189,7 +189,7 @@ FileInfo& FileInfo::operator=(const FileInfo& fileInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string FileInfo::getCsv()
+std::string FileInfo::getCsv() const
 {
   try
   {
@@ -325,7 +325,7 @@ void FileInfo::setCsv(const std::string& csv)
 
 /*! \brief Compare two records according to the selected comparison method. */
 
-int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo)
+int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo) const
 {
   try
   {
@@ -375,7 +375,7 @@ FileInfo* FileInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void FileInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void FileInfo::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

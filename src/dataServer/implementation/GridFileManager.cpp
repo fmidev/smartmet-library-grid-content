@@ -715,7 +715,7 @@ void GridFileManager::deleteFilesNoLock(std::vector<T::FileId>& fileIdList,bool 
 
 /*! \brief Data Server: Delete files no lock. */
 
-void GridFileManager::deleteFilesNoLock(std::set<T::FileId>& fileIdList,bool sentMessageToContentServer)
+void GridFileManager::deleteFilesNoLock(const std::set<T::FileId>& fileIdList,bool sentMessageToContentServer)
 {
   FUNCTION_TRACE
   try

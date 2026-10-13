@@ -21,7 +21,7 @@ class AliasFileCollection
 {
   public:
                   AliasFileCollection();
-                  AliasFileCollection(string_vec& filenames);
+                  AliasFileCollection(const string_vec& filenames);
                   //AliasFileCollection(const AliasFileCollection& aliasFileCollection);
     virtual       ~AliasFileCollection();
 

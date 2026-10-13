@@ -25,7 +25,7 @@ class LuaFunction
                    LuaFunction(const std::string& functionName,const uint type);
     virtual        ~LuaFunction();
 
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string    mFunctionName;  //!< Name of the Lua function as it appears in the script.
     uint           mType;          //!< Call-type category (1, 4, 5, …) that determines the calling convention.

@@ -51,7 +51,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 /*! \brief Builds a value record list from content info entries with given coordinate and interpolation parameters. */
 
-ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
+ValueRecordList::ValueRecordList(const ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
 {
   try
   {

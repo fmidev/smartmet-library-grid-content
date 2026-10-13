@@ -26,14 +26,14 @@ class ProducerInfo
                     ProducerInfo(const char *csv);
     virtual         ~ProducerInfo();
 
-    std::string     getCsv();
+    std::string     getCsv() const;
     std::string     getCsvHeader();
     void            setCsv(const char *csv);
     void            setCsv(const std::string& csv);
 
     ProducerInfo&   operator=(const ProducerInfo& producerInfo);
     ProducerInfo*   duplicate();
-    void            print(std::ostream& stream,uint level,uint optionFlags);
+    void            print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::ProducerId   mProducerId;    //!< Unique numeric identifier of the producer.
     std::string     mName;          //!< Short machine-readable name of the producer (e.g. "ECMWF").

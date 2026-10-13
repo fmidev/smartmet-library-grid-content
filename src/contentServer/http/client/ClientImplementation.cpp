@@ -4679,7 +4679,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nmemb, void *userdata)
+size_t ClientImplementation_responseProcessing(const char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   try
   {

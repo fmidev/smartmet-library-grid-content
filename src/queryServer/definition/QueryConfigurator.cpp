@@ -79,7 +79,7 @@ void QueryConfigurator::configure(Query& query,T::AttributeList& attributeList)
 
 /*! \brief Query Server: Configure misc. */
 
-void QueryConfigurator::configureMisc(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureMisc(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -101,7 +101,7 @@ void QueryConfigurator::configureMisc(Query& query,T::AttributeList& attributeLi
 
 /*! \brief Query Server: Configure producer. */
 
-void QueryConfigurator::configureProducer(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureProducer(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -124,7 +124,7 @@ void QueryConfigurator::configureProducer(Query& query,T::AttributeList& attribu
 
 /*! \brief Query Server: Configure generation. */
 
-void QueryConfigurator::configureGeneration(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureGeneration(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -147,7 +147,7 @@ void QueryConfigurator::configureGeneration(Query& query,T::AttributeList& attri
 
 /*! \brief Query Server: Configure time. */
 
-void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -359,7 +359,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
 /*! \brief Query Server: Configure location. */
 
-void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureLocation(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -418,7 +418,7 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
 
 /*! \brief Query Server: Configure parameters. */
 
-void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureParameters(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -528,7 +528,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
 
 /*! \brief Query Server: Configure parameter. */
 
-void QueryConfigurator::configureParameter(Query& query,QueryParameter& param,T::AttributeList& attributeList)
+void QueryConfigurator::configureParameter(const Query& query,QueryParameter& param,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try

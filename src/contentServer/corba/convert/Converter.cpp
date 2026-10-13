@@ -47,7 +47,7 @@ Converter::~Converter()
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ContentInfo& source,C::ContentInfo& target)
+void Converter::convert(const T::ContentInfo& source,C::ContentInfo& target)
 {
   try
   {
@@ -129,7 +129,7 @@ void Converter::convert(const C::ContentInfo& source,T::ContentInfo& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ContentInfoList& source,C::ContentInfoList& target)
+void Converter::convert(const T::ContentInfoList& source,C::ContentInfoList& target)
 {
   try
   {
@@ -182,7 +182,7 @@ void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& tar
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::FileInfo& source,C::FileInfo& target)
+void Converter::convert(const T::FileInfo& source,C::FileInfo& target)
 {
   try
   {
@@ -292,7 +292,7 @@ void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ProducerInfo& source,C::ProducerInfo& target)
+void Converter::convert(const T::ProducerInfo& source,C::ProducerInfo& target)
 {
   try
   {
@@ -391,7 +391,7 @@ void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::GenerationInfo& source,C::GenerationInfo& target)
+void Converter::convert(const T::GenerationInfo& source,C::GenerationInfo& target)
 {
   try
   {
@@ -505,7 +505,7 @@ void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoLis
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::GeometryInfo& source,C::GeometryInfo& target)
+void Converter::convert(const T::GeometryInfo& source,C::GeometryInfo& target)
 {
   try
   {
@@ -609,7 +609,7 @@ void Converter::convert(const C::GeometryInfoList& source,T::GeometryInfoList& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::EventInfo& source,C::EventInfo& target)
+void Converter::convert(const T::EventInfo& source,C::EventInfo& target)
 {
   try
   {
@@ -761,7 +761,7 @@ void Converter::convert(const C::StringList& source,string_vec& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<std::string>& source,C::TimeStringList& target)
+void Converter::convert(const std::set<std::string>& source,C::TimeStringList& target)
 {
   try
   {
@@ -808,7 +808,7 @@ void Converter::convert(const C::TimeStringList& source,std::set<std::string>& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<std::string>& source,C::StringList& target)
+void Converter::convert(const std::set<std::string>& source,C::StringList& target)
 {
   try
   {
@@ -953,7 +953,7 @@ void Converter::convert(const C::FileIdList& source,std::vector<UInt64>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<UInt64>& source,C::GenerationIdList& target)
+void Converter::convert(const std::set<UInt64>& source,C::GenerationIdList& target)
 {
   try
   {
@@ -1002,7 +1002,7 @@ void Converter::convert(const C::GenerationIdList& source,std::set<UInt64>& targ
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<UInt64>& source,C::FileIdList& target)
+void Converter::convert(const std::set<UInt64>& source,C::FileIdList& target)
 {
   try
   {
@@ -1051,7 +1051,7 @@ void Converter::convert(const C::FileIdList& source,std::set<UInt64>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<int>& source,C::GeometryIdList& target)
+void Converter::convert(const std::set<int>& source,C::GeometryIdList& target)
 {
   try
   {
@@ -1099,7 +1099,7 @@ void Converter::convert(const C::GeometryIdList& source,std::set<int>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<int>& source,C::LevelList& target)
+void Converter::convert(const std::set<int>& source,C::LevelList& target)
 {
   try
   {
@@ -1147,7 +1147,7 @@ void Converter::convert(const C::LevelList& source,std::set<int>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::FileAndContent& source,C::FileContent& target)
+void Converter::convert(const T::FileAndContent& source,C::FileContent& target)
 {
   try
   {
@@ -1235,7 +1235,7 @@ void Converter::convert(const C::FileContentList& source,std::vector<T::FileAndC
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ForecastTime& source,SmartMet::C::ForecastTimeInfo& target)
+void Converter::convert(const T::ForecastTime& source,SmartMet::C::ForecastTimeInfo& target)
 {
   try
   {
@@ -1334,7 +1334,7 @@ void Converter::convert(const SmartMet::C::ForecastTimeInfoList& source,std::vec
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::LevelInfo& source,C::LevelInfo& target)
+void Converter::convert(const T::LevelInfo& source,C::LevelInfo& target)
 {
   try
   {

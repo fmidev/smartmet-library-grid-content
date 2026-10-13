@@ -158,7 +158,7 @@ uint ParameterMappingFile::getNumberOfMappings()
 
 /*! \brief Query Server: Get mapping. */
 
-ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
+ParameterMapping* ParameterMappingFile::getMapping(const ParameterMapping& mapping)
 {
   try
   {
@@ -491,7 +491,7 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
 
 /*! \brief Query Server: Set parameter mappings. */
 
-void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
+void ParameterMappingFile::setParameterMappings(const ParameterMapping_vec& mappings)
 {
   try
   {

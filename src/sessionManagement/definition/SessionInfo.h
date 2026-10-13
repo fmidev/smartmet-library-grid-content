@@ -32,11 +32,11 @@ class SessionInfo
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
-    time_t              getExpirationTime();
-    time_t              getLastAccessTime();
-    T::SessionId        getSessionId();
-    uchar               getStatus();
-    uint                getTimeOutInSeconds();
+    time_t              getExpirationTime() const;
+    time_t              getLastAccessTime() const;
+    T::SessionId        getSessionId() const;
+    uchar               getStatus() const;
+    uint                getTimeOutInSeconds() const;
     void                setTimeOutInSeconds(uint seconds);
     void                setSessionId(T::SessionId sessionId);
     void                setStatus(uchar status);
@@ -59,10 +59,10 @@ class SessionInfo
     void                setAttribute(const char *attributeGroup,const char *attributeName,Int64 attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,UInt64 attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue);
-    void                setAttributes(const char *attributeGroup,AttributeList& attributeList);
+    void                setAttributes(const char *attributeGroup,const AttributeList& attributeList);
     void                deleteAttribute(const char *attributeGroup,const char *attributeName);
     void                deleteAttributeGroup(const char *attributeGroup);
-    void                deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList);
+    void                deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList);
     void                updateAccessTime();
     void                updateSessionInfo(SessionInfo& sessionInfo);
 

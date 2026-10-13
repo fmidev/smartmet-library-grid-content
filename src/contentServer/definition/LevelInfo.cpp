@@ -117,7 +117,7 @@ LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string LevelInfo::getCsv()
+std::string LevelInfo::getCsv() const
 {
   try
   {
@@ -240,7 +240,7 @@ LevelInfo* LevelInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

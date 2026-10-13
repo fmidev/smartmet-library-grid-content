@@ -22,7 +22,7 @@ class UnitConversion
                    UnitConversion();
     virtual        ~UnitConversion();
 
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string    mSourceUnit;                 //!< Name of the source unit (e.g. "K").
     std::string    mTargetUnit;                 //!< Name of the target unit (e.g. "C").

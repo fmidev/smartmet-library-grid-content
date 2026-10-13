@@ -250,13 +250,13 @@ void ServiceImplementation::init(
     DataServer::ServiceInterface* dataServerPtr,
     const std::string& gridConfigFile,
     const std::string& heightConversionFile,
-    string_vec& parameterMappingFiles,
+    const string_vec& parameterMappingFiles,
     const std::string& unitConversionFile,
-    string_vec& parameterMappingAliasFiles,
+    const string_vec& parameterMappingAliasFiles,
     string_vec& aliasFiles,
     const std::string& producerFile,
     string_vec& producerAliasFiles,
-    string_vec& luaFiles,
+    const string_vec& luaFiles,
     bool checkGeometryStatus,
     bool dataServerMethodsEnabled)
 {
@@ -1153,7 +1153,7 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
 
 /*! \brief Query Server: Get geometry id list by coordinates. */
 
-void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& coordinates, std::set<T::GeometryId>& geometryIdList)
+void ServiceImplementation::getGeometryIdListByCoordinates(uint gridWidth,uint gridHeight,const std::vector<T::Coordinate>& coordinates, std::set<T::GeometryId>& geometryIdList)
 {
   FUNCTION_TRACE
   try
@@ -2074,7 +2074,7 @@ bool ServiceImplementation::parseFunction(
 
 /*! \brief Query Server: Get producers. */
 
-void ServiceImplementation::getProducers(Query& query, Producer_vec& producers)
+void ServiceImplementation::getProducers(const Query& query, Producer_vec& producers)
 {
   FUNCTION_TRACE
   try
@@ -4165,7 +4165,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
 /*! \brief Query Server: Execute conversion. */
 
-void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::GridValueList& valueList)
+void ServiceImplementation::executeConversion(const std::string& function, const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList)
 {
   try
   {
@@ -4502,9 +4502,9 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 /*! \brief Query Server: Get special values. */
 
 bool ServiceImplementation::getSpecialValues(
-    Query& query,
+    const Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -4793,7 +4793,7 @@ bool ServiceImplementation::getSpecialValues(
 bool ServiceImplementation::getValueVectors(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -5324,7 +5324,7 @@ bool ServiceImplementation::getValueVectors(
 bool ServiceImplementation::getGridFiles(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -6182,7 +6182,7 @@ bool ServiceImplementation::getGridFiles(
 /*! \brief Query Server: Get content list. */
 
 time_t ServiceImplementation::getContentList(
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     ParameterMapping& pInfo,
@@ -6289,11 +6289,11 @@ time_t ServiceImplementation::getContentList(
 /*! \brief Query Server: Get point values by height. */
 
 bool ServiceImplementation::getPointValuesByHeight(
-    Query& query,
+    const Query& query,
     T::CoordinateType coordinateType,
     T::Coordinate_vec& coordinates,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -6610,11 +6610,11 @@ bool ServiceImplementation::getPointValuesByHeight(
 /*! \brief Query Server: Get value vectors by height. */
 
 bool ServiceImplementation::getValueVectorsByHeight(
-    Query& query,
+    const Query& query,
     T::CoordinateType coordinateType,
     T::Coordinate_vec& coordinates,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -6623,7 +6623,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
     time_t forecastTime,
     T::ParamLevelId paramLevelId,
     T::ParamLevel paramLevel,
-    T::ProducerId& newProducerId,
+    const T::ProducerId& newProducerId,
     ParameterValues& valueList)
 {
   FUNCTION_TRACE
@@ -7234,7 +7234,7 @@ short ServiceImplementation::getLevelInterpolationMethod(T::ParamLevelId paramLe
 bool ServiceImplementation::getPointValues(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -7527,9 +7527,9 @@ bool ServiceImplementation::getPointValues(
 /*! \brief Query Server: Get circle values. */
 
 bool ServiceImplementation::getCircleValues(
-    Query& query,
+    const Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -7821,7 +7821,7 @@ bool ServiceImplementation::getCircleValues(
 bool ServiceImplementation::getPolygonValues(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -8226,7 +8226,7 @@ bool ServiceImplementation::getPolygonValues(
 bool ServiceImplementation::getStreamlineValues(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -8565,7 +8565,7 @@ bool ServiceImplementation::getStreamlineValues(
 bool ServiceImplementation::getIsolineValues(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -8925,7 +8925,7 @@ bool ServiceImplementation::getIsolineValues(
 bool ServiceImplementation::getIsobandValues(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -9292,7 +9292,7 @@ bool ServiceImplementation::getIsobandValues(
 bool ServiceImplementation::getVerticalValueVectors(
     Query& query,
     QueryParameter& qParam,
-    T::ProducerInfo& producerInfo,
+    const T::ProducerInfo& producerInfo,
     T::GeometryId producerGeometryId,
     T::GenerationId generationId,
     const std::string& analysisTime,
@@ -10914,7 +10914,7 @@ void ServiceImplementation::getGridValues(
 void ServiceImplementation::getAdditionalValues(
     const std::string& parameterName,
     uchar coordinateType,
-    T::Coordinate_vec& coordinates,
+    const T::Coordinate_vec& coordinates,
     ParameterValues& values)
 {
   FUNCTION_TRACE
@@ -11587,7 +11587,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
 
 /*! \brief Query Server: Get closest levels by height. */
 
-bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& contentInfoList,uchar coordinateType,double x,double y,int height,int& level1,float& height1,int& level2,float& height2)
+bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& contentInfoList,uchar coordinateType,double x,double y,int height,int& level1,float& height1,int& level2,float& height2)
 {
   FUNCTION_TRACE
   try
@@ -11705,7 +11705,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& content
 
 /*! \brief Query Server: Get closest levels by height. */
 
-bool ServiceImplementation::getClosestLevelsByHeight(T::ContentInfoList& contentInfoList,uchar coordinateType,std::vector<T::Coordinate>& coordinates,uint coordinateIndex,std::size_t coordinateHash,int height,int& level1,float& height1,int& level2,float& height2)
+bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& contentInfoList,uchar coordinateType,std::vector<T::Coordinate>& coordinates,uint coordinateIndex,std::size_t coordinateHash,int height,int& level1,float& height1,int& level2,float& height2)
 {
   FUNCTION_TRACE
   try

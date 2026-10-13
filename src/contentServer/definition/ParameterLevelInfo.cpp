@@ -138,7 +138,7 @@ ParameterLevelInfo* ParameterLevelInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

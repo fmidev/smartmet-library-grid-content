@@ -97,7 +97,7 @@ ForecastTime::~ForecastTime()
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string ForecastTime::getCsv()
+std::string ForecastTime::getCsv() const
 {
   try
   {
@@ -173,7 +173,7 @@ void ForecastTime::setCsv(const std::string& csv)
 
 /*! \brief Print the record contents to the given stream. */
 
-void ForecastTime::print(std::ostream& stream,uint level,uint optionFlags)
+void ForecastTime::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

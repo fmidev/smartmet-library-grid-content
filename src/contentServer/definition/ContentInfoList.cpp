@@ -2551,7 +2551,7 @@ ContentInfo* ContentInfoList::getContentInfoByIndexNoCheck(uint index)
 
 /*! \brief Return the first entry matching the given ParameterLevelInfo. */
 
-ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo)
+ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo)
 {
   FUNCTION_TRACE
   try
@@ -2590,7 +2590,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(T::ParameterLev
 
 /*! \brief Append entries matching the given ParameterLevelInfo to the target list. */
 
-void ContentInfoList::getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3089,7 +3089,7 @@ void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(T::Produ
 
 /*! \brief Collect distinct levels for the given parameter, generation, geometry, and level id. */
 
-void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,const std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
 {
   FUNCTION_TRACE
   try
@@ -7230,7 +7230,7 @@ void ContentInfoList::unlock()
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool ContentInfoList::getReleaseObjects()
+bool ContentInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try
@@ -7268,7 +7268,7 @@ void ContentInfoList::setReleaseObjects(bool releaseObjects)
 
 /*! \brief Return the comparison method used for sorting the list. */
 
-uint ContentInfoList::getComparisonMethod()
+uint ContentInfoList::getComparisonMethod() const
 {
   FUNCTION_TRACE
   try

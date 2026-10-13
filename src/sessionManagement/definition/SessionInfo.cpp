@@ -154,7 +154,7 @@ void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
 
 /*! \brief Get expiration time. */
 
-time_t SessionInfo::getExpirationTime()
+time_t SessionInfo::getExpirationTime() const
 {
   try
   {
@@ -171,7 +171,7 @@ time_t SessionInfo::getExpirationTime()
 
 /*! \brief Get last access time. */
 
-time_t SessionInfo::getLastAccessTime()
+time_t SessionInfo::getLastAccessTime() const
 {
   try
   {
@@ -188,7 +188,7 @@ time_t SessionInfo::getLastAccessTime()
 
 /*! \brief Get session id. */
 
-T::SessionId SessionInfo::getSessionId()
+T::SessionId SessionInfo::getSessionId() const
 {
   try
   {
@@ -291,7 +291,7 @@ void SessionInfo::setAddress(const char *address)
 
 /*! \brief Get status. */
 
-uchar SessionInfo::getStatus()
+uchar SessionInfo::getStatus() const
 {
   try
   {
@@ -308,7 +308,7 @@ uchar SessionInfo::getStatus()
 
 /*! \brief Get time out in seconds. */
 
-uint SessionInfo::getTimeOutInSeconds()
+uint SessionInfo::getTimeOutInSeconds() const
 {
   try
   {
@@ -802,7 +802,7 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 /*! \brief Set attributes. */
 
-void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attributeList)
+void SessionInfo::setAttributes(const char *attributeGroup,const AttributeList& attributeList)
 {
   try
   {
@@ -878,7 +878,7 @@ void SessionInfo::deleteAttributeGroup(const char *attributeGroup)
 
 /*! \brief Delete attributes. */
 
-void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList)
+void SessionInfo::deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList)
 {
   try
   {

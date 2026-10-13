@@ -26,8 +26,8 @@ class ParameterDef
     virtual                     ~ParameterDef();
 
     void                        set(const std::string& paramStr);
-    std::string                 getName();
-    void                        print(std::ostream& stream,uint level,uint optionFlags);
+    std::string                 getName() const;
+    void                        print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string                 mParameterName;            //!< Parameter short name or identifier string.
     std::string                 mProducerName;             //!< Producer name filter (empty = any).

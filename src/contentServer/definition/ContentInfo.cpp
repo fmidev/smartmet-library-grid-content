@@ -211,7 +211,7 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 
 /*! \brief Return the FMI parameter name string. */
 
-char* ContentInfo::getFmiParameterName()
+char* ContentInfo::getFmiParameterName() const
 {
   try
   {
@@ -270,7 +270,7 @@ void ContentInfo::setFmiParameterName(const std::string& name)
 
 /*! \brief Return the forecast time string. */
 
-char* ContentInfo::getForecastTime()
+char* ContentInfo::getForecastTime() const
 {
   try
   {
@@ -346,7 +346,7 @@ void ContentInfo::setForecastTime(const std::string& ftime)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string ContentInfo::getCsv()
+std::string ContentInfo::getCsv() const
 {
   try
   {
@@ -872,7 +872,7 @@ ContentInfo* ContentInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags) const
 {
   try
   {

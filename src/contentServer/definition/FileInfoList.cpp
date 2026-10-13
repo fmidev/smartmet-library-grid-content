@@ -1705,7 +1705,7 @@ FileInfo* FileInfoList::getFileInfoByIndexNoCheck(uint index)
 
 /*! \brief Return the number of entries in the list. */
 
-uint FileInfoList::getLength()
+uint FileInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -2248,7 +2248,7 @@ void FileInfoList::unlock()
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool FileInfoList::getReleaseObjects()
+bool FileInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try

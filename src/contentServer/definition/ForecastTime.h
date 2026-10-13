@@ -25,11 +25,11 @@ class ForecastTime
                        ForecastTime(const char *csv);
      virtual           ~ForecastTime();
 
-     std::string       getCsv();
+     std::string       getCsv() const;
      void              setCsv(const char *csv);
      void              setCsv(const std::string& csv);
 
-     void              print(std::ostream& stream,uint level,uint optionFlags);
+     void              print(std::ostream& stream,uint level,uint optionFlags) const;
 
      T::StorageId      mStorageId;        //!< Storage partition identifier.
      T::SourceId       mSourceId;         //!< Source system identifier.

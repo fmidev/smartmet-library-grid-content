@@ -121,7 +121,7 @@ void UserInfo::updateUserInfo(UserInfo& sessionInfo)
 
 /*! \brief Get start time. */
 
-time_t UserInfo::getStartTime()
+time_t UserInfo::getStartTime() const
 {
   try
   {
@@ -138,7 +138,7 @@ time_t UserInfo::getStartTime()
 
 /*! \brief Get end time. */
 
-time_t UserInfo::getEndTime()
+time_t UserInfo::getEndTime() const
 {
   try
   {
@@ -155,7 +155,7 @@ time_t UserInfo::getEndTime()
 
 /*! \brief Get status. */
 
-uchar UserInfo::getStatus()
+uchar UserInfo::getStatus() const
 {
   try
   {
@@ -172,7 +172,7 @@ uchar UserInfo::getStatus()
 
 /*! \brief Get user id. */
 
-uint UserInfo::getUserId()
+uint UserInfo::getUserId() const
 {
   try
   {
@@ -875,7 +875,7 @@ void UserInfo::setAttribute(const char *attributeGroup,const char *attributeName
 
 /*! \brief Set attributes. */
 
-void UserInfo::setAttributes(const char *attributeGroup,AttributeList& attributeList)
+void UserInfo::setAttributes(const char *attributeGroup,const AttributeList& attributeList)
 {
   try
   {
@@ -951,7 +951,7 @@ void UserInfo::deleteAttributeGroup(const char *attributeGroup)
 
 /*! \brief Delete attributes. */
 
-void UserInfo::deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList)
+void UserInfo::deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList)
 {
   try
   {

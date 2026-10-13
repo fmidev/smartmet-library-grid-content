@@ -142,13 +142,13 @@ class ServiceImplementation : public ServiceInterface
                        DataServer::ServiceInterface *dataServerPtr,
                        const std::string& gridConfigFile,
                        const std::string& heightConversionFile,
-                       string_vec& parameterMappingFiles,
+                       const string_vec& parameterMappingFiles,
                        const std::string& unitConversionFile,
-                       string_vec& parameterMappingAliasFiles,
+                       const string_vec& parameterMappingAliasFiles,
                        string_vec& aliasFiles,
                        const std::string& producerFile,
                        string_vec& producerAliasFiles,
-                       string_vec& luaFileNames,
+                       const string_vec& luaFileNames,
                        bool checkGeometryStatus,
                        bool dataServerMethodsEnabled);
 
@@ -295,7 +295,7 @@ class ServiceImplementation : public ServiceInterface
                        std::string& functionParams);
 
      void           getProducers(
-                       Query& query,
+                       const Query& query,
                        Producer_vec& producers);
 
      void           getProducers(
@@ -310,7 +310,7 @@ class ServiceImplementation : public ServiceInterface
      void           getGeometryIdListByCoordinates(
                        uint gridWidth,
                        uint gridHeight,
-                       std::vector<T::Coordinate>& coordinates,
+                       const std::vector<T::Coordinate>& coordinates,
                        std::set<T::GeometryId>& geometryIdList);
 
      void           getGeometryIdListByGeometryId(
@@ -340,9 +340,9 @@ class ServiceImplementation : public ServiceInterface
 
      void           executeConversion(
                        const std::string& function,
-                       std::vector<std::string>& functionParams,
+                       const std::vector<std::string>& functionParams,
                        time_t forecastTime,
-                       T::GridValueList& valueList);
+                       const T::GridValueList& valueList);
 
      void           executeConversion(
                        const std::string& function,
@@ -361,7 +361,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getPolygonValues(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -374,9 +374,9 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& valueList);
 
      bool           getCircleValues(
-                       Query& query,
+                       const Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -393,11 +393,11 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& valueList);
 
      bool           getPointValuesByHeight(
-                       Query& query,
+                       const Query& query,
                        T::CoordinateType coordinateType,
                        T::Coordinate_vec& coordinates,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -412,7 +412,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getPointValues(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -425,9 +425,9 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& valueList);
 
      bool           getSpecialValues(
-                       Query& query,
+                       const Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -451,7 +451,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getStreamlineValues(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -467,7 +467,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getIsolineValues(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -483,7 +483,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getIsobandValues(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -496,11 +496,11 @@ class ServiceImplementation : public ServiceInterface
                        ParameterValues& valueList);
 
      bool           getValueVectorsByHeight(
-                       Query& query,
+                       const Query& query,
                        T::CoordinateType coordinateType,
                        T::Coordinate_vec& coordinates,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -509,13 +509,13 @@ class ServiceImplementation : public ServiceInterface
                        time_t forecastTime,
                        T::ParamLevelId paramLevelId,
                        T::ParamLevel paramLevel,
-                       T::ProducerId& newProducerId,
+                       const T::ProducerId& newProducerId,
                        ParameterValues& valueList);
 
      bool           getValueVectors(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -531,7 +531,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getVerticalValueVectors(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -546,7 +546,7 @@ class ServiceImplementation : public ServiceInterface
      bool           getGridFiles(
                        Query& query,
                        QueryParameter& qParam,
-                       T::ProducerInfo& producerInfo,
+                       const T::ProducerInfo& producerInfo,
                        T::GeometryId producerGeometryId,
                        T::GenerationId generationId,
                        const std::string& analysisTime,
@@ -591,7 +591,7 @@ class ServiceImplementation : public ServiceInterface
                        HeightRec_vec& recs);
 
      bool           getClosestLevelsByHeight(
-                       T::ContentInfoList& contentInfoList,
+                       const T::ContentInfoList& contentInfoList,
                        uchar coordinateType,
                        std::vector<T::Coordinate>& coordinates,
                        uint coordinateIndex,
@@ -604,7 +604,7 @@ class ServiceImplementation : public ServiceInterface
 
 
      bool           getClosestLevelsByHeight(
-                       T::ContentInfoList& contentInfoList,
+                       const T::ContentInfoList& contentInfoList,
                        uchar coordinateType,
                        double x,
                        double y,
@@ -623,13 +623,13 @@ class ServiceImplementation : public ServiceInterface
      void           getAdditionalValues(
                        const std::string& parameterName,
                        uchar coordinateType,
-                       T::Coordinate_vec& coordinates,
+                       const T::Coordinate_vec& coordinates,
                        ParameterValues& values);
 
      bool           getProducerInfoByName(const std::string& name,T::ProducerInfo& info);
 
      time_t         getContentList(
-                      T::ProducerInfo& producerInfo,
+                      const T::ProducerInfo& producerInfo,
                       T::GeometryId producerGeometryId,
                       T::GenerationId generationId,
                       ParameterMapping& pInfo,

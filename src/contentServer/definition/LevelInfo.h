@@ -32,12 +32,12 @@ class LevelInfo
 
     LevelInfo&      operator=(const LevelInfo& levelInfo);
 
-    std::string     getCsv();
+    std::string     getCsv() const;
     std::string     getCsvHeader();
     void            setCsv(const char *csv);
     void            setCsv(const std::string& csv);
     LevelInfo*      duplicate();
-    void            print(std::ostream& stream,uint level,uint optionFlags);
+    void            print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::ProducerId   mProducerId;           //!< Identifier of the producer that provides this level.
     std::string     mFmiParameterName;    //!< FMI parameter name string (e.g. "T-K").
