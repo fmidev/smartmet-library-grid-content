@@ -5845,6 +5845,7 @@ void MemoryImplementation::readGeometryList()
 void MemoryImplementation::readFileList()
 {
   FUNCTION_TRACE
+  FILE *file = nullptr;
   try
   {
     mFileInfoList.clear();
@@ -5855,7 +5856,7 @@ void MemoryImplementation::readFileList()
     char filename[2048];
 
     snprintf(filename,sizeof(filename),"%s/files.csv",mContentDir.c_str());
-    FILE *file = fopen(filename,"re");
+    file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
@@ -5863,6 +5864,9 @@ void MemoryImplementation::readFileList()
 
     while (fgets(st,1000,file) != nullptr)
     {
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
@@ -5879,10 +5883,14 @@ void MemoryImplementation::readFileList()
       }
     }
     fclose(file);
+    file = nullptr;
     mFileStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
+    if (file != nullptr)
+      fclose(file);
+
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
@@ -5896,6 +5904,7 @@ void MemoryImplementation::readFileList()
 void MemoryImplementation::readContentList()
 {
   FUNCTION_TRACE
+  FILE *file = nullptr;
   try
   {
     mContentInfoList[0].clear();
@@ -5906,7 +5915,7 @@ void MemoryImplementation::readContentList()
     char filename[2048];
 
     snprintf(filename,sizeof(filename),"%s/content.csv",mContentDir.c_str());
-    FILE *file = fopen(filename,"re");
+    file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
@@ -5914,6 +5923,9 @@ void MemoryImplementation::readContentList()
 
     while (fgets(st,1000,file) != nullptr)
     {
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
@@ -5926,10 +5938,14 @@ void MemoryImplementation::readContentList()
       }
     }
     fclose(file);
+    file = nullptr;
     mContentStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
+    if (file != nullptr)
+      fclose(file);
+
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
