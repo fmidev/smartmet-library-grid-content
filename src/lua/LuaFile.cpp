@@ -655,20 +655,17 @@ void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(pLen1);
+    outParameters.reserve(pLen1);
 
-      for (int t=1; t<=pLen1; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        float a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (int t=1; t<=pLen1; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      float a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -767,20 +764,17 @@ void LuaFile::executeFunctionCall4(const std::string& function,uint columns,uint
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(pLen1);
+    outParameters.reserve(pLen1);
 
-      for (int t=1; t<=pLen1; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        double a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (int t=1; t<=pLen1; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      double a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -1233,20 +1227,17 @@ void LuaFile::executeFunctionCall8(const std::string& function,const char *subfu
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(gridSize);
+    outParameters.reserve(gridSize);
 
-      for (uint t=1; t<=gridSize; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        float a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (uint t=1; t<=gridSize; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      float a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -1335,20 +1326,17 @@ void LuaFile::executeFunctionCall8(const std::string& function,const char *subfu
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(gridSize);
+    outParameters.reserve(gridSize);
 
-      for (uint t=1; t<=gridSize; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        double a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (uint t=1; t<=gridSize; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      double a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -1436,20 +1424,17 @@ void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(gridSize);
+    outParameters.reserve(gridSize);
 
-      for (uint t=1; t<=gridSize; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        float a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (uint t=1; t<=gridSize; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      float a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -1537,20 +1522,17 @@ void LuaFile::executeFunctionCall9(const std::string& function,uint columns,uint
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      outParameters.reserve(gridSize);
+    outParameters.reserve(gridSize);
 
-      for (uint t=1; t<=gridSize; t++)
-      {
-        lua_pushnumber(L,t);
-        lua_gettable(L, -2);
-        double a = lua_tonumber(L, -1);
-        outParameters.emplace_back(a);
-        lua_pop(L, 1);
-      }
-      lua_pop(L, 1);  // pop table from the stack
+    for (uint t=1; t<=gridSize; t++)
+    {
+      lua_pushnumber(L,t);
+      lua_gettable(L, -2);
+      double a = lua_tonumber(L, -1);
+      outParameters.emplace_back(a);
+      lua_pop(L, 1);
     }
+    lua_pop(L, 1);  // pop table from the stack
   }
   catch (...)
   {
@@ -1643,32 +1625,29 @@ void LuaFile::loadFunctionList(uint type)
       lua_pop(L, 1);
       throw exception;
     }
-    else
-    {
-      size_t len = 0;
-      const char* cstr = lua_tolstring(L, -1, &len);
+    size_t len = 0;
+    const char* cstr = lua_tolstring(L, -1, &len);
 
-      char buf[100];
-      uint c = 0;
-      for (size_t t = 0; t<= len; t++)
+    char buf[100];
+    uint c = 0;
+    for (size_t t = 0; t<= len; t++)
+    {
+      if (cstr[t] != '\0'  &&  cstr[t] != ','  &&  c < 99)
       {
-        if (cstr[t] != '\0'  &&  cstr[t] != ','  &&  c < 99)
-        {
-          buf[c] = cstr[t];
-          c++;
-        }
-        else
-        {
-          buf[c] = '\0';
-          if (c > 0)
-          {
-            mFunctions.insert(std::pair<std::string,LuaFunction>(toLowerString(std::string(buf)),LuaFunction(buf,type)));
-          }
-          c = 0;
-        }
+        buf[c] = cstr[t];
+        c++;
       }
-      lua_pop(L, 1);  /* pop returned value */
+      else
+      {
+        buf[c] = '\0';
+        if (c > 0)
+        {
+          mFunctions.insert(std::pair<std::string,LuaFunction>(toLowerString(std::string(buf)),LuaFunction(buf,type)));
+        }
+        c = 0;
+      }
     }
+    lua_pop(L, 1);  /* pop returned value */
   }
   catch (...)
   {

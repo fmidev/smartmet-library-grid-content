@@ -90,8 +90,7 @@ float Function_add::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return parameters[0] + mValueToAdd;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -116,8 +115,7 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return parameters[0] + mValueToAdd;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");

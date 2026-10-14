@@ -113,11 +113,8 @@ std::string QueryStreamer::getChunk()
       setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::OK);
       return "";
     }
-    else
-    {
-      setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::EXIT_OK);
-      return "";
-    }
+    setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::EXIT_OK);
+    return "";
   }
   catch (...)
   {

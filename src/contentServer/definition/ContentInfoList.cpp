@@ -4121,7 +4121,6 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
 
                         return;
                       }
-                      else
                       if (info->mParameterLevel < level)
                       {
                         if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
@@ -5119,7 +5118,6 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
 
                         return;
                       }
-                      else
                       if (info->mParameterLevel < level)
                       {
                         if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)

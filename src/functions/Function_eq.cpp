@@ -78,8 +78,7 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     if (parameters.size() == 3)
@@ -92,8 +91,7 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain at least two values!");
@@ -123,8 +121,7 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     if (parameters.size() == 3)
@@ -137,8 +134,7 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");

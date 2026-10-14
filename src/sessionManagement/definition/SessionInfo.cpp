@@ -23,10 +23,10 @@ SessionInfo::SessionInfo()
     // output of a mt19937_64 seeded with a single 32-bit value (only 2^32 possible
     // ids). Zero means "no session" to the callers.
     std::random_device rd;
-    do
+    for (bool more = true; more; more = mSessionId == 0)
     {
       mSessionId = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
-    } while (mSessionId == 0);
+    }
     mStartTime = time(nullptr);
     mLastAccessTime = mStartTime;
     mTimeOutInSeconds = 600;

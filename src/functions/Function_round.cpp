@@ -77,8 +77,7 @@ float Function_round::executeFunctionCall1(std::vector<float>& parameters)
         auto  nw = (Int64)std::llround(parameters[0]*mp);
         return (float)nw/mp;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");
@@ -107,8 +106,7 @@ double Function_round::executeFunctionCall1(std::vector<double>& parameters)
         auto  nw = (Int64)std::llround(parameters[0]*mp);
         return (double)nw/mp;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");

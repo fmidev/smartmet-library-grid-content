@@ -72,8 +72,7 @@ float Function_atan::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return atan(parameters[0])*radiansToDegreesMultiplier;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -98,8 +97,7 @@ double Function_atan::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return atan(parameters[0])*radiansToDegreesMultiplier;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");

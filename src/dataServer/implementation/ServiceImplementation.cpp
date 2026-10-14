@@ -409,25 +409,22 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
 
         return nullptr;
       }
+      time_t deletionTime = gridFile->getDeletionTime();
+      if (deletionTime == 0)
+        return gridFile;
+
+      if ((time(nullptr) + 180) > deletionTime)
+      {
+        // The grid file will be deleted soon. We should not access it anymore.
+        return nullptr;
+      }
       else
       {
-        time_t deletionTime = gridFile->getDeletionTime();
-        if (deletionTime == 0)
-          return gridFile;
+        if (!gridFile->isMemoryMapped())
+          gridFile->mapToMemory();
 
-        if ((time(nullptr) + 180) > deletionTime)
-        {
-          // The grid file will be deleted soon. We should not access it anymore.
-          return nullptr;
-        }
-        else
-        {
-          if (!gridFile->isMemoryMapped())
-            gridFile->mapToMemory();
-
-          gridFile->setAccessTime(time(nullptr));
-          return gridFile;
-        }
+        gridFile->setAccessTime(time(nullptr));
+        return gridFile;
       }
     }
 

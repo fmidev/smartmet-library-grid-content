@@ -535,11 +535,8 @@ int RedisImplementation::openConnection()
             context = nullptr;
             return Result::PERMANENT_STORAGE_ERROR;
           }
-          else
-          {
-            printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
-            return Result::PERMANENT_STORAGE_ERROR;
-          }
+          printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
+          return Result::PERMANENT_STORAGE_ERROR;
         }
         else
         {
@@ -6602,8 +6599,7 @@ int RedisImplementation::getProducerById(T::ProducerId producerId,T::ProducerInf
       freeReplyObject(reply);
       if (producerInfo.mProducerId == producerId)
         return Result::OK;
-      else
-        return Result::DATA_NOT_FOUND;
+      return Result::DATA_NOT_FOUND;
     }
 
     freeReplyObject(reply);
@@ -6773,8 +6769,7 @@ int RedisImplementation::getGenerationById(T::GenerationId generationId,T::Gener
       freeReplyObject(reply);
       if (generationInfo.mGenerationId == generationId)
         return Result::OK;
-      else
-        return Result::DATA_NOT_FOUND;
+      return Result::DATA_NOT_FOUND;
     }
 
     freeReplyObject(reply);
@@ -7262,8 +7257,7 @@ int RedisImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo)
 
       if (fileInfo.mFileId == fileId)
         return Result::OK;
-      else
-        return Result::DATA_NOT_FOUND;
+      return Result::DATA_NOT_FOUND;
 
       return Result::OK;
     }
@@ -8945,8 +8939,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
           }
         }
 
-        
-          delete info;
+        delete info;
       }
     }
 
@@ -9057,8 +9050,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
           }
         }
 
-        
-          delete info;
+        delete info;
       }
     }
 
@@ -9168,8 +9160,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
           }
         }
 
-        
-          delete info;
+        delete info;
       }
     }
 

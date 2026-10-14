@@ -77,8 +77,7 @@ float Function_lte::executeFunctionCall1(std::vector<float>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");
@@ -108,8 +107,7 @@ double Function_lte::executeFunctionCall1(std::vector<double>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");

@@ -659,11 +659,8 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::Prod
         // Return valid entry
         return gl->second;
       }
-      else
-      {
-        // Remove old entry
-        mProducerGenerationListCache.erase(gl);
-      }
+      // Remove old entry
+      mProducerGenerationListCache.erase(gl);
     }
 
     CacheEntry_sptr cacheEntry(new CacheEntry);
@@ -2043,25 +2040,22 @@ bool ServiceImplementation::parseFunction(
       }
       return true;
     }
-    else
+    std::string producerName;
+
+    std::string paramName;
+    getParameterStringInfo(paramStr, ':', paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, queryParam.mForecastNumber, producerName,
+        queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod, queryParam.mFlags);
+
+    std::string alias;
+    if (getAlias(paramName, alias))
     {
-      std::string producerName;
-
-      std::string paramName;
-      getParameterStringInfo(paramStr, ':', paramName, queryParam.mGeometryId, queryParam.mParameterLevelId, queryParam.mParameterLevel, queryParam.mForecastType, queryParam.mForecastNumber, producerName,
-          queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod, queryParam.mFlags);
-
-      std::string alias;
-      if (getAlias(paramName, alias))
+      if (alias != paramStr)
       {
-        if (alias != paramStr)
-        {
-          if (!parseFunction(query,queryParam, alias, function, functionParams, recursionCounter + 1, additionalParameterList))
-            queryParam.mParam = alias;
-        }
+        if (!parseFunction(query,queryParam, alias, function, functionParams, recursionCounter + 1, additionalParameterList))
+          queryParam.mParam = alias;
       }
-      return false;
     }
+    return false;
   }
   catch (...)
   {
@@ -4663,21 +4657,18 @@ bool ServiceImplementation::getSpecialValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     if (contentLen == 2  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
@@ -4840,10 +4831,7 @@ bool ServiceImplementation::getValueVectors(
 
             return res;
           }
-          else
-          {
-            return false;
-          }
+          return false;
         }
         break;
 
@@ -5032,21 +5020,18 @@ bool ServiceImplementation::getValueVectors(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
@@ -5467,7 +5452,12 @@ bool ServiceImplementation::getGridFiles(
 
     std::string ftime = utcTimeFromTimeT(forecastTime);
 
-    int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
+    int year = 0;
+    int month = 0;
+    int day = 0;
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
     splitTimeString(ftime,year,month,day,hour,minute,second);
 
     GRID::GridFile newGridFile;
@@ -6005,17 +5995,14 @@ bool ServiceImplementation::getGridFiles(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.mProducerId = producerInfo.mProducerId;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.mProducerId = producerInfo.mProducerId;
+      return false;
     }
 
     if (contentLen == 2)
@@ -7372,21 +7359,18 @@ bool ServiceImplementation::getPointValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
 
@@ -7665,21 +7649,18 @@ bool ServiceImplementation::getCircleValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
@@ -8068,21 +8049,18 @@ bool ServiceImplementation::getPolygonValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
 
@@ -8369,21 +8347,18 @@ bool ServiceImplementation::getStreamlineValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     if (contentLen == 2)
@@ -8726,21 +8701,18 @@ bool ServiceImplementation::getIsolineValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
@@ -9090,21 +9062,18 @@ bool ServiceImplementation::getIsobandValues(
 
         return true;
       }
-      else
-      {
-        // There is one content record in place, but its time does not match to
-        // the requested forecast time. This is used for indicating that there
-        // are content records available, but not for the requested time.
-        // So, we should use this producer.
+      // There is one content record in place, but its time does not match to
+      // the requested forecast time. This is used for indicating that there
+      // are content records available, but not for the requested time.
+      // So, we should use this producer.
 
-        newProducerId = producerInfo.mProducerId;
-        valueList.clear();
-        valueList.mProducerId = producerInfo.mProducerId;
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mForecastTimeUTC = forecastTime;
-        return false;
-      }
+      newProducerId = producerInfo.mProducerId;
+      valueList.clear();
+      valueList.mProducerId = producerInfo.mProducerId;
+      valueList.mParameterKeyType = pInfo.mParameterKeyType;
+      valueList.mParameterKey = pInfo.mParameterKey;
+      valueList.mForecastTimeUTC = forecastTime;
+      return false;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);

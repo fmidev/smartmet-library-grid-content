@@ -569,13 +569,10 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
 
         return mid-1;
       }
-      else
-      {
-        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) > 0)
-          mid--;
+      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) > 0)
+        mid--;
 
-        return mid;
-      }
+      return mid;
     }
     return 0;
   }

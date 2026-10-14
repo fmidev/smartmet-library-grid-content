@@ -77,8 +77,7 @@ float Function_if::executeFunctionCall1(std::vector<float>& parameters)
 
         return parameters[1];
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain three values!");
@@ -108,8 +107,7 @@ double Function_if::executeFunctionCall1(std::vector<double>& parameters)
 
         return parameters[1];
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain three values!");

@@ -72,8 +72,7 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return C_FLOAT(parameters[0] * mMultiplyer);
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -98,8 +97,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return C_DOUBLE(parameters[0] * mMultiplyer);
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");

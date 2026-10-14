@@ -72,8 +72,7 @@ float Function_acos::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return acos(parameters[0])*radiansToDegreesMultiplier;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -98,8 +97,7 @@ double Function_acos::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return acos(parameters[0])*radiansToDegreesMultiplier;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");

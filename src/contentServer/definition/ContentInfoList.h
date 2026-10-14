@@ -251,13 +251,10 @@ class ContentInfoList
 
           return mid-1;
         }
-        else
-        {
-          while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
-            mid--;
+        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
+          mid--;
 
-          return mid;
-        }
+        return mid;
       }
       return 0;
     }

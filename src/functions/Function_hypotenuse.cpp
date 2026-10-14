@@ -74,8 +74,7 @@ float Function_hypotenuse::executeFunctionCall1(std::vector<float>& parameters)
 
     if (a != ParamValueMissing and b != ParamValueMissing)
       return (float)sqrt(a*a+b*b);
-    else
-      return ParamValueMissing;
+    return ParamValueMissing;
   }
   catch (...)
   {
@@ -101,8 +100,7 @@ double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters
 
     if (a != ParamValueMissing and b != ParamValueMissing)
       return (float)sqrt(a*a+b*b);
-    else
-      return ParamValueMissing;
+    return ParamValueMissing;
   }
   catch (...)
   {

@@ -89,8 +89,7 @@ ValueRecordList::~ValueRecordList()
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      
-        delete rec;
+      delete rec;
     }
     mList.clear();
   }
@@ -160,8 +159,7 @@ void ValueRecordList::clear()
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      
-        delete rec;
+      delete rec;
     }
     mList.clear();
   }

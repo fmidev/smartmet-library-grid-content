@@ -74,8 +74,7 @@ float Function_not::executeFunctionCall1(std::vector<float>& parameters)
       {
         if (parameters[0] == 0)
           return 1.0;
-        else
-          return 0;
+        return 0;
       }
       else
         return ParamValueMissing;
@@ -105,8 +104,7 @@ double Function_not::executeFunctionCall1(std::vector<double>& parameters)
       {
         if (parameters[0] == 0)
           return 1.0;
-        else
-          return 0;
+        return 0;
       }
       else
         return ParamValueMissing;
