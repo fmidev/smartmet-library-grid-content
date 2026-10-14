@@ -176,7 +176,7 @@ class PostgresqlImplementation : public ServiceInterface
 
      int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList) override;
 
-   protected:
+   
 
      void           createTables();
      bool           isConnectionValid();

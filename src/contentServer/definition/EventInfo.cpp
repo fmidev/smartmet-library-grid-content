@@ -306,7 +306,7 @@ EventInfo* EventInfo::duplicate()
 
 /*! \brief Print the event contents to the given stream. */
 
-void EventInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void EventInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

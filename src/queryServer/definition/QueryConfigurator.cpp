@@ -337,7 +337,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
           gmtime_r(&s,&tt);
 
           sprintf(tmp,"%02d%02d",tt.tm_hour,tt.tm_min);
-          if (timeList.size() == 0  ||  timeList.find(tmp) != timeList.end())
+          if (timeList.empty()  ||  timeList.find(tmp) != timeList.end())
           {
             sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
             query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
@@ -442,7 +442,7 @@ void QueryConfigurator::configureParameters(Query& query,const T::AttributeList&
       splitString(levelsStr,',',levels);
     }
 
-    if (levels.size() == 0)
+    if (levels.empty())
       levels.insert(0);
 
     uint levelCount = 0;
@@ -528,7 +528,7 @@ void QueryConfigurator::configureParameters(Query& query,const T::AttributeList&
 
 /*! \brief Query Server: Configure parameter. */
 
-void QueryConfigurator::configureParameter(const Query& query,QueryParameter& param,const T::AttributeList& attributeList)
+void QueryConfigurator::configureParameter(const Query& /*query*/,QueryParameter& param,const T::AttributeList& /*attributeList*/)
 {
   FUNCTION_TRACE
   try

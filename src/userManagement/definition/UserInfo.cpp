@@ -377,10 +377,7 @@ bool UserInfo::hasPermission(const char *permission)
 {
   try
   {
-    if (mUserPermissions.find(permission) == mUserPermissions.end())
-      return false;
-
-    return true;
+    return mUserPermissions.find(permission) != mUserPermissions.end();
   }
   catch (...)
   {
@@ -449,10 +446,7 @@ bool UserInfo::isUserGroupMember(const char *userGroup)
 {
   try
   {
-    if (mUserGroups.find(userGroup) == mUserGroups.end())
-      return false;
-
-    return true;
+    return mUserGroups.find(userGroup) != mUserGroups.end();
   }
   catch (...)
   {
@@ -681,7 +675,7 @@ void UserInfo::getAttributes(const char *attributeGroup,AttributeList& attribute
     if (group == mAttributeGroups.end())
       return;
 
-    if (attributeList.size() == 0)
+    if (attributeList.empty())
     {
       attributeList = group->second;
       return;
@@ -888,7 +882,7 @@ void UserInfo::setAttributes(const char *attributeGroup,const AttributeList& att
       return;
     }
 
-    for (auto& it : attributeList)
+    for (const auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -961,7 +955,7 @@ void UserInfo::deleteAttributes(const char *attributeGroup,const std::vector<std
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto& it : attributeNameList)
+    for (const auto& it : attributeNameList)
     {
       group->second.erase(it);
     }
@@ -978,7 +972,7 @@ void UserInfo::deleteAttributes(const char *attributeGroup,const std::vector<std
 
 /*! \brief Print. */
 
-void UserInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void UserInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

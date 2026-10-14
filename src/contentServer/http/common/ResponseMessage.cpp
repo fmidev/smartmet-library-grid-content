@@ -30,7 +30,7 @@ ResponseMessage::ResponseMessage()
 
 /*! \brief Content Server: Constructor. */
 
-ResponseMessage::ResponseMessage(ResponseMessage& responseMessage)
+ResponseMessage::ResponseMessage(ResponseMessage& /*responseMessage*/)
 {
   try
   {
@@ -660,7 +660,7 @@ uint ResponseMessage::getLinesByKey(const char *key,std::vector<std::string>& va
 
 /*! \brief Content Server: Print. */
 
-void ResponseMessage::print(std::ostream& stream,uint level,uint optionFlags)
+void ResponseMessage::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

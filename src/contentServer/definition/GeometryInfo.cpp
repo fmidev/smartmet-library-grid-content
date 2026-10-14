@@ -323,7 +323,7 @@ GeometryInfo* GeometryInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void GeometryInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void GeometryInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

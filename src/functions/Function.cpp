@@ -27,7 +27,7 @@ Function::Function()
 
 /*! \brief Function: Constructor. */
 
-Function::Function(const Function& function)
+Function::Function(const Function& /*function*/)
 {
   try
   {
@@ -62,7 +62,7 @@ Function::~Function()
 
 /*! \brief Function: Execute function call1. */
 
-float Function::executeFunctionCall1(std::vector<float>& parameters)
+float Function::executeFunctionCall1(std::vector<float>& /*parameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -73,7 +73,7 @@ float Function::executeFunctionCall1(std::vector<float>& parameters)
 
 /*! \brief Function: Execute function call1. */
 
-double Function::executeFunctionCall1(std::vector<double>& parameters)
+double Function::executeFunctionCall1(std::vector<double>& /*parameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -84,7 +84,7 @@ double Function::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call4. */
 
-void Function::executeFunctionCall4(uint columns,uint rows,std::vector<float>& inParameters1,std::vector<float>& inParameters2,std::vector<float>& angles,std::vector<float>& outParameters)
+void Function::executeFunctionCall4(uint /*columns*/,uint /*rows*/,std::vector<float>& /*inParameters1*/,std::vector<float>& /*inParameters2*/,std::vector<float>& /*angles*/,std::vector<float>& /*outParameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -95,7 +95,7 @@ void Function::executeFunctionCall4(uint columns,uint rows,std::vector<float>& i
 
 /*! \brief Function: Execute function call4. */
 
-void Function::executeFunctionCall4(uint columns,uint rows,std::vector<double>& inParameters1,std::vector<double>& inParameters2,std::vector<float>& angles,std::vector<double>& outParameters)
+void Function::executeFunctionCall4(uint /*columns*/,uint /*rows*/,std::vector<double>& /*inParameters1*/,std::vector<double>& /*inParameters2*/,std::vector<float>& /*angles*/,std::vector<double>& /*outParameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -105,7 +105,7 @@ void Function::executeFunctionCall4(uint columns,uint rows,std::vector<double>& 
 
 /*! \brief Function: Execute function call9. */
 
-void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& /*inParameters*/,const std::vector<double>& /*extParameters*/,std::vector<float>& /*outParameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -116,7 +116,7 @@ void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vect
 
 /*! \brief Function: Execute function call9. */
 
-void Function::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& /*inParameters*/,const std::vector<double>& /*extParameters*/,std::vector<double>& /*outParameters*/)
 {
   throw Fmi::Exception(BCP, "Not implemented!");
 }
@@ -131,7 +131,7 @@ Function* Function::duplicate()
 {
   try
   {
-    return (Function*)new Function(*this);
+    return new Function(*this);
   }
   catch (...)
   {
@@ -144,7 +144,7 @@ Function* Function::duplicate()
 
 /*! \brief Function: Print. */
 
-void Function::print(std::ostream& stream,uint level,uint optionFlags)
+void Function::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

@@ -24,7 +24,9 @@ namespace DataServer
 
 
 
-static void* ServiceImplementation_eventProcessingThread(void *arg)
+namespace
+{
+void* ServiceImplementation_eventProcessingThread(void *arg)
 {
   try
   {
@@ -44,7 +46,7 @@ static void* ServiceImplementation_eventProcessingThread(void *arg)
 
 
 
-static void* ServiceImplementation_cacheProcessingThread(void *arg)
+void* ServiceImplementation_cacheProcessingThread(void *arg)
 {
   try
   {
@@ -60,6 +62,7 @@ static void* ServiceImplementation_cacheProcessingThread(void *arg)
     exit(-1);
   }
 }
+}  // namespace
 
 
 
@@ -282,15 +285,12 @@ void ServiceImplementation::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 /*! \brief Data Server: Is session valid. */
 
-bool ServiceImplementation::isSessionValid(T::SessionId sessionId)
+bool ServiceImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return false;
-
-    return true;
+    return !mShutdownRequested;
   }
   catch (...)
   {
@@ -501,12 +501,12 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
               {
                 case T::CoordinateTypeValue::UNKNOWN:
                 case T::CoordinateTypeValue::LATLON_COORDINATES:
-                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,(short)rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
+                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
                   rec->mResult = 0;
                   break;
 
                 case T::CoordinateTypeValue::GRID_COORDINATES:
-                  rec->mValue = message->getGridValueByGridPoint_byInterpolation(rec->mX,rec->mY,(short)rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
+                  rec->mValue = message->getGridValueByGridPoint_byInterpolation(rec->mX,rec->mY,rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
                   rec->mResult = 0;
                   break;
 
@@ -2046,7 +2046,7 @@ int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sess
       T::Coordinate_svec latLonCoordinates;
       Identification::gridDef.getGridLatLonCoordinatesByGeometry(attributeList,latLonCoordinates,width,height);
 
-      if (!latLonCoordinates || latLonCoordinates->size() == 0)
+      if (!latLonCoordinates || latLonCoordinates->empty())
         return Result::DATA_NOT_FOUND;
 
       coordinates.mCoordinateList = *latLonCoordinates;
@@ -3697,7 +3697,7 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -3764,7 +3764,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -4012,7 +4012,7 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
         return Result::MESSAGE_NOT_FOUND;
 
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -4641,7 +4641,7 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -4708,7 +4708,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -4793,7 +4793,7 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
         return Result::MESSAGE_NOT_FOUND;
 
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -5134,7 +5134,7 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessio
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -5328,7 +5328,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId session
       if (message2 == nullptr)
         return Result::MESSAGE_NOT_FOUND;
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -5578,7 +5578,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId se
         return Result::MESSAGE_NOT_FOUND;
 
 
-      if (gridLatLonCoordinates.size() == 0 ||  gridWidth == 0 || gridHeight == 0)
+      if (gridLatLonCoordinates.empty() ||  gridWidth == 0 || gridHeight == 0)
         return Result::INVALID_NUMBER_OF_COORDINATES;
 
       if (gridWidth == 0 || gridHeight == 0)
@@ -5893,7 +5893,7 @@ void ServiceImplementation::fullUpdate()
 
 /*! \brief Data Server: Event clear. */
 
-void ServiceImplementation::event_clear(T::EventInfo& eventInfo)
+void ServiceImplementation::event_clear(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5932,7 +5932,7 @@ void ServiceImplementation::event_storageClear(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event content server reload. */
 
-void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentServerReload(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5951,7 +5951,7 @@ void ServiceImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event producer added. */
 
-void ServiceImplementation::event_producerAdded(T::EventInfo& eventInfo)
+void ServiceImplementation::event_producerAdded(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5988,7 +5988,7 @@ void ServiceImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event producer updated. */
 
-void ServiceImplementation::event_producerUpdated(T::EventInfo& eventInfo)
+void ServiceImplementation::event_producerUpdated(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6025,7 +6025,7 @@ void ServiceImplementation::event_producerListDeletedBySourceId(T::EventInfo& ev
 
 /*! \brief Data Server: Event generation added. */
 
-void ServiceImplementation::event_generationAdded(T::EventInfo& eventInfo)
+void ServiceImplementation::event_generationAdded(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6062,7 +6062,7 @@ void ServiceImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event generation updated. */
 
-void ServiceImplementation::event_generationUpdated(T::EventInfo& eventInfo)
+void ServiceImplementation::event_generationUpdated(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6080,7 +6080,7 @@ void ServiceImplementation::event_generationUpdated(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event generation status changed. */
 
-void ServiceImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
+void ServiceImplementation::event_generationStatusChanged(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6136,7 +6136,7 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
 
 /*! \brief Data Server: Event file added. */
 
-void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo *nextEventInfo)
+void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo * /*nextEventInfo*/)
 {
   //FUNCTION_TRACE
   try
@@ -6245,7 +6245,7 @@ void ServiceImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event file updated. */
 
-void ServiceImplementation::event_fileUpdated(T::EventInfo& eventInfo)
+void ServiceImplementation::event_fileUpdated(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6365,7 +6365,7 @@ void ServiceImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventI
 
 /*! \brief Data Server: Event content list deleted by file id. */
 
-void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6383,7 +6383,7 @@ void ServiceImplementation::event_contentListDeletedByFileId(T::EventInfo& event
 
 /*! \brief Data Server: Event content list deleted by producer id. */
 
-void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6401,7 +6401,7 @@ void ServiceImplementation::event_contentListDeletedByProducerId(T::EventInfo& e
 
 /*! \brief Data Server: Event content list deleted by generation id. */
 
-void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6418,7 +6418,7 @@ void ServiceImplementation::event_contentListDeletedByGenerationId(T::EventInfo&
 
 /*! \brief Data Server: Event content list deleted by source id. */
 
-void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentListDeletedBySourceId(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6506,7 +6506,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event content updated. */
 
-void ServiceImplementation::event_contentUpdated(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentUpdated(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6524,7 +6524,7 @@ void ServiceImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 
 /*! \brief Data Server: Event content deleted. */
 
-void ServiceImplementation::event_contentDeleted(T::EventInfo& eventInfo)
+void ServiceImplementation::event_contentDeleted(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6800,6 +6800,8 @@ void ServiceImplementation::eventProcessingThread()
 
 
 
+namespace
+{
 void getFileNameHash(const char *filename,std::string& hash)
 {
   try
@@ -6829,6 +6831,7 @@ void getFileNameHash(const char *filename,std::string& hash)
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+}  // namespace
 
 
 

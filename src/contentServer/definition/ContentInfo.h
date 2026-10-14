@@ -105,9 +105,9 @@ class ContentInfo
         static const uint DeletedContent          = 0x1000; //!< Record is logically deleted and should be ignored.
     };
 
-  public:
+  
 
-    inline int compare(uint comparisonMethod,ContentInfo *contentInfo) const
+    int compare(uint comparisonMethod,ContentInfo *contentInfo) const
     {
       try
       {

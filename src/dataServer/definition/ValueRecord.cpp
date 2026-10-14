@@ -79,7 +79,7 @@ ValueRecord::~ValueRecord()
 
 /*! \brief Prints all value record fields to the given stream. */
 
-void ValueRecord::print(std::ostream& stream,uint level,uint optionFlags)
+void ValueRecord::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

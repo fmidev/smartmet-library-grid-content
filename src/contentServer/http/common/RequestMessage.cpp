@@ -649,7 +649,7 @@ void RequestMessage::deleteLineByIndex(uint index)
 
 /*! \brief Content Server: Print. */
 
-void RequestMessage::print(std::ostream& stream,uint level,uint optionFlags)
+void RequestMessage::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

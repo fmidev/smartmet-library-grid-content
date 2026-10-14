@@ -574,7 +574,7 @@ void SessionInfo::getAttributes(const char *attributeGroup,AttributeList& attrib
     if (group == mAttributeGroups.end())
       return;
 
-    if (attributeList.size() == 0)
+    if (attributeList.empty())
     {
       attributeList = group->second;
       return;
@@ -815,7 +815,7 @@ void SessionInfo::setAttributes(const char *attributeGroup,const AttributeList& 
       return;
     }
 
-    for (auto& it : attributeList)
+    for (const auto& it : attributeList)
     {
       auto attr = group->second.find(it.first);
       if (attr != group->second.end())
@@ -888,7 +888,7 @@ void SessionInfo::deleteAttributes(const char *attributeGroup,const std::vector<
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto& it : attributeNameList)
+    for (const auto& it : attributeNameList)
     {
       group->second.erase(it);
     }

@@ -495,7 +495,7 @@ int ServiceInterface::deleteSessionAttributes(T::SessionId sessionId,T::SessionI
 
 /*! \brief Protected hook: create session. */
 
-int ServiceInterface::_createSession(T::SessionId sessionId,SessionInfo& sessionInfo)
+int ServiceInterface::_createSession(T::SessionId /*sessionId*/,SessionInfo& /*sessionInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -505,7 +505,7 @@ int ServiceInterface::_createSession(T::SessionId sessionId,SessionInfo& session
 
 /*! \brief Protected hook: delete session. */
 
-int ServiceInterface::_deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId)
+int ServiceInterface::_deleteSession(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -514,7 +514,7 @@ int ServiceInterface::_deleteSession(T::SessionId sessionId,T::SessionId request
 
 /*! \brief Protected hook: delete expired sessions. */
 
-int ServiceInterface::_deleteExpiredSessions(T::SessionId sessionId)
+int ServiceInterface::_deleteExpiredSessions(T::SessionId /*sessionId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -523,7 +523,7 @@ int ServiceInterface::_deleteExpiredSessions(T::SessionId sessionId)
 
 /*! \brief Protected hook: update session access time. */
 
-int ServiceInterface::_updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId)
+int ServiceInterface::_updateSessionAccessTime(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -532,7 +532,7 @@ int ServiceInterface::_updateSessionAccessTime(T::SessionId sessionId,T::Session
 
 /*! \brief Protected hook: update session info. */
 
-int ServiceInterface::_updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo)
+int ServiceInterface::_updateSessionInfo(T::SessionId /*sessionId*/,SessionInfo& /*sessionInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -542,7 +542,7 @@ int ServiceInterface::_updateSessionInfo(T::SessionId sessionId,SessionInfo& ses
 
 /*! \brief Protected hook: get session attribute. */
 
-int ServiceInterface::_getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
+int ServiceInterface::_getSessionAttribute(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,const char * /*attributeName*/,std::string& /*attributeValue*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -551,7 +551,7 @@ int ServiceInterface::_getSessionAttribute(T::SessionId sessionId,T::SessionId r
 
 /*! \brief Protected hook: get session attributes. */
 
-int ServiceInterface::_getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceInterface::_getSessionAttributes(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,AttributeList& /*attributeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -560,7 +560,7 @@ int ServiceInterface::_getSessionAttributes(T::SessionId sessionId,T::SessionId 
 
 /*! \brief Protected hook: get session info. */
 
-int ServiceInterface::_getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
+int ServiceInterface::_getSessionInfo(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,SessionInfo& /*sessionInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -569,7 +569,7 @@ int ServiceInterface::_getSessionInfo(T::SessionId sessionId,T::SessionId reques
 
 /*! \brief Protected hook: set session attribute. */
 
-int ServiceInterface::_setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
+int ServiceInterface::_setSessionAttribute(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,const char * /*attributeName*/,const char * /*attributeValue*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -578,7 +578,7 @@ int ServiceInterface::_setSessionAttribute(T::SessionId sessionId,T::SessionId r
 
 /*! \brief Protected hook: set session attributes. */
 
-int ServiceInterface::_setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceInterface::_setSessionAttributes(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,AttributeList& /*attributeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -587,7 +587,7 @@ int ServiceInterface::_setSessionAttributes(T::SessionId sessionId,T::SessionId 
 
 /*! \brief Protected hook: delete session attribute. */
 
-int ServiceInterface::_deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
+int ServiceInterface::_deleteSessionAttribute(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,const char * /*attributeName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -596,7 +596,7 @@ int ServiceInterface::_deleteSessionAttribute(T::SessionId sessionId,T::SessionI
 
 /*! \brief Protected hook: delete session attribute group. */
 
-int ServiceInterface::_deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup)
+int ServiceInterface::_deleteSessionAttributeGroup(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -604,7 +604,7 @@ int ServiceInterface::_deleteSessionAttributeGroup(T::SessionId sessionId,T::Ses
 
 /*! \brief Protected hook: delete session attributes. */
 
-int ServiceInterface::_deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
+int ServiceInterface::_deleteSessionAttributes(T::SessionId /*sessionId*/,T::SessionId /*requestedSessionId*/,const char * /*attributeGroup*/,std::vector<std::string>& /*attributeNameList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

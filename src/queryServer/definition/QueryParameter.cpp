@@ -2,6 +2,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/Hash.h>
 
+#include <algorithm>
+
 
 namespace SmartMet
 {
@@ -189,15 +191,14 @@ void QueryParameter::getValueListSize(int& columns,int& rows)
   {
     columns = 0;
     rows = 0;
-    if (mValueList.size() == 0)
+    if (mValueList.empty())
       return;
 
     rows = mValueList.size();
     for (auto& it : mValueList)
     {
       int len = it->mValueList.getLength();
-      if (len > columns)
-        columns = len;
+      columns = std::max(len, columns);
     }
   }
   catch (...)
@@ -223,7 +224,7 @@ T::ParamValue QueryParameter::getValueListValue(int col,int row)
       return ParamValueMissing;
 
 
-    auto rec = mValueList[row]->mValueList.getGridValuePtrByIndex(col);
+    auto *rec = mValueList[row]->mValueList.getGridValuePtrByIndex(col);
     if (!rec)
       return ParamValueMissing;
 

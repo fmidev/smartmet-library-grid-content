@@ -872,7 +872,7 @@ ContentInfo* ContentInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void ContentInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

@@ -1,5 +1,6 @@
 #include "Query.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <algorithm>
 #include <ctime>
 #include <macgyver/Hash.h>
 
@@ -188,8 +189,7 @@ uint Query::getValuesPerTimeStep()
       for (auto vList = param.mValueList.begin(); vList != param.mValueList.end(); ++vList)
       {
         uint vCount = (*vList)->mValueList.getLength();
-        if (vCount > valueCount)
-          valueCount = vCount;
+        valueCount = std::max(vCount, valueCount);
       }
     }
     return valueCount;
@@ -331,7 +331,7 @@ void Query::removeAggregationTimes()
   try
   {
     return;
-    if (mAggregationTimes.size() == 0)
+    if (mAggregationTimes.empty())
       return;
 
     for (auto& it : mQueryParameterList)

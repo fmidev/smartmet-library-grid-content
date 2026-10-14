@@ -89,7 +89,7 @@ void AliasFileCollection::init()
 {
   try
   {
-    if (mAliasFileList.size() > 0)
+    if (!mAliasFileList.empty())
       return; // Already initialized
 
     AutoWriteLock lock(&mModificationLock);

@@ -486,7 +486,7 @@ void ContentListStorage::getContentInfoList(T::FileId startFileId,T::MessageInde
 
 /*! \brief Append entries matching the given geometry id to the target list. */
 
-void ContentListStorage::getContentInfoListByGeometryId(T::GeometryId geometryId,ContentInfoList& contentInfoList)
+void ContentListStorage::getContentInfoListByGeometryId(T::GeometryId /*geometryId*/,ContentInfoList& /*contentInfoList*/)
 {
   try
   {

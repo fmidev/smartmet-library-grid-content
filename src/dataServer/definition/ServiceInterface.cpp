@@ -255,7 +255,7 @@ void ServiceInterface::shutdown()
 
 /*! \brief Public API: sets the digital elevation model used for terrain-aware operations. */
 
-void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
+void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> /*dem*/)
 {
   FUNCTION_TRACE
   try
@@ -273,7 +273,7 @@ void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 /*! \brief Public API: sets the land cover dataset used for surface-aware operations. */
 
-void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
+void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> /*landCover*/)
 {
   FUNCTION_TRACE
   try
@@ -3371,7 +3371,7 @@ int ServiceInterface::getMultipleGridValues(T::SessionId sessionId,uint modifica
 
 /*! \brief Data Server: Protected hook: get grid coordinates. */
 
-int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,T::GridCoordinates& coordinates)
+int ServiceInterface::_getGridCoordinates(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,T::GridCoordinates& /*coordinates*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3382,7 +3382,7 @@ int ServiceInterface::_getGridCoordinates(T::SessionId sessionId,T::FileId fileI
 
 /*! \brief Data Server: Protected hook: get grid latlon coordinates by geometry. */
 
-int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId,T::AttributeList& attributeList,T::GridCoordinates& coordinates)
+int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId /*sessionId*/,T::AttributeList& /*attributeList*/,T::GridCoordinates& /*coordinates*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3393,7 +3393,7 @@ int ServiceInterface::_getGridLatlonCoordinatesByGeometry(T::SessionId sessionId
 
 /*! \brief Data Server: Protected hook: get grid data. */
 
-int ServiceInterface::_getGridData(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::GridData& data)
+int ServiceInterface::_getGridData(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::GridData& /*data*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3404,7 +3404,7 @@ int ServiceInterface::_getGridData(T::SessionId sessionId,T::FileId fileId,T::Me
 
 /*! \brief Data Server: Protected hook: get grid attribute list. */
 
-int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList)
+int ServiceInterface::_getGridAttributeList(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::AttributeList& /*attributeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3415,7 +3415,7 @@ int ServiceInterface::_getGridAttributeList(T::SessionId sessionId,T::FileId fil
 
 /*! \brief Data Server: Protected hook: get grid properties. */
 
-int ServiceInterface::_getGridProperties(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::PropertySettingVec& propertyList)
+int ServiceInterface::_getGridProperties(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::PropertySettingVec& /*propertyList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3426,7 +3426,7 @@ int ServiceInterface::_getGridProperties(T::SessionId sessionId,T::FileId fileId
 
 /*! \brief Data Server: Protected hook: get grid file count. */
 
-int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getGridFileCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3437,7 +3437,7 @@ int ServiceInterface::_getGridFileCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Data Server: Protected hook: get grid message bytes. */
 
-int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,std::vector<uchar>& messageBytes,std::vector<uint>& messageSections)
+int ServiceInterface::_getGridMessageBytes(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,std::vector<uchar>& /*messageBytes*/,std::vector<uint>& /*messageSections*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3447,7 +3447,7 @@ int ServiceInterface::_getGridMessageBytes(T::SessionId sessionId,T::FileId file
 
 /*! \brief Data Server: Protected hook: get property values by coordinates. */
 
-int ServiceInterface::_getPropertyValuesByCoordinates(T::SessionId sessionId,const char *propertyName,T::Coordinate_vec& latlonCoordinates,T::ParamValue_vec& values)
+int ServiceInterface::_getPropertyValuesByCoordinates(T::SessionId /*sessionId*/,const char * /*propertyName*/,T::Coordinate_vec& /*latlonCoordinates*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3458,7 +3458,7 @@ int ServiceInterface::_getPropertyValuesByCoordinates(T::SessionId sessionId,con
 
 /*! \brief Data Server: Protected hook: get grid value by point. */
 
-int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByPoint(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*areaInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue& /*value*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3469,7 +3469,7 @@ int ServiceInterface::_getGridValueByPoint(T::SessionId sessionId,T::FileId file
 
 /*! \brief Data Server: Protected hook: get grid value by level and point. */
 
-int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByLevelAndPoint(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,int /*level1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,int /*level2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*areaInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue& /*value*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3499,7 +3499,7 @@ int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::File
 
 /*! \brief Data Server: Protected hook: get grid value by time and point. */
 
-int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeAndPoint(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*areaInterpolationMethod*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue& /*value*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3529,7 +3529,7 @@ int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T:
 
 /*! \brief Data Server: Protected hook: get grid value by time level and point. */
 
-int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,int level1,T::FileId fileId2,T::MessageIndex messageIndex2,int level2,T::FileId fileId3,T::MessageIndex messageIndex3,int level3,T::FileId fileId4,T::MessageIndex messageIndex4,int level4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double x,double y,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue& value)
+int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,int /*level1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,int /*level2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,int /*level3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,int /*level4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*areaInterpolationMethod*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue& /*value*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3540,7 +3540,7 @@ int ServiceInterface::_getGridValueByTimeLevelAndPoint(T::SessionId sessionId,T:
 
 /*! \brief Data Server: Protected hook: get grid value list by circle. */
 
-int ServiceInterface::_getGridValueListByCircle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double origoX,double origoY,double radius,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByCircle(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,double /*origoX*/,double /*origoY*/,double /*radius*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3570,7 +3570,7 @@ int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T:
 
 /*! \brief Data Server: Protected hook: get grid value list by time and circle. */
 
-int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,double /*origoX*/,double /*origoY*/,double /*radius*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3581,7 +3581,7 @@ int ServiceInterface::_getGridValueListByTimeAndCircle(T::SessionId sessionId,T:
 
 /*! \brief Data Server: Protected hook: get grid value list by level and circle. */
 
-int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndCircle(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,double /*origoX*/,double /*origoY*/,double /*radius*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3611,7 +3611,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get grid value list by time level and circle. */
 
-int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,double origoX,double origoY,double radius,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,double /*origoX*/,double /*origoY*/,double /*radius*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3622,7 +3622,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndCircle(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get grid value list by point list. */
 
-int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPointList(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*pointList*/,short /*areaInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3633,7 +3633,7 @@ int ServiceInterface::_getGridValueListByPointList(T::SessionId sessionId,T::Fil
 
 /*! \brief Data Server: Protected hook: get grid value list by level and point list. */
 
-int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPointList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*pointList*/,short /*areaInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3663,7 +3663,7 @@ int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId
 
 /*! \brief Data Server: Protected hook: get grid value list by time and point list. */
 
-int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPointList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*pointList*/,short /*areaInterpolationMethod*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3693,7 +3693,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sess
 
 /*! \brief Data Server: Protected hook: get grid value list by time level and point list. */
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& pointList,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*pointList*/,short /*areaInterpolationMethod*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3704,7 +3704,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPointList(T::SessionId sess
 
 /*! \brief Data Server: Protected hook: get grid value list by polygon. */
 
-int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPolygon(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*polygonPoints*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3715,7 +3715,7 @@ int ServiceInterface::_getGridValueListByPolygon(T::SessionId sessionId,T::FileI
 
 /*! \brief Data Server: Protected hook: get grid value list by level and polygon. */
 
-int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPolygon(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*polygonPoints*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3745,7 +3745,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid value list by time and polygon. */
 
-int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygon(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*polygonPoints*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3775,7 +3775,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessio
 
 /*! \brief Data Server: Protected hook: get grid value list by time level and polygon. */
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& polygonPoints,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*polygonPoints*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3786,7 +3786,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygon(T::SessionId sessio
 
 /*! \brief Data Server: Protected hook: get grid value list by polygon path. */
 
-int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,std::vector<std::vector<T::Coordinate>>& /*polygonPath*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3797,7 +3797,7 @@ int ServiceInterface::_getGridValueListByPolygonPath(T::SessionId sessionId,T::F
 
 /*! \brief Data Server: Protected hook: get grid value list by level and polygon path. */
 
-int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByLevelAndPolygonPath(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<std::vector<T::Coordinate>>& /*polygonPath*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3827,7 +3827,7 @@ int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get grid value list by time and polygon path. */
 
-int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeAndPolygonPath(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,std::vector<std::vector<T::Coordinate>>& /*polygonPath*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3856,7 +3856,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId se
 
 /*! \brief Data Server: Protected hook: get grid value list by time level and polygon path. */
 
-int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<std::vector<T::Coordinate>>& polygonPath,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<std::vector<T::Coordinate>>& /*polygonPath*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3866,7 +3866,7 @@ int ServiceInterface::_getGridValueListByTimeLevelAndPolygonPath(T::SessionId se
 
 /*! \brief Data Server: Protected hook: get grid value list by rectangle. */
 
-int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x1,double y1,double x2,double y2,uint modificationOperation,double_vec& modificationParameters,T::GridValueList& valueList)
+int ServiceInterface::_getGridValueListByRectangle(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,double /*x1*/,double /*y1*/,double /*x2*/,double /*y2*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::GridValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3877,7 +3877,7 @@ int ServiceInterface::_getGridValueListByRectangle(T::SessionId sessionId,T::Fil
 
 /*! \brief Data Server: Protected hook: get grid value vector. */
 
-int ServiceInterface::_getGridValueVector(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVector(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3888,7 +3888,7 @@ int ServiceInterface::_getGridValueVector(T::SessionId sessionId,T::FileId fileI
 
 /*! \brief Data Server: Protected hook: get grid value vector by level. */
 
-int ServiceInterface::_getGridValueVectorByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3918,7 +3918,7 @@ int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId
 
 /*! \brief Data Server: Protected hook: get grid value vector by time. */
 
-int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,short timeInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTime(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,short /*timeInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3929,7 +3929,7 @@ int ServiceInterface::_getGridValueVectorByTime(T::SessionId sessionId,T::FileId
 
 /*! \brief Data Server: Protected hook: get grid value vector by level and coordinate list. */
 
-int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*coordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3940,7 +3940,7 @@ int ServiceInterface::_getGridValueVectorByLevelAndCoordinateList(T::SessionId s
 
 /*! \brief Data Server: Protected hook: get grid value vector by level and geometry. */
 
-int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -3970,7 +3970,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionI
 
 /*! \brief Data Server: Protected hook: get grid value vector by time and geometry. */
 
-int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4000,7 +4000,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId ses
 
 /*! \brief Data Server: Protected hook: get grid value vector by time level and geometry. */
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4011,7 +4011,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndGeometry(T::SessionId ses
 
 /*! \brief Data Server: Protected hook: get grid value vector by coordinate list. */
 
-int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByCoordinateList(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*coordinates*/,short /*areaInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4040,7 +4040,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId se
 
 /*! \brief Data Server: Protected hook: get grid value vector by time and coordinate list. */
 
-int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*coordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4050,7 +4050,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndCoordinateList(T::SessionId se
 
 /*! \brief Data Server: Protected hook: get grid value vector by geometry. */
 
-int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4061,7 +4061,7 @@ int ServiceInterface::_getGridValueVectorByGeometry(T::SessionId sessionId,T::Fi
 
 /*! \brief Data Server: Protected hook: get grid value vector by rectangle. */
 
-int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,uint columns,uint rows,double x,double y,double xStep,double yStep,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByRectangle(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,uint /*columns*/,uint /*rows*/,double /*x*/,double /*y*/,double /*xStep*/,double /*yStep*/,short /*areaInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4091,7 +4091,7 @@ int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid value vector by time and level. */
 
-int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeAndLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,short /*areaInterpolationMethod*/,short /*timeInterpolationMethod*/,short /*levelInterpolationMethod*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4121,7 +4121,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::Session
 
 /*! \brief Data Server: Protected hook: get grid value vector by time level and coordinate list. */
 
-int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::CoordinateType coordinateType,std::vector<T::Coordinate>& coordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ParamValue_vec& values)
+int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::CoordinateType /*coordinateType*/,std::vector<T::Coordinate>& /*coordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ParamValue_vec& /*values*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4132,7 +4132,7 @@ int ServiceInterface::_getGridValueVectorByTimeLevelAndCoordinateList(T::Session
 
 /*! \brief Data Server: Protected hook: get grid isobands. */
 
-int ServiceInterface::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobands(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4143,7 +4143,7 @@ int ServiceInterface::_getGridIsobands(T::SessionId sessionId,T::FileId fileId,T
 
 /*! \brief Data Server: Protected hook: get grid isobands by geometry. */
 
-int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4154,7 +4154,7 @@ int ServiceInterface::_getGridIsobandsByGeometry(T::SessionId sessionId,T::FileI
 
 /*! \brief Data Server: Protected hook: get grid isobands by grid. */
 
-int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByGrid(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4165,7 +4165,7 @@ int ServiceInterface::_getGridIsobandsByGrid(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Data Server: Protected hook: get grid isolines by level. */
 
-int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4176,7 +4176,7 @@ int ServiceInterface::_getGridIsolinesByLevel(T::SessionId sessionId,T::FileId f
 
 /*! \brief Data Server: Protected hook: get grid isobands by level and geometry. */
 
-int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4206,7 +4206,7 @@ int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Data Server: Protected hook: get grid isobands by time. */
 
-int ServiceInterface::_getGridIsobandsByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTime(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4236,7 +4236,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid isobands by time and geometry. */
 
-int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4247,7 +4247,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGeometry(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid isobands by level and grid. */
 
-int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4277,7 +4277,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::Fi
 
 /*! \brief Data Server: Protected hook: get grid isobands by time and grid. */
 
-int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4307,7 +4307,7 @@ int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::F
 
 /*! \brief Data Server: Protected hook: get grid isobands by time and level. */
 
-int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeAndLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4337,7 +4337,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessio
 
 /*! \brief Data Server: Protected hook: get grid isobands by time level and geometry. */
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4367,7 +4367,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,
 
 /*! \brief Data Server: Protected hook: get grid isobands by time level and grid. */
 
-int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4378,7 +4378,7 @@ int ServiceInterface::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessionId,
 
 /*! \brief Data Server: Protected hook: get grid isolines. */
 
-int ServiceInterface::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolines(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4389,7 +4389,7 @@ int ServiceInterface::_getGridIsolines(T::SessionId sessionId,T::FileId fileId,T
 
 /*! \brief Data Server: Protected hook: get grid isolines by geometry. */
 
-int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4400,7 +4400,7 @@ int ServiceInterface::_getGridIsolinesByGeometry(T::SessionId sessionId,T::FileI
 
 /*! \brief Data Server: Protected hook: get grid isolines by grid. */
 
-int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByGrid(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ParamValue_vec& /*contourValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4411,7 +4411,7 @@ int ServiceInterface::_getGridIsolinesByGrid(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Data Server: Protected hook: get grid isobands by level. */
 
-int ServiceInterface::_getGridIsobandsByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourLowValues,T::ParamValue_vec& contourHighValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsobandsByLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourLowValues*/,T::ParamValue_vec& /*contourHighValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4441,7 +4441,7 @@ int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Data Server: Protected hook: get grid isolines by time. */
 
-int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTime(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4452,7 +4452,7 @@ int ServiceInterface::_getGridIsolinesByTime(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Data Server: Protected hook: get grid isolines by level and geometry. */
 
-int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4482,7 +4482,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid isolines by time and geometry. */
 
-int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4493,7 +4493,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGeometry(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid isolines by level and grid. */
 
-int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4523,7 +4523,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::Fi
 
 /*! \brief Data Server: Protected hook: get grid isolines by time and grid. */
 
-int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::ParamValue_vec& /*contourValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4553,7 +4553,7 @@ int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::F
 
 /*! \brief Data Server: Protected hook: get grid isolines by time and level. */
 
-int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeAndLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4583,7 +4583,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessio
 
 /*! \brief Data Server: Protected hook: get grid isolines by time level and geometry. */
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4613,7 +4613,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,
 
 /*! \brief Data Server: Protected hook: get grid isolines by time level and grid. */
 
-int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::ParamValue_vec& contourValues,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& contours)
+int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::ParamValue_vec& /*contourValues*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*contours*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4624,7 +4624,7 @@ int ServiceInterface::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessionId,
 
 /*! \brief Data Server: Protected hook: get grid streamlines. */
 
-int ServiceInterface::_getGridStreamlines(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlines(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4635,7 +4635,7 @@ int ServiceInterface::_getGridStreamlines(T::SessionId sessionId,T::FileId fileI
 
 /*! \brief Data Server: Protected hook: get grid streamlines by geometry. */
 
-int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4646,7 +4646,7 @@ int ServiceInterface::_getGridStreamlinesByGeometry(T::SessionId sessionId,T::Fi
 
 /*! \brief Data Server: Protected hook: get grid streamlines by grid. */
 
-int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4656,7 +4656,7 @@ int ServiceInterface::_getGridStreamlinesByGrid(T::SessionId sessionId,T::FileId
 
 /*! \brief Data Server: Protected hook: get grid streamlines by level. */
 
-int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4666,7 +4666,7 @@ int ServiceInterface::_getGridStreamlinesByLevel(T::SessionId sessionId,T::FileI
 
 /*! \brief Data Server: Protected hook: get grid streamlines by level and geometry. */
 
-int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4676,7 +4676,7 @@ int ServiceInterface::_getGridStreamlinesByLevelAndGeometry(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get grid streamlines by level and grid. */
 
-int ServiceInterface::_getGridStreamlinesByLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,double /*newLevel*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4704,7 +4704,7 @@ int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time. */
 
-int ServiceInterface::_getGridStreamlinesByTime(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTime(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4732,7 +4732,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionI
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time and geometry. */
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4760,7 +4760,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T:
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time and grid. */
 
-int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,time_t newTime,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,time_t /*newTime*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4788,7 +4788,7 @@ int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time and level. */
 
-int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeAndLevel(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4816,7 +4816,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId ses
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time level and geometry. */
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4844,7 +4844,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get grid streamlines by time level and grid. */
 
-int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId sessionId,T::FileId fileId1,T::MessageIndex messageIndex1,T::FileId fileId2,T::MessageIndex messageIndex2,T::FileId fileId3,T::MessageIndex messageIndex3,T::FileId fileId4,T::MessageIndex messageIndex4,time_t newTime,double newLevel,uint gridWidth,uint gridHeight,std::vector<T::Coordinate>& gridLatLonCoordinates,T::AttributeList& attributeList,uint modificationOperation,double_vec& modificationParameters,T::ByteData_vec& streamlines)
+int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId /*sessionId*/,T::FileId /*fileId1*/,T::MessageIndex /*messageIndex1*/,T::FileId /*fileId2*/,T::MessageIndex /*messageIndex2*/,T::FileId /*fileId3*/,T::MessageIndex /*messageIndex3*/,T::FileId /*fileId4*/,T::MessageIndex /*messageIndex4*/,time_t /*newTime*/,double /*newLevel*/,uint /*gridWidth*/,uint /*gridHeight*/,std::vector<T::Coordinate>& /*gridLatLonCoordinates*/,T::AttributeList& /*attributeList*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ByteData_vec& /*streamlines*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4855,7 +4855,7 @@ int ServiceInterface::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId session
 
 /*! \brief Data Server: Protected hook: get multiple grid values. */
 
-int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
+int ServiceInterface::_getMultipleGridValues(T::SessionId /*sessionId*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,T::ValueRecordList& /*valueRecordList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4866,7 +4866,7 @@ int ServiceInterface::_getMultipleGridValues(T::SessionId sessionId,uint modific
 
 /*! \brief Data Server: Protected hook: get grid value vector by point. */
 
-int ServiceInterface::_getGridValueVectorByPoint(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::CoordinateType coordinateType,double x,double y,uint vectorType,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
+int ServiceInterface::_getGridValueVectorByPoint(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,uint /*vectorType*/,uint /*modificationOperation*/,double_vec& /*modificationParameters*/,double_vec& /*valueVector*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

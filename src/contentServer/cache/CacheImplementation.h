@@ -217,7 +217,7 @@ class CacheImplementation : public ServiceInterface
 
     int     _updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList) override;
 
-  protected:
+  
 
     /*! \brief Returns the active search structure. The returned reference keeps it alive even if
         a content update replaces it meanwhile. (The structures used to be raw pointers that an

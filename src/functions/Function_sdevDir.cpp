@@ -20,7 +20,9 @@ namespace Functions
     instead of 180/pi, and missing values were used as directions.)
 */
 
-static double directionStdDev(const std::vector<double>& directions)
+namespace
+{
+double directionStdDev(const std::vector<double>& directions)
 {
   double xsin = 0;
   double xcos = 0;
@@ -48,6 +50,7 @@ static double directionStdDev(const std::vector<double>& directions)
   double stddev = sqrt(-log(r2));
   return stddev*180/PI;
 }
+}  // namespace
 
 
 /*! \brief Function: Constructor. */
@@ -149,7 +152,7 @@ double Function_sdevDir::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -180,7 +183,7 @@ void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
 /*! \brief Function: Execute function call9. */
 
-void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_sdevDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {

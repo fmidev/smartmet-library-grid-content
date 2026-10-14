@@ -224,7 +224,7 @@ class MergeImplementation : public ServiceInterface
 
     int     _updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList) override;
 
-  protected:
+  
 
     T::EventId      addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags);
     /*! \brief Returns the active search structure. The returned reference keeps it alive even if

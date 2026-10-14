@@ -177,7 +177,7 @@ class ClientImplementation : public ContentServer::ServiceInterface
 
      int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList) override;
 
-   protected:
+   
 
      bool           mInitialized;    //!< True after init() has completed successfully.
      std::string    mServiceIor;     //!< CORBA IOR string used to locate the remote servant.

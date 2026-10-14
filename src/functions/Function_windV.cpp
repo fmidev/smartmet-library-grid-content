@@ -125,7 +125,7 @@ double Function_windV::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_windV::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -171,7 +171,7 @@ void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 /*! \brief Function: Execute function call9. */
 
-void Function_windV::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_windV::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -220,7 +220,7 @@ Function* Function_windV::duplicate()
 {
   try
   {
-    return (Function*)new Function(*this);
+    return new Function(*this);
   }
   catch (...)
   {
@@ -233,7 +233,7 @@ Function* Function_windV::duplicate()
 
 /*! \brief Function: Print. */
 
-void Function_windV::print(std::ostream& stream,uint level,uint optionFlags)
+void Function_windV::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

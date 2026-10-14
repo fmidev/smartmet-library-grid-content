@@ -177,7 +177,7 @@ void GridFileManager::deleteFilesByProducerId(T::ProducerId producerId)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -210,7 +210,7 @@ void GridFileManager::deleteFilesByGenerationId(T::GenerationId generationId)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -243,7 +243,7 @@ void GridFileManager::deleteFilesBySourceId(T::SourceId sourceId)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -277,7 +277,7 @@ void GridFileManager::deleteFilesByStorageId(T::StorageId storageId)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -312,7 +312,7 @@ void GridFileManager::deleteFilesByAccessTime(time_t accessTime)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -345,7 +345,7 @@ void GridFileManager::deleteFilesByCheckTime(time_t checkTime)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -378,7 +378,7 @@ void GridFileManager::deleteFilesByDeletionTime(time_t deletionTime)
       }
     }
 
-    if (idList.size() > 0)
+    if (!idList.empty())
     {
       AutoWriteLock lock(&mModificationLock);
       deleteFilesNoLock(idList,false);
@@ -669,7 +669,7 @@ void GridFileManager::print(std::ostream& stream,uint level,uint optionFlags)
 
 /*! \brief Data Server: Delete file no lock. */
 
-void GridFileManager::deleteFileNoLock(T::FileId fileId,bool sentMessageToContentServer)
+void GridFileManager::deleteFileNoLock(T::FileId fileId,bool /*sentMessageToContentServer*/)
 {
   FUNCTION_TRACE
   try

@@ -173,7 +173,7 @@ void ForecastTime::setCsv(const std::string& csv)
 
 /*! \brief Print the record contents to the given stream. */
 
-void ForecastTime::print(std::ostream& stream,uint level,uint optionFlags) const
+void ForecastTime::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

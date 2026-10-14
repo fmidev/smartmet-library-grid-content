@@ -107,7 +107,7 @@ double Function_valid::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_valid::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -118,7 +118,7 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
     uint len = inParameters.size();
     for (uint t=0; t<len; t++)
     {
-      if (inParameters[t].size())
+      if (!inParameters[t].empty())
       {
         outParameters = inParameters[t];
         return;
@@ -137,7 +137,7 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 /*! \brief Function: Execute function call9. */
 
-void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_valid::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -148,7 +148,7 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
     uint len = inParameters.size();
     for (uint t=0; t<len; t++)
     {
-      if (inParameters[t].size())
+      if (!inParameters[t].empty())
       {
         outParameters = inParameters[t];
         return;

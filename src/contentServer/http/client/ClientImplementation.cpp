@@ -1402,7 +1402,7 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 /*! \brief Content Server: Protected hook: delete geometry info by id. */
 
-int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId /*generationId*/,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   try
   {
@@ -1519,7 +1519,7 @@ int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 /*! \brief Content Server: Protected hook: get geometry info by id. */
 
-int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId /*generationId*/,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   try
   {
@@ -1630,7 +1630,7 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 /*! \brief Content Server: Protected hook: get geometry info list by producer id. */
 
-int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId /*producerId*/,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
@@ -3736,7 +3736,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,T::So
 
 /*! \brief Content Server: Protected hook: get content list by parameter. */
 
-int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3786,7 +3786,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 /*! \brief Content Server: Protected hook: get content list by parameter and generation id. */
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3837,7 +3837,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 /*! \brief Content Server: Protected hook: get content list by parameter and generation name. */
 
-int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3886,7 +3886,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 /*! \brief Content Server: Protected hook: get content list by parameter and producer id. */
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3936,7 +3936,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 /*! \brief Content Server: Protected hook: get content list by parameter and producer name. */
 
-int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -4679,7 +4679,9 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-size_t ClientImplementation_responseProcessing(const char *ptr, size_t size, size_t nmemb, void *userdata)
+namespace
+{
+size_t ClientImplementation_responseProcessing(const char *ptr, size_t /*size*/, size_t nmemb, void *userdata)
 {
   try
   {
@@ -4697,6 +4699,7 @@ size_t ClientImplementation_responseProcessing(const char *ptr, size_t size, siz
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+}  // namespace
 
 
 

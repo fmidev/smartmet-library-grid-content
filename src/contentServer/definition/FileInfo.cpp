@@ -375,7 +375,7 @@ FileInfo* FileInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void FileInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void FileInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

@@ -194,7 +194,7 @@ class ContentInfoList
 
   public:
 
-    inline int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
+    int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
     {
       if (mArray == nullptr  ||  mLength == 0)
         return 0;
@@ -263,7 +263,7 @@ class ContentInfoList
     }
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
+    ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
     {
       try
       {
@@ -280,7 +280,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
+    ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
     {
       try
       {
@@ -311,7 +311,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
     {
       try
       {
@@ -327,7 +327,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
     {
       try
       {

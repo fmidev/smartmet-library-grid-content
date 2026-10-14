@@ -665,7 +665,7 @@ class ServiceImplementation : public ServiceInterface
      bool            isGeometryValid(int geometryId,std::vector<std::vector<T::Coordinate>>& polygonPath);
 
 
-  private:
+  
 
      // Private attributes
 

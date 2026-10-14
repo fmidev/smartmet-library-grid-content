@@ -6,6 +6,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/AutoThreadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <algorithm>
 #include <iostream>
 #include <macgyver/Hash.h>
 
@@ -21,6 +22,8 @@ namespace T
 
 /*! \brief Qsort comparator for FileInfo using comparison method 1. */
 
+namespace
+{
 int fileInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -49,6 +52,7 @@ int fileInfo_compare_2(const void *_val1,const void *_val2)
   }
   return 0;
 }
+}  // namespace
 
 
 
@@ -1092,8 +1096,7 @@ void FileInfoList::getFileInfoListNoClear(T::FileId startFileId,int maxRecords,F
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -1205,8 +1208,7 @@ void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,T::FileI
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -1423,8 +1425,7 @@ void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,T:
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -1537,8 +1538,7 @@ void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId star
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -2379,8 +2379,7 @@ time_t FileInfoList::getLastFileDeletionTimeByGenerationId(T::GenerationId gener
       {
         if (info->mGenerationId == generationId || (info->mFlags & T::FileInfo::Flags::DeletedFile) != 0)
         {
-          if (info->mDeletionTime > lastTime)
-            lastTime = info->mDeletionTime;
+          lastTime = std::max(info->mDeletionTime, lastTime);
         }
       }
     }

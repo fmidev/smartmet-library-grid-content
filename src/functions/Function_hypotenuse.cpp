@@ -117,7 +117,7 @@ double Function_hypotenuse::executeFunctionCall1(std::vector<double>& parameters
 
 /*! \brief Function: Execute function call9. */
 
-void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_hypotenuse::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -140,7 +140,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {
-        auto c = (float)sqrt(a*a+b*b);
+        auto c = sqrt(a*a+b*b);
         outParameters.emplace_back(c);
       }
       else
@@ -161,7 +161,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
 /*! \brief Function: Execute function call9. */
 
-void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_hypotenuse::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -183,7 +183,7 @@ void Function_hypotenuse::executeFunctionCall9(uint columns,uint rows,std::vecto
 
       if (a != ParamValueMissing and b != ParamValueMissing)
       {
-        auto c = (double)sqrt(a*a+b*b);
+        auto c = sqrt(a*a+b*b);
         outParameters.emplace_back(c);
       }
       else
@@ -207,7 +207,7 @@ Function* Function_hypotenuse::duplicate()
 {
   try
   {
-    return (Function*)new Function(*this);
+    return new Function(*this);
   }
   catch (...)
   {
@@ -220,7 +220,7 @@ Function* Function_hypotenuse::duplicate()
 
 /*! \brief Function: Print. */
 
-void Function_hypotenuse::print(std::ostream& stream,uint level,uint optionFlags)
+void Function_hypotenuse::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

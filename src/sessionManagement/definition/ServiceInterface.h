@@ -65,7 +65,7 @@ class ServiceInterface
      virtual int    _deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup);
      virtual int    _deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList);
 
-  protected:
+  
 
      bool           mEnabled;        //!< When false, all service calls return SERVICE_DISABLED immediately.
      Log            *mDebugLog;       //!< Optional log for verbose debug output.

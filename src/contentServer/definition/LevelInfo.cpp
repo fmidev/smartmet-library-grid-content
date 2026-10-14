@@ -240,7 +240,7 @@ LevelInfo* LevelInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void LevelInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

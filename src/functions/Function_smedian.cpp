@@ -1,6 +1,8 @@
 #include "Function_smedian.h"
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <algorithm>
+
 
 namespace SmartMet
 {
@@ -95,8 +97,7 @@ float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
 
     if ((sz % 2) == 1)
     {
-      if (i < 0)
-        i = 0;
+      i = std::max(i, 0);
 
       if (i >= sz)
         i = sz-1;
@@ -107,8 +108,7 @@ float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
     if (i >= (sz-1))
       i = sz-2;
 
-    if (i < 0)
-      i = 0;
+    i = std::max(i, 0);
 
     return (values[i]+values[i+1])/2;
   }
@@ -156,8 +156,7 @@ double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
 
     if ((sz % 2) == 1)
     {
-      if (i < 0)
-        i = 0;
+      i = std::max(i, 0);
 
       if (i >= sz)
         i = sz-1;
@@ -168,8 +167,7 @@ double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
     if (i >= (sz-1))
       i = sz-2;
 
-    if (i < 0)
-      i = 0;
+    i = std::max(i, 0);
 
     return (values[i]+values[i+1])/2;
   }
@@ -226,8 +224,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
         if ((vsz % 2) == 1)
         {
-          if (i < 0)
-            i = 0;
+          i = std::max(i, 0);
 
           if (i >= sz)
             i = sz-1;
@@ -239,8 +236,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
           if (i >= (sz-1))
             i = sz-2;
 
-          if (i < 0)
-            i = 0;
+          i = std::max(i, 0);
 
           res = (values[i]+values[i+1])/2;
         }
@@ -299,8 +295,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
 
         if ((vsz % 2) == 1)
         {
-          if (i < 0)
-            i = 0;
+          i = std::max(i, 0);
 
           if (i >= sz)
             i = sz-1;
@@ -312,8 +307,7 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
           if (i >= (sz-1))
             i = sz-2;
 
-          if (i < 0)
-            i = 0;
+          i = std::max(i, 0);
 
           res = (values[i]+values[i+1])/2;
         }

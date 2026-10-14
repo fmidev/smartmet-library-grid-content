@@ -3879,7 +3879,7 @@ SmartMet::C::Result ServerInterface::getHashByProducerId(SmartMet::C::SessionId 
     int result = mService->getHashByProducerId(sessionId,producerId,sHash);
 
     if (result == 0)
-      hash = static_cast<UInt64>(sHash);
+      hash = sHash;
 
     return result;
   }

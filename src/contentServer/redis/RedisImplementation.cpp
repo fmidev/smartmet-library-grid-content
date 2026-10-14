@@ -6,6 +6,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <algorithm>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/permissions.hpp>
@@ -34,7 +35,9 @@ namespace ContentServer
 // long-lived files are still in use and must be skipped, otherwise two files would share
 // the same id. Zero is skipped too, since it means "no file". Returns false on a Redis error.
 
-static bool allocateFileId(redisContext *context,const std::string& tablePrefix,T::FileId& fileId)
+namespace
+{
+bool allocateFileId(redisContext *context,const std::string& tablePrefix,T::FileId& fileId)
 {
   // Bounds the search in the unlikely case of a long run of reserved ids
   const uint maxAttempts = 1000000;
@@ -72,6 +75,7 @@ static bool allocateFileId(redisContext *context,const std::string& tablePrefix,
   exception.addParameter("Attempts",std::to_string(maxAttempts));
   throw exception;
 }
+}  // namespace
 
 
 class RedisProcessLock
@@ -119,6 +123,8 @@ class RedisProcessLock
 
 
 
+namespace
+{
 UInt64 getContentKey(T::FileId fileId,T::MessageIndex messageIndex)
 {
   UInt64 key = fileId;
@@ -136,6 +142,7 @@ UInt64 getGeometryKey(T::GenerationId generationId,T::GeometryId geometryId,T::P
   key = (key << 32) + (g << 8) + levelId;
   return key;
 }
+}  // namespace
 
 
 
@@ -663,7 +670,7 @@ void RedisImplementation::shutdown()
 
 /*! \brief Returns true if the given session id is valid (always true in this backend). */
 
-bool RedisImplementation::isSessionValid(T::SessionId sessionId)
+bool RedisImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -687,10 +694,7 @@ bool RedisImplementation::isConnectionValid()
   FUNCTION_TRACE
   try
   {
-    if (mContext == nullptr  &&  openConnection() != Result::OK)
-      return false;
-
-    return true;
+    return !(mContext == nullptr  &&  openConnection() != Result::OK);
   }
   catch (...)
   {
@@ -1602,7 +1606,7 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
             break;
         }
 
-        if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
+        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
           std::size_t seed = 0;
           Fmi::hash_merge(seed,producerInfo->mName);
@@ -4320,7 +4324,7 @@ int RedisImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Redis backend: returns the number of file records belonging to a given producer id. */
 
-int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
+int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId /*sessionId*/,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -4360,7 +4364,7 @@ int RedisImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
 
 /*! \brief Redis backend: returns the number of file records belonging to a given generation id. */
 
-int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
+int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId /*sessionId*/,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -4400,7 +4404,7 @@ int RedisImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
 
 /*! \brief Redis backend: returns the number of file records belonging to a given source id. */
 
-int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
+int RedisImplementation::_getFileInfoCountBySourceId(T::SessionId /*sessionId*/,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -4468,7 +4472,7 @@ int RedisImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 /*! \brief Redis backend: returns the most recent event for the requesting server. */
 
-int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -4539,7 +4543,7 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 /*! \brief Redis backend: returns a paged list of events starting from the given event id. */
 
-int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4554,8 +4558,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
 
     eventInfoList.clear();
 
-    if (maxRecords > 10000)
-      maxRecords = 10000;
+    maxRecords = std::min(maxRecords, 10000);
 
     auto *reply = static_cast<redisReply*>(redisCommand(mContext,"ZRANGEBYSCORE %sevents %lu %lu LIMIT 0 %u",mTablePrefix.c_str(),startEventId,0xFFFFFFFFFFFF,maxRecords));
     if (reply == nullptr)
@@ -5396,7 +5399,7 @@ int RedisImplementation::_getContentListByProducerName(T::SessionId sessionId,co
 
 /*! \brief Redis backend: returns a paged list of content records belonging to a given generation id. */
 
-int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5558,7 +5561,7 @@ int RedisImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
 
 /*! \brief Redis backend: returns content records matching the given parameter, level, forecast and time range. */
 
-int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5587,7 +5590,7 @@ int RedisImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
 /*! \brief Redis backend: returns content records matching the given parameter and constrained to a generation id. */
 
-int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5620,7 +5623,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
 /*! \brief Redis backend: returns content records matching the given parameter and constrained to a generation name. */
 
-int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5653,7 +5656,7 @@ int RedisImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
 /*! \brief Redis backend: returns content records matching the given parameter and constrained to a producer id. */
 
-int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5738,7 +5741,7 @@ int RedisImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 /*! \brief Redis backend: returns content records matching the given parameter and constrained to a producer name. */
 
-int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5771,7 +5774,7 @@ int RedisImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
 /*! \brief Redis backend: returns content records that reference missing files, generations or producers. */
 
-int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int RedisImplementation::_getContentListOfInvalidIntegrity(T::SessionId /*sessionId*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7701,7 +7704,7 @@ int RedisImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId st
 
 /*! \brief Redis backend helper: deletes a geometry record and optionally its files and content. */
 
-int RedisImplementation::deleteGeometryById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGeometryById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,bool /*deleteFiles*/,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -7740,7 +7743,7 @@ int RedisImplementation::deleteGeometryById(T::GenerationId generationId,T::Geom
 
 /*! \brief Redis backend helper: deletes all geometries of a generation, optionally with files and content. */
 
-int RedisImplementation::deleteGeometryListByGenerationId(T::GenerationId generationId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGeometryListByGenerationId(T::GenerationId generationId,bool /*deleteFiles*/,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -7778,7 +7781,7 @@ int RedisImplementation::deleteGeometryListByGenerationId(T::GenerationId genera
 
 /*! \brief Redis backend helper: deletes all geometries of a producer, optionally with files and content. */
 
-int RedisImplementation::deleteGeometryListByProducerId(T::ProducerId producerId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGeometryListByProducerId(T::ProducerId producerId,bool /*deleteFiles*/,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -7816,7 +7819,7 @@ int RedisImplementation::deleteGeometryListByProducerId(T::ProducerId producerId
 
 /*! \brief Redis backend helper: deletes all geometries of a source id, optionally with files and content. */
 
-int RedisImplementation::deleteGeometryListBySourceId(T::SourceId sourceId,bool deleteFiles,bool deleteContent)
+int RedisImplementation::deleteGeometryListBySourceId(T::SourceId sourceId,bool /*deleteFiles*/,bool deleteContent)
 {
   FUNCTION_TRACE
   try
@@ -8856,7 +8859,7 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
 
 /*! \brief Redis backend helper: low-level fetch of content records matching parameter and a forecast-time range. */
 
-int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8942,7 +8945,7 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
           }
         }
 
-        if (info != nullptr)
+        
           delete info;
       }
     }
@@ -9054,7 +9057,7 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
           }
         }
 
-        if (info != nullptr)
+        
           delete info;
       }
     }
@@ -9165,7 +9168,7 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
           }
         }
 
-        if (info != nullptr)
+        
           delete info;
       }
     }
@@ -9243,7 +9246,7 @@ int RedisImplementation::getContentByForecastTimeList(const std::vector<T::Forec
     std::set<std::string> searchList;
 
     char tmp[1000];
-    for (auto& it : forecastTimeList)
+    for (const auto& it : forecastTimeList)
     {
       snprintf(tmp,sizeof(tmp),"%lu;%d;%d;%d;%s",it.mGenerationId,it.mGeometryId,it.mForecastType,it.mForecastNumber,it.mForecastTime.c_str());
       std::string st = tmp;

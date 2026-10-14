@@ -6,6 +6,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <algorithm>
 #include <boost/thread/thread.hpp>
 #include <libpq-fe.h>
 #include <fmt/format.h>
@@ -433,7 +434,7 @@ void PostgresqlImplementation::shutdown()
 
 /*! \brief Returns true if the given session id is currently valid. */
 
-bool PostgresqlImplementation::isSessionValid(T::SessionId sessionId)
+bool PostgresqlImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -457,10 +458,7 @@ bool PostgresqlImplementation::isConnectionValid()
   FUNCTION_TRACE
   try
   {
-    if (mConnection == nullptr  &&  openConnection() != Result::OK)
-      return false;
-
-    return true;
+    return !(mConnection == nullptr  &&  openConnection() != Result::OK);
   }
   catch (...)
   {
@@ -1175,7 +1173,7 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
             break;
         }
 
-        if (sourceParamKey.length() > 0  &&  targetParamKey.length() > 0)
+        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
           std::size_t seed = 0;
           Fmi::hash_merge(seed,producerInfo->mName);
@@ -2951,7 +2949,7 @@ int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId
 
 /*! \brief PostgreSQL backend: inserts a list of files together with their content into the database. */
 
-int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
+int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint /*requestFlags*/,std::vector<T::FileAndContent>& fileAndContentList)
 {
   FUNCTION_TRACE
   try
@@ -3736,7 +3734,7 @@ int PostgresqlImplementation::_getFileInfoCount(T::SessionId sessionId,uint& cou
 
 /*! \brief PostgreSQL backend: queries the database for the number of files matching the given producer id. */
 
-int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId /*sessionId*/,T::ProducerId producerId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3765,7 +3763,7 @@ int PostgresqlImplementation::_getFileInfoCountByProducerId(T::SessionId session
 
 /*! \brief PostgreSQL backend: queries the database for the number of files matching the given generation id. */
 
-int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId /*sessionId*/,T::GenerationId generationId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3794,7 +3792,7 @@ int PostgresqlImplementation::_getFileInfoCountByGenerationId(T::SessionId sessi
 
 /*! \brief PostgreSQL backend: queries the database for the number of files matching the given source id. */
 
-int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
+int PostgresqlImplementation::_getFileInfoCountBySourceId(T::SessionId /*sessionId*/,T::SourceId sourceId,uint& count)
 {
   FUNCTION_TRACE
   try
@@ -3845,8 +3843,8 @@ int PostgresqlImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& f
     sql += "SET\n";
     sql += fmt::format("  producerId = {},\n", fileInfo.mProducerId);
     sql += fmt::format("  generationId = {},\n", fileInfo.mGenerationId);
-    sql += fmt::format("  protocol = {},\n", (uint)fileInfo.mProtocol);
-    sql += fmt::format("  serverType = {},\n", (uint)fileInfo.mServerType);
+    sql += fmt::format("  protocol = {},\n", fileInfo.mProtocol);
+    sql += fmt::format("  serverType = {},\n", fileInfo.mServerType);
     sql += fmt::format("  server = '{}',\n", sqlText(mConnection, fileInfo.mServer));
     sql += fmt::format("  fileType = {},\n", static_cast<int>((uint)fileInfo.mFileType));
     sql += fmt::format("  fileName = '{}',\n", sqlText(mConnection, fileInfo.mName));
@@ -3915,7 +3913,7 @@ int PostgresqlImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo&
 
 /*! \brief PostgreSQL backend: queries the database for the latest event info. */
 
-int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -4023,7 +4021,7 @@ int PostgresqlImplementation::_getLastEventInfo(T::SessionId sessionId,uint requ
 
 /*! \brief PostgreSQL backend: queries the database for a paged list of events starting at the given id. */
 
-int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4038,8 +4036,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
     eventInfoList.clear();
 
-    if (maxRecords > 10000)
-      maxRecords = 10000;
+    maxRecords = std::min(maxRecords, 10000);
 
     eventInfoList.clear();
 
@@ -4082,8 +4079,7 @@ int PostgresqlImplementation::_getEventInfoList(T::SessionId sessionId,uint requ
 
     //printf("GET EVENT LIST %lu  => %d\n",startEventId,rowCount);
 
-    if (rowCount > maxRecords)
-      rowCount = maxRecords;
+    rowCount = std::min(rowCount, maxRecords);
 
     for (int i = 0; i < rowCount; i++)
     {
@@ -4804,7 +4800,7 @@ int PostgresqlImplementation::_getContentListByProducerName(T::SessionId session
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given generation id. */
 
-int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4966,7 +4962,7 @@ int PostgresqlImplementation::_getContentListBySourceId(T::SessionId sessionId,T
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given parameter. */
 
-int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5016,7 +5012,7 @@ int PostgresqlImplementation::_getContentListByParameter(T::SessionId sessionId,
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the parameter and generation id. */
 
-int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5070,7 +5066,7 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationId(T::Sessi
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the parameter and generation name. */
 
-int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5124,7 +5120,7 @@ int PostgresqlImplementation::_getContentListByParameterAndGenerationName(T::Ses
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the parameter and producer id. */
 
-int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5254,7 +5250,7 @@ int PostgresqlImplementation::_getContentListByParameterGenerationIdAndForecastT
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the parameter and producer name. */
 
-int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5380,7 +5376,7 @@ int PostgresqlImplementation::_getContentLevelListByParameterGenerationGeometryA
 
 /*! \brief PostgreSQL backend: queries the database for content records that fail integrity validation. */
 
-int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::_getContentListOfInvalidIntegrity(T::SessionId /*sessionId*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6484,7 +6480,7 @@ int PostgresqlImplementation::getGenerationList(T::GenerationInfoList& generatio
 
 /*! \brief PostgreSQL backend: queries the database for generations matching the given geometry id. */
 
-int PostgresqlImplementation::getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
+int PostgresqlImplementation::getGenerationListByGeometryId(T::GeometryId /*geometryId*/,T::GenerationInfoList& generationInfoList)
 {
   FUNCTION_TRACE
   try
@@ -7710,7 +7706,7 @@ int PostgresqlImplementation::getFileListByGenerationId(T::GenerationId generati
 
 /*! \brief PostgreSQL backend: queries the database for files matching the given list of generation ids. */
 
-int PostgresqlImplementation::getFileListByGenerationIdList(const std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int PostgresqlImplementation::getFileListByGenerationIdList(const std::set<T::GenerationId>& /*generationIdList*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& fileInfoList)
 {
   FUNCTION_TRACE
   try
@@ -8400,7 +8396,7 @@ int PostgresqlImplementation::deleteContentBySourceId(T::SourceId sourceId)
 
 /*! \brief PostgreSQL backend: updates a content record in the database. */
 
-int PostgresqlImplementation::setContent(const T::ContentInfo& contentInfo)
+int PostgresqlImplementation::setContent(const T::ContentInfo& /*contentInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -9107,7 +9103,7 @@ int PostgresqlImplementation::getContentByParameterId(T::ParamKeyType parameterK
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and time range. */
 
-int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9258,7 +9254,7 @@ int PostgresqlImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyTyp
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and generation. */
 
-int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -9408,7 +9404,7 @@ int PostgresqlImplementation::getContentByParameterIdAndGeneration(T::Generation
 
 /*! \brief PostgreSQL backend: queries the database for content records matching the given parameter id and producer. */
 
-int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::getContentByParameterIdAndProducer(T::ProducerId producerId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

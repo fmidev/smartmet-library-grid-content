@@ -273,7 +273,7 @@ ProducerInfo* ProducerInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ProducerInfo::print(std::ostream& stream,uint level,uint optionFlags) const
+void ProducerInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

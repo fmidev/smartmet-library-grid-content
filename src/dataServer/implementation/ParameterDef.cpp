@@ -213,7 +213,7 @@ ParameterDef::~ParameterDef()
 
 /*! \brief Data Server: Print. */
 
-void ParameterDef::print(std::ostream& stream,uint level,uint optionFlags) const
+void ParameterDef::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

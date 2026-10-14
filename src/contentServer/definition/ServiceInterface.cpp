@@ -115,7 +115,7 @@ bool ServiceInterface::isReady()
 
 /*! \brief Fills in cache statistics for monitoring; base implementation is a no-op. */
 
-void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -4415,7 +4415,7 @@ int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<T::FileI
 
 /*! \brief Protected hook for backend implementations of clear() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_clear(T::SessionId sessionId)
+int ServiceInterface::_clear(T::SessionId /*sessionId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4426,7 +4426,7 @@ int ServiceInterface::_clear(T::SessionId sessionId)
 
 /*! \brief Protected hook for backend implementations of reload() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_reload(T::SessionId sessionId)
+int ServiceInterface::_reload(T::SessionId /*sessionId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4437,7 +4437,7 @@ int ServiceInterface::_reload(T::SessionId sessionId)
 
 /*! \brief Protected hook for backend implementations of getContentChangeTime() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentChangeTime(T::SessionId sessionId,time_t& changeTime)
+int ServiceInterface::_getContentChangeTime(T::SessionId /*sessionId*/,time_t& /*changeTime*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4447,7 +4447,7 @@ int ServiceInterface::_getContentChangeTime(T::SessionId sessionId,time_t& chang
 
 /*! \brief Protected hook for backend implementations of addProducerInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int ServiceInterface::_addProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4458,7 +4458,7 @@ int ServiceInterface::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 /*! \brief Protected hook for backend implementations of setProducerInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int ServiceInterface::_setProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4469,7 +4469,7 @@ int ServiceInterface::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& p
 
 /*! \brief Protected hook for backend implementations of deleteProducerInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
+int ServiceInterface::_deleteProducerInfoById(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4480,7 +4480,7 @@ int ServiceInterface::_deleteProducerInfoById(T::SessionId sessionId,T::Producer
 
 /*! \brief Protected hook for backend implementations of deleteProducerInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
+int ServiceInterface::_deleteProducerInfoByName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4491,7 +4491,7 @@ int ServiceInterface::_deleteProducerInfoByName(T::SessionId sessionId,const std
 
 /*! \brief Protected hook for backend implementations of deleteProducerInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4502,7 +4502,7 @@ int ServiceInterface::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T
 
 /*! \brief Protected hook for backend implementations of getProducerInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,T::ProducerId producerId,T::ProducerInfo& producerInfo)
+int ServiceInterface::_getProducerInfoById(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::ProducerInfo& /*producerInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4513,7 +4513,7 @@ int ServiceInterface::_getProducerInfoById(T::SessionId sessionId,T::ProducerId 
 
 /*! \brief Protected hook for backend implementations of getProducerInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,const std::string& producerName,T::ProducerInfo& producerInfo)
+int ServiceInterface::_getProducerInfoByName(T::SessionId /*sessionId*/,const std::string& /*producerName*/,T::ProducerInfo& /*producerInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4524,7 +4524,7 @@ int ServiceInterface::_getProducerInfoByName(T::SessionId sessionId,const std::s
 
 /*! \brief Protected hook for backend implementations of getProducerInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInfoList& producerInfoList)
+int ServiceInterface::_getProducerInfoList(T::SessionId /*sessionId*/,T::ProducerInfoList& /*producerInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4535,7 +4535,7 @@ int ServiceInterface::_getProducerInfoList(T::SessionId sessionId,T::ProducerInf
 
 /*! \brief Protected hook for backend implementations of getProducerInfoListByParameter() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ProducerInfoList& producerInfoList)
+int ServiceInterface::_getProducerInfoListByParameter(T::SessionId /*sessionId*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ProducerInfoList& /*producerInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4546,7 +4546,7 @@ int ServiceInterface::_getProducerInfoListByParameter(T::SessionId sessionId,T::
 
 /*! \brief Protected hook for backend implementations of getProducerInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::ProducerInfoList& producerInfoList)
+int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,T::ProducerInfoList& /*producerInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4557,7 +4557,7 @@ int ServiceInterface::_getProducerInfoListBySourceId(T::SessionId sessionId,T::S
 
 /*! \brief Protected hook for backend implementations of getProducerInfoCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getProducerInfoCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4568,7 +4568,7 @@ int ServiceInterface::_getProducerInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Protected hook for backend implementations of getProducerNameAndGeometryList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std::set<std::string>& list)
+int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId /*sessionId*/,std::set<std::string>& /*list*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4579,7 +4579,7 @@ int ServiceInterface::_getProducerNameAndGeometryList(T::SessionId sessionId,std
 
 /*! \brief Protected hook for backend implementations of getProducerParameterList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+int ServiceInterface::_getProducerParameterList(T::SessionId /*sessionId*/,T::ParamKeyType /*sourceParameterKeyType*/,T::ParamKeyType /*targetParameterKeyType*/,std::set<std::string>& /*list*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4590,7 +4590,7 @@ int ServiceInterface::_getProducerParameterList(T::SessionId sessionId,T::ParamK
 
 /*! \brief Protected hook for backend implementations of getProducerParameterListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType sourceParameterKeyType,T::ParamKeyType targetParameterKeyType,std::set<std::string>& list)
+int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::ParamKeyType /*sourceParameterKeyType*/,T::ParamKeyType /*targetParameterKeyType*/,std::set<std::string>& /*list*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4601,7 +4601,7 @@ int ServiceInterface::_getProducerParameterListByProducerId(T::SessionId session
 
 /*! \brief Protected hook for backend implementations of addGenerationInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int ServiceInterface::_addGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4612,7 +4612,7 @@ int ServiceInterface::_addGenerationInfo(T::SessionId sessionId,T::GenerationInf
 
 /*! \brief Protected hook for backend implementations of setGenerationInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int ServiceInterface::_setGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4623,7 +4623,7 @@ int ServiceInterface::_setGenerationInfo(T::SessionId sessionId,T::GenerationInf
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
+int ServiceInterface::_deleteGenerationInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4634,7 +4634,7 @@ int ServiceInterface::_deleteGenerationInfoById(T::SessionId sessionId,T::Genera
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
+int ServiceInterface::_deleteGenerationInfoByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4645,7 +4645,7 @@ int ServiceInterface::_deleteGenerationInfoByName(T::SessionId sessionId,const s
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoListByIdList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
+int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId /*sessionId*/,std::set<T::GenerationId>& /*generationIdList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4656,7 +4656,7 @@ int ServiceInterface::_deleteGenerationInfoListByIdList(T::SessionId sessionId,s
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4667,7 +4667,7 @@ int ServiceInterface::_deleteGenerationInfoListByProducerId(T::SessionId session
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4678,7 +4678,7 @@ int ServiceInterface::_deleteGenerationInfoListByProducerName(T::SessionId sessi
 
 /*! \brief Protected hook for backend implementations of deleteGenerationInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4689,7 +4689,7 @@ int ServiceInterface::_deleteGenerationInfoListBySourceId(T::SessionId sessionId
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getGenerationInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4700,7 +4700,7 @@ int ServiceInterface::_getGenerationInfoById(T::SessionId sessionId,T::Generatio
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,const std::string& generationName,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getGenerationInfoByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4711,7 +4711,7 @@ int ServiceInterface::_getGenerationInfoByName(T::SessionId sessionId,const std:
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoList(T::SessionId /*sessionId*/,T::GenerationInfoList& /*generationInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4722,7 +4722,7 @@ int ServiceInterface::_getGenerationInfoList(T::SessionId sessionId,T::Generatio
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoListByGeometryId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,T::GeometryId geometryId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId /*sessionId*/,T::GeometryId /*geometryId*/,T::GenerationInfoList& /*generationInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4733,7 +4733,7 @@ int ServiceInterface::_getGenerationInfoListByGeometryId(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::GenerationInfoList& /*generationInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4744,7 +4744,7 @@ int ServiceInterface::_getGenerationInfoListByProducerId(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/,T::GenerationInfoList& /*generationInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4755,7 +4755,7 @@ int ServiceInterface::_getGenerationInfoListByProducerName(T::SessionId sessionI
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GenerationInfoList& generationInfoList)
+int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,T::GenerationInfoList& /*generationInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4766,7 +4766,7 @@ int ServiceInterface::_getGenerationInfoListBySourceId(T::SessionId sessionId,T:
 
 /*! \brief Protected hook for backend implementations of getLastGenerationInfoByProducerIdAndStatus() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId sessionId,T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,uchar /*generationStatus*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4777,7 +4777,7 @@ int ServiceInterface::_getLastGenerationInfoByProducerIdAndStatus(T::SessionId s
 
 /*! \brief Protected hook for backend implementations of getLastGenerationInfoByProducerNameAndStatus() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId sessionId,const std::string& producerName,uchar generationStatus,T::GenerationInfo& generationInfo)
+int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId /*sessionId*/,const std::string& /*producerName*/,uchar /*generationStatus*/,T::GenerationInfo& /*generationInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4788,7 +4788,7 @@ int ServiceInterface::_getLastGenerationInfoByProducerNameAndStatus(T::SessionId
 
 /*! \brief Protected hook for backend implementations of getGenerationInfoCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getGenerationInfoCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4799,7 +4799,7 @@ int ServiceInterface::_getGenerationInfoCount(T::SessionId sessionId,uint& count
 
 /*! \brief Protected hook for backend implementations of setGenerationInfoStatusById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
+int ServiceInterface::_setGenerationInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,uchar /*status*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4810,7 +4810,7 @@ int ServiceInterface::_setGenerationInfoStatusById(T::SessionId sessionId,T::Gen
 
 /*! \brief Protected hook for backend implementations of setGenerationInfoStatusByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
+int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,uchar /*status*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4821,7 +4821,7 @@ int ServiceInterface::_setGenerationInfoStatusByName(T::SessionId sessionId,cons
 
 /*! \brief Protected hook for backend implementations of addGeometryInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int ServiceInterface::_addGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4832,7 +4832,7 @@ int ServiceInterface::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& g
 
 /*! \brief Protected hook for backend implementations of deleteGeometryInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int ServiceInterface::_deleteGeometryInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4843,7 +4843,7 @@ int ServiceInterface::_deleteGeometryInfoById(T::SessionId sessionId,T::Generati
 
 /*! \brief Protected hook for backend implementations of deleteGeometryInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4854,7 +4854,7 @@ int ServiceInterface::_deleteGeometryInfoListByGenerationId(T::SessionId session
 
 /*! \brief Protected hook for backend implementations of deleteGeometryInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4865,7 +4865,7 @@ int ServiceInterface::_deleteGeometryInfoListByProducerId(T::SessionId sessionId
 
 /*! \brief Protected hook for backend implementations of deleteGeometryInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4876,7 +4876,7 @@ int ServiceInterface::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int ServiceInterface::_getGeometryInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4887,7 +4887,7 @@ int ServiceInterface::_getGeometryInfoById(T::SessionId sessionId,T::GenerationI
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInfoList& geometryInfoList)
+int ServiceInterface::_getGeometryInfoList(T::SessionId /*sessionId*/,T::GeometryInfoList& /*geometryInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4898,7 +4898,7 @@ int ServiceInterface::_getGeometryInfoList(T::SessionId sessionId,T::GeometryInf
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryInfoList& geometryInfoList)
+int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryInfoList& /*geometryInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4909,7 +4909,7 @@ int ServiceInterface::_getGeometryInfoListByGenerationId(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
+int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::GeometryInfoList& /*geometryInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4920,7 +4920,7 @@ int ServiceInterface::_getGeometryInfoListByProducerId(T::SessionId sessionId,T:
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::GeometryInfoList& geometryInfoList)
+int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,T::GeometryInfoList& /*geometryInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4931,7 +4931,7 @@ int ServiceInterface::_getGeometryInfoListBySourceId(T::SessionId sessionId,T::S
 
 /*! \brief Protected hook for backend implementations of getGeometryInfoCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getGeometryInfoCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4942,7 +4942,7 @@ int ServiceInterface::_getGeometryInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Protected hook for backend implementations of setGeometryInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int ServiceInterface::_setGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4952,7 +4952,7 @@ int ServiceInterface::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& g
 
 /*! \brief Protected hook for backend implementations of setGeometryInfoStatusById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int ServiceInterface::_setGeometryInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,uchar /*status*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4963,7 +4963,7 @@ int ServiceInterface::_setGeometryInfoStatusById(T::SessionId sessionId,T::Gener
 
 /*! \brief Protected hook for backend implementations of addFileInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int ServiceInterface::_addFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4974,7 +4974,7 @@ int ServiceInterface::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 /*! \brief Protected hook for backend implementations of setFileInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int ServiceInterface::_setFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4985,7 +4985,7 @@ int ServiceInterface::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
 
 /*! \brief Protected hook for backend implementations of addFileInfoWithContentList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_addFileInfoWithContentList(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -4996,7 +4996,7 @@ int ServiceInterface::_addFileInfoWithContentList(T::SessionId sessionId,T::File
 
 /*! \brief Protected hook for backend implementations of addFileInfoListWithContent() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
+int ServiceInterface::_addFileInfoListWithContent(T::SessionId /*sessionId*/,uint /*requestFlags*/,std::vector<T::FileAndContent>& /*fileAndContentList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5007,7 +5007,7 @@ int ServiceInterface::_addFileInfoListWithContent(T::SessionId sessionId,uint re
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
+int ServiceInterface::_deleteFileInfoById(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5018,7 +5018,7 @@ int ServiceInterface::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileI
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
+int ServiceInterface::_deleteFileInfoByName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5029,7 +5029,7 @@ int ServiceInterface::_deleteFileInfoByName(T::SessionId sessionId,const std::st
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5040,7 +5040,7 @@ int ServiceInterface::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5051,7 +5051,7 @@ int ServiceInterface::_deleteFileInfoListByProducerName(T::SessionId sessionId,c
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int ServiceInterface::_deleteFileInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5079,7 +5079,7 @@ catch (...)
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationIdAndForecastTime() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
+int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,time_t /*forecastTime*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5090,7 +5090,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationIdAndForecastTime(T::Sessio
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByForecastTimeList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId /*sessionId*/,std::vector<T::ForecastTime>& /*forecastTimeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5101,7 +5101,7 @@ int ServiceInterface::_deleteFileInfoListByForecastTimeList(T::SessionId session
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByGenerationName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5112,7 +5112,7 @@ int ServiceInterface::_deleteFileInfoListByGenerationName(T::SessionId sessionId
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5123,7 +5123,7 @@ int ServiceInterface::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::So
 
 /*! \brief Protected hook for backend implementations of deleteFileInfoListByFileIdList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
+int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId /*sessionId*/,std::set<T::FileId>& /*fileIdList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5134,7 +5134,7 @@ int ServiceInterface::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std
 
 /*! \brief Protected hook for backend implementations of getFileInfoById() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T::FileInfo& fileInfo)
+int ServiceInterface::_getFileInfoById(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::FileInfo& /*fileInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5145,7 +5145,7 @@ int ServiceInterface::_getFileInfoById(T::SessionId sessionId,T::FileId fileId,T
 
 /*! \brief Protected hook for backend implementations of getFileInfoByName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::string& filename,T::FileInfo& fileInfo)
+int ServiceInterface::_getFileInfoByName(T::SessionId /*sessionId*/,const std::string& /*filename*/,T::FileInfo& /*fileInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5156,7 +5156,7 @@ int ServiceInterface::_getFileInfoByName(T::SessionId sessionId,const std::strin
 
 /*! \brief Protected hook for backend implementations of getFileInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoList(T::SessionId sessionId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoList(T::SessionId /*sessionId*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5167,7 +5167,7 @@ int ServiceInterface::_getFileInfoList(T::SessionId sessionId,T::FileId startFil
 
 /*! \brief Protected hook for backend implementations of getFileInfoListByFileIdList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId /*sessionId*/,std::vector<T::FileId>& /*fileIdList*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5178,7 +5178,7 @@ int ServiceInterface::_getFileInfoListByFileIdList(T::SessionId sessionId,std::v
 
 /*! \brief Protected hook for backend implementations of getFileInfoListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5189,7 +5189,7 @@ int ServiceInterface::_getFileInfoListByProducerId(T::SessionId sessionId,T::Pro
 
 /*! \brief Protected hook for backend implementations of getFileInfoListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5200,7 +5200,7 @@ int ServiceInterface::_getFileInfoListByProducerName(T::SessionId sessionId,cons
 
 /*! \brief Protected hook for backend implementations of getFileInfoListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5211,7 +5211,7 @@ int ServiceInterface::_getFileInfoListByGenerationId(T::SessionId sessionId,T::G
 
 /*! \brief Protected hook for backend implementations of getFileInfoListByGenerationName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5222,7 +5222,7 @@ int ServiceInterface::_getFileInfoListByGenerationName(T::SessionId sessionId,co
 
 /*! \brief Protected hook for backend implementations of getFileInfoListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList)
+int ServiceInterface::_getFileInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,T::FileId /*startFileId*/,int /*maxRecords*/,T::FileInfoList& /*fileInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5233,7 +5233,7 @@ int ServiceInterface::_getFileInfoListBySourceId(T::SessionId sessionId,T::Sourc
 
 /*! \brief Protected hook for backend implementations of getFileInfoCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getFileInfoCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5244,7 +5244,7 @@ int ServiceInterface::_getFileInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Protected hook for backend implementations of getFileInfoCountByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,T::ProducerId producerId,uint& count)
+int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5255,7 +5255,7 @@ int ServiceInterface::_getFileInfoCountByProducerId(T::SessionId sessionId,T::Pr
 
 /*! \brief Protected hook for backend implementations of getFileInfoCountByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::GenerationId generationId,uint& count)
+int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5266,7 +5266,7 @@ int ServiceInterface::_getFileInfoCountByGenerationId(T::SessionId sessionId,T::
 
 /*! \brief Protected hook for backend implementations of getFileInfoCountBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,T::SourceId sourceId,uint& count)
+int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5277,7 +5277,7 @@ int ServiceInterface::_getFileInfoCountBySourceId(T::SessionId sessionId,T::Sour
 
 /*! \brief Protected hook for backend implementations of addEventInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
+int ServiceInterface::_addEventInfo(T::SessionId /*sessionId*/,T::EventInfo& /*eventInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5288,7 +5288,7 @@ int ServiceInterface::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventIn
 
 /*! \brief Protected hook for backend implementations of getLastEventInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int ServiceInterface::_getLastEventInfo(T::SessionId /*sessionId*/,uint /*requestingServerId*/,T::EventInfo& /*eventInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5299,7 +5299,7 @@ int ServiceInterface::_getLastEventInfo(T::SessionId sessionId,uint requestingSe
 
 /*! \brief Protected hook for backend implementations of getEventInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int ServiceInterface::_getEventInfoList(T::SessionId /*sessionId*/,uint /*requestingServerId*/,T::EventId /*startEventId*/,int /*maxRecords*/,T::EventInfoList& /*eventInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5310,7 +5310,7 @@ int ServiceInterface::_getEventInfoList(T::SessionId sessionId,uint requestingSe
 
 /*! \brief Protected hook for backend implementations of getEventInfoCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getEventInfoCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5321,7 +5321,7 @@ int ServiceInterface::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Protected hook for backend implementations of addContentInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int ServiceInterface::_addContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5332,7 +5332,7 @@ int ServiceInterface::_addContentInfo(T::SessionId sessionId,T::ContentInfo& con
 
 /*! \brief Protected hook for backend implementations of setContentInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int ServiceInterface::_setContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5343,7 +5343,7 @@ int ServiceInterface::_setContentInfo(T::SessionId sessionId,T::ContentInfo& con
 
 /*! \brief Protected hook for backend implementations of addContentList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_addContentList(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5354,7 +5354,7 @@ int ServiceInterface::_addContentList(T::SessionId sessionId,T::ContentInfoList&
 
 /*! \brief Protected hook for backend implementations of deleteContentInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
+int ServiceInterface::_deleteContentInfo(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5365,7 +5365,7 @@ int ServiceInterface::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId
 
 /*! \brief Protected hook for backend implementations of deleteContentListByFileId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
+int ServiceInterface::_deleteContentListByFileId(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5376,7 +5376,7 @@ int ServiceInterface::_deleteContentListByFileId(T::SessionId sessionId,T::FileI
 
 /*! \brief Protected hook for backend implementations of deleteContentListByFileName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
+int ServiceInterface::_deleteContentListByFileName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5387,7 +5387,7 @@ int ServiceInterface::_deleteContentListByFileName(T::SessionId sessionId,const 
 
 /*! \brief Protected hook for backend implementations of deleteContentListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int ServiceInterface::_deleteContentListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5398,7 +5398,7 @@ int ServiceInterface::_deleteContentListByProducerId(T::SessionId sessionId,T::P
 
 /*! \brief Protected hook for backend implementations of deleteContentListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int ServiceInterface::_deleteContentListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5409,7 +5409,7 @@ int ServiceInterface::_deleteContentListByProducerName(T::SessionId sessionId,co
 
 /*! \brief Protected hook for backend implementations of deleteContentListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int ServiceInterface::_deleteContentListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5420,7 +5420,7 @@ int ServiceInterface::_deleteContentListByGenerationId(T::SessionId sessionId,T:
 
 /*! \brief Protected hook for backend implementations of deleteContentListByGenerationName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int ServiceInterface::_deleteContentListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5431,7 +5431,7 @@ int ServiceInterface::_deleteContentListByGenerationName(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of deleteContentListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int ServiceInterface::_deleteContentListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5442,7 +5442,7 @@ int ServiceInterface::_deleteContentListBySourceId(T::SessionId sessionId,T::Sou
 
 /*! \brief Protected hook for backend implementations of getContentInfo() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex,T::ContentInfo& contentInfo)
+int ServiceInterface::_getContentInfo(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/,T::ContentInfo& /*contentInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5453,7 +5453,7 @@ int ServiceInterface::_getContentInfo(T::SessionId sessionId,T::FileId fileId,T:
 
 /*! \brief Protected hook for backend implementations of getContentList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentList(T::SessionId sessionId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentList(T::SessionId /*sessionId*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5464,7 +5464,7 @@ int ServiceInterface::_getContentList(T::SessionId sessionId,T::FileId startFile
 
 /*! \brief Protected hook for backend implementations of getContentListByFileId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,T::FileId fileId,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByFileId(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5475,7 +5475,7 @@ int ServiceInterface::_getContentListByFileId(T::SessionId sessionId,T::FileId f
 
 /*! \brief Protected hook for backend implementations of getContentListByFileIdList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::vector<T::FileId>& fileIdList,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByFileIdList(T::SessionId /*sessionId*/,std::vector<T::FileId>& /*fileIdList*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5486,7 +5486,7 @@ int ServiceInterface::_getContentListByFileIdList(T::SessionId sessionId,std::ve
 
 /*! \brief Protected hook for backend implementations of getContentListByFileName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std::string& filename,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByFileName(T::SessionId /*sessionId*/,const std::string& /*filename*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5497,7 +5497,7 @@ int ServiceInterface::_getContentListByFileName(T::SessionId sessionId,const std
 
 /*! \brief Protected hook for backend implementations of getContentListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5508,7 +5508,7 @@ int ServiceInterface::_getContentListByProducerId(T::SessionId sessionId,T::Prod
 
 /*! \brief Protected hook for backend implementations of getContentListByProducerName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const std::string& producerName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5519,7 +5519,7 @@ int ServiceInterface::_getContentListByProducerName(T::SessionId sessionId,const
 
 /*! \brief Protected hook for backend implementations of getContentListBySourceId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5530,7 +5530,7 @@ int ServiceInterface::_getContentListBySourceId(T::SessionId sessionId,T::Source
 
 /*! \brief Protected hook for backend implementations of getContentListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5541,7 +5541,7 @@ int ServiceInterface::_getContentListByGenerationId(T::SessionId sessionId,T::Ge
 
 /*! \brief Protected hook for backend implementations of getContentListByGenerationName() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByGenerationName(T::SessionId sessionId,const std::string& generationName,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,T::FileId /*startFileId*/,T::MessageIndex /*startMessageIndex*/,int /*maxRecords*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5572,7 +5572,7 @@ int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId ses
 
 /*! \brief Protected hook for backend implementations of getContentListByGenerationIdAndTimeRange() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId sessionId,T::GenerationId generationId,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationIdAndTimeRange(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,time_t /*startTime*/,time_t /*endTime*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5602,7 +5602,7 @@ int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId s
 
 /*! \brief Protected hook for backend implementations of getContentListByGenerationNameAndTimeRange() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId sessionId,const std::string& generationName,time_t startTime,time_t endTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByGenerationNameAndTimeRange(T::SessionId /*sessionId*/,const std::string& /*generationName*/,time_t /*startTime*/,time_t /*endTime*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5633,7 +5633,7 @@ int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::Param
 
 /*! \brief Protected hook for backend implementations of getContentListByParameter() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameter(T::SessionId /*sessionId*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*minLevel*/,T::ParamLevel /*maxLevel*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*startTime*/,time_t /*endTime*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5664,7 +5664,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId ses
 
 /*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationId() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*minLevel*/,T::ParamLevel /*maxLevel*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*startTime*/,time_t /*endTime*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5695,7 +5695,7 @@ int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId s
 
 /*! \brief Protected hook for backend implementations of getContentListByParameterAndGenerationName() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*minLevel*/,T::ParamLevel /*maxLevel*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*startTime*/,time_t /*endTime*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5726,7 +5726,7 @@ int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessi
 
 /*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerId() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*minLevel*/,T::ParamLevel /*maxLevel*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*startTime*/,time_t /*endTime*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5757,7 +5757,7 @@ int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId ses
 
 /*! \brief Protected hook for backend implementations of getContentListByParameterAndProducerName() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterAndProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*minLevel*/,T::ParamLevel /*maxLevel*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*startTime*/,time_t /*endTime*/,uint /*requestFlags*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5787,7 +5787,7 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
 
 /*! \brief Protected hook for backend implementations of getContentListByParameterGenerationIdAndForecastTime() (epoch form) — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::ParamKeyType /*parameterKeyType*/,std::string /*parameterKey*/,T::ParamLevelId /*parameterLevelId*/,T::ParamLevel /*level*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,T::GeometryId /*geometryId*/,time_t /*forecastTime*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5798,7 +5798,7 @@ int ServiceInterface::_getContentListByParameterGenerationIdAndForecastTime(T::S
 
 /*! \brief Protected hook for backend implementations of getContentListOfInvalidIntegrity() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5809,7 +5809,7 @@ int ServiceInterface::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T
 
 /*! \brief Protected hook for backend implementations of getContentGeometryIdListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<T::GeometryId>& geometryIdList)
+int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,std::set<T::GeometryId>& /*geometryIdList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5820,7 +5820,7 @@ int ServiceInterface::_getContentGeometryIdListByGenerationId(T::SessionId sessi
 
 /*! \brief Protected hook for backend implementations of getContentLevelListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+int ServiceInterface::_getContentLevelListByGenerationGeometryAndLevelId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,std::set<T::ParamLevel>& /*contentLevelList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5831,7 +5831,7 @@ int ServiceInterface::_getContentLevelListByGenerationGeometryAndLevelId(T::Sess
 
 /*! \brief Protected hook for backend implementations of getContentLevelListByParameterGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::string parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList)
+int ServiceInterface::_getContentLevelListByParameterGenerationGeometryAndLevelId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,std::string /*parameterKey*/,T::ParamLevelId /*levelId*/,std::set<T::ParamLevel>& /*contentLevelList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5841,7 +5841,7 @@ int ServiceInterface::_getContentLevelListByParameterGenerationGeometryAndLevelI
 
 /*! \brief Protected hook for backend implementations of getContentParamListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ContentInfoList& contentParamList)
+int ServiceInterface::_getContentParamListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::ContentInfoList& /*contentParamList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5852,7 +5852,7 @@ int ServiceInterface::_getContentParamListByGenerationId(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::ParamKeyType /*parameterKeyType*/,std::set<std::string>& /*paramKeyList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5863,7 +5863,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationId(T::SessionId session
 
 /*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationAndGeometryId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamKeyType /*parameterKeyType*/,std::set<std::string>& /*paramKeyList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5874,7 +5874,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationAndGeometryId(T::Sessio
 
 /*! \brief Protected hook for backend implementations of getContentParamKeyListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,T::ParamKeyType /*parameterKeyType*/,std::set<std::string>& /*paramKeyList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5885,7 +5885,7 @@ int ServiceInterface::_getContentParamKeyListByGenerationGeometryAndLevelId(T::S
 
 /*! \brief Protected hook for backend implementations of getContentTimeListByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,std::set<std::string>& /*contentTimeList*/)
 {
   return 0; // throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5896,7 +5896,7 @@ int ServiceInterface::_getContentTimeListByGenerationId(T::SessionId sessionId,T
 
 /*! \brief Protected hook for backend implementations of getContentTimeListByGenerationAndGeometryId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,std::set<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,std::set<std::string>& /*contentTimeList*/)
 {
   return 0; // throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5907,7 +5907,7 @@ int ServiceInterface::_getContentTimeListByGenerationAndGeometryId(T::SessionId 
 
 /*! \brief Protected hook for backend implementations of getContentTimeListByGenerationGeometryAndLevelId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByGenerationGeometryAndLevelId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,std::set<std::string>& /*contentTimeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5917,7 +5917,7 @@ int ServiceInterface::_getContentTimeListByGenerationGeometryAndLevelId(T::Sessi
 
 /*! \brief Protected hook for backend implementations of getContentTimeListByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,T::ProducerId producerId,std::set<std::string>& contentTimeList)
+int ServiceInterface::_getContentTimeListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,std::set<std::string>& /*contentTimeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5928,7 +5928,7 @@ int ServiceInterface::_getContentTimeListByProducerId(T::SessionId sessionId,T::
 
 /*! \brief Protected hook for backend implementations of getContentTimeRangeByProducerAndGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeRangeByProducerAndGenerationId(T::SessionId sessionId,T::ProducerId producerId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
+int ServiceInterface::_getContentTimeRangeByProducerAndGenerationId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,T::GenerationId /*generationId*/,time_t& /*startTime*/,time_t& /*endTime*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5939,7 +5939,7 @@ int ServiceInterface::_getContentTimeRangeByProducerAndGenerationId(T::SessionId
 
 /*! \brief Protected hook for backend implementations of getContentTimeRangeByGenerationId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId sessionId,T::GenerationId generationId,time_t& startTime,time_t& endTime)
+int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,time_t& /*startTime*/,time_t& /*endTime*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5950,7 +5950,7 @@ int ServiceInterface::_getContentTimeRangeByGenerationId(T::SessionId sessionId,
 
 /*! \brief Protected hook for backend implementations of getGenerationIdGeometryIdAndForecastTimeList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId sessionId,std::set<std::string>& list)
+int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId /*sessionId*/,std::set<std::string>& /*list*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5961,7 +5961,7 @@ int ServiceInterface::_getGenerationIdGeometryIdAndForecastTimeList(T::SessionId
 
 /*! \brief Protected hook for backend implementations of getContentCount() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
+int ServiceInterface::_getContentCount(T::SessionId /*sessionId*/,uint& /*count*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5972,7 +5972,7 @@ int ServiceInterface::_getContentCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Protected hook for backend implementations of getHashByProducerId() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,T::ProducerId producerId,UInt64 & hash)
+int ServiceInterface::_getHashByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/,UInt64 & /*hash*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5983,7 +5983,7 @@ int ServiceInterface::_getHashByProducerId(T::SessionId sessionId,T::ProducerId 
 
 /*! \brief Protected hook for backend implementations of getLevelInfoList() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList)
+int ServiceInterface::_getLevelInfoList(T::SessionId /*sessionId*/,T::LevelInfoList& /*levelInfoList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -5993,7 +5993,7 @@ int ServiceInterface::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoList&
 
 /*! \brief Protected hook for backend implementations of updateCachedFiles() — base returns NOT_IMPLEMENTED. */
 
-int ServiceInterface::_updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
+int ServiceInterface::_updateCachedFiles(T::SessionId /*sessionId*/,std::set<T::FileId>& /*fileIdList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

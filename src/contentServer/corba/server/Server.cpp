@@ -11,7 +11,9 @@ namespace Corba
 {
 
 
-static void* Server_maintenanceThread(void *arg)
+namespace
+{
+void* Server_maintenanceThread(void *arg)
 {
   try
   {
@@ -27,6 +29,7 @@ static void* Server_maintenanceThread(void *arg)
     exit(-1);
   }
 }
+}  // namespace
 
 
 

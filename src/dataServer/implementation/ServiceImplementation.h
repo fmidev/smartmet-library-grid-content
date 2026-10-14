@@ -169,7 +169,7 @@ class ServiceImplementation : public ServiceInterface
 
      int    _getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList) override;
 
-  protected:
+  
 
      virtual bool   isSessionValid(T::SessionId sessionId);
 

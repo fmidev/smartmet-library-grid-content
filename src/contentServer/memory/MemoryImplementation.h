@@ -177,7 +177,7 @@ class MemoryImplementation : public ServiceInterface
 
      int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList) override;
 
-   protected:
+   
 
      virtual bool   isSessionValid(T::SessionId sessionId);
      T::EventId     addEvent(uint eventType,UInt64 id1,UInt64 id2,UInt64 id3,UInt64 flags);

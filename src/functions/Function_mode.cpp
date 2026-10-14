@@ -93,7 +93,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       }
     }
 
-    if (valueCount.size() == 0)
+    if (valueCount.empty())
       return ParamValueMissing;
 
     int maxVal = 0;
@@ -150,7 +150,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       }
     }
 
-    if (valueCount.size() == 0)
+    if (valueCount.empty())
       return ParamValueMissing;
 
     int maxVal = 0;
@@ -213,7 +213,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         }
       }
 
-      if (valueCount.size() == 0)
+      if (valueCount.empty())
       {
         outParameters.emplace_back(ParamValueMissing);
       }
@@ -282,7 +282,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         }
       }
 
-      if (valueCount.size() == 0)
+      if (valueCount.empty())
       {
         outParameters.emplace_back(ParamValueMissing);
       }

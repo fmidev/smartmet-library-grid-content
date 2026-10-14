@@ -22,7 +22,9 @@ namespace ContentServer
 {
 
 
-static void* CacheImplementation_eventProcessingThread(void *arg)
+namespace
+{
+void* CacheImplementation_eventProcessingThread(void *arg)
 {
   try
   {
@@ -43,7 +45,7 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
 // A generation event refers to a generation which could not be read from the content storage.
 // The event is not retried, so the failure must at least be visible in the logs.
 
-static void reportMissingGeneration(const char *eventName,T::GenerationId generationId,int result)
+void reportMissingGeneration(const char *eventName,T::GenerationId generationId,int result)
 {
   Fmi::Exception exception(BCP,"Cannot read the generation of a content event from the content storage!");
   exception.addParameter("Event",eventName);
@@ -51,6 +53,7 @@ static void reportMissingGeneration(const char *eventName,T::GenerationId genera
   exception.addParameter("ServiceResult",getResultString(result));
   exception.printError();
 }
+}  // namespace
 
 
 
@@ -154,7 +157,7 @@ CacheImplementation::~CacheImplementation()
 
 /*! \brief Fills in cache statistics for monitoring (no-op placeholder). */
 
-void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -248,10 +251,7 @@ bool CacheImplementation::isReady()
   {
     if (mContentSwapEnabled)
     {
-      if (mContentSwapCounter > 0)
-        return true;
-      else
-        return false;
+      return mContentSwapCounter > 0;
     }
 
     if (mStartTime > 0)
@@ -434,15 +434,12 @@ void CacheImplementation::shutdown()
 
 /*! \brief Returns whether the supplied session id is valid for this cache. */
 
-bool CacheImplementation::isSessionValid(T::SessionId sessionId)
+bool CacheImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   //FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return false;
-
-    return true;
+    return !mShutdownRequested;
   }
   catch (...)
   {
@@ -6740,7 +6737,7 @@ void CacheImplementation::readContentList()
 
 /*! \brief Handles a CLEAR event by emptying all cached lists. */
 
-void CacheImplementation::event_clear(T::EventInfo& eventInfo)
+void CacheImplementation::event_clear(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6789,7 +6786,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
 /*! \brief Handles a CONTENT_SERVER_RELOAD event by triggering a full reload. */
 
-void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
+void CacheImplementation::event_contentServerReload(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6808,7 +6805,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 /*! \brief Handles the start of an upstream update loop. */
 
-void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
+void CacheImplementation::event_updateLoopStart(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6834,7 +6831,7 @@ void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
 
 /*! \brief Handles the end of an upstream update loop and may trigger a search-structure swap. */
 
-void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
+void CacheImplementation::event_updateLoopEnd(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -7564,7 +7561,9 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
     was rewritten in place lost its messages from the cache. Takes the ownership of contentInfo.
 */
 
-static void addOrReplaceContent(T::ContentInfoList& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+namespace
+{
+void addOrReplaceContent(T::ContentInfoList& list,T::ContentInfo *contentInfo,uint& deleteCounter)
 {
   T::ContentInfo *existing = list.addContentInfo(contentInfo);
   if (existing == contentInfo)
@@ -7579,6 +7578,7 @@ static void addOrReplaceContent(T::ContentInfoList& list,T::ContentInfo *content
   }
   delete contentInfo;
 }
+}  // namespace
 
 
 
@@ -8770,7 +8770,7 @@ void CacheImplementation::updateContent()
         if (mShutdownRequested)
           return;
 
-        auto ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
+        auto *ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
         nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
       }
 
@@ -9004,7 +9004,7 @@ void CacheImplementation::updateContent()
       uint glen = ssp->mGenerationInfoList.getLength();
       for (uint g=0; g<glen; g++)
       {
-        auto ginfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
+        auto *ginfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
         ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
       }
 

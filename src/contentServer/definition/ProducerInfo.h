@@ -46,7 +46,7 @@ class ProducerInfo
 
     UInt64          mHash;          //!< Hash used for change detection across synchronised instances.
 
-  public:
+  
 
     /*! \brief Bitmask flags for producer lifecycle management. */
     class Flags

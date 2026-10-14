@@ -24,7 +24,9 @@ namespace ContentServer
 
 /*! \brief Merge backend: thread entry point that invokes eventProcessingThread on the implementation. */
 
-static void* MergeImplementation_eventProcessingThread(void *arg)
+namespace
+{
+void* MergeImplementation_eventProcessingThread(void *arg)
 {
   try
   {
@@ -87,6 +89,7 @@ inline T::SourceId getNewSourceId(uint contentStorageIndex,T::SourceId oldId)
   T::SourceId id = (contentStorageIndex << 24) + (oldId & 0x00FFFFFF);
   return id;
 }
+}  // namespace
 
 
 
@@ -184,7 +187,7 @@ SearchStructure_sptr MergeImplementation::activeSearchStructure() const
 
 /*! \brief Merge backend: collect cache statistics from the merged ContentServer instances. */
 
-void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -274,10 +277,7 @@ bool MergeImplementation::isReady()
   FUNCTION_TRACE
   try
   {
-    if (mContentSwapCounter > 0)
-      return true;
-    else
-      return false;
+    return mContentSwapCounter > 0;
   }
   catch (...)
   {
@@ -425,15 +425,12 @@ void MergeImplementation::shutdown()
 
 /*! \brief Merge backend: return true if the given session id is currently valid. */
 
-bool MergeImplementation::isSessionValid(T::SessionId sessionId)
+bool MergeImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   //FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return false;
-
-    return true;
+    return !mShutdownRequested;
   }
   catch (...)
   {
@@ -447,7 +444,7 @@ bool MergeImplementation::isSessionValid(T::SessionId sessionId)
 
 /*! \brief Merge backend: not implemented; mutation methods are read-only on the merged view. */
 
-int MergeImplementation::_clear(T::SessionId sessionId)
+int MergeImplementation::_clear(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -466,7 +463,7 @@ int MergeImplementation::_clear(T::SessionId sessionId)
 
 /*! \brief Merge backend: schedule a full reload of all upstream content storages. */
 
-int MergeImplementation::_reload(T::SessionId sessionId)
+int MergeImplementation::_reload(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -582,7 +579,7 @@ int MergeImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& ch
 
 /*! \brief Merge backend: not implemented; producer additions go directly to the upstream sources. */
 
-int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int MergeImplementation::_addProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -601,7 +598,7 @@ int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 /*! \brief Merge backend: not implemented; producer updates go directly to the upstream sources. */
 
-int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int MergeImplementation::_setProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -620,7 +617,7 @@ int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 /*! \brief Merge backend: not implemented; deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteProducerInfoById(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -639,7 +636,7 @@ int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::Produ
 
 /*! \brief Merge backend: not implemented; deletion by name is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteProducerInfoByName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -696,7 +693,7 @@ int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
 
 /*! \brief Merge backend: not implemented; producer deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -1375,7 +1372,7 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; generation additions go directly to the upstream sources. */
 
-int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int MergeImplementation::_addGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1394,7 +1391,7 @@ int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 /*! \brief Merge backend: not implemented; generation updates go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int MergeImplementation::_setGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1413,7 +1410,7 @@ int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generation
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteGenerationInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -1432,7 +1429,7 @@ int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Gen
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteGenerationInfoByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -1451,7 +1448,7 @@ int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,cons
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
+int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId /*sessionId*/,std::set<T::GenerationId>& /*generationIdList*/)
 {
   FUNCTION_TRACE
   try
@@ -1470,7 +1467,7 @@ int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -1489,7 +1486,7 @@ int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -1508,7 +1505,7 @@ int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -1941,7 +1938,7 @@ int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
 
 /*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
+int MergeImplementation::_setGenerationInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -1960,7 +1957,7 @@ int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::
 
 /*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
+int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -1979,7 +1976,7 @@ int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
 
 /*! \brief Merge backend: not implemented; geometry additions go directly to the upstream sources. */
 
-int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int MergeImplementation::_addGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1997,26 +1994,7 @@ int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    return Result::NO_PERMANENT_STORAGE_DEFINED;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
-
-int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteGeometryInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/)
 {
   FUNCTION_TRACE
   try
@@ -2035,7 +2013,7 @@ int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -2054,7 +2032,26 @@ int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessio
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
+{
+  FUNCTION_TRACE
+  try
+  {
+    return Result::NO_PERMANENT_STORAGE_DEFINED;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
+
+int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -2287,7 +2284,7 @@ int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
 
 /*! \brief Merge backend: not implemented; geometry updates go directly to the upstream sources. */
 
-int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int MergeImplementation::_setGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2306,7 +2303,7 @@ int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 /*! \brief Merge backend: not implemented; geometry status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int MergeImplementation::_setGeometryInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -2325,7 +2322,7 @@ int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::Ge
 
 /*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int MergeImplementation::_addFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2344,7 +2341,7 @@ int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 /*! \brief Merge backend: not implemented; file updates go directly to the upstream sources. */
 
-int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int MergeImplementation::_setFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2363,7 +2360,7 @@ int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 /*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+int MergeImplementation::_addFileInfoWithContentList(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/,T::ContentInfoList& /*contentInfoList*/)
 {
   FUNCTION_TRACE
   try
@@ -2382,7 +2379,7 @@ int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 /*! \brief Merge backend: not implemented; bulk file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
+int MergeImplementation::_addFileInfoListWithContent(T::SessionId /*sessionId*/,uint /*requestFlags*/,std::vector<T::FileAndContent>& /*fileAndContentList*/)
 {
   FUNCTION_TRACE
   try
@@ -2401,7 +2398,7 @@ int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
+int MergeImplementation::_deleteFileInfoById(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   FUNCTION_TRACE
   try
@@ -2420,7 +2417,7 @@ int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Merge backend: not implemented; file deletion by name is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
+int MergeImplementation::_deleteFileInfoByName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   FUNCTION_TRACE
   try
@@ -2439,7 +2436,7 @@ int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -2458,7 +2455,7 @@ int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -2477,7 +2474,7 @@ int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -2496,7 +2493,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
+int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,time_t /*forecastTime*/)
 {
   FUNCTION_TRACE
   try
@@ -2515,7 +2512,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId /*sessionId*/,std::vector<T::ForecastTime>& /*forecastTimeList*/)
 {
   FUNCTION_TRACE
   try
@@ -2534,7 +2531,7 @@ int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -2553,7 +2550,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -2572,7 +2569,7 @@ int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T:
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
+int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId /*sessionId*/,std::set<T::FileId>& /*fileIdList*/)
 {
   FUNCTION_TRACE
   try
@@ -3112,7 +3109,7 @@ T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
 
 /*! \brief Merge backend: not implemented; events are produced by the upstream sources. */
 
-int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
+int MergeImplementation::_addEventInfo(T::SessionId /*sessionId*/,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3131,7 +3128,7 @@ int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 /*! \brief Merge backend: return the most recent merged event visible to the requesting server. */
 
-int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   //FUNCTION_TRACE
   try
@@ -3165,7 +3162,7 @@ int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 /*! \brief Merge backend: return a page of merged event records starting at the given event id. */
 
-int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3290,7 +3287,7 @@ int MergeImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
 
-int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int MergeImplementation::_addContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3309,7 +3306,7 @@ int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 /*! \brief Merge backend: not implemented; content updates go directly to the upstream sources. */
 
-int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int MergeImplementation::_setContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3328,7 +3325,7 @@ int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 /*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
 
-int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int MergeImplementation::_addContentList(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/)
 {
   FUNCTION_TRACE
   try
@@ -3347,7 +3344,7 @@ int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
+int MergeImplementation::_deleteContentInfo(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/)
 {
   FUNCTION_TRACE
   try
@@ -3366,7 +3363,7 @@ int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fil
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
+int MergeImplementation::_deleteContentListByFileId(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   FUNCTION_TRACE
   try
@@ -3385,7 +3382,7 @@ int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::Fi
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
+int MergeImplementation::_deleteContentListByFileName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   FUNCTION_TRACE
   try
@@ -3404,7 +3401,7 @@ int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,con
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteContentListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -3423,7 +3420,7 @@ int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteContentListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -3442,7 +3439,7 @@ int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteContentListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -3461,7 +3458,7 @@ int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteContentListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -3480,7 +3477,7 @@ int MergeImplementation::_deleteContentListByGenerationName(T::SessionId session
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteContentListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -5563,7 +5560,7 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
 
 /*! \brief Merge backend: handle a content server reload event by reimporting from the given storage. */
 
-void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_contentServerReload(uint /*contentStorageIndex*/,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5582,7 +5579,7 @@ void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::
 
 /*! \brief Merge backend: handle the start of an upstream update cycle. */
 
-void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5608,7 +5605,7 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
 
 /*! \brief Merge backend: handle the end of an upstream update cycle. */
 
-void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6001,7 +5998,7 @@ void MergeImplementation::event_geometryAdded(uint contentStorageIndex,T::EventI
 
 /*! \brief Merge backend: handle a geometry-deleted event from an upstream content storage. */
 
-void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_geometryDeleted(uint /*contentStorageIndex*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -6024,7 +6021,7 @@ void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::Even
 
 /*! \brief Merge backend: handle a geometry status change event from an upstream content storage. */
 
-void MergeImplementation::event_geometryStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_geometryStatusChanged(uint /*contentStorageIndex*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -6161,8 +6158,10 @@ void MergeImplementation::event_geometryListDeletedBySourceId(uint contentStorag
     was rewritten in place lost its messages. Takes the ownership of contentInfo.
 */
 
+namespace
+{
 template <typename List>
-static void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& deleteCounter)
 {
   T::ContentInfo *existing = list.addContentInfo(contentInfo);
   if (existing == contentInfo)
@@ -6177,6 +6176,7 @@ static void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& del
   }
   delete contentInfo;
 }
+}  // namespace
 
 
 
@@ -6900,7 +6900,7 @@ void MergeImplementation::processEvents(bool eventThread)
   // FUNCTION_TRACE
   try
   {
-    if (mContentSources.size() == 0)
+    if (mContentSources.empty())
       return;
 
     if (!eventThread  &&  mReloadActivated)
@@ -7274,7 +7274,7 @@ void MergeImplementation::updateContent()
       if (mShutdownRequested)
         return;
 
-      auto ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
+      auto *ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
       nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
     }
 

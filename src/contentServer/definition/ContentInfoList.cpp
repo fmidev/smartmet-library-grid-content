@@ -8,6 +8,8 @@
 #include <grid-files/common/ShowFunction.h>
 #include <macgyver/Hash.h>
 
+#include <algorithm>
+
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
 
@@ -21,6 +23,8 @@ namespace T
 
 /*! \brief Qsort comparator for ContentInfo using comparison method 1. */
 
+namespace
+{
 int contentInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -335,6 +339,7 @@ int contentInfo_compare_20(const void *_val1,const void *_val2)
   }
   return 0;
 }
+}  // namespace
 
 
 
@@ -2769,8 +2774,7 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -3511,7 +3515,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
 
 /*! \brief Append entries matching the given FMI parameter id and filters (UTC time range) to the target list. */
 
-void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint /*requestFlags*/,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4502,7 +4506,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
 
 /*! \brief Append entries matching the given FMI parameter name and filters (UTC time range). */
 
-void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint requestFlags,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTimeUTC,time_t endTimeUTC,uint /*requestFlags*/,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5764,8 +5768,7 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -5849,8 +5852,7 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,Co
     contentInfo.mProducerId = producerId;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::producer_file_message,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
+    startIdx = std::max(startIdx, 0);
 
     for (uint t=startIdx; t<mLength; t++)
     {
@@ -5884,7 +5886,7 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,Co
 
 /*! \brief Append a paginated slice of entries matching the given generation id. */
 
-void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerId*/,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5947,8 +5949,7 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -6063,8 +6064,7 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
     contentInfo.mProducerId = producerId;
 
     int startIdx = getClosestIndexNoLock(mComparisonMethod,contentInfo);
-    if (startIdx < 0)
-      startIdx = 0;
+    startIdx = std::max(startIdx, 0);
 
     for (uint t=startIdx; t<mLength; t++)
     {
@@ -6097,7 +6097,7 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
 
 /*! \brief Append a paginated slice of entries matching the given generation and geometry ids. */
 
-void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
+void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId /*producerId*/,T::GenerationId generationId,T::GeometryId geometryId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -6159,8 +6159,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {
@@ -6356,8 +6355,7 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
 
     if (maxRecords >= 0)
     {
-      if (startIdx < 0)
-        startIdx = 0;
+      startIdx = std::max(startIdx, 0);
 
       for (uint t=startIdx; t<mLength; t++)
       {

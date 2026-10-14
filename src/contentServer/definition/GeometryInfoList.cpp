@@ -19,6 +19,8 @@ namespace T
 
 /*! \brief Qsort comparator for GeometryInfo using comparison method 1. */
 
+namespace
+{
 int geometryInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
@@ -95,6 +97,7 @@ int geometryInfo_compare_5(const void *_val1,const void *_val2)
   }
   return 0;
 }
+}  // namespace
 
 
 

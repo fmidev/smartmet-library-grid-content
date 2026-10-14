@@ -113,7 +113,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 /*! \brief Query Server: Get cache stats. */
 
-void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -186,7 +186,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 /*! \brief Query Server: Set dem. */
 
-void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
+void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> /*dem*/)
 {
   FUNCTION_TRACE
   try
@@ -204,7 +204,7 @@ void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 /*! \brief Query Server: Set land cover. */
 
-void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
+void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> /*landCover*/)
 {
   FUNCTION_TRACE
   try
@@ -519,7 +519,7 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
 
 /*! \brief Query Server: Protected hook: execute query. */
 
-int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
+int ServiceInterface::_executeQuery(T::SessionId /*sessionId*/,Query& /*query*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -530,7 +530,7 @@ int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 
 /*! \brief Query Server: Protected hook: get producer list. */
 
-int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& producerList)
+int ServiceInterface::_getProducerList(T::SessionId /*sessionId*/,string_vec& /*producerList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -541,7 +541,7 @@ int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& produc
 
 /*! \brief Query Server: Protected hook: get values by grid point. */
 
-int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
+int ServiceInterface::_getValuesByGridPoint(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*interpolationMethod*/,T::GridPointValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -584,7 +584,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
 
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0]->mValueList.getLength() == 1)
     {
-      auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(0);
+      auto *valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(0);
       if (valuePtr != nullptr)
       {
         value = valuePtr->mValue;
@@ -640,7 +640,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
       uint len = query.mQueryParameterList[0].mValueList[0]->mValueList.getLength();
       for (uint t=0; t<len; t++)
       {
-        auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(t);
+        auto *valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
           valueList.emplace_back(valuePtr->mValue);
         else
@@ -704,7 +704,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     {
       for (auto& it : query.mQueryParameterList[0].mValueList)
       {
-        auto valuePtr = it->mValueList.getGridValuePtrByIndex(0);
+        auto *valuePtr = it->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)
           values.emplace_back(valuePtr->mValue);
         else

@@ -178,7 +178,7 @@ class RedisImplementation : public ServiceInterface
 
      int    _getLevelInfoList(T::SessionId sessionId,T::LevelInfoList& levelInfoList) override;
 
-   protected:
+   
 
      bool           isConnectionValid();
      int            openConnection();

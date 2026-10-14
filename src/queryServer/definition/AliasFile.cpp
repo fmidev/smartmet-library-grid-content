@@ -110,7 +110,7 @@ void AliasFile::init()
 {
   try
   {
-    if (mAliasList.size() > 0)
+    if (!mAliasList.empty())
       return; // Already initialized
 
     AutoWriteLock lock(&mModificationLock);
@@ -374,7 +374,7 @@ void AliasFile::loadFile()
           rec.mName = st;
           rec.mAliasString = p;
 
-          if (rec.mName.length() > 0  &&  rec.mAliasString.length() > 0)
+          if (!rec.mName.empty()  &&  !rec.mAliasString.empty())
           {
             if (!mDuplicatesAllowed)
             {

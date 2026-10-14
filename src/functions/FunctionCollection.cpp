@@ -120,7 +120,7 @@ float FunctionCollection::executeFunctionCall1(const std::string& functionName,s
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -146,7 +146,7 @@ double FunctionCollection::executeFunctionCall1(const std::string& functionName,
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -172,7 +172,7 @@ void FunctionCollection::executeFunctionCall4(const std::string& functionName,ui
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -198,7 +198,7 @@ void FunctionCollection::executeFunctionCall4(const std::string& functionName,ui
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -224,7 +224,7 @@ void FunctionCollection::executeFunctionCall9(const std::string& functionName,ui
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -250,7 +250,7 @@ void FunctionCollection::executeFunctionCall9(const std::string& functionName,ui
 {
   try
   {
-    auto function = getFunction(functionName);
+    auto *function = getFunction(functionName);
     if (function == nullptr)
     {
       Fmi::Exception exception(BCP, "Function not found!");
@@ -271,7 +271,7 @@ void FunctionCollection::executeFunctionCall9(const std::string& functionName,ui
 
 /*! \brief Function: Print. */
 
-void FunctionCollection::print(std::ostream& stream,uint level,uint optionFlags)
+void FunctionCollection::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

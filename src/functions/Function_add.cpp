@@ -134,7 +134,7 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_add::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -142,7 +142,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       return;
 
     double b = mValueToAdd;
-    if (extParameters.size() > 0)
+    if (!extParameters.empty())
     {
       for (double extParameter : extParameters)
         b = b + extParameter;
@@ -155,7 +155,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        auto c = (double)(a + b);
+        auto c = (a + b);
         outParameters.emplace_back(c);
       }
       else
@@ -176,7 +176,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 /*! \brief Function: Execute function call9. */
 
-void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_add::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -184,7 +184,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       return;
 
     double b = mValueToAdd;
-    if (extParameters.size() > 0)
+    if (!extParameters.empty())
     {
       for (double extParameter : extParameters)
         b = b + extParameter;
@@ -197,7 +197,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        auto c = (double)(a + b);
+        auto c = (a + b);
         outParameters.emplace_back(c);
       }
       else

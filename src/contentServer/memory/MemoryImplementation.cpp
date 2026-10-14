@@ -7,6 +7,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <algorithm>
 #include <boost/thread/thread.hpp>
 
 
@@ -23,7 +24,9 @@ namespace ContentServer
 
 /*! \brief Memory backend: thread entry point that invokes syncProcessingThread on the implementation. */
 
-static void* MemoryImplementation_syncProcessingThread(void *arg)
+namespace
+{
+void* MemoryImplementation_syncProcessingThread(void *arg)
 {
   try
   {
@@ -39,6 +42,7 @@ static void* MemoryImplementation_syncProcessingThread(void *arg)
     exit(-1);
   }
 }
+}  // namespace
 
 
 
@@ -219,7 +223,7 @@ void MemoryImplementation::shutdown()
 
 /*! \brief Memory backend: return true if the given session id is currently valid. */
 
-bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
+bool MemoryImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -290,17 +294,13 @@ void MemoryImplementation::syncProcessingThread()
         time_t t5 = getFileModificationTime(filename);
 
         time_t max = t1;
-        if (t2 > max)
-          max = t2;
+        max = std::max(t2, max);
 
-        if (t3 > max)
-          max = t3;
+        max = std::max(t3, max);
 
-        if (t4 > max)
-          max = t4;
+        max = std::max(t4, max);
 
-        if (t5 > max)
-          max = t5;
+        max = std::max(t5, max);
 
         if (max < tt && (mProducerStorage_modificationTime != t1 ||
                          mGenerationStorage_modificationTime != t2 ||
@@ -991,7 +991,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     uint plen = producerList.getLength();
     for (uint t=0; t<plen; t++)
     {
-      auto prod = producerList.getProducerInfoByIndex(t);
+      auto *prod = producerList.getProducerInfoByIndex(t);
       producers.insert(std::pair<T::ProducerId,T::ProducerInfo*>(prod->mProducerId,prod));
     }
 
@@ -2774,7 +2774,7 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       t.addContentInfoList(tmpContentList);
     }
 
-    auto it = tmpEventList.getFirstEvent();
+    auto *it = tmpEventList.getFirstEvent();
     while (it != nullptr)
     {
       addEvent(it->mType,it->mId1,it->mId2,it->mId3,it->mFlags);
@@ -3585,7 +3585,7 @@ int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
 
 /*! \brief Memory backend: return the most recent event record visible to the requesting server. */
 
-int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -3617,7 +3617,7 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 /*! \brief Memory backend: return a page of event records starting at the given event id. */
 
-int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4381,7 +4381,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 /*! \brief Memory backend: return a page of content records belonging to the given generation id. */
 
-int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -5718,8 +5718,7 @@ void MemoryImplementation::readProducerList()
         auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
-        if (rec->mProducerId > mMaxProducerId)
-          mMaxProducerId = rec->mProducerId;
+        mMaxProducerId = std::max(rec->mProducerId, mMaxProducerId);
 
         mProducerInfoList.addProducerInfo(rec);
 
@@ -5771,8 +5770,7 @@ void MemoryImplementation::readGenerationList()
         auto *rec = new T::GenerationInfo();
         rec->setCsv(st);
 
-        if (rec->mGenerationId > mMaxGenerationId)
-          mMaxGenerationId = rec->mGenerationId;
+        mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
 
         mGenerationInfoList.addGenerationInfo(rec);
       }
@@ -5876,8 +5874,7 @@ void MemoryImplementation::readFileList()
         auto *rec = new T::FileInfo();
         rec->setCsv(st);
 
-        if (rec->mFileId > mMaxFileId)
-          mMaxFileId = rec->mFileId;
+        mMaxFileId = std::max(rec->mFileId, mMaxFileId);
 
         mFileInfoList.addFileInfo(rec);
       }
@@ -6044,8 +6041,7 @@ bool MemoryImplementation::syncProducerList()
         auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
-        if (rec->mProducerId > mMaxProducerId)
-          mMaxProducerId = rec->mProducerId;
+        mMaxProducerId = std::max(rec->mProducerId, mMaxProducerId);
 
         T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(rec->mProducerId);
         if (info != nullptr)
@@ -6146,8 +6142,7 @@ bool MemoryImplementation::syncGenerationList()
         auto *rec = new T::GenerationInfo();
         rec->setCsv(st);
 
-        if (rec->mGenerationId > mMaxGenerationId)
-          mMaxGenerationId = rec->mGenerationId;
+        mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
 
         T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
         if (info != nullptr)
@@ -6356,8 +6351,7 @@ bool MemoryImplementation::syncFileList()
         auto *rec = new T::FileInfo();
         rec->setCsv(st);
 
-        if (rec->mFileId > mMaxFileId)
-          mMaxFileId = rec->mFileId;
+        mMaxFileId = std::max(rec->mFileId, mMaxFileId);
 
         T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
         if (info != nullptr)

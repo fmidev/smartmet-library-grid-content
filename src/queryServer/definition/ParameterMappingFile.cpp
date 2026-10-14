@@ -498,7 +498,7 @@ void ParameterMappingFile::setParameterMappings(const ParameterMapping_vec& mapp
     auto msearch = std::make_unique<MappingSearch>();
     auto mreverseSearch = std::make_unique<MappingSearch>();
 
-    for (auto& mapping : mappings)
+    for (const auto& mapping : mappings)
     {
       std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
@@ -633,10 +633,7 @@ void ParameterMappingFile::loadFile()
           if (field[11][0] != '\0')
             rec.mGroupFlags = toInt64(field[11]);
 
-          if (field[12][0] == 'E')
-            rec.mSearchEnabled = true;
-          else
-            rec.mSearchEnabled = false;
+          rec.mSearchEnabled = field[12][0] == 'E';
 
           if (field[12][0] == 'I')
             rec.mIgnore = true;

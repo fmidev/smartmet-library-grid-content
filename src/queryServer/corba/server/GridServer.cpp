@@ -10,7 +10,9 @@ namespace Corba
 {
 
 
-static void* GridServer_maintenanceThread(void *arg)
+namespace
+{
+void* GridServer_maintenanceThread(void *arg)
 {
   try
   {
@@ -26,6 +28,7 @@ static void* GridServer_maintenanceThread(void *arg)
     exit(-1);
   }
 }
+}  // namespace
 
 
 
@@ -138,7 +141,7 @@ void GridServer::init(ContentServer::ServiceInterface *contentServiceInterface,D
       PortableServer::ObjectId_var content_service_oid = PortableServer::string_to_ObjectId("ContentService");
       mPoa->activate_object_with_id(content_service_oid, &mCorbaContentInterface);
 
-      CORBA::Object_var content_service_obj = ((ContentServer::Corba::ServerInterface*)&mCorbaContentInterface)->_this();
+      CORBA::Object_var content_service_obj = ((&mCorbaContentInterface))->_this();
       CORBA::String_var content_service_ior(mOrb->object_to_string(content_service_obj));
       mCorbaContentInterface._remove_ref();
 
@@ -149,7 +152,7 @@ void GridServer::init(ContentServer::ServiceInterface *contentServiceInterface,D
       PortableServer::ObjectId_var data_service_oid = PortableServer::string_to_ObjectId("DataService");
       mPoa->activate_object_with_id(data_service_oid, &mCorbaDataInterface);
 
-      CORBA::Object_var data_service_obj = ((DataServer::Corba::ServerInterface*)&mCorbaDataInterface)->_this();
+      CORBA::Object_var data_service_obj = ((&mCorbaDataInterface))->_this();
       CORBA::String_var data_service_ior(mOrb->object_to_string(data_service_obj));
       mCorbaDataInterface._remove_ref();
 
