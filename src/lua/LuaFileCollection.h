@@ -28,7 +28,7 @@ class LuaFileCollection
     void            init();
     void            init(const string_vec& filenames);
     bool            checkUpdates(bool force);
-    bool            getFunction(const std::string& functionName,const uint functionType,std::string& function);
+    bool            getFunction(const std::string& functionName,uint functionType,std::string& function);
     uint            getFunction(const std::string& functionName,std::string& function);
 
     // Type 1: Takes one or several parameters, returns one value

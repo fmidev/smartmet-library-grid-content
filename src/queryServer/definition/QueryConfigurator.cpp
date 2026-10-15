@@ -269,9 +269,9 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
       {
         time_t tim = 0;
         if (timezoneStr != nullptr)
-          tim = localTimeToTimeT(it.c_str(),timezoneStr);
+          tim = localTimeToTimeT(it,timezoneStr);
         else
-          tim = localTimeToTimeT(it.c_str(),"");
+          tim = localTimeToTimeT(it,"");
 
         struct tm tt{};
         gmtime_r(&tim,&tt);

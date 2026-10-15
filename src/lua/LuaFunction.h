@@ -22,7 +22,7 @@ class LuaFunction
   public:
                    LuaFunction();
                    LuaFunction(const LuaFunction& luaFunction);
-                   LuaFunction(const std::string& functionName,const uint type);
+                   LuaFunction(const std::string& functionName,uint type);
     virtual        ~LuaFunction();
     LuaFunction& operator=(const LuaFunction&) = default;
 

@@ -386,7 +386,7 @@ float LuaFile::executeFunctionCall1(const std::string& function,std::vector<floa
         Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
+        exception.addParameter("Error Message",message);
         throw exception;
       }
       return value;
@@ -473,7 +473,7 @@ double LuaFile::executeFunctionCall1(const std::string& function,std::vector<dou
         Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
+        exception.addParameter("Error Message",message);
         throw exception;
       }
       return value;
@@ -550,7 +550,7 @@ double LuaFile::executeFunctionCall2(const std::string& function,const char *str
         Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
+        exception.addParameter("Error Message",message);
         throw exception;
       }
       return value;
@@ -859,7 +859,7 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
         Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
+        exception.addParameter("Error Message",message);
         throw exception;
       }
 
@@ -950,7 +950,7 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
         Fmi::Exception exception(BCP, "LUA function call returns an error!");
         exception.addParameter("LUA File",mFilename);
         exception.addParameter("LUA Function",function);
-        exception.addParameter("Error Message",message.c_str());
+        exception.addParameter("Error Message",message);
         throw exception;
       }
 
