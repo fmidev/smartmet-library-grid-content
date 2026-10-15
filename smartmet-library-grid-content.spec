@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.13
+Version: 26.10.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -37,10 +37,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.10.11
-BuildRequires: smartmet-library-grid-files-devel >= 26.10.13
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.11
-BuildRequires: smartmet-library-spine-devel >= 26.10.13
+BuildRequires: smartmet-library-gis-devel >= 26.10.15
+BuildRequires: smartmet-library-grid-files-devel >= 26.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.15
+BuildRequires: smartmet-library-spine-devel >= 26.10.15
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -48,10 +48,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.10.11
-Requires: smartmet-library-grid-files >= 26.10.13
-Requires: smartmet-library-macgyver >= 26.10.11
-Requires: smartmet-library-spine >= 26.10.13
+Requires: smartmet-library-gis >= 26.10.15
+Requires: smartmet-library-grid-files >= 26.10.15
+Requires: smartmet-library-macgyver >= 26.10.15
+Requires: smartmet-library-spine >= 26.10.15
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: %{smartmet_fmt_devel}
 #TestRequires: gcc-c++
@@ -59,12 +59,12 @@ Requires: smartmet-library-spine >= 26.10.13
 #TestRequires: gdal312-devel
 #TestRequires: luajit-devel
 #TestRequires: omniORB-devel >= 4.3.0
-#TestRequires: smartmet-library-gis-devel >= 26.10.11
-#TestRequires: smartmet-library-grid-files-devel >= 26.10.13
-#TestRequires: smartmet-library-macgyver-devel >= 26.10.11
+#TestRequires: smartmet-library-gis-devel >= 26.10.15
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.15
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.15
 #TestRequires: smartmet-library-newbase-devel
-#TestRequires: smartmet-library-spine-devel >= 26.10.13
-#TestRequires: smartmet-library-grid-files-test >= 26.10.11
+#TestRequires: smartmet-library-spine-devel >= 26.10.15
+#TestRequires: smartmet-library-grid-files-test >= 26.10.15
 #TestRequires: smartmet-test-data
 
 Provides: %{SPECNAME}
@@ -99,10 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 26.10.11
-Requires: smartmet-library-gis-devel >= 26.10.11
-Requires: smartmet-library-spine-devel >= 26.10.13
-Requires: smartmet-library-grid-files-devel >= 26.10.13
+Requires: smartmet-library-macgyver-devel >= 26.10.15
+Requires: smartmet-library-gis-devel >= 26.10.15
+Requires: smartmet-library-spine-devel >= 26.10.15
+Requires: smartmet-library-grid-files-devel >= 26.10.15
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -112,9 +112,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
-* Tue Oct 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.13-1.fmi
+* Thu Oct 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.15-1.fmi
 - Declare member functions and parameters const where nothing is modified (const correctness), no functional changes
-- Requires 26.10.13 versions of spine, grid-files due to their ABI changes
+- Requires 26.10.15 versions of spine, grid-files due to their ABI changes
 - Fixed reading a missing group field from user definitions with only four fields
 - Fixed mechanical clang-tidy findings (internal linkage, unused parameters, initialization, redundant code), no functional changes
 - Fixed clang-tidy style findings (loops, nested conditionals, dead code)
