@@ -2345,6 +2345,8 @@ void FileInfoList::sort(uint comparisonMethod)
 
       case 2:
         qsort(mArray,mLength,sizeof(FileInfoPtr),fileInfo_compare_2);
+        break;
+
       default:
         break;
     };

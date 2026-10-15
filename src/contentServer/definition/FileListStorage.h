@@ -29,7 +29,7 @@ class FileListStorage
                    FileListStorage();
                    FileListStorage(FileListStorage& fileListStorage);
     virtual        ~FileListStorage();
-    FileListStorage& operator=(FileListStorage&) = default;
+    FileListStorage& operator=(const FileListStorage&) = delete;
 
     void           addFileInfo(FileInfo *fileInfo);
     void           clear();
