@@ -329,7 +329,6 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
       default:
         return num_compare(mGenerationId,generationInfo->mGenerationId);
     }
-    return 0;
   }
   catch (...)
   {

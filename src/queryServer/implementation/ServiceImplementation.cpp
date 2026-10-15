@@ -4843,7 +4843,6 @@ bool ServiceImplementation::getValueVectors(
           }
           return false;
         }
-        break;
 
         case QueryParameter::LocationType::Grid:
         {
@@ -4854,7 +4853,6 @@ bool ServiceImplementation::getValueVectors(
           return res;
 
         }
-        break;
         default:
           break;
       }
@@ -7883,7 +7881,6 @@ bool ServiceImplementation::getPolygonValues(
           return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
              paramLevelId,paramLevel,newProducerId,valueList);
         }
-        break;
 
 
         case T::CoordinateTypeValue::GRID_COORDINATES:
@@ -7904,7 +7901,6 @@ bool ServiceImplementation::getPolygonValues(
           return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
              paramLevelId,paramLevel,newProducerId,valueList);
         }
-        break;
 
 
         case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
@@ -7941,7 +7937,6 @@ bool ServiceImplementation::getPolygonValues(
           return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
              paramLevelId,paramLevel,newProducerId,valueList);
         }
-        break;
         default:
           break;
       }

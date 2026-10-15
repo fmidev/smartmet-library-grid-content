@@ -7262,7 +7262,6 @@ int RedisImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo)
         return Result::OK;
       return Result::DATA_NOT_FOUND;
 
-      return Result::OK;
     }
 
     freeReplyObject(reply);

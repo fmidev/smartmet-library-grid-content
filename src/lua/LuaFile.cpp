@@ -391,7 +391,6 @@ float LuaFile::executeFunctionCall1(const std::string& function,std::vector<floa
       }
       return value;
     }
-    return 0;
   }
   catch (...)
   {
@@ -478,7 +477,6 @@ double LuaFile::executeFunctionCall1(const std::string& function,std::vector<dou
       }
       return value;
     }
-    return 0;
   }
   catch (...)
   {
@@ -555,7 +553,6 @@ double LuaFile::executeFunctionCall2(const std::string& function,const char *str
       }
       return value;
     }
-    return 0;
   }
   catch (...)
   {
@@ -865,7 +862,6 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
 
       return value;
     }
-    return std::string("");
   }
   catch (...)
   {
@@ -956,7 +952,6 @@ std::string LuaFile::executeFunctionCall5(const std::string& function,const std:
 
       return value;
     }
-    return std::string("");
   }
   catch (...)
   {
@@ -1035,7 +1030,6 @@ std::string LuaFile::executeFunctionCall6(const std::string& function,std::vecto
 
       return value;
     }
-    return std::string("");
   }
   catch (...)
   {

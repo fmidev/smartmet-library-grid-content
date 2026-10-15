@@ -343,7 +343,6 @@ int FileInfo::compare(uint comparisonMethod,FileInfo *fileInfo) const
       default:
         return num_compare(mFileId,fileInfo->mFileId);
     }
-    return 0;
   }
   catch (...)
   {
