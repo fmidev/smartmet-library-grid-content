@@ -28,6 +28,7 @@ class UserInfo
 
                         UserInfo();
     virtual             ~UserInfo();
+    UserInfo& operator=(const UserInfo&) = default;
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
