@@ -18,6 +18,7 @@ class Function_variance : public Function
                       Function_variance();
                       Function_variance(const Function_variance& function);
     ~Function_variance() override;
+    Function_variance& operator=(const Function_variance&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -74,6 +74,7 @@
 #include "../../functions/Function_streamDir.h"
 #include "../../functions/Function_feelsLike.h"
 #include "../../functions/Function_replace.h"
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -133,7 +134,9 @@ void* queryServer_updateThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 }  // namespace
@@ -2354,6 +2357,8 @@ void ServiceImplementation::postProcessQuery(Query& query)
 
           }
           break;
+          default:
+            break;
         }
       }
     }
@@ -2455,8 +2460,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
           {
             pValues->mValueVector = inputVectors[0];
           }
-          else
-          if (f != "@"  &&  !inputVectors.empty())
+          else if (f != "@"  &&  !inputVectors.empty())
           {
             //UInt64 startTime = getTime();
 
@@ -2477,6 +2481,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
                 case 9:
                   mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,pValues->mValueVector);
+                  break;
+                default:
                   break;
               }
             }
@@ -2556,6 +2562,8 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
                 case 9:
                   mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,outputVector);
+                  break;
+                default:
                   break;
               }
             }
@@ -2846,6 +2854,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                     pValues->mValueList.addGridValue(rec);
                   }
                   break;
+                  default:
+                    break;
                 }
               }
 
@@ -2921,6 +2931,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                   pValues->mValueList.addGridValue(rec);
                 }
                 break;
+                default:
+                  break;
               }
             }
 
@@ -3014,6 +3026,8 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
                     list.addGridValue(newRec);
                   }
                   break;
+                  default:
+                    break;
                 }
               }
             }
@@ -3087,8 +3101,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
       // The query defines the geometries that we need to use.
       geometryIdList = query.mGeometryIdList;
     }
-    else
-    if (query.mFlags & Query::Flags::GeometryHitNotRequired)
+    else if (query.mFlags & Query::Flags::GeometryHitNotRequired)
     {
       // The query defines that the requested coordinates does not need to
       // hit the area. So, all geometries are acceptable.
@@ -3221,8 +3234,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
             std::set<T::GeometryId> geomIdList;
             if (geometryId > 0)
               geomIdList.insert(geometryId);
-            else
-            if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
+            else if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
               geomIdList.insert(globalGeometryId);
             else
               geomIdList = geometryIdList;
@@ -3435,8 +3447,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
     {
       geometryIdList = query.mGeometryIdList;
     }
-    else
-    if ((query.mFlags & Query::Flags::GeometryHitNotRequired))
+    else if ((query.mFlags & Query::Flags::GeometryHitNotRequired))
     {
       Identification::gridDef.getGeometryIdList(geometryIdList);
     }
@@ -3621,8 +3632,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                 if (tmpGeomIdList.empty())
                   tmpGeomIdList.insert(geometryId);
               }
-              else
-              if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
+              else if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
                 tmpGeomIdList.insert(globalGeometryId);
 
               if (qParam->mType != QueryParameter::Type::PointValues &&  tmpGeomIdList.empty())
@@ -3649,8 +3659,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
               if (producerId == 0 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
               {
                 std::string prodName = producerStr;
-                auto *p1 = producersPtr;
-                auto *p2 = geomIdListPtr;
 
                 while (!prodName.empty() &&  valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0)
                 {
@@ -3701,8 +3709,6 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
                     prodName = "";
                 }
                 tmpGeomIdList.clear();
-                producersPtr = p1;
-                geomIdListPtr = p2;
               }
 
               if (valueList->mValueList.getLength() == 0  || ((qParam->mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
@@ -4359,6 +4365,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
         case T::ParamKeyTypeValue::FMI_NAME:
           entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
           break;
+        default:
+          break;
       }
 
       // Adjust the records counter for in-place updates (when the entry already existed)
@@ -4402,6 +4410,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
           entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
       }
       break;
+      default:
+        break;
     }
 
     contentInfoList = cList;
@@ -4845,6 +4855,8 @@ bool ServiceImplementation::getValueVectors(
 
         }
         break;
+        default:
+          break;
       }
     }
 
@@ -5843,8 +5855,7 @@ bool ServiceImplementation::getGridFiles(
         }
       }
     }
-    else
-    if (version == 2)
+    else if (version == 2)
     {
       //PRINT_DATA(mDebugLog, "-- GRIB version 2\n");
 
@@ -7209,6 +7220,8 @@ short ServiceImplementation::getLevelInterpolationMethod(T::ParamLevelId paramLe
 
         case T::ParamLevelType::Number:
           return T::LevelInterpolationMethod::Forbidden;
+        default:
+          break;
       }
     }
     return T::LevelInterpolationMethod::Nearest;
@@ -7541,9 +7554,6 @@ bool ServiceImplementation::getCircleValues(
   {
     PRINT_DATA(mDebugLog, "getCircleValues()\n");
 
-    short areaInterpolationMethod = qParam.mAreaInterpolationMethod;
-    if (areaInterpolationMethod == T::AreaInterpolationMethod::Undefined)
-      areaInterpolationMethod = pInfo.mAreaInterpolationMethod;
 
     short timeInterpolationMethod = qParam.mTimeInterpolationMethod;
     if (timeInterpolationMethod == T::TimeInterpolationMethod::Undefined)
@@ -7932,15 +7942,14 @@ bool ServiceImplementation::getPolygonValues(
              paramLevelId,paramLevel,newProducerId,valueList);
         }
         break;
+        default:
+          break;
       }
 
       return true;
     }
 
 
-    short areaInterpolationMethod = qParam.mAreaInterpolationMethod;
-    if (areaInterpolationMethod == T::AreaInterpolationMethod::Undefined)
-      areaInterpolationMethod = pInfo.mAreaInterpolationMethod;
 
     short timeInterpolationMethod = qParam.mTimeInterpolationMethod;
     if (timeInterpolationMethod == T::TimeInterpolationMethod::Undefined)
@@ -10452,7 +10461,7 @@ void ServiceImplementation::getGridValues(
                 }
 
                 int cLen = contentInfoList.getLength();
-                PRINT_DATA(mDebugLog, "         + Found %u content records\n", cLen);
+                PRINT_DATA(mDebugLog, "         + Found %d content records\n", cLen);
 
 
                 if (cLen > 0)
@@ -10813,7 +10822,7 @@ void ServiceImplementation::getGridValues(
                             valList->mFlags |= ParameterValues::Flags::AggregationValue;
                             query.mAggregationTimes.insert(valList->mForecastTimeUTC);
 
-                            PRINT_DATA(mDebugLog," ##### set aggregationFlag (%ld) %s\n",originalTimes.size(),utcTimeFromTimeT(valList->mForecastTimeUTC).c_str());
+                            PRINT_DATA(mDebugLog," ##### set aggregationFlag (%zu) %s\n",originalTimes.size(),utcTimeFromTimeT(valList->mForecastTimeUTC).c_str());
                           }
 
                           qParam.mValueList.emplace_back(valList);
@@ -11474,9 +11483,6 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
       entry->generationId = heightGenerationId;
       entry->producerHash = heightProducerId;
 
-      auto len = entry->contentInfoList.getLength();
-      if (!len)
-        len = 1;
 
       mLevelContentCache.insert(levelContentHash,entry);
     }
@@ -11992,9 +11998,6 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
       entry->generationId = heightGenerationId;
       entry->producerHash = heightProducerId;
 
-      auto len = entry->contentInfoList.getLength();
-      if (!len)
-        len = 1;
 
       mLevelContentCache.insert(levelContentHash,entry);
     }

@@ -19,6 +19,7 @@ class Function_median : public Function
                       Function_median();
                       Function_median(const Function_median& function);
     ~Function_median() override;
+    Function_median& operator=(const Function_median&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

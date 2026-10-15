@@ -24,6 +24,8 @@ class ParameterValues
                             ParameterValues();
                             //ParameterValues(const ParameterValues& parameterValues);
     virtual                 ~ParameterValues();
+    ParameterValues(const ParameterValues&) = default;
+    ParameterValues& operator=(const ParameterValues&) = default;
 
     void                    clear();
     void                    print(std::ostream& stream,uint level,uint optionFlags);
@@ -34,8 +36,8 @@ class ParameterValues
     T::GenerationId         mGenerationId;       //!< Identifier of the model run (generation).
     UInt64                  mGenerationFlags;    //!< Flags describing properties of the generation.
     T::GeometryId           mGeometryId;         //!< Identifier of the grid geometry used.
-    T::FileId               mFileId[4];          //!< File identifiers for up to four contributing messages.
-    T::MessageIndex         mMessageIndex[4];    //!< Message indices within the corresponding files.
+    T::FileId               mFileId[4]{};          //!< File identifiers for up to four contributing messages.
+    T::MessageIndex         mMessageIndex[4]{};    //!< Message indices within the corresponding files.
     std::string             mAnalysisTime;       //!< Analysis (reference) time string for the model run.
     time_t                  mModificationTime;   //!< Epoch time when this value record was last updated.
 

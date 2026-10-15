@@ -19,6 +19,7 @@ class Function_if : public Function
                       Function_if();
                       Function_if(const Function_if& function);
     ~Function_if() override;
+    Function_if& operator=(const Function_if&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

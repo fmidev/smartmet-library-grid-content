@@ -19,6 +19,7 @@ class Function_atan : public Function
                       Function_atan();
                       Function_atan(const Function_atan& function);
     ~Function_atan() override;
+    Function_atan& operator=(const Function_atan&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

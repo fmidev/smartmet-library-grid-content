@@ -27,6 +27,8 @@ class MemoryImplementation : public ServiceInterface
   public:
                     MemoryImplementation();
      ~MemoryImplementation() override;
+     MemoryImplementation(const MemoryImplementation&) = delete;
+     MemoryImplementation& operator=(const MemoryImplementation&) = delete;
 
      virtual void   init(bool contentLoadEnabled,bool contentSaveEnabled,bool contentSyncEnabled,bool eventsEnabled,const std::string& contentDir,uint contentSaveInterval);
      void   shutdown() override;
@@ -200,7 +202,7 @@ class MemoryImplementation : public ServiceInterface
      bool                   mReloadActivated;    //!< True when a full data reload has been requested.
      bool                   mShutdownRequested;  //!< True after shutdown() has been called.
      bool                   mUpdateInProgress;   //!< True while a bulk content update is running.
-     T::SessionId           mSessionId;          //!< Session identifier used for internal operations.
+     T::SessionId           mSessionId = 0;          //!< Session identifier used for internal operations.
 
      T::FileInfoList        mFileInfoList;        //!< File records indexed by file id.
      T::FileInfoList        mFileInfoListByName;  //!< File records indexed by filename.

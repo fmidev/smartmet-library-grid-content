@@ -2284,6 +2284,8 @@ void GenerationInfoList::sort(uint comparisonMethod)
       case 5:
         qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_5);
         break;
+      default:
+        break;
     }
   }
   catch (...)

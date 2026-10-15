@@ -567,7 +567,7 @@ void Converter::convert(T::GeometryInfoList& source,C::GeometryInfoList& target)
     for (uint t=0; t<len; t++)
     {
       T::GeometryInfo *info = source.getGeometryInfoByIndex(t);
-      C::GeometryInfo corbaObject;
+      C::GeometryInfo corbaObject{};
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }

@@ -538,7 +538,7 @@ void Converter::convert(T::GridPointValueList& source,C::GridPointValueList& tar
     for (uint t=0; t<len; t++)
     {
       T::GridPointValue *obj = source.getGridPointValueByIndex(t);
-      C::GridPointValue corbaObject;
+      C::GridPointValue corbaObject{};
       convert(*obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -1134,7 +1134,7 @@ void Converter::convert(T::Coordinate_vec& source,C::CoordinateList& target)
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       convert(source[t],corbaObject);
       target[t] = corbaObject;
     }

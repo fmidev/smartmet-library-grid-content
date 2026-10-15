@@ -19,6 +19,7 @@ class Function_in : public Function
                       Function_in();
                       Function_in(const Function_in& function);
     ~Function_in() override;
+    Function_in& operator=(const Function_in&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

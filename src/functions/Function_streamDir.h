@@ -19,6 +19,7 @@ class Function_streamDir : public Function
                       Function_streamDir();
                       Function_streamDir(const Function_streamDir& function);
     ~Function_streamDir() override;
+    Function_streamDir& operator=(const Function_streamDir&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

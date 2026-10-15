@@ -19,6 +19,7 @@ class Function_min : public Function
                       Function_min();
                       Function_min(const Function_min& function);
     ~Function_min() override;
+    Function_min& operator=(const Function_min&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

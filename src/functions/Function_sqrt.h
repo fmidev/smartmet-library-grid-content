@@ -19,6 +19,7 @@ class Function_sqrt : public Function
                       Function_sqrt();
                       Function_sqrt(const Function_sqrt& function);
     ~Function_sqrt() override;
+    Function_sqrt& operator=(const Function_sqrt&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

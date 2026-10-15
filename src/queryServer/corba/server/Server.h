@@ -25,6 +25,8 @@ class Server
   public:
                   Server(const char *address,const char *port);
     virtual       ~Server();
+    Server(const Server&) = delete;
+    Server& operator=(const Server&) = delete;
 
     virtual void  init(QueryServer::ServiceInterface *serviceInterface);
     virtual void  start();
@@ -44,7 +46,7 @@ class Server
     std::string                     mServiceIor;       //!< IOR string published after servant activation.
     std::string                     mAddress;          //!< Network address the ORB listens on.
     std::string                     mPort;             //!< Port number the ORB listens on.
-    pthread_t                       mThread;           //!< Background thread running the ORB event loop.
+    pthread_t                       mThread = 0;           //!< Background thread running the ORB event loop.
 
 };
 

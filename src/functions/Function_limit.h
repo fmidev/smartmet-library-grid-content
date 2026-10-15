@@ -19,6 +19,7 @@ class Function_limit : public Function
                       Function_limit();
                       Function_limit(const Function_limit& function);
     ~Function_limit() override;
+    Function_limit& operator=(const Function_limit&) = default;
 
     // Type 1: First and second param define the range (min,max) and the rest belongs to data.
     float     executeFunctionCall1(std::vector<float>& parameters) override;

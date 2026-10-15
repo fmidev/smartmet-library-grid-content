@@ -19,6 +19,7 @@ class Function_windDir : public Function
                       Function_windDir();
                       Function_windDir(const Function_windDir& function);
     ~Function_windDir() override;
+    Function_windDir& operator=(const Function_windDir&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

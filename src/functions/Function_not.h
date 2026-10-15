@@ -19,6 +19,7 @@ class Function_not : public Function
                       Function_not();
                       Function_not(const Function_not& function);
     ~Function_not() override;
+    Function_not& operator=(const Function_not&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

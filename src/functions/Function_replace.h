@@ -19,6 +19,7 @@ class Function_replace : public Function
                       Function_replace();
                       Function_replace(const Function_replace& function);
     ~Function_replace() override;
+    Function_replace& operator=(const Function_replace&) = default;
 
     // Type 1: First and second param define the range (min,max) and the rest belongs to data.
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -328,7 +328,7 @@ int ServiceInterface::getSessionAttributes(T::SessionId sessionId,T::SessionId r
     int result = _getSessionAttributes(sessionId,requestedSessionId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -404,7 +404,7 @@ int ServiceInterface::setSessionAttributes(T::SessionId sessionId,T::SessionId r
     int result = _setSessionAttributes(sessionId,requestedSessionId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -480,7 +480,7 @@ int ServiceInterface::deleteSessionAttributes(T::SessionId sessionId,T::SessionI
     int result = _deleteSessionAttributes(sessionId,requestedSessionId,attributeGroup,attributeNameList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,attributeName[%ld]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%s,attributeName[%zu]);result %d;time %f;",__FUNCTION__,sessionId,requestedSessionId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

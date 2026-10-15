@@ -273,7 +273,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
         else
           tim = localTimeToTimeT(it.c_str(),"");
 
-        struct tm tt;
+        struct tm tt{};
         gmtime_r(&tim,&tt);
         sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
         query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
@@ -285,7 +285,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
 
     if (startTime > 0)
     {
-      struct tm tt;
+      struct tm tt{};
       gmtime_r(&startTime,&tt);
 
       sprintf(tmp,"%04d%02d%02dT000000",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday);
@@ -298,8 +298,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
 
       if (endTimeStr == nullptr)
         endTime = startTime + (timesteps-1) * timestep;
-      else
-      if (timestepsStr == nullptr)
+      else if (timestepsStr == nullptr)
         timesteps = ((endTime-startTime) / timestep) + 1;
 
       gmtime_r(&startTime,&tt);
@@ -313,7 +312,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
 
     if (endTime > 0)
     {
-      struct tm tt;
+      struct tm tt{};
       gmtime_r(&endTime,&tt);
       sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
       query.mEndTime = utcTimeToTimeT(tmp);
@@ -333,7 +332,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
       {
         if (t >= startStep)
         {
-          struct tm tt;
+          struct tm tt{};
           gmtime_r(&s,&tt);
 
           sprintf(tmp,"%02d%02d",tt.tm_hour,tt.tm_min);

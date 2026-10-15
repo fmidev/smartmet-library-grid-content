@@ -27,6 +27,8 @@ class ClientImplementation : public ContentServer::ServiceInterface
   public:
                     ClientImplementation();
      ~ClientImplementation() override;
+     ClientImplementation(const ClientImplementation&) = delete;
+     ClientImplementation& operator=(const ClientImplementation&) = delete;
 
      virtual void   init(std::string url);
 

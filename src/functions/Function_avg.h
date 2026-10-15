@@ -19,6 +19,7 @@ class Function_avg : public Function
                       Function_avg();
                       Function_avg(const Function_avg& function);
     ~Function_avg() override;
+    Function_avg& operator=(const Function_avg&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

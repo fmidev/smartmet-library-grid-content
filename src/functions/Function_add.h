@@ -19,6 +19,7 @@ class Function_add : public Function
                       Function_add(double valueToAdd);
                       Function_add(const Function_add& function);
     ~Function_add() override;
+    Function_add& operator=(const Function_add&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -290,6 +290,8 @@ int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo) cons
         if (res != 0)
           return res;
         return num_compare(mLevelId,geometryInfo->mLevelId);
+      default:
+        break;
     }
     return 0;
   }

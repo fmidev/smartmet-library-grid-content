@@ -24,6 +24,7 @@ class ResponseMessage
                     ResponseMessage();
                     ResponseMessage(ResponseMessage& responseMessage);
      virtual        ~ResponseMessage();
+     ResponseMessage& operator=(const ResponseMessage&) = default;
 
      void           addChar(char ch);
      void           addLine(const char *line);
@@ -61,7 +62,7 @@ class ResponseMessage
      std::vector<std::string> mLines;      //!< Ordered list of serialised lines (optionally key=value formatted).
 
      uint           mLinePos;             //!< Current write position within mLine during character-by-character assembly.
-     char           mLine[10000];         //!< Temporary buffer used while assembling an incoming line via addChar().
+     char           mLine[10000]{};         //!< Temporary buffer used while assembling an incoming line via addChar().
 
 };
 

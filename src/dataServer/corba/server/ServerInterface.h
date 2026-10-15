@@ -32,6 +32,8 @@ class ServerInterface : public POA_SmartMet::DataServer::Corba::ServiceInterface
   public:
                   ServerInterface();
     ~ServerInterface() override;
+    ServerInterface(const ServerInterface&) = default;
+    ServerInterface& operator=(const ServerInterface&) = default;
 
     void          init(DataServer::ServiceInterface *service);
 

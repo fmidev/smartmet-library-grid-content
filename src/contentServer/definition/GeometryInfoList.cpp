@@ -1774,6 +1774,8 @@ void GeometryInfoList::sort(uint comparisonMethod)
       case 5:
         qsort(mArray,mLength,sizeof(GeometryInfoPtr),geometryInfo_compare_5);
         break;
+      default:
+        break;
     }
   }
   catch (...)

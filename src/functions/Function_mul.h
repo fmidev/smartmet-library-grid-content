@@ -19,6 +19,7 @@ class Function_mul : public Function
                       Function_mul();
                       Function_mul(const Function_mul& function);
     ~Function_mul() override;
+    Function_mul& operator=(const Function_mul&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iostream>
 #include <cstdio>
+#include <chrono>
+#include <thread>
 
 using namespace boost::interprocess;
 
@@ -113,11 +115,13 @@ class RedisProcessLock
         exception.printError();
       }
     }
+    RedisProcessLock(const RedisProcessLock&) = delete;
+    RedisProcessLock& operator=(const RedisProcessLock&) = delete;
 
   protected:
 
     RedisImplementation *mRedisImplementation;
-    UInt64 mKey;
+    UInt64 mKey = 0;
 };
 
 
@@ -800,7 +804,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     addEvent(EventType::CLEAR,0,0,0,0);
 
     // Lets wait for awhile so that clients (like the grid-engine's ContentServer) receive this event)
-    sleep(5);
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     auto *reply = static_cast<redisReply*>(redisCommand(mContext,"DEL %sproducerCounter",mTablePrefix.c_str()));
     if (reply == nullptr)
@@ -4599,8 +4603,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint /*request
             // File not found
           }
         }
-        else
-        if (eventInfo->mType == EventType::CONTENT_ADDED)
+        else if (eventInfo->mType == EventType::CONTENT_ADDED)
         {
           T::ContentInfo contentInfo;
           if (getContent(eventInfo->mId1,eventInfo->mId2,contentInfo) == 0)
@@ -8562,7 +8565,7 @@ int RedisImplementation::getGenerationTimeAndGeometryList(std::set<std::string>&
           contentInfo.setCsv(reply->element[t]->str);
 
           char st[1000];
-          snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.getForecastTime(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
+          snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",contentInfo.mSourceId,contentInfo.mGenerationId,contentInfo.mGeometryId,contentInfo.mForecastType,contentInfo.mForecastNumber,contentInfo.getForecastTime(),contentInfo.mModificationTime,contentInfo.mDeletionTime);
           std::string str = st;
 
           if (list.find(str) == list.end())
@@ -8804,14 +8807,11 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::OK;
 
     if (!isConnectionValid())
@@ -8897,14 +8897,11 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::OK;
 
     if (!isConnectionValid())
@@ -9002,14 +8999,11 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::OK;
 
     if (!isConnectionValid())
@@ -9112,14 +9106,11 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::OK;
 
     if (!isConnectionValid())

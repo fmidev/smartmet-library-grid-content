@@ -19,6 +19,7 @@ class Function_acos : public Function
                       Function_acos();
                       Function_acos(const Function_acos& function);
     ~Function_acos() override;
+    Function_acos& operator=(const Function_acos&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

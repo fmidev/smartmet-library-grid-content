@@ -34,6 +34,7 @@ class ContentListStorage
                         ContentListStorage();
                         ContentListStorage(const ContentListStorage& contentListStorage);
     virtual             ~ContentListStorage();
+    ContentListStorage& operator=(const ContentListStorage&) = default;
 
     ContentInfo*        addContentInfo(ContentInfo *contentInfo);
     void                clear();

@@ -19,6 +19,7 @@ class Function_hypotenuse : public Function
                       Function_hypotenuse();
                       Function_hypotenuse(const Function_hypotenuse& function);
     ~Function_hypotenuse() override;
+    Function_hypotenuse& operator=(const Function_hypotenuse&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -220,7 +220,7 @@ Function* Function_windV::duplicate()
 {
   try
   {
-    return new Function(*this);
+    return (Function*)new Function_windV(*this);
   }
   catch (...)
   {

@@ -9,6 +9,7 @@
 #include <macgyver/Hash.h>
 #include <algorithm>
 #include <boost/thread/thread.hpp>
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -39,7 +40,9 @@ void* MemoryImplementation_syncProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 }  // namespace
@@ -823,14 +826,11 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,0,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
@@ -3664,8 +3664,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint /*reques
           eventInfo->mEventData = output.str();
         }
       }
-      else
-      if (eventInfo->mType == EventType::CONTENT_ADDED)
+      else if (eventInfo->mType == EventType::CONTENT_ADDED)
       {
         T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo->mId1,eventInfo->mId2);
 
@@ -4581,14 +4580,11 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4660,14 +4656,11 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4739,14 +4732,11 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4818,14 +4808,11 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
 
@@ -4907,14 +4894,11 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     T::ContentInfo *cInfo = mContentInfoList[1].getContentInfoByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
@@ -4992,14 +4976,11 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5526,7 +5507,7 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       char st[1000];
-      snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+      snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
       std::string str = st;
 
 

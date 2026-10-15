@@ -36,6 +36,8 @@ class PostgresqlImplementation : public ServiceInterface
   public:
                     PostgresqlImplementation();
      ~PostgresqlImplementation() override;
+     PostgresqlImplementation(const PostgresqlImplementation&) = delete;
+     PostgresqlImplementation& operator=(const PostgresqlImplementation&) = delete;
 
      virtual void   init(const char *primaryConnectionString,const char *secondaryConnectionString,bool tableCreationAllowed);
      void   shutdown() override;

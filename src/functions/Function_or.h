@@ -19,6 +19,7 @@ class Function_or : public Function
                       Function_or();
                       Function_or(const Function_or& function);
     ~Function_or() override;
+    Function_or& operator=(const Function_or&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

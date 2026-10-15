@@ -19,6 +19,7 @@ class Function_out : public Function
                       Function_out();
                       Function_out(const Function_out& function);
     ~Function_out() override;
+    Function_out& operator=(const Function_out&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

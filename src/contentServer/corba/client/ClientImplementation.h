@@ -25,6 +25,8 @@ class ClientImplementation : public ContentServer::ServiceInterface
   public:
                     ClientImplementation();
      ~ClientImplementation() override;
+     ClientImplementation(const ClientImplementation&) = default;
+     ClientImplementation& operator=(const ClientImplementation&) = default;
 
      virtual void   init(const std::string& serviceIor);
      virtual uint   getId();

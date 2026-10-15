@@ -21,6 +21,8 @@ class FunctionCollection
   public:
                         FunctionCollection();
     virtual             ~FunctionCollection();
+    FunctionCollection(const FunctionCollection&) = delete;
+    FunctionCollection& operator=(const FunctionCollection&) = delete;
 
     virtual void        addFunction(const char *functionName,FunctionPtr function);
     virtual void        addFunction(const std::string& functionName,FunctionPtr function);

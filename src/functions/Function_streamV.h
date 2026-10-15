@@ -19,6 +19,7 @@ class Function_streamV : public Function
                       Function_streamV();
                       Function_streamV(const Function_streamV& function);
     ~Function_streamV() override;
+    Function_streamV& operator=(const Function_streamV&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

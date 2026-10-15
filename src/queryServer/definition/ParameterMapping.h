@@ -23,6 +23,8 @@ class ParameterMapping
                                 ParameterMapping();
                                 //ParameterMapping(const ParameterMapping& mapping);
     virtual                     ~ParameterMapping();
+    ParameterMapping(const ParameterMapping&) = default;
+    ParameterMapping& operator=(const ParameterMapping&) = default;
 
     virtual std::size_t         getHash();
     virtual std::size_t         getKeyHash();

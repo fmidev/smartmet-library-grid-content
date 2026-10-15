@@ -19,6 +19,7 @@ class Function_cos : public Function
                       Function_cos();
                       Function_cos(const Function_cos& function);
     ~Function_cos() override;
+    Function_cos& operator=(const Function_cos&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

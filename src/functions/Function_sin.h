@@ -19,6 +19,7 @@ class Function_sin : public Function
                       Function_sin();
                       Function_sin(const Function_sin& function);
     ~Function_sin() override;
+    Function_sin& operator=(const Function_sin&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

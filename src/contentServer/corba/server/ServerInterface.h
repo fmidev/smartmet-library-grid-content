@@ -30,6 +30,8 @@ class ServerInterface : public POA_SmartMet::ContentServer::Corba::ServiceInterf
   public:
                   ServerInterface();
     ~ServerInterface() override;
+    ServerInterface(const ServerInterface&) = default;
+    ServerInterface& operator=(const ServerInterface&) = default;
 
     void          init(ContentServer::ServiceInterface *service);
 

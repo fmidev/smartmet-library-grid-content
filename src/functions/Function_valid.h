@@ -19,6 +19,7 @@ class Function_valid : public Function
                       Function_valid();
                       Function_valid(const Function_valid& function);
     ~Function_valid() override;
+    Function_valid& operator=(const Function_valid&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

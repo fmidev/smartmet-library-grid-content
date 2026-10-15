@@ -25,6 +25,8 @@ class GridData
                         GridData();
                         //GridData(GridData& gridData);
     virtual             ~GridData();
+    GridData(const GridData&) = default;
+    GridData& operator=(const GridData&) = default;
 
     virtual void        print(std::ostream& stream,uint level,uint optionFlags);
 

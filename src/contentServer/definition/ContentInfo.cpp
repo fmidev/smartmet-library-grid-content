@@ -351,7 +351,7 @@ std::string ContentInfo::getCsv() const
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%d;;;%d;;;%d;%d;;%u;%u;%d;%ld;%ld;%u",
         mFileId,
         mMessageIndex,
         mFileType,

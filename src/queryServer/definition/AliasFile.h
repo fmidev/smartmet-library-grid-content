@@ -27,6 +27,8 @@ class AliasFile
                   AliasFile(const std::string& filename,bool duplicatesAllowed);
                   //AliasFile(const AliasFile& aliasFile);
     virtual       ~AliasFile();
+    AliasFile(const AliasFile&) = default;
+    AliasFile& operator=(const AliasFile&) = default;
 
     virtual void  init();
     virtual void  init(const std::string& filename);

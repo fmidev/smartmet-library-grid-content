@@ -231,7 +231,7 @@ Function* Function_streamDir::duplicate()
 {
   try
   {
-    return new Function(*this);
+    return (Function*)new Function_streamDir(*this);
   }
   catch (...)
   {

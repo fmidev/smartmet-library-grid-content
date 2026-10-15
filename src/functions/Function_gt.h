@@ -19,6 +19,7 @@ class Function_gt : public Function
                       Function_gt();
                       Function_gt(const Function_gt& function);
     ~Function_gt() override;
+    Function_gt& operator=(const Function_gt&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

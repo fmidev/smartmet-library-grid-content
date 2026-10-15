@@ -24,6 +24,8 @@ class ParameterDef
                                 //ParameterDef(const ParameterDef& def);
                                 ParameterDef(const std::string& paramStr);
     virtual                     ~ParameterDef();
+    ParameterDef(const ParameterDef&) = default;
+    ParameterDef& operator=(const ParameterDef&) = default;
 
     void                        set(const std::string& paramStr);
     std::string                 getName() const;

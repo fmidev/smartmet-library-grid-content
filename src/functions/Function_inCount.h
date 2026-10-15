@@ -19,6 +19,7 @@ class Function_inCount : public Function
                       Function_inCount();
                       Function_inCount(const Function_inCount& function);
     ~Function_inCount() override;
+    Function_inCount& operator=(const Function_inCount&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

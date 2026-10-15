@@ -32,6 +32,7 @@ class LuaFile
                       LuaFile(const std::string& filename);
                       LuaFile(const LuaFile& luaFile);
     virtual           ~LuaFile();
+    LuaFile& operator=(const LuaFile&) = default;
 
     void              init();
     void              init(const std::string& filename);
@@ -85,8 +86,8 @@ class LuaFile
 
     std::string       mFilename;             //!< Path to the Lua script file on disk.
     LuaFunction_map   mFunctions;            //!< Map of function names to their LuaFunction descriptors.
-    void*             mLuaState[NUM_OF_LUA_HANDLES];   //!< Pool of independent Lua states for concurrent execution.
-    UInt64            mStateKey[NUM_OF_LUA_HANDLES];   //!< Checkout keys associated with each Lua state slot.
+    void*             mLuaState[NUM_OF_LUA_HANDLES]{};   //!< Pool of independent Lua states for concurrent execution.
+    UInt64            mStateKey[NUM_OF_LUA_HANDLES]{};   //!< Checkout keys associated with each Lua state slot.
     UInt64            mStateKeyCounter;      //!< Monotonically increasing counter used to generate unique state keys.
     time_t            mLastModified;         //!< File modification time at the last load, used for change detection.
     ModificationLock  mModificationLock;     //!< Lock protecting the function map and file-reload operations.
@@ -115,6 +116,8 @@ class LuaHandle
     {
       mLuaFile->releaseLuaState(mKey);
     }
+    LuaHandle(const LuaHandle&) = delete;
+    LuaHandle& operator=(const LuaHandle&) = delete;
 
     void* getState()
     {
@@ -125,7 +128,7 @@ class LuaHandle
 
     LuaFile    *mLuaFile;  //!< Owning LuaFile whose state pool is used.
     void  *mState;         //!< Raw lua_State pointer for the checked-out slot.
-    UInt64   mKey;         //!< Unique key used to return this slot to the pool.
+    UInt64   mKey = 0;         //!< Unique key used to return this slot to the pool.
 };
 
 using LuaFile_vec = std::vector<LuaFile>;  //!< Ordered collection of LuaFile objects.

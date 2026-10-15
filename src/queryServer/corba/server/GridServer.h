@@ -30,6 +30,8 @@ class GridServer
   public:
                   GridServer(const char *address,const char *port);
     virtual       ~GridServer();
+    GridServer(const GridServer&) = delete;
+    GridServer& operator=(const GridServer&) = delete;
 
     virtual void  init(ContentServer::ServiceInterface *contentServiceInterface,DataServer::ServiceInterface *dataServiceInterface,QueryServer::ServiceInterface *queryServiceInterface);
     virtual void  start();
@@ -57,7 +59,7 @@ class GridServer
     std::string                           mQueryServiceIor;          //!< Published IOR for the QueryServer servant.
     std::string                           mAddress;                  //!< Network address the ORB listens on.
     std::string                           mPort;                     //!< Port number the ORB listens on.
-    pthread_t                             mThread;                   //!< Background thread running the ORB event loop.
+    pthread_t                             mThread = 0;                   //!< Background thread running the ORB event loop.
 
 };
 

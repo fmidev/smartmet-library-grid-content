@@ -19,6 +19,7 @@ class Function_round : public Function
                       Function_round();
                       Function_round(const Function_round& function);
     ~Function_round() override;
+    Function_round& operator=(const Function_round&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

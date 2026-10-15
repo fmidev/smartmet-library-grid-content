@@ -205,7 +205,7 @@ Function* Function_hypotenuse::duplicate()
 {
   try
   {
-    return new Function(*this);
+    return (Function*)new Function_hypotenuse(*this);
   }
   catch (...)
   {

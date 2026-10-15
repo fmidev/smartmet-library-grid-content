@@ -19,6 +19,7 @@ class Function_sub : public Function
                       Function_sub();
                       Function_sub(const Function_sub& function);
     ~Function_sub() override;
+    Function_sub& operator=(const Function_sub&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

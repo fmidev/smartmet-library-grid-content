@@ -32,6 +32,8 @@ class Converter
   public:
                   Converter();
     virtual       ~Converter();
+    Converter(const Converter&) = default;
+    Converter& operator=(const Converter&) = default;
 
     static void   convert(const T::GridData& source,C::GridData& target);
     static void   convert(const C::GridData& source,T::GridData& target);

@@ -65,6 +65,8 @@ class MergeImplementation : public ServiceInterface
   public:
                     MergeImplementation();
     ~MergeImplementation() override;
+    MergeImplementation(const MergeImplementation&) = delete;
+    MergeImplementation& operator=(const MergeImplementation&) = delete;
 
     virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ContentServer_sptr_vec& contentStorages);
     bool    isReady() override;
@@ -289,9 +291,9 @@ class MergeImplementation : public ServiceInterface
     bool                   mReloadActivated;              //!< True when a full reload from all backends has been triggered.
     bool                   mShutdownRequested;            //!< True after shutdown() has been called.
     bool                   mUpdateInProgress;             //!< True while a bulk content update is running.
-    bool                   mRequestForwardEnabled;        //!< When true, write operations are forwarded to the backends.
+    bool                   mRequestForwardEnabled = false;        //!< When true, write operations are forwarded to the backends.
     T::SessionId           mSessionId;                    //!< Session identifier used for backend queries.
-    T::SessionId           mDataServerSessionId;          //!< Session identifier passed to the data server.
+    T::SessionId           mDataServerSessionId = 0;          //!< Session identifier passed to the data server.
     T::FileListStorage     mFileInfoList;                 //!< Merged file records.
     T::ProducerInfoList    mProducerInfoList;             //!< Merged producer records.
     T::GenerationInfoList  mGenerationInfoList;           //!< Merged generation records.
@@ -317,7 +319,7 @@ class MergeImplementation : public ServiceInterface
     time_t                 mContentUpdateTime;            //!< Time of the last content update.
     bool                   mContentUpdateRequired;        //!< True when a content refresh is pending.
     uint                   mContentUpdateInterval;        //!< Minimum seconds between successive content updates.
-    bool                   mContentSwapEnabled;           //!< True when double-buffered search-structure swapping is active.
+    bool                   mContentSwapEnabled = false;           //!< True when double-buffered search-structure swapping is active.
     uint                   mContentSwapCounter;           //!< Counter used to throttle search-structure swaps.
     ContentTimeCache       mContentTimeCache;             //!< Per-generation cache of available forecast time strings.
     ModificationLock       mContentTimeCache_modificationLock;  //!< Guards mContentTimeCache during updates.

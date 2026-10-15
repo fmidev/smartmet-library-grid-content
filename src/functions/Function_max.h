@@ -19,6 +19,7 @@ class Function_max : public Function
                       Function_max();
                       Function_max(const Function_max& function);
     ~Function_max() override;
+    Function_max& operator=(const Function_max&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

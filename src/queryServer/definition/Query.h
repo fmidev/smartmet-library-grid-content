@@ -25,6 +25,8 @@ class Query
                         Query();
                         //Query(const Query& query);
     virtual             ~Query();
+    Query(const Query&) = default;
+    Query& operator=(const Query&) = default;
 
     bool                parameterInQuery(const std::string& param);
     QueryParameter*     getQueryParameterPtr(const std::string& param);

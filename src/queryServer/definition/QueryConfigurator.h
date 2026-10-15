@@ -22,6 +22,8 @@ class QueryConfigurator
   public:
                 QueryConfigurator();
     virtual     ~QueryConfigurator();
+    QueryConfigurator(const QueryConfigurator&) = default;
+    QueryConfigurator& operator=(const QueryConfigurator&) = default;
 
     void        configure(Query& query,T::AttributeList& attributeList);
 

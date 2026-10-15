@@ -18,6 +18,7 @@ class Function_sdevDir : public Function
                       Function_sdevDir();
                       Function_sdevDir(const Function_sdevDir& function);
     ~Function_sdevDir() override;
+    Function_sdevDir& operator=(const Function_sdevDir&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

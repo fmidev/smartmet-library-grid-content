@@ -19,6 +19,7 @@ class Function_mode : public Function
                       Function_mode();
                       Function_mode(const Function_mode& function);
     ~Function_mode() override;
+    Function_mode& operator=(const Function_mode&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -21,6 +21,8 @@ class Alias
                    Alias();
                    //Alias(const Alias& alias);
     virtual        ~Alias();
+    Alias(const Alias&) = default;
+    Alias& operator=(const Alias&) = default;
 
     void           print(std::ostream& stream,uint level,uint optionFlags) const;
 

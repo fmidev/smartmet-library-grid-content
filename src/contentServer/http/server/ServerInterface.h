@@ -24,6 +24,8 @@ class ServerInterface
   public:
                 ServerInterface();
     virtual     ~ServerInterface();
+    ServerInterface(const ServerInterface&) = default;
+    ServerInterface& operator=(const ServerInterface&) = default;
 
     void        init(ContentServer::ServiceInterface *service,bool readMethodsEnabled,bool writeMethodsEnabled);
 

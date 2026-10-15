@@ -24,6 +24,8 @@ class RedisImplementation : public ServiceInterface
   public:
                     RedisImplementation();
      ~RedisImplementation() override;
+     RedisImplementation(const RedisImplementation&) = delete;
+     RedisImplementation& operator=(const RedisImplementation&) = delete;
 
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,const char *redisPassword);
      virtual void   init(const char *redisAddress,int redisPort,const char *tablePrefix,bool databaseLockEnabled,const char *redisPassword);

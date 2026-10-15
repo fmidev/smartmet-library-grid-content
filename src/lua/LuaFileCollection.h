@@ -23,6 +23,7 @@ class LuaFileCollection
                     LuaFileCollection(const string_vec& filenames);
                     LuaFileCollection(const LuaFileCollection& luaFileCollection);
     virtual         ~LuaFileCollection();
+    LuaFileCollection& operator=(const LuaFileCollection&) = default;
 
     void            init();
     void            init(const string_vec& filenames);
@@ -72,8 +73,8 @@ class LuaFileCollection
     string_vec        mFilenames;        //!< Paths of the Lua script files managed by this collection.
     LuaFile_vec       mLuaFileList;      //!< Loaded LuaFile instances, one per filename entry.
     ModificationLock  mModificationLock; //!< Lock protecting the file list during hot-reload.
-    time_t            mLastCheck;        //!< Timestamp of the last modification-check pass.
-    uint              mCheckInterval;    //!< Minimum seconds between successive modification checks.
+    time_t            mLastCheck = 0;        //!< Timestamp of the last modification-check pass.
+    uint              mCheckInterval = 0;    //!< Minimum seconds between successive modification checks.
 };
 
 

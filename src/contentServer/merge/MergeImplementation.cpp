@@ -12,6 +12,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -39,7 +40,9 @@ void* MergeImplementation_eventProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 
@@ -841,14 +844,11 @@ int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,-1,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
@@ -1545,7 +1545,7 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
       if (info != nullptr)
       {
         char st[1000];
-        snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+        snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
         std::string str = st;
         if (list.find(str) == list.end())
           list.insert(str);
@@ -3206,8 +3206,7 @@ int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint /*request
           eventInfo->mEventData = output.str();
         }
       }
-      else
-      if (eventInfo->mType == EventType::CONTENT_ADDED)
+      else if (eventInfo->mType == EventType::CONTENT_ADDED)
       {
         T::ContentInfo *contentInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo->mId1,eventInfo->mId2);
 
@@ -4056,14 +4055,11 @@ int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4138,14 +4134,11 @@ int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4219,14 +4212,11 @@ int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4302,14 +4292,11 @@ int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4382,14 +4369,11 @@ int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4471,14 +4455,11 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     T::ContentInfo *cInfo = ssp->mContentInfoList[1].getContentInfoByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
@@ -5590,7 +5571,7 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
         + mGeometryInfoList.getHashByStorageId(contentStorageIndex)
         + mContentInfoList.getHashByStorageId(contentStorageIndex);
 
-    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopStart(%u);Hash %ld",contentStorageIndex,mContentSources[contentStorageIndex].mHash);
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopStart(%u);Hash %zu",contentStorageIndex,mContentSources[contentStorageIndex].mHash);
   }
   catch (...)
   {
@@ -5620,12 +5601,12 @@ void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventI
 
     if (hash != mContentSources[contentStorageIndex].mHash)
     {
-      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);### Hash changed %ld ###",contentStorageIndex,hash);
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);### Hash changed %zu ###",contentStorageIndex,hash);
       mContentUpdateRequired = true;
     }
     else
     {
-      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);Hash not changed %ld",contentStorageIndex,hash);
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);Hash not changed %zu",contentStorageIndex,hash);
     }
 
     mContentSources[contentStorageIndex].mHash = hash;
@@ -6881,6 +6862,8 @@ void MergeImplementation::processEvent(uint contentStorageIndex,T::EventInfo& ev
       case EventType::CONTENT_UPDATED:
         event_contentUpdated(contentStorageIndex,eventInfo);
         break;
+      default:
+        break;
     }
   }
   catch (...)
@@ -7103,11 +7086,11 @@ void MergeImplementation::updateContent()
       {
         PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
 
-        PRINT_DATA(mDebugLog,"  ** Producers    %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Geometries   %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Files        %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Content      %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Producers    %zu  %zu\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Generations  %zu  %zu\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Geometries   %zu  %zu\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Files        %zu  %zu\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
+        PRINT_DATA(mDebugLog,"  ** Content      %zu  %zu\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
       }
 
       if (mCachedFiles_totalWaitTime == 0 &&

@@ -19,6 +19,7 @@ class Function_div : public Function
                       Function_div();
                       Function_div(const Function_div& function);
     ~Function_div() override;
+    Function_div& operator=(const Function_div&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

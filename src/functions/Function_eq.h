@@ -19,6 +19,7 @@ class Function_eq : public Function
                       Function_eq();
                       Function_eq(const Function_eq& function);
     ~Function_eq() override;
+    Function_eq& operator=(const Function_eq&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

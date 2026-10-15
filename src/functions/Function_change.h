@@ -19,6 +19,7 @@ class Function_change : public Function
                       Function_change();
                       Function_change(const Function_change& function);
     ~Function_change() override;
+    Function_change& operator=(const Function_change&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

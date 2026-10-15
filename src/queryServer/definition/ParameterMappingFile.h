@@ -31,6 +31,8 @@ class ParameterMappingFile
                           ParameterMappingFile(const std::string& filename);
                           //ParameterMappingFile(const ParameterMappingFile& mappingFile);
     virtual               ~ParameterMappingFile();
+    ParameterMappingFile(const ParameterMappingFile&) = default;
+    ParameterMappingFile& operator=(const ParameterMappingFile&) = default;
 
     virtual void          init();
     virtual bool          checkUpdates();

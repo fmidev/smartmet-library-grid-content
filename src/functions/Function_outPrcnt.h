@@ -19,6 +19,7 @@ class Function_outPrcnt : public Function
                       Function_outPrcnt();
                       Function_outPrcnt(const Function_outPrcnt& function);
     ~Function_outPrcnt() override;
+    Function_outPrcnt& operator=(const Function_outPrcnt&) = default;
 
     // Type 1: First and second param define the range (min,max) and the rest belongs to data.
     float     executeFunctionCall1(std::vector<float>& parameters) override;

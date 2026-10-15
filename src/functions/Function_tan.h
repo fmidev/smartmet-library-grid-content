@@ -19,6 +19,7 @@ class Function_tan : public Function
                       Function_tan();
                       Function_tan(const Function_tan& function);
     ~Function_tan() override;
+    Function_tan& operator=(const Function_tan&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

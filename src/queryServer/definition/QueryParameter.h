@@ -28,6 +28,8 @@ class QueryParameter
                                 QueryParameter();
                                 //QueryParameter(const QueryParameter& queryParameter);
     virtual                     ~QueryParameter();
+    QueryParameter(const QueryParameter&) = default;
+    QueryParameter& operator=(const QueryParameter&) = default;
 
     std::size_t                 getHash();
     QueryParameter*             duplicate();

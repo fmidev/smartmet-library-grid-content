@@ -19,6 +19,7 @@ class Function_feelsLike : public Function
                       Function_feelsLike();
                       Function_feelsLike(const Function_feelsLike& function);
     ~Function_feelsLike() override;
+    Function_feelsLike& operator=(const Function_feelsLike&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

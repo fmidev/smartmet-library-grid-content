@@ -19,6 +19,7 @@ class Function_windU : public Function
                       Function_windU();
                       Function_windU(const Function_windU& function);
     ~Function_windU() override;
+    Function_windU& operator=(const Function_windU&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

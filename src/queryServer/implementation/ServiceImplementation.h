@@ -39,7 +39,7 @@ class CacheEntry
   public:
     T::GenerationInfoList_sptr generationInfoList;  //!< Cached list of generations for this producer.
     StringVector_sptr          analysisTimes;        //!< Cached list of analysis time strings.
-    UInt64                     producerHash;         //!< Hash of the producer state when this entry was built.
+    UInt64                     producerHash = 0;         //!< Hash of the producer state when this entry was built.
 };
 
 using CacheEntry_sptr = std::shared_ptr<CacheEntry>;                                          //!< Shared pointer to a CacheEntry.
@@ -52,8 +52,8 @@ class ContentCacheEntry
 {
   public:
     T::ContentInfoList contentInfoList;  //!< Cached content records matching the query.
-    UInt64 producerHash;                 //!< Producer state hash when this entry was built.
-    T::GenerationId generationId;        //!< Generation identifier for which the content was cached.
+    UInt64 producerHash = 0;                 //!< Producer state hash when this entry was built.
+    T::GenerationId generationId = 0;        //!< Generation identifier for which the content was cached.
 };
 
 using ContentCacheEntry_sptr = std::shared_ptr<ContentCacheEntry>;                            //!< Shared pointer to a ContentCacheEntry.
@@ -68,8 +68,8 @@ class ContentSearchCacheEntry
 {
   public:
     std::shared_ptr<T::ContentInfoList> contentInfoList;  //!< Shared cached content list from the search.
-    UInt64 producerHash;                                   //!< Producer state hash when this entry was built.
-    T::GenerationId generationId;                          //!< Generation identifier for this cache entry.
+    UInt64 producerHash = 0;                                   //!< Producer state hash when this entry was built.
+    T::GenerationId generationId = 0;                          //!< Generation identifier for this cache entry.
 };
 using ContentSearchCache = std::unordered_map<std::size_t,ContentSearchCacheEntry>;           //!< Hash cache from query hash to ContentSearchCacheEntry.
 
@@ -113,7 +113,7 @@ class HeightConversion
     HeightConversion() {producerId = 0; heightProducerId = 0; multiplier = 1.0;}
 
     T::ProducerId   producerId;       //!< Producer whose levels are converted.
-    T::ParamLevelId levelId;          //!< Level type to which this conversion applies.
+    T::ParamLevelId levelId = 0;          //!< Level type to which this conversion applies.
     T::ProducerId   heightProducerId; //!< Producer that supplies the height field.
     std::string     heightParameter;  //!< Parameter name of the auxiliary height field.
     double          multiplier;       //!< Scale factor applied to the height values.
@@ -136,6 +136,8 @@ class ServiceImplementation : public ServiceInterface
   public:
                     ServiceImplementation();
      ~ServiceImplementation() override;
+     ServiceImplementation(const ServiceImplementation&) = delete;
+     ServiceImplementation& operator=(const ServiceImplementation&) = delete;
 
      void           init(
                        ContentServer::ServiceInterface *contentServerPtr,
@@ -718,7 +720,7 @@ class ServiceImplementation : public ServiceInterface
      std::size_t                mContentSearchCache_maxRecords;
      std::size_t                mContentSearchCache_maxRecordsPerThread;
      uint                       mContentSearchCache_clearInterval;
-     time_t                     mParameterMappingCache_clearRequired;
+     time_t                     mParameterMappingCache_clearRequired = 0;
 
      HeightConversionMap        mHeightConversions;
      ModificationLock           mHeightConversions_modificationLock;

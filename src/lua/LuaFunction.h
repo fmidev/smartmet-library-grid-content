@@ -24,6 +24,7 @@ class LuaFunction
                    LuaFunction(const LuaFunction& luaFunction);
                    LuaFunction(const std::string& functionName,const uint type);
     virtual        ~LuaFunction();
+    LuaFunction& operator=(const LuaFunction&) = default;
 
     void           print(std::ostream& stream,uint level,uint optionFlags) const;
 

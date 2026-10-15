@@ -272,7 +272,7 @@ int ServiceInterface::getUserAttributes(T::SessionId sessionId,uint userId,const
     int result = _getUserAttributes(sessionId,userId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -376,7 +376,7 @@ int ServiceInterface::setUserAttributes(T::SessionId sessionId,uint userId,const
     int result = _setUserAttributes(sessionId,userId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -453,7 +453,7 @@ int ServiceInterface::deleteUserAttributes(T::SessionId sessionId,uint userId,co
     int result = _deleteUserAttributes(sessionId,userId,attributeGroup,attributeNameList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,AttributeName[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,AttributeName[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

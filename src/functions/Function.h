@@ -23,6 +23,7 @@ class Function
                       Function();
                       Function(const Function& function);
     virtual           ~Function();
+    Function& operator=(const Function&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     virtual float     executeFunctionCall1(std::vector<float>& parameters);

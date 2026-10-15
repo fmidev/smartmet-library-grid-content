@@ -7399,6 +7399,8 @@ void ContentInfoList::sort(uint comparisonMethod)
       case 20:
         qsort(mArray,mLength,sizeof(ContentInfoPtr),contentInfo_compare_20);
         break;
+      default:
+        break;
     }
 
   }

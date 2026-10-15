@@ -19,6 +19,7 @@ class Function_diff : public Function
                       Function_diff();
                       Function_diff(const Function_diff& function);
     ~Function_diff() override;
+    Function_diff& operator=(const Function_diff&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

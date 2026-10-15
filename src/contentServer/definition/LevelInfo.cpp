@@ -122,7 +122,7 @@ std::string LevelInfo::getCsv() const
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%u;%u;;;%d",
+    snprintf(st,sizeof(st),"%u;%d;;;%d",
         mProducerId,
         mFmiParameterLevelId,
         mParameterLevel);

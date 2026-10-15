@@ -19,6 +19,7 @@ class Function_outCount : public Function
                       Function_outCount();
                       Function_outCount(const Function_outCount& function);
     ~Function_outCount() override;
+    Function_outCount& operator=(const Function_outCount&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

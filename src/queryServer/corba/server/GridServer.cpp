@@ -1,5 +1,6 @@
 #include "GridServer.h"
 #include <macgyver/ThreadName.h>
+#include <cstdlib>
 
 
 namespace SmartMet
@@ -25,7 +26,9 @@ void* GridServer_maintenanceThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 }  // namespace

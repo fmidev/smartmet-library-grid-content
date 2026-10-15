@@ -162,7 +162,7 @@ std::string GenerationInfo::getCsv() const
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%lu;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%lu;%u",
         mGenerationId,
         mGenerationType,
         mProducerId,

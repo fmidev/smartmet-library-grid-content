@@ -343,7 +343,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,ContentInfo[%u],%u,%f,%f,%d,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -451,7 +451,7 @@ int ServiceInterface::getParameterVerticalValueVectorByPointAndTime(T::SessionId
     int result = _getParameterVerticalValueVectorByPointAndTime(sessionId,producer,parameter,coordinateType,x,y,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,ParamValue[%zu],ParamLevel[%zu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -478,7 +478,7 @@ int ServiceInterface::getParameterVerticalValueVectorByPointListAndTime(T::Sessi
     int result = _getParameterVerticalValueVectorByPointListAndTime(sessionId,producer,parameter,coordinateType,coordinates,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%ld],%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%zu],%s,%d,%d,ParamValue[%zu],ParamLevel[%zu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

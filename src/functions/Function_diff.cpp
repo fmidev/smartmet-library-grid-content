@@ -189,8 +189,7 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
       if (b == ParamValueMissing)
         value = ParamValueMissing;
-      else
-      if (value != ParamValueMissing)
+      else if (value != ParamValueMissing)
         value -= b;
 
       outParameters.emplace_back(value);
@@ -266,8 +265,7 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 
       if (b == ParamValueMissing)
         value = ParamValueMissing;
-      else
-      if (value != ParamValueMissing)
+      else if (value != ParamValueMissing)
         value -= b;
 
       outParameters.emplace_back(value);

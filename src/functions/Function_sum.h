@@ -19,6 +19,7 @@ class Function_sum : public Function
                       Function_sum();
                       Function_sum(const Function_sum& function);
     ~Function_sum() override;
+    Function_sum& operator=(const Function_sum&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

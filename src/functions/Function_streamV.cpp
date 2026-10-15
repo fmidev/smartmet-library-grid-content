@@ -220,7 +220,7 @@ Function* Function_streamV::duplicate()
 {
   try
   {
-    return new Function(*this);
+    return (Function*)new Function_streamV(*this);
   }
   catch (...)
   {

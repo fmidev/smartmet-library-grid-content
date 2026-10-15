@@ -19,6 +19,7 @@ class Function_inPrcnt : public Function
                       Function_inPrcnt();
                       Function_inPrcnt(const Function_inPrcnt& function);
     ~Function_inPrcnt() override;
+    Function_inPrcnt& operator=(const Function_inPrcnt&) = default;
 
     // Type 1: First and second param define the range (min,max) and the rest belongs to data.
     float     executeFunctionCall1(std::vector<float>& parameters) override;

@@ -26,6 +26,8 @@ class ClientImplementation : public DataServer::ServiceInterface
   public:
                     ClientImplementation();
      ~ClientImplementation() override;
+     ClientImplementation(const ClientImplementation&) = default;
+     ClientImplementation& operator=(const ClientImplementation&) = default;
 
      virtual void   init(std::string serviceIor);
 

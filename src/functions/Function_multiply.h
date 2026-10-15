@@ -19,6 +19,7 @@ class Function_multiply : public Function
                       Function_multiply(double multiplyer);
                       Function_multiply(const Function_multiply& function);
     ~Function_multiply() override;
+    Function_multiply& operator=(const Function_multiply&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

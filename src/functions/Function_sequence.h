@@ -19,6 +19,7 @@ class Function_sequence : public Function
                       Function_sequence();
                       Function_sequence(const Function_sequence& function);
     ~Function_sequence() override;
+    Function_sequence& operator=(const Function_sequence&) = delete;
 
     virtual void      addFunction(Function *function);
 

@@ -14,6 +14,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/thread/thread.hpp>
 #include <csignal>
+#include <cstdlib>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -39,7 +40,9 @@ void* ServiceImplementation_eventProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 
@@ -59,7 +62,9 @@ void* ServiceImplementation_cacheProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 }  // namespace
@@ -114,7 +119,7 @@ ServiceImplementation::~ServiceImplementation()
   try
   {
     if (!mShutdownRequested)
-      shutdown();
+      ServiceImplementation::shutdown();
   }
   catch (...)
   {
@@ -511,6 +516,8 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
                   // TODO: Implementation required
                   rec->mResult = Result::NOT_IMPLEMENTED;
                   break;
+                default:
+                  break;
               }
             }
             catch (...)
@@ -598,6 +605,8 @@ int ServiceImplementation::_getGridCoordinates(T::SessionId sessionId,T::FileId 
 
       case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
         coordinates.mCoordinateList = *message->getGridOriginalCoordinates();
+        break;
+      default:
         break;
     }
 
@@ -2389,6 +2398,8 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
         case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
           // TODO: Implementation required
           return Result::NOT_IMPLEMENTED;
+        default:
+          break;
       }
       return Result::UNKNOW_COORDINATE_TYPE;
     }
@@ -5736,7 +5747,7 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
         T::ContentInfo *info = contentList.getContentInfoByIndex(t);
 
-        GRID::MessageInfo mInfo;
+        GRID::MessageInfo mInfo{};
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = info->mFilePosition;
         mInfo.mMessageType = info->mFileType;
@@ -6461,7 +6472,7 @@ void ServiceImplementation::event_contentAdded(T::EventInfo& eventInfo)
       gridFile = storageFile.get();
       try
       {
-        GRID::MessageInfo mInfo;
+        GRID::MessageInfo mInfo{};
 
         mInfo.mFileMemoryPtr = nullptr;
         mInfo.mFilePosition = contentInfo.mFilePosition;
@@ -6652,6 +6663,8 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
       case ContentServer::EventType::CONTENT_UPDATED:
         event_contentUpdated(eventInfo);
+        break;
+      default:
         break;
     }
 

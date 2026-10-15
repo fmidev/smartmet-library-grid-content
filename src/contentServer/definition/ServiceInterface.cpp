@@ -1046,7 +1046,7 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
     int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,generationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,geometryId,generationInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%d,generationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,geometryId,generationInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2062,7 +2062,7 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,%d,%s);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%d,%d,%s);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime.c_str(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2092,7 +2092,7 @@ int ServiceInterface::deleteFileInfoListByGenerationIdAndForecastTime(T::Session
     int result = _deleteFileInfoListByGenerationIdAndForecastTime(sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,%d,%lu);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%d,%d,%ld);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,forecastType,forecastNumber,forecastTime,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2302,7 +2302,7 @@ int ServiceInterface::getFileInfoList(T::SessionId sessionId,T::FileId startFile
     int result = _getFileInfoList(sessionId,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2362,7 +2362,7 @@ int ServiceInterface::getFileInfoListByProducerId(T::SessionId sessionId,T::Prod
     int result = _getFileInfoListByProducerId(sessionId,producerId,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2392,7 +2392,7 @@ int ServiceInterface::getFileInfoListByProducerName(T::SessionId sessionId,const
     int result = _getFileInfoListByProducerName(sessionId,producerName,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2422,7 +2422,7 @@ int ServiceInterface::getFileInfoListByGenerationId(T::SessionId sessionId,T::Ge
     int result = _getFileInfoListByGenerationId(sessionId,generationId,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2452,7 +2452,7 @@ int ServiceInterface::getFileInfoListByGenerationName(T::SessionId sessionId,con
     int result = _getFileInfoListByGenerationName(sessionId,generationName,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2482,7 +2482,7 @@ int ServiceInterface::getFileInfoListBySourceId(T::SessionId sessionId,T::Source
     int result = _getFileInfoListBySourceId(sessionId,sourceId,startFileId,maxRecords,fileInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%d,FileInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,maxRecords,fileInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -2691,7 +2691,7 @@ int ServiceInterface::getEventInfoList(T::SessionId sessionId,uint requestingSer
     int result = _getEventInfoList(sessionId,requestingServerId,startEventId,maxRecords,eventInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,EventInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,requestingServerId,startEventId,maxRecords,eventInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%d,EventInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,requestingServerId,startEventId,maxRecords,eventInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3112,7 +3112,7 @@ int ServiceInterface::getContentList(T::SessionId sessionId,T::FileId startFileI
     int result = _getContentList(sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%d,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3232,7 +3232,7 @@ int ServiceInterface::getContentListByProducerId(T::SessionId sessionId,T::Produ
     int result = _getContentListByProducerId(sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,%d,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3262,7 +3262,7 @@ int ServiceInterface::getContentListByProducerName(T::SessionId sessionId,const 
     int result = _getContentListByProducerName(sessionId,producerName,startFileId,startMessageIndex,maxRecords,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,%d,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3292,7 +3292,7 @@ int ServiceInterface::getContentListBySourceId(T::SessionId sessionId,T::SourceI
     int result = _getContentListBySourceId(sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%u,%d,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,sourceId,startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3322,7 +3322,7 @@ int ServiceInterface::getContentListByGenerationId(T::SessionId sessionId,T::Gen
     int result = _getContentListByGenerationId(sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%u,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%u,%d,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startFileId,startMessageIndex,maxRecords,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3352,7 +3352,7 @@ int ServiceInterface::getContentListByGenerationName(T::SessionId sessionId,cons
     int result = _getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%u,%d,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startFileId,startMessageIndex,maxRecords,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3412,7 +3412,7 @@ int ServiceInterface::getContentListByGenerationIdAndTimeRange(T::SessionId sess
     int result = _getContentListByGenerationIdAndTimeRange(sessionId,generationId,startTime,endTime,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%lu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime,endTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%ld,%ld,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime,endTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3472,7 +3472,7 @@ int ServiceInterface::getContentListByGenerationNameAndTimeRange(T::SessionId se
     int result = _getContentListByGenerationNameAndTimeRange(sessionId,generationName,startTime,endTime,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%lu,%lu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startTime,endTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%ld,%ld,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),startTime,endTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3532,7 +3532,7 @@ int ServiceInterface::getContentListByParameter(T::SessionId sessionId,T::ParamK
     int result = _getContentListByParameter(sessionId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,%d,%d,%d,%d,%d,%d,%lu,%lu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,%d,%d,%d,%d,%d,%d,%ld,%ld,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3592,7 +3592,7 @@ int ServiceInterface::getContentListByParameterAndGenerationId(T::SessionId sess
     int result = _getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%s,%d,%d,%d,%d,%d,%d,%lu,%lu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%s,%d,%d,%d,%d,%d,%d,%ld,%ld,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3652,7 +3652,7 @@ int ServiceInterface::getContentListByParameterAndGenerationName(T::SessionId se
     int result = _getContentListByParameterAndGenerationName(sessionId,generationName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%u,%s,%d,%d,%d,%d,%d,%d,%lu,%lu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%u,%s,%d,%d,%d,%d,%d,%d,%ld,%ld,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationName.c_str(),parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3712,7 +3712,7 @@ int ServiceInterface::getContentListByParameterAndProducerId(T::SessionId sessio
     int result = _getContentListByParameterAndProducerId(sessionId,producerId,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%u,%s,%d,%d,%d,%d,%d,%d,%lu,%lu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%u,%s,%d,%d,%d,%d,%d,%d,%ld,%ld,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerId,parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3772,7 +3772,7 @@ int ServiceInterface::getContentListByParameterAndProducerName(T::SessionId sess
     int result = _getContentListByParameterAndProducerName(sessionId,producerName,parameterKeyType,parameterKey,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%u,%s,%d,%d,%d,%d,%d,%d,%lu,%lu,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%u,%s,%d,%d,%d,%d,%d,%d,%ld,%ld,%u,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,producerName.c_str(),parameterKeyType,parameterKey.c_str(),parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3832,7 +3832,7 @@ int ServiceInterface::getContentListByParameterGenerationIdAndForecastTime(T::Se
     int result = _getContentListByParameterGenerationIdAndForecastTime(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%s,%d,%d,%d,%d,%d,%lu,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,parameterKeyType,parameterKey.c_str(),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%s,%d,%d,%d,%d,%d,%ld,ContentInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,generationId,parameterKeyType,parameterKey.c_str(),parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,contentInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3922,7 +3922,7 @@ int ServiceInterface::getContentLevelListByGenerationGeometryAndLevelId(T::Sessi
     int result = _getContentLevelListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,contentLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%d,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,contentLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -3952,7 +3952,7 @@ int ServiceInterface::getContentLevelListByParameterGenerationGeometryAndLevelId
     int result = _getContentLevelListByParameterGenerationGeometryAndLevelId(sessionId,generationId,geometryId,parameterKey,levelId,contentLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%s,%u,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,parameterKey.c_str(),levelId,contentLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%s,%d,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,parameterKey.c_str(),levelId,contentLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4071,7 +4071,7 @@ int ServiceInterface::getContentParamKeyListByGenerationGeometryAndLevelId(T::Se
     int result = _getContentParamKeyListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,parameterKeyType,paramKeyList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,paramKey[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,levelId,parameterKeyType,paramKeyList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%d,paramKey[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,levelId,parameterKeyType,paramKeyList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4131,7 +4131,7 @@ int ServiceInterface::getContentTimeListByGenerationAndGeometryId(T::SessionId s
     int result = _getContentTimeListByGenerationAndGeometryId(sessionId,generationId,geometryId,contentTimeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,contentTimeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,contentTimeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4161,7 +4161,7 @@ int ServiceInterface::getContentTimeListByGenerationGeometryAndLevelId(T::Sessio
     int result = _getContentTimeListByGenerationGeometryAndLevelId(sessionId,generationId,geometryId,levelId,contentTimeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%u,%u,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,contentTimeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%d,%d,time[%lu]);result %d;time %f;",__FUNCTION__,sessionId,generationId,geometryId,levelId,contentTimeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4221,7 +4221,7 @@ int ServiceInterface::getContentTimeRangeByProducerAndGenerationId(T::SessionId 
     int result = _getContentTimeRangeByProducerAndGenerationId(sessionId,producerId,generationId,startTime,endTime);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%lu,%lu);result %d;time %f;",__FUNCTION__,sessionId,producerId,generationId,startTime,endTime,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%lu,%ld,%ld);result %d;time %f;",__FUNCTION__,sessionId,producerId,generationId,startTime,endTime,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4251,7 +4251,7 @@ int ServiceInterface::getContentTimeRangeByGenerationId(T::SessionId sessionId,T
     int result = _getContentTimeRangeByGenerationId(sessionId,generationId,startTime,endTime);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%lu,%lu);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime,endTime,result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%lu,%ld,%ld);result %d;time %f;",__FUNCTION__,sessionId,generationId,startTime,endTime,result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -4401,7 +4401,7 @@ int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<T::FileI
     int result = _updateCachedFiles(sessionId,fileIdList);;
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,fileIdList[%ld]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,fileIdList[%zu]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)

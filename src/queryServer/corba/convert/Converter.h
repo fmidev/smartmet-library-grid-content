@@ -30,6 +30,8 @@ class Converter
   public:
                   Converter();
     virtual       ~Converter();
+    Converter(const Converter&) = default;
+    Converter& operator=(const Converter&) = default;
 
     static void   convert(const T::GeometryId_set& source,C::GeometryIdList& target);
     static void   convert(const C::GeometryIdList& source,T::GeometryId_set& target);

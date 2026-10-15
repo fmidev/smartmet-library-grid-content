@@ -19,6 +19,7 @@ class Function_lte : public Function
                       Function_lte();
                       Function_lte(const Function_lte& function);
     ~Function_lte() override;
+    Function_lte& operator=(const Function_lte&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

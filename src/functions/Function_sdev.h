@@ -18,6 +18,7 @@ class Function_sdev : public Function
                       Function_sdev();
                       Function_sdev(const Function_sdev& function);
     ~Function_sdev() override;
+    Function_sdev& operator=(const Function_sdev&) = default;
 
     // Type 1: Takes one or several parameters, returns one value
     float     executeFunctionCall1(std::vector<float>& parameters) override;

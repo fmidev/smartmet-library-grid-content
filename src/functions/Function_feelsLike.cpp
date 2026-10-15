@@ -283,7 +283,7 @@ Function* Function_feelsLike::duplicate()
 {
   try
   {
-    return new Function(*this);
+    return (Function*)new Function_feelsLike(*this);
   }
   catch (...)
   {

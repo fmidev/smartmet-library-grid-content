@@ -40,6 +40,8 @@ class Converter
   public:
                   Converter();
     virtual       ~Converter();
+    Converter(const Converter&) = default;
+    Converter& operator=(const Converter&) = default;
 
     static void   convert(const T::ContentInfo& source,C::ContentInfo& target);
     static void   convert(const C::ContentInfo& source,T::ContentInfo& target);

@@ -28,6 +28,8 @@ class GridFileManager
   public:
                         GridFileManager();
     virtual             ~GridFileManager();
+    GridFileManager(const GridFileManager&) = delete;
+    GridFileManager& operator=(const GridFileManager&) = delete;
 
     void                init(T::SessionId serverSessionId,ContentServer::ServiceInterface* contentServer);
 
@@ -64,7 +66,7 @@ class GridFileManager
     ModificationLock                                  mModificationLock;   //!< Guards all access to mFileList.
     std::unordered_map<T::FileId,GRID::GridFile_sptr> mFileList;           //!< Map from file identifier to open grid file handle.
     ContentServer::ServiceInterface*                  mContentServer;      //!< Non-owning pointer to the ContentServer used for file metadata lookups.
-    T::SessionId                                      mServerSessionId;    //!< Session identifier used for ContentServer calls.
+    T::SessionId                                      mServerSessionId = 0;    //!< Session identifier used for ContentServer calls.
 };
 
 

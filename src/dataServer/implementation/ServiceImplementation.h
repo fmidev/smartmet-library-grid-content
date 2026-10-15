@@ -53,6 +53,8 @@ class ServiceImplementation : public ServiceInterface
   public:
                     ServiceImplementation();
      ~ServiceImplementation() override;
+     ServiceImplementation(const ServiceImplementation&) = delete;
+     ServiceImplementation& operator=(const ServiceImplementation&) = delete;
 
      virtual void   init(
                        T::SessionId serverSessionId,

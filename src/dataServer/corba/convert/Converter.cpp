@@ -374,7 +374,7 @@ void Converter::convert(const T::GridCoordinates& source,C::GridCoordinates& tar
     for (uint t=0; t<len; t++)
     {
       T::Coordinate coordinate = source.mCoordinateList[t];
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       corbaObject.x = coordinate.x();
       corbaObject.y = coordinate.y();
       target.coordinateList[t] = corbaObject;
@@ -485,7 +485,7 @@ void Converter::convert(const T::ValueRecordList& source,C::ValueRecordList& tar
     for (uint t=0; t<len; t++)
     {
       T::ValueRecord *obj = source.getValueRecordByIndex(t);
-      C::ValueRecord corbaObject;
+      C::ValueRecord corbaObject{};
       convert(*obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -716,7 +716,7 @@ void Converter::convert(const std::vector<T::Coordinate>& source,C::CoordinateLi
     for (uint t=0; t<len; t++)
     {
       auto obj = source[t];
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       convert(obj,corbaObject);
       target[t] = corbaObject;
     }

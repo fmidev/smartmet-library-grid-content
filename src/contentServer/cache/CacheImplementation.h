@@ -57,6 +57,8 @@ class CacheImplementation : public ServiceInterface
   public:
                     CacheImplementation();
     ~CacheImplementation() override;
+    CacheImplementation(const CacheImplementation&) = delete;
+    CacheImplementation& operator=(const CacheImplementation&) = delete;
 
     virtual void    init(T::SessionId sessionId,T::SessionId dataServerSessionId,ServiceInterface *contentStorage);
     bool    isReady() override;
@@ -285,7 +287,7 @@ class CacheImplementation : public ServiceInterface
     bool                   mUpdateInProgress;             //!< True while a bulk content update is running.
     bool                   mRequestForwardEnabled;        //!< When true, write operations are forwarded to the master storage.
     T::SessionId           mSessionId;                    //!< Session identifier used for master queries.
-    T::SessionId           mDataServerSessionId;          //!< Session identifier passed to the data server.
+    T::SessionId           mDataServerSessionId = 0;          //!< Session identifier passed to the data server.
     T::EventId             mLastProcessedEventId;         //!< Highest event id already applied to the cache.
     T::FileInfoList        mFileInfoList;                 //!< Cached file records.
     T::ProducerInfoList    mProducerInfoList;             //!< Cached producer records.

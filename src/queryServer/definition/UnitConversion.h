@@ -21,6 +21,8 @@ class UnitConversion
   public:
                    UnitConversion();
     virtual        ~UnitConversion();
+    UnitConversion(const UnitConversion&) = default;
+    UnitConversion& operator=(const UnitConversion&) = default;
 
     void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
