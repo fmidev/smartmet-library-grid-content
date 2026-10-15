@@ -50,12 +50,6 @@ void* MergeImplementation_eventProcessingThread(void *arg)
 
 /*! \brief Merge backend: combine the storage index with an id to form a globally unique 32-bit id. */
 
-inline uint getNewId(uint contentStorageIndex,uint oldId)
-{
-  uint id = (contentStorageIndex << 24) + (oldId & 0x00FFFFFF);
-  return id;
-}
-
 
 /*! \brief Merge backend: combine the storage index with a producer id to form a global producer id. */
 
