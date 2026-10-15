@@ -2931,7 +2931,7 @@ int PostgresqlImplementation::_addFileInfoWithContentList(T::SessionId sessionId
       contentInfo->mFileId = fileInfo.mFileId;
     }
 
-    addContentList(contentInfoList);
+    addContentListToDatabase(contentInfoList);
 
     addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,contentInfoList.getLength(),0,fileInfo.getCsv().c_str());
 
@@ -2997,7 +2997,7 @@ int PostgresqlImplementation::_addFileInfoListWithContent(T::SessionId sessionId
       }
     }
 
-    addContentList(contentInfoList);
+    addContentListToDatabase(contentInfoList);
 
     uint len = fileInfoList.getLength();
     for (uint t=0; t<len; t++)
@@ -4263,7 +4263,7 @@ int PostgresqlImplementation::_addContentList(T::SessionId sessionId,T::ContentI
       return Result::NO_CONNECTION_TO_PERMANENT_STORAGE;
 
 
-    addContentList(contentInfoList);
+    addContentListToDatabase(contentInfoList);
 
     T::EventInfoList eventInfoList;
 
@@ -8074,7 +8074,7 @@ int PostgresqlImplementation::addContent(T::ContentInfo& contentInfo)
 
 /*! \brief PostgreSQL backend: inserts a list of content records into the database. */
 
-int PostgresqlImplementation::addContentList(const T::ContentInfoList& contentInfoList)
+int PostgresqlImplementation::addContentListToDatabase(const T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try

@@ -224,7 +224,7 @@ class PostgresqlImplementation : public ServiceInterface
      int            getFileListBySourceId(T::SourceId sourceId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);
 
      int            addContent(T::ContentInfo& contentInfo);
-     int            addContentList(const T::ContentInfoList& contentInfoList);
+     int            addContentListToDatabase(const T::ContentInfoList& contentInfoList);
      int            setContent(const T::ContentInfo& contentInfo);
      int            deleteContent(T::FileId fileId,T::MessageIndex messageIndex);
      int            deleteContentByFileId(T::FileId fileId);
