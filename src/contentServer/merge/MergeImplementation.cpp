@@ -5404,6 +5404,9 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
       if (mShutdownRequested)
         return;
 
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       T::FileInfoList fileInfoList;
 
       int result = contentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
@@ -5471,6 +5474,9 @@ void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer
     {
       if (mShutdownRequested)
         return;
+
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
 
       T::ContentInfoList contentInfoList;
 

@@ -6631,6 +6631,9 @@ void CacheImplementation::readFileList()
       if (mShutdownRequested)
         return;
 
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       T::FileInfoList fileInfoList;
 
       int result = mContentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
@@ -6691,6 +6694,9 @@ void CacheImplementation::readContentList()
     {
       if (mShutdownRequested)
         return;
+
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
 
       T::ContentInfoList contentInfoList;
 
