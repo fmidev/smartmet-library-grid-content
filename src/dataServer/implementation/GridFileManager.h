@@ -51,7 +51,7 @@ class GridFileManager
     void                getFilesToBeCached(std::map<T::FileId,std::string>& filenames);
     void                getFilesInCache(std::map<T::FileId,std::string>& filenames);
     void                getRequestCounters(GRID::RequestCounters& requestCounters,bool diskFiles,bool networkFiles);
-    void                getStateAttributes(std::shared_ptr<T::AttributeNode> parent);
+    void                getStateAttributes(const std::shared_ptr<T::AttributeNode>& parent);
     void                resetRequestCounters();
     void                print(std::ostream& stream,uint level,uint optionFlags);
 

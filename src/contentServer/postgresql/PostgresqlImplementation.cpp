@@ -6038,7 +6038,7 @@ int PostgresqlImplementation::getProducerById(T::ProducerId producerId,T::Produc
 
 /*! \brief PostgreSQL backend: queries the database for the producer matching the given name. */
 
-int PostgresqlImplementation::getProducerByName(std::string producerName,T::ProducerInfo& producerInfo)
+int PostgresqlImplementation::getProducerByName(const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -6320,7 +6320,7 @@ int PostgresqlImplementation::getGenerationById(T::GenerationId generationId,T::
 
 /*! \brief PostgreSQL backend: queries the database for the generation matching the given name. */
 
-int PostgresqlImplementation::getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo)
+int PostgresqlImplementation::getGenerationByName(const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -7455,7 +7455,7 @@ int PostgresqlImplementation::getFileById(T::FileId fileId,T::FileInfo& fileInfo
 
 /*! \brief PostgreSQL backend: queries the database for the file matching the given name. */
 
-int PostgresqlImplementation::getFileByName(std::string fileName,T::FileInfo& fileInfo)
+int PostgresqlImplementation::getFileByName(const std::string& fileName,T::FileInfo& fileInfo)
 {
   FUNCTION_TRACE
   try

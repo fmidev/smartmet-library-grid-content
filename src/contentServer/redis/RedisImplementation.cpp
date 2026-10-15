@@ -84,18 +84,18 @@ class RedisProcessLock
 {
   public:
 
-    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation)
+    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation) : mRedisImplementation(redisImplementation)
     {
       FUNCTION_TRACE
-      mRedisImplementation = redisImplementation;
+
       mRedisImplementation->lock(function,line,mKey,180,true);
     }
 
 
-    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation,uint waitTimeInSec,bool resetLock)
+    RedisProcessLock(const char *function,uint line,RedisImplementation *redisImplementation,uint waitTimeInSec,bool resetLock) : mRedisImplementation(redisImplementation)
     {
       FUNCTION_TRACE
-      mRedisImplementation = redisImplementation;
+
       mRedisImplementation->lock(function,line,mKey,waitTimeInSec,resetLock);
     }
 
@@ -6620,7 +6620,7 @@ int RedisImplementation::getProducerById(T::ProducerId producerId,T::ProducerInf
 
 /*! \brief Redis backend helper: low-level fetch of a producer record by name. */
 
-int RedisImplementation::getProducerByName(std::string producerName,T::ProducerInfo& producerInfo)
+int RedisImplementation::getProducerByName(const std::string& producerName,T::ProducerInfo& producerInfo)
 {
   FUNCTION_TRACE
   try
@@ -6790,7 +6790,7 @@ int RedisImplementation::getGenerationById(T::GenerationId generationId,T::Gener
 
 /*! \brief Redis backend helper: low-level fetch of a generation record by name. */
 
-int RedisImplementation::getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo)
+int RedisImplementation::getGenerationByName(const std::string& generationName,T::GenerationInfo& generationInfo)
 {
   FUNCTION_TRACE
   try
@@ -9585,7 +9585,7 @@ void RedisImplementation::truncateEvents()
 
 /*! \brief Redis backend helper: stores a filename-to-file-id mapping in the filenames hash. */
 
-int RedisImplementation::addFilename(std::string filename,T::FileId fileId)
+int RedisImplementation::addFilename(const std::string& filename,T::FileId fileId)
 {
   FUNCTION_TRACE
   try
@@ -9616,7 +9616,7 @@ int RedisImplementation::addFilename(std::string filename,T::FileId fileId)
 
 /*! \brief Redis backend helper: looks up the file id of a filename in the filenames hash. */
 
-T::FileId RedisImplementation::getFileId(std::string filename)
+T::FileId RedisImplementation::getFileId(const std::string& filename)
 {
   FUNCTION_TRACE
   try
@@ -9650,7 +9650,7 @@ T::FileId RedisImplementation::getFileId(std::string filename)
 
 /*! \brief Redis backend helper: removes a filename-to-file-id mapping from the filenames hash. */
 
-int RedisImplementation::deleteFilename(std::string filename)
+int RedisImplementation::deleteFilename(const std::string& filename)
 {
   FUNCTION_TRACE
   try

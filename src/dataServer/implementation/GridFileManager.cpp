@@ -599,7 +599,7 @@ std::size_t GridFileManager::getFileCount()
 
 /*! \brief Data Server: Get state attributes. */
 
-void GridFileManager::getStateAttributes(std::shared_ptr<T::AttributeNode> parent)
+void GridFileManager::getStateAttributes(const std::shared_ptr<T::AttributeNode>& parent)
 {
   FUNCTION_TRACE
   try

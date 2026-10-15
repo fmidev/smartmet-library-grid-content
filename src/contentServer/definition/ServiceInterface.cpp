@@ -1040,10 +1040,10 @@ int ServiceInterface::getGenerationInfoListByGeometryId(T::SessionId sessionId,T
       return Result::SERVICE_DISABLED;
 
     if (mProcessingLog == nullptr || !mProcessingLog->isEnabled())
-      return _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+      return _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
 
     UInt64 timeStart = getTime();
-    int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);;
+    int result = _getGenerationInfoListByGeometryId(sessionId,geometryId,generationInfoList);
     UInt64 requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%d,generationInfo[%u]);result %d;time %f;",__FUNCTION__,sessionId,geometryId,generationInfoList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
@@ -4398,7 +4398,7 @@ int ServiceInterface::updateCachedFiles(T::SessionId sessionId,std::set<T::FileI
       return _updateCachedFiles(sessionId,fileIdList);
 
     UInt64 timeStart = getTime();
-    int result = _updateCachedFiles(sessionId,fileIdList);;
+    int result = _updateCachedFiles(sessionId,fileIdList);
     UInt64 requestTime = getTime() - timeStart;
 
     PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,fileIdList[%zu]);result %d;time %f;",__FUNCTION__,sessionId,fileIdList.size(),result,C_DOUBLE(requestTime) / 1000000);

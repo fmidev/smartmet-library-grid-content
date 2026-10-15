@@ -39,15 +39,15 @@ class ContentSource
   public:
     ContentSource()
     {
-      mContentStorageStartTime = 0;
-      mLastProcessedEventId = 0;
-      mHash = 0;
+
+
+
     }
 
     ContentServer_sptr     mContentStorage;          //!< Shared pointer to the backend ServiceInterface.
-    time_t                 mContentStorageStartTime; //!< Start time of the backend, used to detect restarts.
-    T::EventId             mLastProcessedEventId;    //!< Highest event id already processed from this backend.
-    std::size_t            mHash;                    //!< Content hash used to detect bulk changes.
+    time_t                 mContentStorageStartTime{0}; //!< Start time of the backend, used to detect restarts.
+    T::EventId             mLastProcessedEventId{0};    //!< Highest event id already processed from this backend.
+    std::size_t            mHash{0};                    //!< Content hash used to detect bulk changes.
 };
 
 using ContentSource_vec = std::vector<ContentSource>;  //!< Collection of content sources managed by the merge layer.

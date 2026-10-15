@@ -80,10 +80,10 @@ using ContentSearchCache = std::unordered_map<std::size_t,ContentSearchCacheEntr
 class HeightRec
 {
   public:
-    HeightRec() {levelId = 0; time1 = 0;level1_1 = 0; level1_2 = 0; height1_1 = 0; height1_2 = 0;time2 = 0; level2_1 = 0; level2_2 = 0;height2_1 = 0; height2_2 = 0;};
+    HeightRec()   { level1_1 = 0; level1_2 = 0; height1_1 = 0; height1_2 = 0;time2 = 0; level2_1 = 0; level2_2 = 0;height2_1 = 0; height2_2 = 0;}
 
-    T::ParamLevelId levelId;     //!< Level type identifier for this height bracket.
-    time_t time1;                //!< Forecast time of the first bracketing level pair.
+    T::ParamLevelId levelId{0};     //!< Level type identifier for this height bracket.
+    time_t time1{0};                //!< Forecast time of the first bracketing level pair.
     T::ParamLevel level1_1;      //!< Lower level at time1.
     T::ParamLevel level1_2;      //!< Upper level at time1.
     T::ParamValue height1_1;     //!< Height (m) corresponding to level1_1 at time1.
@@ -110,11 +110,11 @@ using LevelContentCache = Fmi::Cache::Cache<std::size_t,ContentCacheEntry_sptr>;
 class HeightConversion
 {
   public:
-    HeightConversion() {producerId = 0; heightProducerId = 0; multiplier = 1.0;}
+    HeightConversion()   { multiplier = 1.0;}
 
-    T::ProducerId   producerId;       //!< Producer whose levels are converted.
+    T::ProducerId   producerId{0};       //!< Producer whose levels are converted.
     T::ParamLevelId levelId = 0;          //!< Level type to which this conversion applies.
-    T::ProducerId   heightProducerId; //!< Producer that supplies the height field.
+    T::ProducerId   heightProducerId{0}; //!< Producer that supplies the height field.
     std::string     heightParameter;  //!< Parameter name of the auxiliary height field.
     double          multiplier;       //!< Scale factor applied to the height values.
 };

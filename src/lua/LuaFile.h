@@ -106,9 +106,9 @@ class LuaHandle
 {
   public:
 
-    LuaHandle(LuaFile *luaFile)
+    LuaHandle(LuaFile *luaFile) : mLuaFile(luaFile)
     {
-      mLuaFile = luaFile;
+
       mState = mLuaFile->getLuaState(mKey);
     }
 

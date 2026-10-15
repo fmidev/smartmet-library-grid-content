@@ -192,7 +192,7 @@ class RedisImplementation : public ServiceInterface
      int            deleteProducerById(T::ProducerId producerId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            deleteProducerListBySourceId(T::SourceId sourceId,bool deleteGenerations,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            getProducerById(T::ProducerId producerId,T::ProducerInfo& producerInfo);
-     int            getProducerByName(std::string producerName,T::ProducerInfo& producerInfo);
+     int            getProducerByName(const std::string& producerName,T::ProducerInfo& producerInfo);
      int            getProducerList(T::ProducerInfoList& producerInfoList);
      int            getProducerListBySourceId(T::SourceId sourceId,T::ProducerInfoList& producerInfoList);
 
@@ -200,7 +200,7 @@ class RedisImplementation : public ServiceInterface
      int            deleteGenerationListByProducerId(T::ProducerId producerId,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            deleteGenerationListBySourceId(T::SourceId sourceId,bool deleteGeometries,bool deleteFiles,bool deleteContent);
      int            getGenerationById(T::GenerationId generationId,T::GenerationInfo& generationInfo);
-     int            getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo);
+     int            getGenerationByName(const std::string& generationName,T::GenerationInfo& generationInfo);
      int            getGenerationList(T::GenerationInfoList& generationInfoList);
      int            getGenerationListByProducerId(T::ProducerId producerId,T::GenerationInfoList& generationInfoList);
      int            getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList);
@@ -255,9 +255,9 @@ class RedisImplementation : public ServiceInterface
 
      void           truncateEvents();
 
-     int            addFilename(std::string filename,T::FileId fileId);
-     int            deleteFilename(std::string filename);
-     T::FileId      getFileId(std::string filename);
+     int            addFilename(const std::string& filename,T::FileId fileId);
+     int            deleteFilename(const std::string& filename);
+     T::FileId      getFileId(const std::string& filename);
      void           getFilenames(std::map<std::string,T::FileId>& fileList);
 
 

@@ -194,7 +194,7 @@ class PostgresqlImplementation : public ServiceInterface
      int            deleteProducerById(T::ProducerId producerId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent);
      int            deleteProducerListBySourceId(T::SourceId sourceId,bool deleteGenerations,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent);
      int            getProducerById(T::ProducerId producerId,T::ProducerInfo& producerInfo);
-     int            getProducerByName(std::string producerName,T::ProducerInfo& producerInfo);
+     int            getProducerByName(const std::string& producerName,T::ProducerInfo& producerInfo);
      int            getProducerList(T::ProducerInfoList& producerInfoList);
      int            getProducerListBySourceId(T::SourceId sourceId,T::ProducerInfoList& producerInfoList);
 
@@ -202,7 +202,7 @@ class PostgresqlImplementation : public ServiceInterface
      int            deleteGenerationListByProducerId(T::ProducerId producerId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent);
      int            deleteGenerationListBySourceId(T::SourceId sourceId,bool deleteGenerationGeometries,bool deleteFiles,bool deleteContent);
      int            getGenerationById(T::GenerationId generationId,T::GenerationInfo& generationInfo);
-     int            getGenerationByName(std::string generationName,T::GenerationInfo& generationInfo);
+     int            getGenerationByName(const std::string& generationName,T::GenerationInfo& generationInfo);
      int            getGenerationList(T::GenerationInfoList& generationInfoList);
      int            getGenerationListByProducerId(T::ProducerId producerId,T::GenerationInfoList& generationInfoList);
      int            getGenerationListByGeometryId(T::GeometryId geometryId,T::GenerationInfoList& generationInfoList);
@@ -216,7 +216,7 @@ class PostgresqlImplementation : public ServiceInterface
      int            deleteFileListByProducerId(T::ProducerId producerId,bool deleteContent);
      int            deleteFileListBySourceId(T::SourceId sourceId,bool deleteContent);
      int            getFileById(T::FileId fileId,T::FileInfo& fileInfo);
-     int            getFileByName(std::string fileName,T::FileInfo& fileInfo);
+     int            getFileByName(const std::string& fileName,T::FileInfo& fileInfo);
      int            getFileList(T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListByGenerationId(T::GenerationId generationId,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);
      int            getFileListByGenerationIdList(const std::set<T::GenerationId>& generationIdList,T::FileId startFileId,int maxRecords,T::FileInfoList& fileInfoList);

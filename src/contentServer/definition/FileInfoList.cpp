@@ -2349,7 +2349,7 @@ void FileInfoList::sort(uint comparisonMethod)
 
       default:
         break;
-    };
+    }
   }
   catch (...)
   {
