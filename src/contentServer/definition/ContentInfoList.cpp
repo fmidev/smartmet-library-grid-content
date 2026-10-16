@@ -2829,6 +2829,45 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
 
 
 
+namespace
+{
+
+/*! \brief Add the parameter key of the content of the given key type. Returns false for unsupported key types. */
+
+bool addParamKey(ContentInfo *info,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
+{
+  switch (parameterKeyType)
+  {
+    case T::ParamKeyTypeValue::FMI_ID:
+      if (info->mFmiParameterId > 0)
+        paramKeyList.insert(std::to_string(info->mFmiParameterId));
+      break;
+
+    case T::ParamKeyTypeValue::FMI_NAME:
+      if (info->getFmiParameterName()[0] != '\0')
+      {
+        paramKeyList.insert(info->getFmiParameterName());
+      }
+      else
+      if (info->mFmiParameterId > 0)
+      {
+        std::string id = "FMI-" + std::to_string(info->mFmiParameterId);
+        paramKeyList.insert(id);
+      }
+      break;
+
+    default:
+      return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Collect distinct parameter keys for the given generation into the output set. */
 
 void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::set<std::string>& paramKeyList)
@@ -2859,29 +2898,8 @@ void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId produce
       ContentInfo *info = mArray[t];
       if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
-        switch (parameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            if (info->mFmiParameterId > 0)
-              paramKeyList.insert(std::to_string(info->mFmiParameterId));
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            if (info->getFmiParameterName()[0] != '\0')
-            {
-              paramKeyList.insert(info->getFmiParameterName());
-            }
-            else
-            if (info->mFmiParameterId > 0)
-            {
-              std::string id = "FMI-" + std::to_string(info->mFmiParameterId);
-              paramKeyList.insert(id);
-            }
-            break;
-
-          default:
-            return;
-        }
+        if (!addParamKey(info,parameterKeyType,paramKeyList))
+          return;
       }
       if ((mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
           mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time) &&
@@ -2931,29 +2949,8 @@ void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(T::Produce
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
-        switch (parameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            if (info->mFmiParameterId > 0)
-              paramKeyList.insert(std::to_string(info->mFmiParameterId));
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            if (info->getFmiParameterName()[0] != '\0')
-            {
-              paramKeyList.insert(info->getFmiParameterName());
-            }
-            else
-            if (info->mFmiParameterId > 0)
-            {
-              std::string id = "FMI-" + std::to_string(info->mFmiParameterId);
-              paramKeyList.insert(id);
-            }
-            break;
-
-          default:
-            return;
-        }
+        if (!addParamKey(info,parameterKeyType,paramKeyList))
+          return;
       }
       if ((mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
           mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time) &&
@@ -3002,29 +2999,8 @@ void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(T::Pr
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           info->mFmiParameterLevelId == levelId && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
-        switch (parameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            if (info->mFmiParameterId > 0)
-              paramKeyList.insert(std::to_string(info->mFmiParameterId));
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            if (info->getFmiParameterName()[0] != '\0')
-            {
-              paramKeyList.insert(info->getFmiParameterName());
-            }
-            else
-            if (info->mFmiParameterId > 0)
-            {
-              std::string id = "FMI-" + std::to_string(info->mFmiParameterId);
-              paramKeyList.insert(id);
-            }
-            break;
-
-          default:
-            return;
-        }
+        if (!addParamKey(info,parameterKeyType,paramKeyList))
+          return;
       }
       if ((mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time ||
           mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time) &&
