@@ -6085,6 +6085,102 @@ bool MemoryImplementation::syncProducerList()
 
 
 
+/*! \brief Memory backend: add or mark the generation of one line of the generations csv-file. */
+
+void MemoryImplementation::syncGenerationCsvLine(char *st)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::GenerationInfo();
+    rec->setCsv(st);
+
+    mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
+
+    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+    }
+    else
+    {
+      T::ProducerInfo *pInfo = mProducerInfoList.getProducerInfoById(rec->mProducerId);
+      if (pInfo != nullptr)
+      {
+        rec->mFlags = rec->mFlags | 0x80000000;
+        mGenerationInfoList.addGenerationInfo(rec);
+        addEvent(EventType::GENERATION_ADDED,rec->mGenerationId,0,0,0);
+      }
+      else
+      {
+        // Invalid producer
+        delete rec;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the generations that were not marked as found in the csv-file. */
+
+void MemoryImplementation::deleteUnsyncedGenerations(uint len)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<T::GenerationId> idList;
+    mGenerationInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The generation is not in the csv-file anymore. We should delete it.
+        idList.emplace_back(info->mGenerationId);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    int count = 0;
+    for (unsigned long & it : idList)
+    {
+      mGenerationInfoList.deleteGenerationInfoById(it);
+      mFileInfoListByName.deleteFileInfoByGenerationId(it);
+      mFileInfoList.deleteFileInfoByGenerationId(it);
+      count += mContentInfoList[0].markDeletedByGenerationId(it);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Memory backend: reconcile the in-memory generation list with the persisted storage. */
 
 bool MemoryImplementation::syncGenerationList()
@@ -6116,70 +6212,12 @@ bool MemoryImplementation::syncGenerationList()
     {
       if (st[0] != '#')
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        auto *rec = new T::GenerationInfo();
-        rec->setCsv(st);
-
-        mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
-
-        T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::ProducerInfo *pInfo = mProducerInfoList.getProducerInfoById(rec->mProducerId);
-          if (pInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            mGenerationInfoList.addGenerationInfo(rec);
-            addEvent(EventType::GENERATION_ADDED,rec->mGenerationId,0,0,0);
-          }
-          else
-          {
-            // Invalid producer
-            delete rec;
-          }
-        }
+        syncGenerationCsvLine(st);
       }
     }
     (void)fclose(file);
 
-    std::vector<T::GenerationId> idList;
-    mGenerationInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0)
-      {
-        // The generation is not in the csv-file anymore. We should delete it.
-        idList.emplace_back(info->mGenerationId);
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
-    }
-
-    int count = 0;
-    for (unsigned long & it : idList)
-    {
-      mGenerationInfoList.deleteGenerationInfoById(it);
-      mFileInfoListByName.deleteFileInfoByGenerationId(it);
-      mFileInfoList.deleteFileInfoByGenerationId(it);
-      count += mContentInfoList[0].markDeletedByGenerationId(it);
-      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
-    }
-
-    if (count > 0)
-    {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
-    }
+    deleteUnsyncedGenerations(len);
 
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
     return true;
