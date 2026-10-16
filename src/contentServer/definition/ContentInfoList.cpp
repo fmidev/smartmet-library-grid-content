@@ -6401,6 +6401,39 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
 
 
 
+namespace
+{
+
+/*! \brief Insert the level id into the sorted list unless it is already there. */
+
+void insertSortedLevelId(std::vector<T::ParamLevelId>& paramLevelIdList,T::ParamLevelId levelId)
+{
+  uint vLen = paramLevelIdList.size();
+  uint c = 0;
+  while (c < vLen)
+  {
+    if (paramLevelIdList[c] == levelId)
+    {
+      c = vLen;
+    }
+    else
+    if (paramLevelIdList[c] > levelId)
+    {
+      paramLevelIdList.insert(paramLevelIdList.begin() + c,levelId);
+      c = vLen;
+    }
+    c++;
+  }
+  if (c == vLen)
+    paramLevelIdList.emplace_back(levelId);
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Collect distinct FMI parameter level ids for the given parameter id. */
 
 void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiParameterId,std::vector<T::ParamLevelId>& paramLevelIdList)
@@ -6417,33 +6450,8 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiPa
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        uint vLen = paramLevelIdList.size();
-        uint c = 0;
-        while (c < vLen)
-        {
-          if (info->mFmiParameterId == fmiParameterId)
-          {
-            if (paramLevelIdList[c] == info->mFmiParameterLevelId)
-            {
-              c = vLen;
-            }
-            else
-            if (paramLevelIdList[c] > info->mFmiParameterLevelId)
-            {
-              paramLevelIdList.insert(paramLevelIdList.begin() + c,info->mFmiParameterLevelId);
-              c = vLen;
-            }
-          }
-          c++;
-        }
-        if (c == vLen)
-        {
-          if (info->mFmiParameterId == fmiParameterId)
-            paramLevelIdList.emplace_back(info->mFmiParameterLevelId);
-        }
-      }
+      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+        insertSortedLevelId(paramLevelIdList,info->mFmiParameterLevelId);
     }
   }
   catch (...)
