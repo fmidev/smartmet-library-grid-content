@@ -38,11 +38,7 @@ class ContentSource
 {
   public:
     ContentSource()
-    {
-
-
-
-    }
+    = default;
 
     ContentServer_sptr     mContentStorage;          //!< Shared pointer to the backend ServiceInterface.
     time_t                 mContentStorageStartTime{0}; //!< Start time of the backend, used to detect restarts.

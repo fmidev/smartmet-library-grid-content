@@ -30,6 +30,7 @@ class SessionInfo
                         SessionInfo();
     virtual             ~SessionInfo();
     SessionInfo& operator=(const SessionInfo&) = default;
+    SessionInfo(const SessionInfo&) = default;
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
