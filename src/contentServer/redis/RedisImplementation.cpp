@@ -3295,6 +3295,58 @@ int RedisImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 
 
+/*! \brief Redis backend: adds the content list of a file into the database. */
+
+int RedisImplementation::addFileContentList(const T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint len = contentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      if (info != nullptr)
+      {
+        // ### Making sure that content data matches the file data.
+
+        info->mFileId = fileInfo.mFileId;
+        if (info->mFileType == 0)
+          info->mFileType = fileInfo.mFileType;
+
+        info->mProducerId = fileInfo.mProducerId;
+        info->mGenerationId = fileInfo.mGenerationId;
+        info->mFlags = info->mFlags;
+
+        // ### Creating a key for the content.
+
+        UInt64 id = getContentKey(info->mFileId,info->mMessageIndex);
+
+        // ### Adding the content record into the database.
+
+        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %lu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
+        if (reply == nullptr)
+        {
+          closeConnection();
+          return Result::PERMANENT_STORAGE_ERROR;
+        }
+
+        freeReplyObject(reply);
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Redis backend: adds a file entry together with its content list in one operation. */
 
 int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
@@ -3377,38 +3429,9 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
     // ### Adding the content information into the database.
 
-    uint len = contentInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-      if (info != nullptr)
-      {
-        // ### Making sure that content data matches the file data.
-
-        info->mFileId = fileInfo.mFileId;
-        if (info->mFileType == 0)
-          info->mFileType = fileInfo.mFileType;
-
-        info->mProducerId = fileInfo.mProducerId;
-        info->mGenerationId = fileInfo.mGenerationId;
-        info->mFlags = info->mFlags;
-
-        // ### Creating a key for the content.
-
-        UInt64 id = getContentKey(info->mFileId,info->mMessageIndex);
-
-        // ### Adding the content record into the database.
-
-        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %lu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
-        if (reply == nullptr)
-        {
-          closeConnection();
-          return Result::PERMANENT_STORAGE_ERROR;
-        }
-
-        freeReplyObject(reply);
-      }
-    }
+    int result = addFileContentList(fileInfo,contentInfoList);
+    if (result != Result::OK)
+      return result;
 
     // ### Adding an event to the event list.
 

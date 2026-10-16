@@ -256,6 +256,7 @@ class RedisImplementation : public ServiceInterface
      void           truncateEvents();
 
      int            addFilename(const std::string& filename,T::FileId fileId);
+     int            addFileContentList(const T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
      int            deleteFilename(const std::string& filename);
      T::FileId      getFileId(const std::string& filename);
      void           getFilenames(std::map<std::string,T::FileId>& fileList);
