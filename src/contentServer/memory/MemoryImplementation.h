@@ -196,7 +196,7 @@ class MemoryImplementation : public ServiceInterface
      virtual bool   syncProducerList();
      virtual bool   syncGenerationList();
      void           syncGenerationCsvLine(char *st);
-     void           deleteUnsyncedGenerations(uint len);
+     void           deleteUnsyncedGenerations();
      virtual bool   syncGeometryList();
      virtual bool   syncFileList();
      virtual bool   syncContentList();

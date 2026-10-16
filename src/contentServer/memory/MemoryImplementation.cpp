@@ -6041,7 +6041,7 @@ bool MemoryImplementation::syncProducerList()
     (void)fclose(file);
 
     std::vector<T::ProducerId> idList;
-    mProducerInfoList.getLength();
+    len = mProducerInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
@@ -6135,13 +6135,13 @@ void MemoryImplementation::syncGenerationCsvLine(char *st)
 
 /*! \brief Memory backend: delete the generations that were not marked as found in the csv-file. */
 
-void MemoryImplementation::deleteUnsyncedGenerations(uint len)
+void MemoryImplementation::deleteUnsyncedGenerations()
 {
   FUNCTION_TRACE
   try
   {
     std::vector<T::GenerationId> idList;
-    mGenerationInfoList.getLength();
+    uint len = mGenerationInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
@@ -6217,7 +6217,7 @@ bool MemoryImplementation::syncGenerationList()
     }
     (void)fclose(file);
 
-    deleteUnsyncedGenerations(len);
+    deleteUnsyncedGenerations();
 
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
     return true;
@@ -6296,7 +6296,7 @@ bool MemoryImplementation::syncGeometryList()
     (void)fclose(file);
 
     std::vector<T::GeometryInfo> idList;
-    mGeometryInfoList.getLength();
+    len = mGeometryInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
@@ -6404,7 +6404,7 @@ bool MemoryImplementation::syncFileList()
 
     std::vector<T::FileId> idList;
     std::vector<std::string> nameList;
-    mFileInfoList.getLength();
+    len = mFileInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
