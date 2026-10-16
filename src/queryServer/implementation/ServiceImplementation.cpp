@@ -9503,7 +9503,7 @@ bool ServiceImplementation::getVerticalValueVectors(
         }
       }
     }
-    return valueList.mValueVector.size() != 0;
+    return !valueList.mValueVector.empty();
   }
   catch (...)
   {

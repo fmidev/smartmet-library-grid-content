@@ -113,6 +113,7 @@ float Function_sdevDir::executeFunctionCall1(std::vector<float>& parameters)
   try
   {
     std::vector<double> values;
+    values.reserve(parameters.size());
     for (auto val : parameters)
       values.push_back(val);
     return directionStdDev(values);
@@ -134,6 +135,7 @@ double Function_sdevDir::executeFunctionCall1(std::vector<double>& parameters)
   try
   {
     std::vector<double> values;
+    values.reserve(parameters.size());
     for (auto val : parameters)
       values.push_back(val);
     return directionStdDev(values);
