@@ -709,6 +709,53 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::Prod
 
 
 
+/*! \brief Query Server: Print the query to the debug log when the execution starts. */
+
+void ServiceImplementation::printQueryStart(Query& query)
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      query.print(stream, 0, 0);
+      PRINT_DATA(mDebugLog, "\n############################## QUERY EXECUTION START ##################\n\n");
+      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Print the end of the query execution to the debug log. */
+
+void ServiceImplementation::printQueryEnd()
+{
+  FUNCTION_TRACE
+  try
+  {
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      PRINT_DATA(mDebugLog, "\n############################### QUERY EXECUTION END ###################\n\n");
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Protected hook: execute query. */
 
 int ServiceImplementation::_executeQuery(T::SessionId /*sessionId*/, Query& query)
@@ -725,13 +772,7 @@ int ServiceImplementation::_executeQuery(T::SessionId /*sessionId*/, Query& quer
 
     mRequestCounter++;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\n############################## QUERY EXECUTION START ##################\n\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryStart(query);
 
     int result = 0;
     switch (query.mSearchType)
@@ -749,10 +790,7 @@ int ServiceImplementation::_executeQuery(T::SessionId /*sessionId*/, Query& quer
         break;
     }
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      PRINT_DATA(mDebugLog, "\n############################### QUERY EXECUTION END ###################\n\n");
-    }
+    printQueryEnd();
 
     return result;
   }

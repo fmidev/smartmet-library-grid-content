@@ -195,6 +195,8 @@ class ServiceImplementation : public ServiceInterface
      void           executeQueryFunctions(Query& query);
      int            executeTimeRangeQuery(Query& query);
      int            executeTimeStepQuery(Query& query);
+     void           printQueryStart(Query& query);
+     void           printQueryEnd();
      void           postProcessQuery(Query& query);
 
      void           startUpdateProcessing();
