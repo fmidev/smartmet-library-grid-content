@@ -1092,6 +1092,72 @@ void ServiceImplementation::loadHeightConversionFile()
 
 
 
+namespace
+{
+
+/*! \brief Check that all the coordinates are inside the given geometry. */
+
+bool geometryCoversCoordinates(T::GeometryId geometryId,T::AreaCoordinates& coordinates)
+{
+  bool match = true;
+  for (auto& cList : coordinates)
+  {
+    for (auto coordinate = cList.begin(); coordinate != cList.end(); ++coordinate)
+    {
+      double grid_i = ParamValueMissing;
+      double grid_j = ParamValueMissing;
+
+      if (!Identification::gridDef.getGridPointByGeometryIdAndLatLonCoordinates(geometryId,coordinate->y(), coordinate->x(),grid_i,grid_j))
+        match = false;
+    }
+  }
+  return match;
+}
+
+}  // namespace
+
+
+
+
+
+/*! \brief Query Server: Report a producer geometry which has no registered definition. */
+
+void ServiceImplementation::reportUnregisteredGeometry(T::GeometryId geometryId)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // The geometry itself has no registered definition, so its coverage cannot be
+    // verified. This is different from the case where the geometry is registered
+    // but does not cover the requested coordinates. The candidate is still rejected
+    // either way, since a data fetch would fail later for the same reason.
+    PRINT_DATA(mDebugLog, "  - Geometry '%d' has no registered definition. Coverage cannot be verified!\n", geometryId);
+
+    // The debug log is normally disabled in production, so also warn to the terminal
+    // (=> journal) where maintenance can see it. Print only once per geometry to avoid
+    // flooding the journal, since this method is called for every query.
+    bool firstWarning = false;
+    {
+      AutoWriteLock lock(&mUnregisteredGeometryWarnings_modificationLock);
+      firstWarning = mUnregisteredGeometryWarnings.insert(geometryId).second;
+    }
+    if (firstWarning)
+    {
+      Fmi::Exception warning(BCP, "Producer refers to a grid geometry that has no registered definition; check the grid geometry configuration");
+      warning.addParameter("GeometryId", std::to_string(geometryId));
+      warning.printError();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get geometry id list by coordinates. */
 
 void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& producers,T::AreaCoordinates& coordinates, std::set<T::GeometryId>& geometryIdList)
@@ -1106,43 +1172,11 @@ void ServiceImplementation::getGeometryIdListByCoordinates(Producer_vec& produce
     {
       if (registeredGeometryIds.find(prod->second) == registeredGeometryIds.end())
       {
-        // The geometry itself has no registered definition, so its coverage cannot be
-        // verified. This is different from the case where the geometry is registered
-        // but does not cover the requested coordinates. The candidate is still rejected
-        // either way, since a data fetch would fail later for the same reason.
-        PRINT_DATA(mDebugLog, "  - Geometry '%d' has no registered definition. Coverage cannot be verified!\n", prod->second);
-
-        // The debug log is normally disabled in production, so also warn to the terminal
-        // (=> journal) where maintenance can see it. Print only once per geometry to avoid
-        // flooding the journal, since this method is called for every query.
-        bool firstWarning = false;
-        {
-          AutoWriteLock lock(&mUnregisteredGeometryWarnings_modificationLock);
-          firstWarning = mUnregisteredGeometryWarnings.insert(prod->second).second;
-        }
-        if (firstWarning)
-        {
-          Fmi::Exception warning(BCP, "Producer refers to a grid geometry that has no registered definition; check the grid geometry configuration");
-          warning.addParameter("GeometryId", std::to_string(prod->second));
-          warning.printError();
-        }
-
+        reportUnregisteredGeometry(prod->second);
         continue;
       }
 
-      bool match = true;
-      for (auto& cList : coordinates)
-      {
-        for (auto coordinate = cList.begin(); coordinate != cList.end(); ++coordinate)
-        {
-          double grid_i = ParamValueMissing;
-          double grid_j = ParamValueMissing;
-
-          if (!Identification::gridDef.getGridPointByGeometryIdAndLatLonCoordinates(prod->second,coordinate->y(), coordinate->x(),grid_i,grid_j))
-            match = false;
-        }
-      }
-      if (match)
+      if (geometryCoversCoordinates(prod->second,coordinates))
         geometryIdList.insert(prod->second);
     }
   }

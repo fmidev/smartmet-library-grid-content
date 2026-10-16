@@ -304,6 +304,8 @@ class ServiceImplementation : public ServiceInterface
                        const std::string& producerName,
                        Producer_vec& producers);
 
+     void           reportUnregisteredGeometry(T::GeometryId geometryId);
+
      void           getGeometryIdListByCoordinates(
                      Producer_vec& producers,
                      T::AreaCoordinates& coordinates,
