@@ -381,6 +381,8 @@ class ServiceImplementation : public ServiceInterface
                        short& levelInterpolationMethod,
                        uint& flags);
 
+     void          checkParameterMappingCacheGeneration();
+
      void          getParameterMappings(
                        const std::string& producerName,
                        T::ProducerId producerId,
@@ -986,7 +988,7 @@ class ServiceImplementation : public ServiceInterface
      std::size_t                mContentSearchCache_maxRecords;
      std::size_t                mContentSearchCache_maxRecordsPerThread;
      uint                       mContentSearchCache_clearInterval;
-     time_t                     mParameterMappingCache_clearRequired = 0;
+     std::atomic<UInt64>        mParameterMappingCache_generation{0};  //!< Incremented when the mapping files change: clears the per-thread mapping caches.
 
      HeightConversionMap        mHeightConversions;
      ModificationLock           mHeightConversions_modificationLock;

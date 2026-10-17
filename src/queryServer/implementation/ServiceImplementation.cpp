@@ -2102,8 +2102,14 @@ thread_local time_t mContentSearchCache_clearTime;
 
 
 
+// The parameter mapping cache is per thread, so the cache itself needs no locking. The update thread only
+// increments ServiceImplementation::mParameterMappingCache_generation (atomic) when a mapping file changes, and each
+// query thread clears its cache when it sees a generation that differs from the generation of its cache. The cached
+// mapping vectors are never modified after they are cached (the users make a new vector instead), and they are
+// shared only by the calls of the same thread.
+
 thread_local ParameterMappingCache mParameterMappingCache;
-thread_local time_t mParameterMappingCache_clearTime;
+thread_local UInt64 mParameterMappingCache_seenGeneration = 0;
 
 thread_local std::set<UInt64 > mReadyGeometryList;
 
@@ -2177,7 +2183,6 @@ ServiceImplementation::ServiceImplementation()
     mContentSearchCache_stats.size = 0;
     mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
     mCheckGeometryStatus = false;
-    mParameterMappingCache_clearTime = time(nullptr);
     mProducerGenerationListCache_clearTime  = time(nullptr);
     mProducerGenerationListCache_clearRequired = 0;
     mUpdateProcessingActive = false;
@@ -3487,6 +3492,23 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
 
 
 
+/*! \brief Query Server: Clear the parameter mapping cache of the thread if the mapping files have changed after
+           the cache was cleared the last time. */
+
+void ServiceImplementation::checkParameterMappingCacheGeneration()
+{
+  UInt64 generation = mParameterMappingCache_generation.load();
+  if (mParameterMappingCache_seenGeneration != generation)
+  {
+    mParameterMappingCache.clear();
+    mParameterMappingCache_seenGeneration = generation;
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get parameter mappings. */
 
 void ServiceImplementation::getParameterMappings(const std::string& producerName,T::ProducerId producerId,const std::string& parameterName,std::size_t parameterHash,T::GeometryId geometryId, bool onlySearchEnabled, ParameterMapping_vec_sptr& mappings)
@@ -3507,16 +3529,12 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
 
     Fmi::hash_merge(hash,geometryId);
     Fmi::hash_merge(hash,onlySearchEnabled);
+    Fmi::hash_merge(hash,reinterpret_cast<std::uintptr_t>(this));  // The thread local cache is shared by the instances
 
-    if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
-    {
-      mParameterMappingCache.clear();
-      mParameterMappingCache_clearTime = mParameterMappingCache_clearRequired;
-    }
+    checkParameterMappingCacheGeneration();
 
 
     {
-      //AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -3537,7 +3555,6 @@ void ServiceImplementation::getParameterMappings(const std::string& producerName
       }
     }
 
-    //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
@@ -3582,15 +3599,11 @@ void ServiceImplementation::getParameterMappings(
     Fmi::hash_merge(hash,levelId);
     Fmi::hash_merge(hash,level);
     Fmi::hash_merge(hash,onlySearchEnabled);
+    Fmi::hash_merge(hash,reinterpret_cast<std::uintptr_t>(this));  // The thread local cache is shared by the instances
 
-    if (mParameterMappingCache_clearTime < mParameterMappingCache_clearRequired)
-    {
-      mParameterMappingCache.clear();
-      mParameterMappingCache_clearTime = mParameterMappingCache_clearRequired;
-    }
+    checkParameterMappingCacheGeneration();
 
     {
-      //AutoReadLock lock(&mParameterMappingCache_modificationLock);
       auto it = mParameterMappingCache.find(hash);
       if (it != mParameterMappingCache.end())
       {
@@ -3611,7 +3624,6 @@ void ServiceImplementation::getParameterMappings(
       }
     }
 
-    //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
     if (mParameterMappingCache.find(hash) == mParameterMappingCache.end())
       mParameterMappingCache.insert(std::pair<std::size_t, ParameterMapping_vec_sptr>(hash, mappings));
   }
@@ -12330,8 +12342,7 @@ void ServiceImplementation::checkParameterMappingUpdates()
     {
       if (!mShutdownRequested  &&  mParameterMapping.checkUpdates())
       {
-        //AutoWriteLock lock(&mParameterMappingCache_modificationLock);
-        mParameterMappingCache_clearRequired = time(nullptr);
+        mParameterMappingCache_generation++;
       }
     }
   }
