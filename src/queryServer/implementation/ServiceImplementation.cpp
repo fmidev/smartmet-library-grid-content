@@ -5028,6 +5028,34 @@ void ServiceImplementation::reportDataServerError(const char *service,int result
 
 
 
+/*! \brief Query Server: Report the error of the data server call (and return false if the error stops the value fetch), and convert the values with the conversion function. */
+
+bool ServiceImplementation::checkValueResult(int result,const char *service,const std::vector<const T::ContentInfo*>& contents,bool errorStops,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList)
+{
+  try
+  {
+    if (result != 0)
+    {
+      reportDataServerError(service,result,contents);
+      if (errorStops)
+        return false;
+    }
+
+    if (conversionByFunction)
+      executeConversion(function, functionParams, forecastTime, valueList);
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Print the content list into the debug log (if it is enabled). */
 
 void ServiceImplementation::printContentList(T::ContentInfoList& contentList)
@@ -7707,18 +7735,9 @@ bool ServiceImplementation::getPointValues(
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByPointList",result,{contentInfo1});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByPointList",{contentInfo1},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -7753,18 +7772,9 @@ bool ServiceImplementation::getPointValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mParameterLevel = paramLevel;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByLevelAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByLevelAndPointList",result,{contentInfo1,contentInfo2});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByLevelAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByLevelAndPointList",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -7780,18 +7790,9 @@ bool ServiceImplementation::getPointValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByTimeAndPointList",result,{contentInfo1,contentInfo2});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByTimeAndPointList",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -7815,22 +7816,12 @@ bool ServiceImplementation::getPointValues(
         valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByTimeLevelAndPointList(0,
-              contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
-              contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
-              fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByLevelAndPointList",result,{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByTimeLevelAndPointList(0,
+                  contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
+                  contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
+                  fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByLevelAndPointList",{contentInfo1,contentInfo2,contentInfo3,contentInfo4},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -7938,18 +7929,9 @@ bool ServiceImplementation::getCircleValues(
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByCircle(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, radius,modificationOperation,modificationParameters, valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByCircle",result,{contentInfo1});
-            // throw exception;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByCircle(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, radius,modificationOperation,modificationParameters, valueList.mValueList),"getGridValueListByCircle",{contentInfo1},false,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -7983,19 +7965,10 @@ bool ServiceImplementation::getCircleValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          // Fetching data from the grids.
-          int result = mDataServerPtr->getGridValueListByTimeAndCircle(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,contentInfo2->mFileId,contentInfo2->mMessageIndex,fTime,coordinateType,x,y,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByTimeAndCircle",result,{contentInfo1});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        // Fetching data from the grids.
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByTimeAndCircle(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,contentInfo2->mFileId,contentInfo2->mMessageIndex,fTime,coordinateType,x,y,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByTimeAndCircle",{contentInfo1},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8012,18 +7985,9 @@ bool ServiceImplementation::getCircleValues(
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByLevelAndCircle(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,x,y,radius,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByLevelAndCircle",result,{contentInfo1,contentInfo2});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByLevelAndCircle(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,x,y,radius,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByLevelAndCircle",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8292,18 +8256,9 @@ bool ServiceImplementation::getPolygonValues(
 
         valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, query.mCoordinateType, query.mAreaCoordinates,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByPolygonPath",result,{contentInfo1});
-            // throw exception;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, query.mCoordinateType, query.mAreaCoordinates,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByPolygonPath",{contentInfo1},false,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8336,18 +8291,9 @@ bool ServiceImplementation::getPolygonValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByTimeAndPolygonPath",result,{contentInfo1,contentInfo2});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByTimeAndPolygonPath",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8365,18 +8311,9 @@ bool ServiceImplementation::getPolygonValues(
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByLevelAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByLevelAndPolygonPath",result,{contentInfo1,contentInfo2});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByLevelAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByLevelAndPolygonPath",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8400,22 +8337,12 @@ bool ServiceImplementation::getPolygonValues(
         valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
         valueList.mParameterLevel = paramLevel;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueListByTimeLevelAndPolygonPath(0,
-              contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
-              contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
-              fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueListByTimeLevelAndPolygonPath",result,{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
-            return false;
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-        }
+        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !checkValueResult(mDataServerPtr->getGridValueListByTimeLevelAndPolygonPath(0,
+                  contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
+                  contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
+                  fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList),"getGridValueListByTimeLevelAndPolygonPath",{contentInfo1,contentInfo2,contentInfo3,contentInfo4},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+          return false;
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -9580,18 +9507,9 @@ bool ServiceImplementation::getVerticalValueVectors(
           valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
           T::GridValueList valList;
-          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-          {
-            int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList);
-            if (result != 0)
-            {
-              reportDataServerError("getGridValueListByPointList",result,{contentInfo1});
-              return false;
-            }
-
-            if (conversionByFunction)
-              executeConversion(function, functionParams, forecastTime, valList);
-          }
+          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+              !checkValueResult(mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList),"getGridValueListByPointList",{contentInfo1},true,conversionByFunction,function,functionParams,forecastTime,valList))
+            return false;
 
           uint len = valList.getLength();
           for (uint t=0; t<len; t++)
@@ -9643,18 +9561,9 @@ bool ServiceImplementation::getVerticalValueVectors(
           valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
           T::GridValueList valList;
-          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-          {
-            int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList);
-            if (result != 0)
-            {
-              reportDataServerError("getGridValueListByTimeAndPointList",result,{contentInfo1,contentInfo2});
-              return false;
-            }
-
-            if (conversionByFunction)
-              executeConversion(function, functionParams, forecastTime, valList);
-          }
+          if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+              !checkValueResult(mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList),"getGridValueListByTimeAndPointList",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valList))
+            return false;
 
           uint len = valList.getLength();
           for (uint t=0; t<len; t++)

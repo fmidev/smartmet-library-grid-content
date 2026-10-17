@@ -351,6 +351,7 @@ class ServiceImplementation : public ServiceInterface
      void           checkThreadCacheState();
      void           printContentList(T::ContentInfoList& contentList);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
+     bool           checkValueResult(int result,const char *service,const std::vector<const T::ContentInfo*>& contents,bool errorStops,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList);
      bool           getModificationOperation(const std::string& function,const std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      bool           getPointValueVector(const T::ContentInfo& contentInfo,uchar coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector);
      void           addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
