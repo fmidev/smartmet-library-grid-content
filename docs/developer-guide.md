@@ -344,7 +344,9 @@ Results are written back into each `QueryParameter::mValueList` as `ParameterVal
 (one per time step, with the producer, generation, geometry, level and the values).
 
 `QueryConfigurator` builds a `Query` from HTTP-style key/value parameters, and
-`QueryStreamer` serialises results. Plugins that use the grid engine mostly build the
+`QueryStreamer` serialises results. Its `timestep` accepts `data` (use the data
+times), minutes, the `30m`/`1h` forms and ISO 8601 durations (`PT30M`). A timestep that
+is not positive is rejected with an exception. Plugins that use the grid engine mostly build the
 `Query` themselves.
 
 ### Parameter strings
@@ -499,6 +501,12 @@ Request threads call all three services concurrently. The rules the code follows
 * The Query Server's configuration maps (producers, mappings, aliases) each have their
   own read/write lock. A reload clears and refills a map under its write lock, so
   queries wait for the reload to finish.
+* The Query Server's lookup caches (parameter mappings, content lists, content
+  searches, producer generation lists) are `thread_local` and need no lock. The update
+  thread invalidates them by incrementing an atomic generation counter
+  (`mParameterMappingCache_generation`, `mContentCache_globalGeneration`, …), and each
+  query thread clears its own cache when it sees a new generation. Cached vectors are
+  never modified after they are cached; callers copy them instead.
 
 When you add state to one of these classes, use the same lock types
 (`ModificationLock` with `AutoReadLock` / `AutoWriteLock`, `ThreadLock` with
