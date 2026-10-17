@@ -3593,6 +3593,440 @@ bool hasDataAtPoint(const Query& query, const QueryParameter& qParam, uint timeI
 
 
 
+namespace
+{
+
+/*! \brief Input of the function of the time step collected over the values of the time step. */
+
+struct FunctionInput
+{
+  std::vector<double> areaParameters;  // If the case of area request, this contain all grid point values.
+  std::vector<double> extParameters;
+  bool areaCnt = false;
+  FunctionSource source;
+  T::GridValue lastRec;
+};
+
+
+
+/*! \brief Get the value of the function parameter (of the parameter values for the time step) at the value index
+           into the value (or into the value list for a value string). Updates the source information, the last
+           record and the area flag of the input. */
+
+void getFunctionParameterValue(QueryParameter& q,int tCount,uint v,double& a,std::vector<double>& valueList,FunctionInput& input)
+{
+  if ((std::size_t)tCount >= q.mValueList.size())
+  {
+    input.areaCnt = true;
+    return;
+  }
+
+  if (input.source.producerId == 0 && q.mValueList[tCount]->mProducerId > 0)
+  {
+    input.source.producerId = q.mValueList[tCount]->mProducerId;
+    input.source.generationId = q.mValueList[tCount]->mGenerationId;
+    input.source.geometryId = q.mValueList[tCount]->mGeometryId;
+    input.source.flags = q.mValueList[tCount]->mFlags;
+  }
+
+  T::GridValue rec;
+  if (!q.mValueList[tCount]->mValueList.getGridValueByIndex(v,rec))
+  {
+    a = ParamValueMissing;
+    return;
+  }
+
+  if (!rec.mValueString.empty())
+  {
+    splitString(rec.mValueString, ';', valueList);
+  }
+  else
+  {
+    a = rec.mValue;
+  }
+
+  if (rec.mX == -1000 && rec.mY == -1000)
+  {
+    input.areaCnt = true;
+  }
+  else
+  {
+    input.lastRec = rec;
+  }
+}
+
+
+
+/*! \brief Add the function parameter value: to the parameters, and to the area parameters (for a query parameter)
+           or to the external parameters (for a constant of the first value). */
+
+void addFunctionParameterValue(double a,bool isQueryParameter,uint v,std::vector<double>& parameters,FunctionInput& input)
+{
+  parameters.emplace_back(a);
+  if (isQueryParameter)
+    input.areaParameters.emplace_back(a);
+  else
+  if (v == 0)
+    input.extParameters.emplace_back(a);
+}
+
+
+
+/*! \brief Collect the values of the function parameters for the time step at the value index. VALID functions skip
+           the parameters that have no data at the point. */
+
+void collectFunctionValues(Query& query,QueryParameter& qParam,bool onlyAvailableParams,int tCount,uint v,std::vector<double>& parameters,std::vector<std::string>& strParameters,FunctionInput& input)
+{
+  for (auto it = qParam.mFunctionParams.begin(); it != qParam.mFunctionParams.end(); ++it)
+  {
+    double a = toDouble(it->second.c_str());
+    QueryParameter* q = query.getQueryParameterPtr(it->first);
+    if (onlyAvailableParams && q != nullptr && !hasDataAtPoint(query, *q, tCount, v))
+      continue;
+
+    strParameters.push_back(it->second);
+    std::vector<double> valueList;
+    if (q != nullptr)
+      getFunctionParameterValue(*q,tCount,v,a,valueList,input);
+
+    if (valueList.empty())
+    {
+      addFunctionParameterValue(a,q != nullptr,v,parameters,input);
+    }
+    else
+    {
+      for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
+        addFunctionParameterValue(*aa,q != nullptr,v,parameters,input);
+    }
+  }
+}
+
+}  // namespace
+
+
+
+
+
+/*! \brief Query Server: Execute the point function (a built-in function or a Lua function of the type 1, 2 or 5) with
+           the parameters and add the result value at the location of the last record. */
+
+void ServiceImplementation::executePointFunction(const Query& query,const std::string& function,std::vector<double>& parameters,const std::vector<std::string>& strParameters,const T::GridValue& lastRec,ParameterValues& values)
+{
+  try
+  {
+    auto *functionPtr = mFunctionCollection.getFunction(function);
+    if (functionPtr)
+    {
+      double val = functionPtr->executeFunctionCall1(parameters);
+      T::GridValue rec(lastRec.mX, lastRec.mY, val);
+      values.mValueList.addGridValue(rec);
+      return;
+    }
+
+    std::string luaFunction;
+    uint type = mLuaFileCollection.getFunction(function, luaFunction);
+    switch (type)
+    {
+      case 1:
+      {
+        double val = mLuaFileCollection.executeFunctionCall1(luaFunction, parameters);
+        T::GridValue rec(lastRec.mX, lastRec.mY, val);
+        values.mValueList.addGridValue(rec);
+      }
+      break;
+
+      case 2:
+      {
+        if (strParameters.size() == 1)
+        {
+          double val = mLuaFileCollection.executeFunctionCall2(luaFunction, strParameters[0].c_str());
+          T::GridValue rec(lastRec.mX, lastRec.mY, val);
+          values.mValueList.addGridValue(rec);
+        }
+      }
+      break;
+
+      case 5:
+      {
+        std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, parameters);
+        T::GridValue rec(lastRec.mX, lastRec.mY, val);
+        values.mValueList.addGridValue(rec);
+      }
+      break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the area function (a built-in function or a Lua function of the type 1 or 5) with the
+           external parameters followed by the area parameters, and add the result as an area value. */
+
+void ServiceImplementation::executeAreaFunction(const Query& query,const std::string& func,const std::vector<double>& areaParameters,std::vector<double>& extParameters,ParameterValues& values)
+{
+  try
+  {
+    for (auto it = areaParameters.begin();it != areaParameters.end();++it)
+      extParameters.push_back(*it);
+
+    auto *functionPtr = mFunctionCollection.getFunction(func);
+    if (functionPtr)
+    {
+      double val = functionPtr->executeFunctionCall1(extParameters);
+      T::GridValue rec(-1000, -1000, val);
+      values.mValueList.addGridValue(rec);
+      return;
+    }
+
+    std::string luaFunction;
+    uint type = mLuaFileCollection.getFunction(func, luaFunction);
+    switch (type)
+    {
+      case 1:
+      {
+        double val = mLuaFileCollection.executeFunctionCall1(luaFunction, extParameters);
+        T::GridValue rec(-1000, -1000, val);
+        values.mValueList.addGridValue(rec);
+      }
+      break;
+
+      case 5:
+      {
+        std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, extParameters);
+        T::GridValue rec(-1000, -1000, val);
+        values.mValueList.addGridValue(rec);
+      }
+      break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the function of the query parameter for the time step (for each value of the time step,
+           or once for the area) and add the result to the value list of the parameter. */
+
+void ServiceImplementation::executeTimeStepFunction(Query& query,QueryParameter& qParam,const std::string& function,uint valueCount,bool onlyAvailableParams,int tCount,time_t forecastTime)
+{
+  try
+  {
+    std::string f = function.substr(0, 1);
+
+    std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
+    pValues->mForecastTimeUTC = forecastTime;
+
+    FunctionInput input;
+
+    for (uint v = 0; v < valueCount; v++)
+    {
+      std::vector<double> parameters;
+      std::vector<std::string> strParameters;
+
+      collectFunctionValues(query,qParam,onlyAvailableParams,tCount,v,parameters,strParameters,input);
+
+      if (f == "/")
+      {
+        pValues->mFlags = input.source.flags;
+        T::GridValue rec(input.lastRec.mX, input.lastRec.mY, parameters.empty() ? ParamValueMissing : parameters[0]);
+        pValues->mValueList.addGridValue(rec);
+      }
+      else
+      if (f != "@" && !input.areaCnt)
+      {
+        // Functions parameter list is a simple value list. If this is an area request
+        // then each grid point is calculated separately.
+
+        executePointFunction(query,function,parameters,strParameters,input.lastRec,*pValues);
+
+        pValues->mProducerId = input.source.producerId;
+        pValues->mGenerationId = input.source.generationId;
+        pValues->mGeometryId = input.source.geometryId;
+      }
+    }
+    /*
+
+    if (areaCnt && f != "@")
+    {
+      std::string luaFunction;
+      uint type = mLuaFileCollection.getFunction(function, luaFunction);
+      switch (type)
+      {
+        case 1:
+        {
+          double val = mLuaFileCollection.executeFunctionCall1(luaFunction, extParameters);
+          T::GridValue rec(-1000, -1000, val);
+          pValues->mValueList.addGridValue(rec);
+        }
+        break;
+
+        case 5:
+        {
+          std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, extParameters);
+          T::GridValue rec(-1000, -1000, val);
+          pValues->mValueList.addGridValue(rec);
+        }
+        break;
+      }
+
+      pValues->mProducerId = producerId;
+      pValues->mGenerationId = generationId;
+      pValues->mGeometryId = geometryId;
+    }
+    */
+
+    if (!function.empty()  &&  function.substr(0, 1) == "@")
+    {
+      // This is an area function call.
+
+      executeAreaFunction(query,function.substr(1),input.areaParameters,input.extParameters,*pValues);
+
+      pValues->mProducerId = input.source.producerId;
+      pValues->mGenerationId = input.source.generationId;
+      pValues->mGeometryId = input.source.geometryId;
+    }
+
+    if (input.areaCnt  &&  pValues->mValueList.getLength() > 1)
+    {
+      T::GridValue rec;
+      pValues->mValueList.getGridValueByIndex(0,rec);
+      pValues->mValueList.clear();
+      rec.mX = -1000;
+      rec.mY = -1000;
+      pValues->mValueList.addGridValue(rec);
+    }
+    qParam.mValueList.emplace_back(pValues);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the row range function ("/function") of the query parameter for each value record and
+           replace the value lists with the results. */
+
+void ServiceImplementation::executeRowRangeFunction(Query& query,QueryParameter& qParam)
+{
+  try
+  {
+    std::string function = qParam.mFunction.substr(1);
+    auto *functionPtr = mFunctionCollection.getFunction(function);
+    uint type = 0;
+    std::string luaFunction;
+    if (!functionPtr)
+      type = mLuaFileCollection.getFunction(function, luaFunction);
+
+    int startIdx = 0;
+    int endIdx = 0;
+    std::vector<T::ParamValue> parameters;
+    getRowRangeFunctionParameters(qParam,startIdx,endIdx,parameters);
+
+
+    int columns = 0;
+    int rows = 0;
+
+    std::vector<T::GridValueList> valueList;
+
+    qParam.getValueListSize(columns,rows);
+
+    for (int r = 0; r<rows; r++)
+    {
+      T::GridValueList list;
+      for (int c=0; c<columns; c++)
+      {
+
+        T::GridValue *rec = qParam.getValueListRecord(c,r);
+        if (rec)
+        {
+          std::vector<T::ParamValue> values = parameters;
+          qParam.getValueListValuesByRowRange(c,r+startIdx,r+endIdx,values);
+          executeRowRangeValueFunction(query,functionPtr,type,luaFunction,values,*rec,list);
+        }
+      }
+      valueList.emplace_back(list);
+    }
+
+    for (int r = 0; r<rows; r++)
+    {
+      (*qParam.mValueList[r]).mValueList = valueList[r];
+      if (query.mAggregationTimes.find((*qParam.mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
+        (*qParam.mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the row range function (a built-in function or a Lua function of the type 1 or 5) with
+           the values and add the result record (a copy of the record with the result value) to the list. */
+
+void ServiceImplementation::executeRowRangeValueFunction(const Query& query,Functions::FunctionPtr functionPtr,uint type,const std::string& luaFunction,std::vector<T::ParamValue>& values,const T::GridValue& rec,T::GridValueList& list)
+{
+  try
+  {
+    if (functionPtr)
+    {
+      T::GridValue newRec(rec);
+      newRec.mValue = functionPtr->executeFunctionCall1(values);
+      list.addGridValue(newRec);
+      return;
+    }
+
+    switch (type)
+    {
+      case 1:
+      {
+        T::GridValue newRec(rec);
+        newRec.mValue = mLuaFileCollection.executeFunctionCall1(luaFunction, values);
+        list.addGridValue(newRec);
+      }
+      break;
+
+      case 5:
+      {
+        T::GridValue newRec(rec);
+        newRec.mValueString = mLuaFileCollection.executeFunctionCall5(luaFunction,query.mLanguage,values);
+        list.addGridValue(newRec);
+      }
+      break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
 
 
 /*! \brief Query Server: Execute query functions. */
@@ -3602,13 +4036,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object before function execution:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryObject(query,"Query -object before function execution:");
 
 
     uint valueCount = query.getValuesPerTimeStep();
@@ -3624,8 +4052,6 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
       std::string function = qParam->mFunction;
       if (!function.empty())
       {
-        std::string f = function.substr(0, 1);
-
         // VALID selects the first parameter that has data for the time and covers the point, and
         // returns its value as such. A missing value of the preferred parameter (say no
         // precipitation in a nowcast) must not be replaced by the value of a later parameter (say
@@ -3635,347 +4061,12 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
         int tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
-          std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
-          pValues->mForecastTimeUTC = *tt;
-
-          std::vector<double> areaParameters;  // If the case of area request, this contain all grid point values.
-          std::vector<double> extParameters;
-
-          bool areaCnt = false;
-          T::ProducerId producerId = 0;
-          T::GenerationId generationId = 0;
-          uint geometryId = 0;
-          uint flags = 0;
-
-          T::GridValue lastRec;
-          for (uint v = 0; v < valueCount; v++)
-          {
-            std::vector<double> parameters;
-            std::vector<std::string> strParameters;
-
-            for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
-            {
-              double a = toDouble(it->second.c_str());
-              QueryParameter* q = query.getQueryParameterPtr(it->first);
-              if (onlyAvailableParams && q != nullptr && !hasDataAtPoint(query, *q, tCount, v))
-                continue;
-
-              strParameters.push_back(it->second);
-              std::vector<double> valueList;
-              if (q != nullptr)
-              {
-                if ((std::size_t)tCount < q->mValueList.size())
-                {
-                  if (producerId == 0 && q->mValueList[tCount]->mProducerId > 0)
-                  {
-                    producerId = q->mValueList[tCount]->mProducerId;
-                    generationId = q->mValueList[tCount]->mGenerationId;
-                    geometryId = q->mValueList[tCount]->mGeometryId;
-                    flags = q->mValueList[tCount]->mFlags;
-                  }
-
-                  T::GridValue rec;
-                  if (q->mValueList[tCount]->mValueList.getGridValueByIndex(v,rec))
-                  {
-                    if (!rec.mValueString.empty())
-                    {
-                      splitString(rec.mValueString, ';', valueList);
-                    }
-                    else
-                    {
-                      a = rec.mValue;
-                    }
-
-                    if (rec.mX == -1000 && rec.mY == -1000)
-                    {
-                      areaCnt = true;
-                    }
-                    else
-                    {
-                      lastRec = rec;
-                    }
-                  }
-                  else
-                  {
-                    a = ParamValueMissing;
-                  }
-                }
-                else
-                {
-                  areaCnt = true;
-                }
-              }
-
-              if (valueList.empty())
-              {
-                parameters.emplace_back(a);
-                if (q)
-                  areaParameters.emplace_back(a);
-                else
-                if (v == 0)
-                  extParameters.emplace_back(a);
-              }
-              else
-              {
-                for (auto aa = valueList.begin(); aa != valueList.end(); ++aa)
-                {
-                  parameters.emplace_back(*aa);
-                  if (q)
-                    areaParameters.emplace_back(*aa);
-                  else
-                  if (v == 0)
-                    extParameters.emplace_back(*aa);
-                }
-              }
-            }
-
-            if (f == "/")
-            {
-              pValues->mFlags = flags;
-              if (!parameters.empty())
-              {
-                T::GridValue rec(lastRec.mX, lastRec.mY, parameters[0]);
-                pValues->mValueList.addGridValue(rec);
-              }
-              else
-              {
-                T::GridValue rec(lastRec.mX, lastRec.mY, ParamValueMissing);
-                pValues->mValueList.addGridValue(rec);
-              }
-            }
-            else
-            if (f != "@" && !areaCnt)
-            {
-              // Functions parameter list is a simple value list. If this is an area request
-              // then each grid point is calculated separately.
-
-              auto *functionPtr = mFunctionCollection.getFunction(function);
-              if (functionPtr)
-              {
-                double val = functionPtr->executeFunctionCall1(parameters);
-                T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                pValues->mValueList.addGridValue(rec);
-              }
-              else
-              {
-                std::string luaFunction;
-                uint type = mLuaFileCollection.getFunction(function, luaFunction);
-                switch (type)
-                {
-                  case 1:
-                  {
-                    double val = mLuaFileCollection.executeFunctionCall1(luaFunction, parameters);
-                    T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                    pValues->mValueList.addGridValue(rec);
-                  }
-                  break;
-
-                  case 2:
-                  {
-                    if (strParameters.size() == 1)
-                    {
-                      double val = mLuaFileCollection.executeFunctionCall2(luaFunction, strParameters[0].c_str());
-                      T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                      pValues->mValueList.addGridValue(rec);
-                    }
-                  }
-                  break;
-
-                  case 5:
-                  {
-                    std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, parameters);
-                    T::GridValue rec(lastRec.mX, lastRec.mY, val);
-                    pValues->mValueList.addGridValue(rec);
-                  }
-                  break;
-                  default:
-                    break;
-                }
-              }
-
-              pValues->mProducerId = producerId;
-              pValues->mGenerationId = generationId;
-              pValues->mGeometryId = geometryId;
-            }
-          }
-          /*
-
-          if (areaCnt && f != "@")
-          {
-            std::string luaFunction;
-            uint type = mLuaFileCollection.getFunction(function, luaFunction);
-            switch (type)
-            {
-              case 1:
-              {
-                double val = mLuaFileCollection.executeFunctionCall1(luaFunction, extParameters);
-                T::GridValue rec(-1000, -1000, val);
-                pValues->mValueList.addGridValue(rec);
-              }
-              break;
-
-              case 5:
-              {
-                std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, extParameters);
-                T::GridValue rec(-1000, -1000, val);
-                pValues->mValueList.addGridValue(rec);
-              }
-              break;
-            }
-
-            pValues->mProducerId = producerId;
-            pValues->mGenerationId = generationId;
-            pValues->mGeometryId = geometryId;
-          }
-          */
-
-          if (!function.empty()  &&  function.substr(0, 1) == "@")
-          {
-            // This is an area function call.
-
-            std::string func = function.substr(1);
-            for (auto it = areaParameters.begin();it != areaParameters.end();++it)
-              extParameters.push_back(*it);
-
-            auto *functionPtr = mFunctionCollection.getFunction(func);
-            if (functionPtr)
-            {
-              double val = functionPtr->executeFunctionCall1(extParameters);
-              T::GridValue rec(-1000, -1000, val);
-              pValues->mValueList.addGridValue(rec);
-            }
-            else
-            {
-              std::string luaFunction;
-              uint type = mLuaFileCollection.getFunction(func, luaFunction);
-              switch (type)
-              {
-                case 1:
-                {
-                  double val = mLuaFileCollection.executeFunctionCall1(luaFunction, extParameters);
-                  T::GridValue rec(-1000, -1000, val);
-                  pValues->mValueList.addGridValue(rec);
-                }
-                break;
-
-                case 5:
-                {
-                  std::string val = mLuaFileCollection.executeFunctionCall5(luaFunction, query.mLanguage, extParameters);
-                  T::GridValue rec(-1000, -1000, val);
-                  pValues->mValueList.addGridValue(rec);
-                }
-                break;
-                default:
-                  break;
-              }
-            }
-
-            pValues->mProducerId = producerId;
-            pValues->mGenerationId = generationId;
-            pValues->mGeometryId = geometryId;
-          }
-
-          if (areaCnt)
-          {
-            if (pValues->mValueList.getLength() > 1)
-            {
-              T::GridValue rec;
-              pValues->mValueList.getGridValueByIndex(0,rec);
-              pValues->mValueList.clear();
-              rec.mX = -1000;
-              rec.mY = -1000;
-              pValues->mValueList.addGridValue(rec);
-            }
-          }
-          qParam->mValueList.emplace_back(pValues);
-
+          executeTimeStepFunction(query,*qParam,function,valueCount,onlyAvailableParams,tCount,*tt);
           tCount++;
         }
       }
-      if (!qParam->mFunction.empty() > 0  &&  qParam->mFunction.substr(0,1) == "/")
-      {
-        std::string function = qParam->mFunction.substr(1);
-        auto *functionPtr = mFunctionCollection.getFunction(function);
-        uint type = 0;
-        std::string luaFunction;
-        if (!functionPtr)
-          type = mLuaFileCollection.getFunction(function, luaFunction);
-
-        int startIdx = 0;
-        int endIdx = 0;
-
-        int fpLen = qParam->mFunctionParams.size();
-        if (fpLen > 1)
-          startIdx = toInt32(qParam->mFunctionParams[1].second);
-
-        if (fpLen > 2)
-          endIdx = toInt32(qParam->mFunctionParams[2].second);
-
-        std::vector<T::ParamValue> parameters;
-        for (int t=4; t<fpLen; t++)
-          parameters.emplace_back(toDouble(qParam->mFunctionParams[t].second));
-
-
-        int columns = 0;
-        int rows = 0;
-
-        std::vector<T::GridValueList> valueList;
-
-        qParam->getValueListSize(columns,rows);
-
-        for (int r = 0; r<rows; r++)
-        {
-          T::GridValueList list;
-          for (int c=0; c<columns; c++)
-          {
-
-            T::GridValue *rec = qParam->getValueListRecord(c,r);
-            if (rec)
-            {
-              std::vector<T::ParamValue> values = parameters;
-              qParam->getValueListValuesByRowRange(c,r+startIdx,r+endIdx,values);
-
-              if (functionPtr)
-              {
-                T::GridValue newRec(*rec);
-                newRec.mValue = functionPtr->executeFunctionCall1(values);
-                list.addGridValue(newRec);
-              }
-              else
-              {
-                switch (type)
-                {
-                  case 1:
-                  {
-                    T::GridValue newRec(*rec);
-                    newRec.mValue = mLuaFileCollection.executeFunctionCall1(luaFunction, values);
-                    list.addGridValue(newRec);
-                  }
-                  break;
-
-                  case 5:
-                  {
-                    T::GridValue newRec(*rec);
-                    newRec.mValueString = mLuaFileCollection.executeFunctionCall5(luaFunction,query.mLanguage,values);
-                    list.addGridValue(newRec);
-                  }
-                  break;
-                  default:
-                    break;
-                }
-              }
-            }
-          }
-          valueList.emplace_back(list);
-        }
-
-        for (int r = 0; r<rows; r++)
-        {
-          (*qParam->mValueList[r]).mValueList = valueList[r];
-          if (query.mAggregationTimes.find((*qParam->mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
-            (*qParam->mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
-        }
-      }
+      if (!qParam->mFunction.empty()  &&  qParam->mFunction.substr(0,1) == "/")
+        executeRowRangeFunction(query,*qParam);
     }
 
     query.removeTemporaryParameters();
@@ -3989,13 +4080,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
 
     query.updateForecastTimeList();
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object after function execution:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryObject(query,"Query -object after function execution:");
   }
   catch (...)
   {

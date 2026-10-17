@@ -411,6 +411,11 @@ class ServiceImplementation : public ServiceInterface
      void           fetchTimeStepValues(Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,time_t forecastTime,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList);
      void           updateTimeStepFetchState(const Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,bool concat,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,ParameterValues& valueList);
      void           addMissingTimeStepValues(const Query& query,QueryParameter& qParam,time_t tt,const std::unordered_set<time_t>& additionalTimeList,const QueryFetchState& state);
+     void           executePointFunction(const Query& query,const std::string& function,std::vector<double>& parameters,const std::vector<std::string>& strParameters,const T::GridValue& lastRec,ParameterValues& values);
+     void           executeAreaFunction(const Query& query,const std::string& func,const std::vector<double>& areaParameters,std::vector<double>& extParameters,ParameterValues& values);
+     void           executeTimeStepFunction(Query& query,QueryParameter& qParam,const std::string& function,uint valueCount,bool onlyAvailableParams,int tCount,time_t forecastTime);
+     void           executeRowRangeFunction(Query& query,QueryParameter& qParam);
+     void           executeRowRangeValueFunction(const Query& query,Functions::FunctionPtr functionPtr,uint type,const std::string& luaFunction,std::vector<T::ParamValue>& values,const T::GridValue& rec,T::GridValueList& list);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);
