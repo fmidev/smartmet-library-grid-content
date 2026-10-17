@@ -351,6 +351,37 @@ void setLevelValueListContentInfo(ParameterValues& valueList,const ParameterMapp
 
 
 
+/*! \brief Collect the levels of the height records (the two given level fields) and replace the levels in the records
+           with their indexes in the ordered level set. Returns the level set. */
+
+std::set<T::ParamLevel> indexHeightLevels(HeightRec_vec& recs,T::ParamLevel HeightRec::*levelA,T::ParamLevel HeightRec::*levelB)
+{
+  std::set<T::ParamLevel> levels;
+  for (auto& rec : recs)
+  {
+    levels.insert(rec.*levelA);
+    levels.insert(rec.*levelB);
+  }
+
+  T::ParamLevel idx = 0;
+  for (int lev : levels)
+  {
+    for (auto& rec : recs)
+    {
+      if (rec.*levelA == lev)
+        rec.*levelA = idx;
+
+      if (rec.*levelB == lev)
+        rec.*levelB = idx;
+
+    }
+    idx++;
+  }
+  return levels;
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -7263,6 +7294,87 @@ bool ServiceImplementation::getPointValuesByHeight(
 
 
 
+/*! \brief Query Server: Get the value vectors of the levels (one vector per level) at the coordinates. Returns false if
+           a content is missing or the data server call fails. */
+
+bool ServiceImplementation::getHeightLevelValueVectors(
+    const Query& query,
+    T::Coordinate_vec& coordinates,
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId levelId,
+    const std::set<T::ParamLevel>& levels,
+    const QueryParameter& qParam,
+    short areaInterpolationMethod,
+    double_vec& modificationParameters,
+    std::vector<std::shared_ptr<T::ParamValue_vec>>& valueVectors)
+{
+  try
+  {
+    for (int lev : levels)
+    {
+      std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
+      time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,levelId,lev,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
+
+      //PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList1->getLength(),fTime1);
+
+      if (fTime == 0)
+        return false;
+
+      uint contentLen = contentList->getLength();
+      if (contentLen == 0)
+        return false;
+
+      T::ContentInfo* contentInfo = contentList->getContentInfoByIndex(0);
+
+      std::shared_ptr<T::ParamValue_vec> values(new T::ParamValue_vec());
+      int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
+      if (result1 != 0)
+      {
+        reportDataServerError("getGridValueVectorByCoordinateList",result1,{contentInfo});
+        return false;
+      }
+
+      valueVectors.push_back(values);
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Set the height interpolated values to the value list (converted by the function if requested) and the default precision. */
+
+void ServiceImplementation::setHeightValueVector(QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,ParameterValues& valueList)
+{
+  try
+  {
+    if (conversionByFunction  &&  (qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
+       executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
+    else
+      valueList.mValueVector = valueVector;
+
+    setDefaultPrecision(qParam,pInfo);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get value vectors by height. */
 
 bool ServiceImplementation::getValueVectorsByHeight(
@@ -7295,27 +7407,11 @@ bool ServiceImplementation::getValueVectorsByHeight(
     if (levelInterpolationMethod == T::LevelInterpolationMethod::Undefined)
       levelInterpolationMethod = pInfo.mLevelInterpolationMethod;
 
-    //uint modificationOperation = 0;
+    uint modificationOperation = 0;  // Not used: the data server calls below use no modification operation
     double_vec modificationParameters;
     std::string function;
     std::vector<std::string> functionParams;
-    bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
-
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        //modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    bool conversionByFunction = getValueConversion(pInfo,function,functionParams,modificationOperation,modificationParameters);
 
     T::ParamValue_vec valueVector;
     HeightRec_vec recs;
@@ -7329,57 +7425,12 @@ bool ServiceImplementation::getValueVectorsByHeight(
     if (rlen != coordinates.size())
       return false;
 
-    std::set<T::ParamLevel> levels1;
-    for (uint r=0; r<rlen; r++)
-    {
-      levels1.insert(recs[r].level1_1);
-      levels1.insert(recs[r].level1_2);
-    }
-
-    T::ParamLevel idx = 0;
-    for (int lev : levels1)
-    {
-      for (uint r=0; r<rlen; r++)
-      {
-        if (recs[r].level1_1 == lev)
-          recs[r].level1_1 = idx;
-
-        if (recs[r].level1_2 == lev)
-          recs[r].level1_2 = idx;
-
-      }
-      idx++;
-    }
-
+    std::set<T::ParamLevel> levels1 = indexHeightLevels(recs,&HeightRec::level1_1,&HeightRec::level1_2);
 
     std::vector<std::shared_ptr<T::ParamValue_vec>> valueList1;
 
-    for (int lev : levels1)
-    {
-      std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
-      time_t fTime1 = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,lev,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
-
-      //PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList1->getLength(),fTime1);
-
-      if (fTime1 == 0)
-        return false;
-
-      uint contentLen1 = contentList->getLength();
-      if (contentLen1 == 0)
-        return false;
-
-      T::ContentInfo* contentInfo = contentList->getContentInfoByIndex(0);
-
-      std::shared_ptr<T::ParamValue_vec> values(new T::ParamValue_vec());
-      int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
-      if (result1 != 0)
-      {
-        reportDataServerError("getGridValueVectorByCoordinateList",result1,{contentInfo});
-        return false;
-      }
-
-      valueList1.push_back(values);
-    }
+    if (!getHeightLevelValueVectors(query,coordinates,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,levels1,qParam,areaInterpolationMethod,modificationParameters,valueList1))
+      return false;
 
     if (recs[0].time1 == recs[0].time2)
     {
@@ -7390,73 +7441,18 @@ bool ServiceImplementation::getValueVectorsByHeight(
         valueVector.push_back(val);
       }
 
-      if (conversionByFunction  &&  (qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-         executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-      else
-        valueList.mValueVector = valueVector;
-
-      setDefaultPrecision(qParam,pInfo);
+      setHeightValueVector(qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
 
       return true;
     }
 
 
-    if (recs[0].time1 == recs[0].time2)
-      return false;
-
-
-    std::set<T::ParamLevel> levels2;
-    for (uint r=0; r<rlen; r++)
-    {
-      levels2.insert(recs[r].level2_1);
-      levels2.insert(recs[r].level2_2);
-    }
-
-    idx = 0;
-    for (int lev : levels2)
-    {
-      for (uint r=0; r<rlen; r++)
-      {
-        if (recs[r].level2_1 == lev)
-          recs[r].level2_1 = idx;
-
-        if (recs[r].level2_2 == lev)
-          recs[r].level2_2 = idx;
-
-      }
-      idx++;
-    }
-
-
+    std::set<T::ParamLevel> levels2 = indexHeightLevels(recs,&HeightRec::level2_1,&HeightRec::level2_2);
 
     std::vector<std::shared_ptr<T::ParamValue_vec>> valueList2;
 
-    for (int lev : levels2)
-    {
-      std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
-      time_t fTime2 = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,lev,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
-
-      //PRINT_DATA(mDebugLog, "         + Found %u content records (fTime = %ld)\n", contentList1->getLength(),fTime1);
-
-      if (fTime2 == 0)
-        return false;
-
-      uint contentLen = contentList->getLength();
-      if (contentLen == 0)
-        return false;
-
-      T::ContentInfo* contentInfo = contentList->getContentInfoByIndex(0);
-
-      std::shared_ptr<T::ParamValue_vec> values(new T::ParamValue_vec());
-      int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
-      if (result1 != 0)
-      {
-        reportDataServerError("getGridValueVectorByCoordinateList",result1,{contentInfo});
-        return false;
-      }
-
-      valueList2.push_back(values);
-    }
+    if (!getHeightLevelValueVectors(query,coordinates,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,levels2,qParam,areaInterpolationMethod,modificationParameters,valueList2))
+      return false;
 
     valueVector.reserve(rlen);
     for (uint r=0; r<rlen; r++)
@@ -7468,12 +7464,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
       valueVector.push_back(val);
     }
 
-    if (conversionByFunction  &&  (qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-       executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-    else
-      valueList.mValueVector = valueVector;
-
-    setDefaultPrecision(qParam,pInfo);
+    setHeightValueVector(qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
 
     return true;
   }

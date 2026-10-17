@@ -351,6 +351,8 @@ class ServiceImplementation : public ServiceInterface
      void           checkThreadCacheState();
      void           printContentList(T::ContentInfoList& contentList);
      bool           getContentLevels(const T::ProducerInfo& producerInfo,T::GenerationId generationId,T::GeometryId producerGeometryId,const ParameterMapping& pInfo,T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& parameterLevels);
+     bool           getHeightLevelValueVectors(const Query& query,T::Coordinate_vec& coordinates,const T::ProducerInfo& producerInfo,T::GeometryId producerGeometryId,T::GenerationId generationId,ParameterMapping& pInfo,time_t forecastTime,T::ParamLevelId levelId,const std::set<T::ParamLevel>& levels,const QueryParameter& qParam,short areaInterpolationMethod,double_vec& modificationParameters,std::vector<std::shared_ptr<T::ParamValue_vec>>& valueVectors);
+     void           setHeightValueVector(QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,ParameterValues& valueList);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);
