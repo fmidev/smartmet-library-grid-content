@@ -232,6 +232,11 @@ class MergeImplementation : public ServiceInterface
     void                 addMergedContent(T::ContentInfo *contentInfo);
     void                 addEventFileAndContents(uint contentStorageIndex,T::FileId newFileId,const std::string& eventData);
     void                 addStoredFileAndContents(uint contentStorageIndex,T::FileId newFileId,T::EventInfo& eventInfo);
+    void                 updateContentIfRequired();
+    bool                 reloadAfterRestart(uint s,const T::EventInfo& eventInfo);
+    bool                 processEventInfoList(uint s,T::EventInfoList& eventInfoList,uint& ecnt);
+    bool                 processSourceEvents(uint s,bool eventThread,uint& tlen,uint& ecnt);
+    void                 removeUnknownGenerationTimes();
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

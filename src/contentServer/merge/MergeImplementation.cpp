@@ -6728,6 +6728,179 @@ void MergeImplementation::processEvent(uint contentStorageIndex,T::EventInfo& ev
 
 
 
+/*! \brief Update the content when the update interval has changed or an update was requested, but not more often than every 30 seconds. */
+
+void MergeImplementation::updateContentIfRequired()
+{
+  try
+  {
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Reload the data if the content storage has restarted after its last known start (according to the last event). Returns true after a reload. */
+
+bool MergeImplementation::reloadAfterRestart(uint s,const T::EventInfo& eventInfo)
+{
+  try
+  {
+    if (mContentSources[s].mContentStorageStartTime > 0 &&  mContentSources[s].mContentStorageStartTime < eventInfo.mServerTime)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents(%u);Content server restart detected, reload required",s);
+      mEventInfoList.clear();
+      reloadData();
+      mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
+      mContentUpdateRequired  = true;
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Process the events of the content storage (logging failures). Returns false if a shutdown was requested. */
+
+bool MergeImplementation::processEventInfoList(uint s,T::EventInfoList& eventInfoList,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo *it = eventInfoList.getFirstEvent();
+    while (it != nullptr)
+    {
+      try
+      {
+        processEvent(s,*it);
+        ecnt++;
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+        exception.printError();
+      }
+
+      mContentSources[s].mLastProcessedEventId = it->mEventId;
+      it = it->nextItem;
+      if (mShutdownRequested)
+        return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Fetch and process the new events of the content storage, adding their number to tlen. Returns false if
+           the processing should stop (reload after a restart, a fetch error or a shutdown request). */
+
+bool MergeImplementation::processSourceEvents(uint s,bool eventThread,uint& tlen,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo eventInfo;
+    eventInfo.mEventId = 0;
+    int result = mContentSources[s].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+    if ((result == Result::DATA_NOT_FOUND || result == Result::OK)  &&  eventThread  &&  reloadAfterRestart(s,eventInfo))
+      return false;
+
+    if (result != Result::OK)
+      return true;
+
+    if (eventThread  &&  mContentSources[s].mContentStorageStartTime == 0)
+      mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
+
+    if (eventInfo.mEventId <= mContentSources[s].mLastProcessedEventId)
+      return true;
+
+    T::EventInfoList eventInfoList;
+    result = mContentSources[s].mContentStorage->getEventInfoList(mSessionId,0,mContentSources[s].mLastProcessedEventId+1,10000,eventInfoList);
+    if (result != 0)
+    {
+      return false;
+    }
+
+    uint len = eventInfoList.getLength();
+    tlen += len;
+
+    return processEventInfoList(s,eventInfoList,ecnt);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Remove the cached forecast times of the generations that are not in the active search structure. */
+
+void MergeImplementation::removeUnknownGenerationTimes()
+{
+  try
+  {
+    auto ssp = activeSearchStructure();
+    if (!ssp)
+      return;
+
+    AutoReadLock lock(&mContentTimeCache_modificationLock);
+
+    for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); )
+    {
+      if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+      {
+        if (mShutdownRequested)
+          return;
+
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        it = mContentTimeCache.erase(it);
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: drain pending events from each upstream content storage and apply them. */
 
 void MergeImplementation::processEvents(bool eventThread)
@@ -6747,15 +6920,7 @@ void MergeImplementation::processEvents(bool eventThread)
       return;
     }
 
-    time_t t1 = time(nullptr) / mContentUpdateInterval;
-    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
-
-    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
-    {
-      mContentUpdateRequired = false;
-      mContentUpdateTime = 0;
-      updateContent();
-    }
+    updateContentIfRequired();
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
@@ -6781,60 +6946,8 @@ void MergeImplementation::processEvents(bool eventThread)
         if (mShutdownRequested)
           return;
 
-        T::EventInfo eventInfo;
-        eventInfo.mEventId = 0;
-        int result = mContentSources[s].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-        if (result == Result::DATA_NOT_FOUND || result == Result::OK)
-        {
-          if (eventThread  &&  mContentSources[s].mContentStorageStartTime > 0 &&  mContentSources[s].mContentStorageStartTime < eventInfo.mServerTime)
-          {
-            PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents(%u);Content server restart detected, reload required",s);
-            mEventInfoList.clear();
-            reloadData();
-            mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
-            mContentUpdateRequired  = true;
-            return;
-          }
-        }
-
-        if (result == Result::OK)
-        {
-          if (eventThread  &&  mContentSources[s].mContentStorageStartTime == 0)
-            mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
-
-          if (eventInfo.mEventId > mContentSources[s].mLastProcessedEventId)
-          {
-            T::EventInfoList eventInfoList;
-            result = mContentSources[s].mContentStorage->getEventInfoList(mSessionId,0,mContentSources[s].mLastProcessedEventId+1,10000,eventInfoList);
-            if (result != 0)
-            {
-              return;
-            }
-
-            uint len = eventInfoList.getLength();
-            tlen += len;
-
-            T::EventInfo *it = eventInfoList.getFirstEvent();
-            while (it != nullptr)
-            {
-              try
-              {
-                processEvent(s,*it);
-                ecnt++;
-              }
-              catch (...)
-              {
-                Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-                exception.printError();
-              }
-
-              mContentSources[s].mLastProcessedEventId = it->mEventId;
-              it = it->nextItem;
-              if (mShutdownRequested)
-                return;
-            }
-          }
-        }
+        if (!processSourceEvents(s,eventThread,tlen,ecnt))
+          return;
       }
     }
 
@@ -6850,24 +6963,7 @@ void MergeImplementation::processEvents(bool eventThread)
 
       PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents();%s",buf);
 
-      auto ssp = activeSearchStructure();
-      if (ssp)
-      {
-        AutoReadLock lock(&mContentTimeCache_modificationLock);
-
-        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
-        {
-          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-          {
-            if (mShutdownRequested)
-              return;
-
-            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-            mContentTimeCache.erase(it->first);
-            mContentTimeCache_modificationLock.writeUnlock();
-          }
-        }
-      }
+      removeUnknownGenerationTimes();
     }
   }
   catch (...)
