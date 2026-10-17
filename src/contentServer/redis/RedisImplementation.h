@@ -257,6 +257,14 @@ class RedisImplementation : public ServiceInterface
 
      int            addFilename(const std::string& filename,T::FileId fileId);
      int            addFileContentList(const T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList);
+     int            checkContentReferences(const T::ContentInfo& info,T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo);
+     void           setEventData(T::EventInfo& eventInfo);
+     void           registerLockOwner(UInt64 lockRequestCounter);
+     bool           isLockOwnerAlive(UInt64 releaseCounter);
+     UInt64         getLockReleaseCounter();
+     int            connectRedis(redisContext*& context);
+     void           setConnection(redisContext *context);
+     bool           authenticateRedis(redisContext *context,int& result);
      int            deleteFilename(const std::string& filename);
      T::FileId      getFileId(const std::string& filename);
      void           getFilenames(std::map<std::string,T::FileId>& fileList);

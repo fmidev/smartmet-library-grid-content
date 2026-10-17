@@ -2,6 +2,7 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/identification/GridDef.h>
 
 #include <utility>
 
@@ -14,6 +15,75 @@ namespace SmartMet
 {
 namespace ContentServer
 {
+
+
+/*! \brief Return the parameter key of the content of the given key type, or an empty string if the parameter has no such key.
+           With fmiIdFallback a content without an FMI name gets the key "FMI-<id>" for the FMI_NAME type. */
+
+std::string ServiceInterface::getParameterKeyByType(const T::ContentInfo& contentInfo,T::ParamKeyType parameterKeyType,bool fmiIdFallback)
+{
+  try
+  {
+    std::string paramKey;
+    auto fmiId = contentInfo.mFmiParameterId;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        paramKey = std::to_string(contentInfo.mFmiParameterId);
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        paramKey = contentInfo.getFmiParameterName();
+        if (fmiIdFallback  &&  paramKey.empty())
+          paramKey = "FMI-" + toString(contentInfo.mFmiParameterId);
+        break;
+
+      case T::ParamKeyTypeValue::GRIB_ID:
+      {
+        Identification::FmiParameterId_grib def;
+        if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
+          paramKey = std::to_string(def.mGribParameterId);
+      }
+      break;
+
+      case T::ParamKeyTypeValue::NEWBASE_ID:
+      {
+        Identification::FmiParameterId_newbase def;
+        if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
+          paramKey = std::to_string(def.mNewbaseParameterId);
+      }
+      break;
+
+      case T::ParamKeyTypeValue::NEWBASE_NAME:
+      {
+        Identification::NewbaseParameterDef def;
+        if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
+          paramKey = def.mParameterName;
+      }
+      break;
+
+      case T::ParamKeyTypeValue::NETCDF_NAME:
+      {
+        Identification::FmiParameterId_netCdf def;
+        if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
+          paramKey = def.mNetCdfParameterName;
+      }
+      break;
+
+      default:
+        break;
+    }
+    return paramKey;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
 
 
 /*! \brief Constructor: initializes log pointers to null, marks implementation type as Interface and enables the service. */

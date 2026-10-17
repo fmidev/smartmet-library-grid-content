@@ -234,6 +234,8 @@ class ServiceInterface
 
    protected:
 
+     static std::string getParameterKeyByType(const T::ContentInfo& contentInfo,T::ParamKeyType parameterKeyType,bool fmiIdFallback = false);
+
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);
      virtual int    _getContentChangeTime(T::SessionId sessionId,time_t& changeTime);

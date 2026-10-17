@@ -334,6 +334,111 @@ RedisImplementation::~RedisImplementation()
 
 
 
+/*! \brief Record the ticket and the Redis connection of the lock holder. A waiter may reset the lock only
+           if that connection no longer exists (the holder has crashed), never while the holder is alive but slow. */
+
+void RedisImplementation::registerLockOwner(UInt64 lockRequestCounter)
+{
+  try
+  {
+    auto *idReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT ID"));
+    if (idReply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot get the Redis client id!");
+    }
+    const long long clientId = idReply->integer;
+    freeReplyObject(idReply);
+
+    auto *setReply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockOwner %llu:%lld",mTablePrefix.c_str(),static_cast<unsigned long long>(lockRequestCounter),clientId));
+    if (setReply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot set the lock owner!");
+    }
+    freeReplyObject(setReply);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief True if the current lock holder (ticket releaseCounter+1) is known to be connected to Redis. Holders
+           of older versions do not register themselves, and are treated as not alive like before. */
+
+bool RedisImplementation::isLockOwnerAlive(UInt64 releaseCounter)
+{
+  try
+  {
+    auto *ownerReply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockOwner",mTablePrefix.c_str()));
+    if (ownerReply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot get the lock owner!");
+    }
+    std::string owner = (ownerReply->str != nullptr ? ownerReply->str : "");
+    freeReplyObject(ownerReply);
+
+    // The owner is "<ticket>:<client id>"
+    const auto colon = owner.find(':');
+    if (colon == std::string::npos)
+      return false;
+    const auto ticket = Fmi::stoul_opt(owner.substr(0,colon));
+    const auto client = Fmi::stol_opt(owner.substr(colon+1));
+    if (!ticket || !client || *ticket != releaseCounter + 1)
+      return false;
+    const long long clientId = *client;
+
+    auto *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
+    if (listReply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot list the Redis clients!");
+    }
+    const bool alive = listReply->type == REDIS_REPLY_STRING && listReply->str != nullptr && listReply->len > 0;
+    freeReplyObject(listReply);
+    return alive;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Return the current value of the lock release counter. */
+
+UInt64 RedisImplementation::getLockReleaseCounter()
+{
+  try
+  {
+    auto *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
+    if (reply == nullptr)
+    {
+      closeConnection();
+      throw Fmi::Exception(BCP,"Cannot get the lock release counter!");
+    }
+    UInt64 lockReleaseCounter = reply->integer;
+    if (reply->str != nullptr)
+      lockReleaseCounter = toInt64(reply->str);
+    freeReplyObject(reply);
+    return lockReleaseCounter;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 /*! \brief Acquires a thread- or database-level lock, optionally resetting it after a timeout. */
 
 void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint waitTimeInSec,bool resetLock)
@@ -367,64 +472,6 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
     UInt64 previousReleaseCounter = 0;
     freeReplyObject(reply);
 
-    // Record the ticket and the Redis connection of the lock holder. A waiter
-    // may reset the lock only if that connection no longer exists (the holder
-    // has crashed), never while the holder is alive but slow.
-    auto registerOwner = [&]()
-    {
-      auto *idReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT ID"));
-      if (idReply == nullptr)
-      {
-        closeConnection();
-        throw Fmi::Exception(BCP,"Cannot get the Redis client id!");
-      }
-      const long long clientId = idReply->integer;
-      freeReplyObject(idReply);
-
-      auto *setReply = static_cast<redisReply*>(redisCommand(mContext,"SET %slockOwner %llu:%lld",mTablePrefix.c_str(),static_cast<unsigned long long>(lockRequestCounter),clientId));
-      if (setReply == nullptr)
-      {
-        closeConnection();
-        throw Fmi::Exception(BCP,"Cannot set the lock owner!");
-      }
-      freeReplyObject(setReply);
-    };
-
-    // True if the current lock holder (ticket lockReleaseCounter+1) is known to
-    // be connected to Redis. Holders of older versions do not register
-    // themselves, and are treated as not alive like before.
-    auto ownerAlive = [&](UInt64 releaseCounter) -> bool
-    {
-      auto *ownerReply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockOwner",mTablePrefix.c_str()));
-      if (ownerReply == nullptr)
-      {
-        closeConnection();
-        throw Fmi::Exception(BCP,"Cannot get the lock owner!");
-      }
-      std::string owner = (ownerReply->str != nullptr ? ownerReply->str : "");
-      freeReplyObject(ownerReply);
-
-      // The owner is "<ticket>:<client id>"
-      const auto colon = owner.find(':');
-      if (colon == std::string::npos)
-        return false;
-      const auto ticket = Fmi::stoul_opt(owner.substr(0,colon));
-      const auto client = Fmi::stol_opt(owner.substr(colon+1));
-      if (!ticket || !client || *ticket != releaseCounter + 1)
-        return false;
-      const long long clientId = *client;
-
-      auto *listReply = static_cast<redisReply*>(redisCommand(mContext,"CLIENT LIST ID %lld",clientId));
-      if (listReply == nullptr)
-      {
-        closeConnection();
-        throw Fmi::Exception(BCP,"Cannot list the Redis clients!");
-      }
-      const bool alive = listReply->type == REDIS_REPLY_STRING && listReply->str != nullptr && listReply->len > 0;
-      freeReplyObject(listReply);
-      return alive;
-    };
-
     time_t startTime = time(nullptr);
 
     while (true)
@@ -435,20 +482,11 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
         return;
       }
 
-      auto *reply = static_cast<redisReply*>(redisCommand(mContext,"GET %slockReleaseCounter",mTablePrefix.c_str()));
-      if (reply == nullptr)
-      {
-        closeConnection();
-        throw Fmi::Exception(BCP,"Cannot get the lock release counter!");
-      }
-      lockReleaseCounter = reply->integer;
-      if (reply->str != nullptr)
-        lockReleaseCounter = toInt64(reply->str);
-      freeReplyObject(reply);
+      lockReleaseCounter = getLockReleaseCounter();
 
       if ((lockReleaseCounter+1) == lockRequestCounter)
       {
-        registerOwner();
+        registerLockOwner(lockRequestCounter);
         key = lockRequestCounter;
         return;
       }
@@ -474,7 +512,7 @@ void RedisImplementation::lock(const char *function,uint line,UInt64 & key,uint 
           throw exception;
         }
 
-        if (lockReleaseCounter < lockRequestCounter && ownerAlive(lockReleaseCounter))
+        if (lockReleaseCounter < lockRequestCounter && isLockOwnerAlive(lockReleaseCounter))
         {
           // The holder is alive, just slow. Keep waiting.
           startTime = currentTime;
@@ -638,6 +676,111 @@ void RedisImplementation::init(const char *redisAddress,int redisPort,const char
 
 
 
+/*! \brief Connect to the primary Redis server, or to the secondary one if the primary fails. Returns
+           PERMANENT_STORAGE_ERROR if the secondary fails too; the context is null if neither could be tried. */
+
+int RedisImplementation::connectRedis(redisContext*& context)
+{
+  try
+  {
+    struct timeval timeout = { 3, 0 }; // 3 seconds
+
+    context = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
+    if (context != nullptr && !context->err)
+    {
+      mSourceInfo = "Redis:" + mRedisAddress + ":" + std::to_string(mRedisPort);
+      return Result::OK;
+    }
+
+    if (context)
+    {
+      printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,context->errstr);
+      redisFree(context);
+      context = nullptr;
+    }
+
+    if (mRedisSecondaryPort <= 0)
+      return Result::OK;
+
+    context = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
+    if (context == nullptr || context->err)
+    {
+      if (context)
+      {
+        printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,context->errstr);
+        redisFree(context);
+        context = nullptr;
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+      printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
+      return Result::PERMANENT_STORAGE_ERROR;
+    }
+
+    mSourceInfo = "Redis:" + mRedisSecondaryAddress + ":" + std::to_string(mRedisSecondaryPort);
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Take the connected context into use. */
+
+void RedisImplementation::setConnection(redisContext *context)
+{
+  mContext = context;
+  if (mStartTime == 0 || mReloadRequired)
+    mStartTime = time(nullptr);
+}
+
+
+
+
+/*! \brief Authenticate the connection. Returns false if there was no reply, otherwise sets the result:
+           OK when the connection was taken into use, AUTHENTICATION_FAILED when the context was freed. */
+
+bool RedisImplementation::authenticateRedis(redisContext *context,int& result)
+{
+  try
+  {
+    // SECURITY: the password must be passed as an argument, never as part of the
+    // format string: a '%' in the password would otherwise be interpreted by
+    // hiredis as a conversion (reading garbage varargs), and a space would split
+    // it into two arguments.
+    auto *authReply = static_cast<redisReply*>(
+        redisCommand(context,"AUTH %b",mRedisPassword.data(),mRedisPassword.size()));
+    if (authReply == nullptr)
+      return false;
+
+    const bool ok = (authReply->type == REDIS_REPLY_STATUS && authReply->str != nullptr &&
+                     strcasecmp(authReply->str,"OK") == 0);
+    freeReplyObject(authReply);
+    if (ok)
+    {
+      setConnection(context);
+      result = Result::OK;
+      return true;
+    }
+
+    redisFree(context);
+    printf("Redis authentication failed (%s)\n",mSourceInfo.c_str());
+    mSourceInfo = "Redis:AUTHENTICATION_FAILED";
+    result = Result::AUTHENTICATION_FAILED;
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 /*! \brief Opens the Redis connection, falling back to the secondary instance if needed. */
 
 int RedisImplementation::openConnection()
@@ -648,45 +791,10 @@ int RedisImplementation::openConnection()
     if (mContext != nullptr)
       return Result::OK;
 
-    struct timeval timeout = { 3, 0 }; // 3 seconds
-
     redisContext *context = nullptr;
 
-    context = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
-    if (context == nullptr || context->err)
-    {
-      if (context)
-      {
-        printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,context->errstr);
-        redisFree(context);
-        context = nullptr;
-      }
-
-      if (mRedisSecondaryPort > 0)
-      {
-        context = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
-        if (context == nullptr || context->err)
-        {
-          if (context)
-          {
-            printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,context->errstr);
-            redisFree(context);
-            context = nullptr;
-            return Result::PERMANENT_STORAGE_ERROR;
-          }
-          printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
-          return Result::PERMANENT_STORAGE_ERROR;
-        }
-        else
-        {
-          mSourceInfo = "Redis:" + mRedisSecondaryAddress + ":" + std::to_string(mRedisSecondaryPort);
-        }
-      }
-    }
-    else
-    {
-      mSourceInfo = "Redis:" + mRedisAddress + ":" + std::to_string(mRedisPort);
-    }
+    if (connectRedis(context) != Result::OK)
+      return Result::PERMANENT_STORAGE_ERROR;
 
     if (context == nullptr)
     {
@@ -704,11 +812,8 @@ int RedisImplementation::openConnection()
 
         if (strcasecmp(replyStr,"PONG") == 0)
         {
-          mContext = context;
           freeReplyObject(reply);
-          if (mStartTime == 0 || mReloadRequired)
-            mStartTime = time(nullptr);
-
+          setConnection(context);
           return Result::OK;
         }
 
@@ -717,31 +822,9 @@ int RedisImplementation::openConnection()
           freeReplyObject(reply);
           reply = nullptr;
 
-          // SECURITY: the password must be passed as an argument, never as part of the
-          // format string: a '%' in the password would otherwise be interpreted by
-          // hiredis as a conversion (reading garbage varargs), and a space would split
-          // it into two arguments.
-          auto *authReply = static_cast<redisReply*>(
-              redisCommand(context,"AUTH %b",mRedisPassword.data(),mRedisPassword.size()));
-          if (authReply != nullptr)
-          {
-            const bool ok = (authReply->type == REDIS_REPLY_STATUS && authReply->str != nullptr &&
-                             strcasecmp(authReply->str,"OK") == 0);
-            freeReplyObject(authReply);
-            if (ok)
-            {
-              mContext = context;
-              if (mStartTime == 0 || mReloadRequired)
-                mStartTime = time(nullptr);
-
-              return Result::OK;
-            }
-
-            redisFree(context);
-            printf("Redis authentication failed (%s)\n",mSourceInfo.c_str());
-            mSourceInfo = "Redis:AUTHENTICATION_FAILED";
-            return Result::AUTHENTICATION_FAILED;
-          }
+          int result = Result::OK;
+          if (authenticateRedis(context,result))
+            return result;
         }
 
         if (reply != nullptr)
@@ -1647,100 +1730,10 @@ int RedisImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
 
       if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
       {
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
@@ -1826,100 +1819,10 @@ int RedisImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
       if (contentInfo->mProducerId == producerId)
       {
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
@@ -4700,6 +4603,63 @@ int RedisImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*request
 
 
 
+/*! \brief Set the CSV data of the added file and its contents, or of the added content, as the event data. */
+
+void RedisImplementation::setEventData(T::EventInfo& eventInfo)
+{
+  try
+  {
+    if (eventInfo.mType == EventType::FILE_ADDED)
+    {
+      T::FileInfo fileInfo;
+
+      if (getFileById(eventInfo.mId1,fileInfo) == 0)
+      {
+        std::ostringstream output;
+        output << fileInfo.getCsv() << "\n";
+
+        if (eventInfo.mId3 > 0)
+        {
+          T::ContentInfoList contentInfoList;
+          getContentByFileId(eventInfo.mId1,contentInfoList);
+
+          uint len = contentInfoList.getLength();
+          for (uint t=0; t<len; t++)
+          {
+            T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
+            output << contentInfo->getCsv() << "\n";
+          }
+        }
+        eventInfo.mEventData = output.str();
+      }
+      else
+      {
+        // File not found
+      }
+    }
+    else if (eventInfo.mType == EventType::CONTENT_ADDED)
+    {
+      T::ContentInfo contentInfo;
+      if (getContent(eventInfo.mId1,eventInfo.mId2,contentInfo) == 0)
+      {
+        eventInfo.mEventData = contentInfo.getCsv();
+      }
+      else
+      {
+       // Content not found
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Redis backend: returns a paged list of events starting from the given event id. */
 
 int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
@@ -4733,46 +4693,7 @@ int RedisImplementation::_getEventInfoList(T::SessionId sessionId,uint /*request
         auto *eventInfo = new T::EventInfo();
         eventInfo->setCsv(reply->element[t]->str);
 
-        if (eventInfo->mType == EventType::FILE_ADDED)
-        {
-          T::FileInfo fileInfo;
-
-          if (getFileById(eventInfo->mId1,fileInfo) == 0)
-          {
-            std::ostringstream output;
-            output << fileInfo.getCsv() << "\n";
-
-            if (eventInfo->mId3 > 0)
-            {
-              T::ContentInfoList contentInfoList;
-              getContentByFileId(eventInfo->mId1,contentInfoList);
-
-              uint len = contentInfoList.getLength();
-              for (uint t=0; t<len; t++)
-              {
-                T::ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-                output << contentInfo->getCsv() << "\n";
-              }
-            }
-            eventInfo->mEventData = output.str();
-          }
-          else
-          {
-            // File not found
-          }
-        }
-        else if (eventInfo->mType == EventType::CONTENT_ADDED)
-        {
-          T::ContentInfo contentInfo;
-          if (getContent(eventInfo->mId1,eventInfo->mId2,contentInfo) == 0)
-          {
-            eventInfo->mEventData = contentInfo.getCsv();
-          }
-          else
-          {
-           // Content not found
-          }
-        }
+        setEventData(*eventInfo);
 
         eventInfoList.addEventInfo(eventInfo);
       }
@@ -4966,6 +4887,43 @@ int RedisImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 
 
+/*! \brief Check that the producer, generation and file of the content exist and match each other. The infos
+           are caches of the previous lookups and are updated when the content refers to other ones. */
+
+int RedisImplementation::checkContentReferences(const T::ContentInfo& info,T::ProducerInfo& producerInfo,T::GenerationInfo& generationInfo,T::FileInfo& fileInfo)
+{
+  try
+  {
+    if (info.mProducerId != producerInfo.mProducerId && getProducerById(info.mProducerId,producerInfo) != Result::OK)
+      return Result::UNKNOWN_PRODUCER_ID;
+
+    if (info.mGenerationId != generationInfo.mGenerationId &&  getGenerationById(info.mGenerationId,generationInfo) != Result::OK)
+      return Result::UNKNOWN_GENERATION_ID;
+
+    if (info.mFileId != fileInfo.mFileId && getFileById(info.mFileId,fileInfo) != Result::OK)
+      return Result::UNKNOWN_FILE_ID;
+
+    if (producerInfo.mProducerId != generationInfo.mProducerId)
+      return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
+
+    if (producerInfo.mProducerId != fileInfo.mProducerId)
+      return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
+
+    if (generationInfo.mGenerationId != fileInfo.mGenerationId)
+      return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Redis backend: adds a batch of content records in a single pipelined operation. */
 
 int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
@@ -4997,23 +4955,9 @@ int RedisImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
       }
       else
       {
-        if (info->mProducerId != producerInfo.mProducerId && getProducerById(info->mProducerId,producerInfo) != Result::OK)
-          return Result::UNKNOWN_PRODUCER_ID;
-
-        if (info->mGenerationId != generationInfo.mGenerationId &&  getGenerationById(info->mGenerationId,generationInfo) != Result::OK)
-          return Result::UNKNOWN_GENERATION_ID;
-
-        if (info->mFileId != fileInfo.mFileId && getFileById(info->mFileId,fileInfo) != Result::OK)
-          return Result::UNKNOWN_FILE_ID;
-
-        if (producerInfo.mProducerId != generationInfo.mProducerId)
-          return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
-
-        if (producerInfo.mProducerId != fileInfo.mProducerId)
-          return Result::PRODUCER_AND_FILE_DO_NOT_MATCH;
-
-        if (generationInfo.mGenerationId != fileInfo.mGenerationId)
-          return Result::GENERATION_AND_FILE_DO_NOT_MATCH;
+        int result = checkContentReferences(*info,producerInfo,generationInfo,fileInfo);
+        if (result != Result::OK)
+          return result;
 
         UInt64 id = getContentKey(info->mFileId,info->mMessageIndex);
 

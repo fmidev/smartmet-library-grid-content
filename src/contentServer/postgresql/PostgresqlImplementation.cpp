@@ -1078,100 +1078,10 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
 
       if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
       {
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
