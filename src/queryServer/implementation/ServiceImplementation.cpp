@@ -8393,24 +8393,8 @@ bool ServiceImplementation::getStreamlineValues(
     T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
     T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
-    valueList.mParameterKeyType = pInfo.mParameterKeyType;
-    valueList.mParameterKey = pInfo.mParameterKey;
-    valueList.mParameterLevelId = paramLevelId;
-
-    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
-    valueList.mForecastTimeUTC = forecastTime;
-    valueList.mProducerId = contentInfo1->mProducerId;
-    valueList.mGenerationId = contentInfo1->mGenerationId;
+    setValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,*contentInfo1);
     valueList.mGenerationFlags = generationFlags;
-    valueList.mGeometryId = contentInfo1->mGeometryId;
-    valueList.mFileId[0] = contentInfo1->mFileId;
-    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = contentInfo1->mModificationTime;
-    valueList.mAnalysisTime = analysisTime;
-    valueList.mForecastType = contentInfo1->mForecastType;
-    valueList.mForecastNumber = contentInfo1->mForecastNumber;
-    valueList.mParameterLevel = contentInfo1->mParameterLevel;
-    valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
 
     query.mAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
     query.mAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -8418,133 +8402,101 @@ bool ServiceImplementation::getStreamlineValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTimeUTC == fTime)
+      if (contentInfo1->mForecastTimeUTC != fTime)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+        // There is one content record in place, but its time does not match to
+        // the requested forecast time. This is used for indicating that there
+        // are content records available, but not for the requested time.
+        // So, we should use this producer.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable;
-
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridStreamlinesByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridStreamlinesByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridStreamlines(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridStreamlinesByGeometry / getGridStreamlinesByGrid / getGridStreamlines");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
+        setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
+        return false;
       }
-      // There is one content record in place, but its time does not match to
-      // the requested forecast time. This is used for indicating that there
-      // are content records available, but not for the requested time.
-      // So, we should use this producer.
 
-      setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
-      return false;
+      // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
+      valueList.mFlags = ParameterValues::Flags::DataAvailable;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridStreamlinesByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridStreamlines(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridStreamlinesByGeometry / getGridStreamlinesByGrid / getGridStreamlines",{contentInfo1});
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
-    if (contentLen == 2)
+    if (contentLen == 2  &&  isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
     {
-      if (isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
-      {
-        // We did not find a grid with the exact forecast time, but we find grids that
-        // are before and after the current forecast time. This means that we should do
-        // some time interpolation.
+      // We did not find a grid with the exact forecast time, but we find grids that
+      // are before and after the current forecast time. This means that we should do
+      // some time interpolation.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridStreamlinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime",{contentInfo1,contentInfo2});
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridStreamlinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      setDefaultPrecision(qParam,pInfo);
 
-        return true;
-      }
-
-      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact level but we find grids that
-        // are before and after the current level. This means that we should do
-        // some level interpolation.
-
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridStreamlinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridStreamlinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel",{contentInfo1,contentInfo2});
-
-        valueList.mParameterLevel = paramLevel;
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
-      }
+      return true;
     }
 
-    if (contentLen == 4)
+    if (contentLen == 2  &&  contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
     {
-      if (isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
-      {
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-        valueList.mFileId[2] = contentInfo3->mFileId;
-        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
-        valueList.mFileId[3] = contentInfo4->mFileId;
-        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+      // We did not find a grid with the exact level but we find grids that
+      // are before and after the current level. This means that we should do
+      // some level interpolation.
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        valueList.mParameterLevel = paramLevel;
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridStreamlinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridStreamlinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      valueList.mParameterLevel = paramLevel;
 
-        return true;
-      }
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
+    }
+
+    if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
+    {
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFileId[2] = contentInfo3->mFileId;
+      valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+      valueList.mFileId[3] = contentInfo4->mFileId;
+      valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+
+      valueList.mParameterLevel = paramLevel;
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
     return false;
@@ -8639,24 +8591,8 @@ bool ServiceImplementation::getIsolineValues(
     T::ContentInfo* contentInfo3 = contentList->getContentInfoByIndex(2);
     T::ContentInfo* contentInfo4 = contentList->getContentInfoByIndex(3);
 
-    valueList.mParameterKeyType = pInfo.mParameterKeyType;
-    valueList.mParameterKey = pInfo.mParameterKey;
-    valueList.mParameterLevelId = paramLevelId;
-
-    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
-    valueList.mForecastTimeUTC = forecastTime;
-    valueList.mProducerId = contentInfo1->mProducerId;
-    valueList.mGenerationId = contentInfo1->mGenerationId;
+    setValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,*contentInfo1);
     valueList.mGenerationFlags = generationFlags;
-    valueList.mGeometryId = contentInfo1->mGeometryId;
-    valueList.mFileId[0] = contentInfo1->mFileId;
-    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = contentInfo1->mModificationTime;
-    valueList.mAnalysisTime = analysisTime;
-    valueList.mForecastType = contentInfo1->mForecastType;
-    valueList.mForecastNumber = contentInfo1->mForecastNumber;
-    valueList.mParameterLevel = contentInfo1->mParameterLevel;
-    valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
 
     query.mAttributeList.setAttribute("grid.timeInterpolationMethod",Fmi::to_string(timeInterpolationMethod));
     query.mAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -8664,136 +8600,104 @@ bool ServiceImplementation::getIsolineValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTimeUTC == fTime)
+      if (contentInfo1->mForecastTimeUTC != fTime)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+        // There is one content record in place, but its time does not match to
+        // the requested forecast time. This is used for indicating that there
+        // are content records available, but not for the requested time.
+        // So, we should use this producer.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable;
-
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsolinesByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsolinesByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsolines(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsolinesByGeometry / getGridIsolinesByGrid / getGridIsolines");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
+        setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
+        return false;
       }
-      // There is one content record in place, but its time does not match to
-      // the requested forecast time. This is used for indicating that there
-      // are content records available, but not for the requested time.
-      // So, we should use this producer.
 
-      setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
-      return false;
+      // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
+      valueList.mFlags = ParameterValues::Flags::DataAvailable;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsolinesByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsolines(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsolinesByGeometry / getGridIsolinesByGrid / getGridIsolines",{contentInfo1});
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
     query.mAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
-    if (contentLen == 2)
+    if (contentLen == 2  &&  isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
     {
-      if (isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
-      {
-        // We did not find a grid with the exact forecast time, but we find grids that
-        // are before and after the current forecast time. This means that we should do
-        // some time interpolation.
+      // We did not find a grid with the exact forecast time, but we find grids that
+      // are before and after the current forecast time. This means that we should do
+      // some time interpolation.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsolinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsolinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime",{contentInfo1,contentInfo2});
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsolinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsolinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      setDefaultPrecision(qParam,pInfo);
 
-        return true;
-      }
-
-      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact level but we find grids that
-        // are before and after the current level. This means that we should do
-        // some level interpolation.
-
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsolinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsolinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel",{contentInfo1,contentInfo2});
-
-        valueList.mParameterLevel = paramLevel;
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
-      }
+      return true;
     }
 
-    if (contentLen == 4)
+    if (contentLen == 2  &&  contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
     {
-      if (isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
-      {
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-        valueList.mFileId[2] = contentInfo3->mFileId;
-        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
-        valueList.mFileId[3] = contentInfo4->mFileId;
-        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+      // We did not find a grid with the exact level but we find grids that
+      // are before and after the current level. This means that we should do
+      // some level interpolation.
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsolinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsolinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        valueList.mParameterLevel = paramLevel;
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsolinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsolinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      valueList.mParameterLevel = paramLevel;
 
-        return true;
-      }
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
+    }
+
+    if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
+    {
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFileId[2] = contentInfo3->mFileId;
+      valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+      valueList.mFileId[3] = contentInfo4->mFileId;
+      valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsolinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsolinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+
+      valueList.mParameterLevel = paramLevel;
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
     return false;
@@ -8903,137 +8807,104 @@ bool ServiceImplementation::getIsobandValues(
 
     if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTimeUTC == fTime)
+      if (contentInfo1->mForecastTimeUTC != fTime)
       {
-        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+        // There is one content record in place, but its time does not match to
+        // the requested forecast time. This is used for indicating that there
+        // are content records available, but not for the requested time.
+        // So, we should use this producer.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable;
-
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsobandsByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsobandsByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsobands(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsobandsByGeometry / getGridIsobandsByGrid / getGridIsobands");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
+        setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
+        return false;
       }
-      // There is one content record in place, but its time does not match to
-      // the requested forecast time. This is used for indicating that there
-      // are content records available, but not for the requested time.
-      // So, we should use this producer.
 
-      setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
-      return false;
+      // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+
+      valueList.mFlags = ParameterValues::Flags::DataAvailable;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsobandsByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsobands(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsobandsByGeometry / getGridIsobandsByGrid / getGridIsobands",{contentInfo1});
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
     query.mAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
-    if (contentLen == 2)
+    if (contentLen == 2  &&  isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
     {
-      if (isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
-      {
-        // We did not find a grid with the exact forecast time, but we find grids that
-        // are before and after the current forecast time. This means that we should do
-        // some time interpolation.
+      // We did not find a grid with the exact forecast time, but we find grids that
+      // are before and after the current forecast time. This means that we should do
+      // some time interpolation.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsobandsByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsobandsByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime",{contentInfo1,contentInfo2});
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsobandsByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsobandsByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      setDefaultPrecision(qParam,pInfo);
 
-        return true;
-      }
-
-
-      if (contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact level but we find grids that
-        // are before and after the current level. This means that we should do
-        // some level interpolation.
-
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsobandsByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsobandsByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel",{contentInfo1,contentInfo2});
-
-        valueList.mParameterLevel = paramLevel;
-
-        setDefaultPrecision(qParam,pInfo);
-
-        return true;
-      }
+      return true;
     }
 
-    if (contentLen == 4)
+    if (contentLen == 2  &&  contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
     {
-      if (isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
-      {
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-        valueList.mFileId[2] = contentInfo3->mFileId;
-        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
-        valueList.mFileId[3] = contentInfo4->mFileId;
-        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+      // We did not find a grid with the exact level but we find grids that
+      // are before and after the current level. This means that we should do
+      // some level interpolation.
 
-        fetchContours(qParam,[&]() {
-            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
-              [&]() { return mDataServerPtr->getGridIsobandsByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
-              [&]() { return mDataServerPtr->getGridIsobandsByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
-          "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        valueList.mParameterLevel = paramLevel;
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsobandsByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsobandsByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel",{contentInfo1,contentInfo2});
 
-        setDefaultPrecision(qParam,pInfo);
+      valueList.mParameterLevel = paramLevel;
 
-        return true;
-      }
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
+    }
+
+    if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
+    {
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFileId[2] = contentInfo3->mFileId;
+      valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+      valueList.mFileId[3] = contentInfo4->mFileId;
+      valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+
+      fetchContours(qParam,[&]() {
+          return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+            [&]() { return mDataServerPtr->getGridIsobandsByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+            [&]() { return mDataServerPtr->getGridIsobandsByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+        "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
+
+      valueList.mParameterLevel = paramLevel;
+
+      setDefaultPrecision(qParam,pInfo);
+
+      return true;
     }
 
     return false;
