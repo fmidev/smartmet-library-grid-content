@@ -237,6 +237,13 @@ class MergeImplementation : public ServiceInterface
     bool                 processEventInfoList(uint s,T::EventInfoList& eventInfoList,uint& ecnt);
     bool                 processSourceEvents(uint s,bool eventThread,uint& tlen,uint& ecnt);
     void                 removeUnknownGenerationTimes();
+    bool                 isSearchStructureCurrent(SearchStructure& ss);
+    bool                 isCachedFileWaitAllowed();
+    bool                 isMissingFromLocalCache(T::FileInfo& fInfo);
+    T::FileInfo*         getFileMissingFromLocalCache();
+    void                 delayContentSwap(T::FileInfo& file);
+    void                 reportExceededCachedFileWait();
+    bool                 updateSearchStructureHashes(SearchStructure& ss);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

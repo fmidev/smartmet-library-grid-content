@@ -7006,6 +7006,237 @@ void MergeImplementation::eventProcessingThread()
 
 
 
+/*! \brief Return true if no files are waited for the local cache and the hashes of the search structure lists
+           match the hashes of the current lists. The hashes are logged. */
+
+bool MergeImplementation::isSearchStructureCurrent(SearchStructure& ss)
+{
+  try
+  {
+    if (mDebugLog &&  mDebugLog->isEnabled())
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
+
+      PRINT_DATA(mDebugLog,"  ** Producers    %zu  %zu\n",ss.mProducerInfoList.getHash(),mProducerInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Generations  %zu  %zu\n",ss.mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Geometries   %zu  %zu\n",ss.mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Files        %zu  %zu\n",ss.mFileInfoList.getHash(),mFileInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Content      %zu  %zu\n",ss.mContentInfoList[0].getHash(),mContentInfoList.getHash());
+    }
+    return mCachedFiles_totalWaitTime == 0 &&
+           ss.mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
+           ss.mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
+           ss.mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
+           ss.mFileInfoList.getHash() == mFileInfoList.getHash() &&
+           ss.mContentInfoList[0].getHash() == mContentInfoList.getHash();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Return true if the search structure swap may still wait for the locally cached files (the maximum wait time of the first or of the later swaps is not reached). */
+
+bool MergeImplementation::isCachedFileWaitAllowed()
+{
+  return (mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
+         (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime);
+}
+
+
+
+
+/*! \brief Return true if the file should be in the local cache but is not: it is marked for caching, it is not
+           deleted soon, its generation is ready and the original file exists. */
+
+bool MergeImplementation::isMissingFromLocalCache(T::FileInfo& fInfo)
+{
+  try
+  {
+    // We are caching locally only marked files.
+
+    if ((fInfo.mFlags & T::FileInfo::Flags::LocalCacheRecommended) == 0  ||  (fInfo.mFlags & T::FileInfo::Flags::DeletedFile) != 0  ||
+        fInfo.mServerType != T::FileInfo::ServerType::Filesys)
+      return false;
+
+    // Cannot find the file from the cached file list?
+
+    if (mCachedFiles.find(fInfo.mFileId) != mCachedFiles.end())
+      return false;
+
+    // The file deletion time is not very close, so it should be in the cache
+
+    if (fInfo.mDeletionTime != 0  &&  (time(nullptr) + 180) >= fInfo.mDeletionTime)
+      return false;
+
+    // The file generation status is ready, so it should be in the cache
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo.mGenerationId);
+    if (gInfo == nullptr  ||  gInfo->mStatus != T::GenerationInfo::Status::Ready)
+      return false;
+
+    // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
+
+    auto fsize = getFileSize(fInfo.mName.c_str());
+    return fsize > 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Return the first file that should be in the local cache but is not, or null if there is none. */
+
+T::FileInfo* MergeImplementation::getFileMissingFromLocalCache()
+{
+  try
+  {
+    uint fileCount = mFileInfoList.getLength();
+    for (uint t=0; t<fileCount; t++)
+    {
+      T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
+      if (fInfo  &&  isMissingFromLocalCache(*fInfo))
+        return fInfo;
+    }
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Log the reason and postpone the search structure swap until the file may be in the local cache. */
+
+void MergeImplementation::delayContentSwap(T::FileInfo& file)
+{
+  try
+  {
+    T::FileInfo *fInfo = &file;
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
+    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
+    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
+    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
+    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
+    if (mContentSwapCounter == 0)
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
+    }
+
+    mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
+    mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Report if the maximum wait time for the locally cached files was exceeded. */
+
+void MergeImplementation::reportExceededCachedFileWait()
+{
+  try
+  {
+    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
+        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
+    {
+      Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
+      exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
+      exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
+      exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
+      exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
+      exception.printError();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the producer hashes and the generation time ranges of the new search structure. Returns false if a shutdown was requested. */
+
+bool MergeImplementation::updateSearchStructureHashes(SearchStructure& ss)
+{
+  try
+  {
+    // ### Updating producer hash values
+
+    uint pLen = ss.mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoByIndex(p);
+      if (producerInfo != nullptr)
+      {
+        std::size_t generationHash = ss.mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t geometryHash = ss.mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t fileHash = ss.mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t contentHash = ss.mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
+
+        std::size_t h = 0;
+        Fmi::hash_merge(h,generationHash);
+        Fmi::hash_merge(h,geometryHash);
+        Fmi::hash_merge(h,fileHash);
+        Fmi::hash_merge(h,contentHash);
+
+        producerInfo->mHash = h;
+      }
+    }
+
+    //PRINT_EVENT_LINE(mDebugLog,"** producerHash calculated");
+
+
+    // ### Updating generation time ranges
+
+    uint glen = ss.mGenerationInfoList.getLength();
+    for (uint g=0; g<glen; g++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      auto *ginfo = ss.mGenerationInfoList.getGenerationInfoByIndex(g);
+      ss.mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: pull the latest content changes from every upstream content storage. */
 
 void MergeImplementation::updateContent()
@@ -7028,32 +7259,13 @@ void MergeImplementation::updateContent()
     auto ssp = activeSearchStructure();
     // We create totally new search structure and replace the the old one.
 
-    if (ssp)
+    if (ssp  &&  isSearchStructureCurrent(*ssp))
     {
-      if (mDebugLog &&  mDebugLog->isEnabled())
-      {
-        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
+      // Nothing has changed. No swapping needed.
 
-        PRINT_DATA(mDebugLog,"  ** Producers    %zu  %zu\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Generations  %zu  %zu\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Geometries   %zu  %zu\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Files        %zu  %zu\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Content      %zu  %zu\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
-      }
-
-      if (mCachedFiles_totalWaitTime == 0 &&
-          ssp->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
-          ssp->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
-          ssp->mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
-          ssp->mFileInfoList.getHash() == mFileInfoList.getHash() &&
-          ssp->mContentInfoList[0].getHash() == mContentInfoList.getHash())
-      {
-         // Nothing has changed. No swapping needed.
-
-        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();No search structure swapping required");
-        mContentUpdateTime = time(nullptr);
-        return;
-      }
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();No search structure swapping required");
+      mContentUpdateTime = time(nullptr);
+      return;
     }
 
     AutoReadLock lock(&mModificationLock);
@@ -7061,74 +7273,19 @@ void MergeImplementation::updateContent()
     PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping started");
 
 
-    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
-        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime))
+    if (isCachedFileWaitAllowed())
     {
       // We can swap the search structure only if the locally cached files are ready.
 
-      uint fileCount = mFileInfoList.getLength();
-      for (uint t=0; t<fileCount; t++)
+      T::FileInfo *fInfo = getFileMissingFromLocalCache();
+      if (fInfo != nullptr)
       {
-        T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
-        if (fInfo)
-        {
-          if ((fInfo->mFlags & T::FileInfo::Flags::LocalCacheRecommended)  &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&
-              fInfo->mServerType == T::FileInfo::ServerType::Filesys)
-          {
-            // We are caching locally only marked files.
-
-            if (mCachedFiles.find(fInfo->mFileId) == mCachedFiles.end())
-            {
-              // Cannot find the file from the cached file list.
-
-              if (fInfo->mDeletionTime == 0 || (time(nullptr) + 180) < fInfo->mDeletionTime)
-              {
-                // The file deletion time is not very close, so it should be in the cache
-
-                T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo->mGenerationId);
-                if (gInfo && gInfo->mStatus == T::GenerationInfo::Status::Ready)
-                {
-                  // The file generation status is ready, so it should be in the cache
-                  auto fsize = getFileSize(fInfo->mName.c_str());
-                  if (fsize > 0)
-                  {
-                    // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
-                    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
-                    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
-                    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
-                    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
-                    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
-                    if (mContentSwapCounter == 0)
-                    {
-                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
-                    }
-                    else
-                    {
-                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
-                    }
-
-                    mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
-                    mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
-                    return;
-                  }
-                }
-              }
-            }
-          }
-        }
+        delayContentSwap(*fInfo);
+        return;
       }
     }
 
-    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
-        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
-    {
-      Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
-      exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
-      exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
-      exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
-      exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
-      exception.printError();
-    }
+    reportExceededCachedFileWait();
 
     mCachedFiles_totalWaitTime = 0;
 
@@ -7167,47 +7324,8 @@ void MergeImplementation::updateContent()
     nptr->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
     //PRINT_EVENT_LINE(mDebugLog,"** contentList 2 sorted");
 
-    // ### Updating producer hash values
-
-    uint pLen = nptr->mProducerInfoList.getLength();
-
-    for (uint p=0; p<pLen; p++)
-    {
-      if (mShutdownRequested)
-        return;
-
-      T::ProducerInfo *producerInfo = nptr->mProducerInfoList.getProducerInfoByIndex(p);
-      if (producerInfo != nullptr)
-      {
-        std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t contentHash = nptr->mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
-
-        std::size_t h = 0;
-        Fmi::hash_merge(h,generationHash);
-        Fmi::hash_merge(h,geometryHash);
-        Fmi::hash_merge(h,fileHash);
-        Fmi::hash_merge(h,contentHash);
-
-        producerInfo->mHash = h;
-      }
-    }
-
-    //PRINT_EVENT_LINE(mDebugLog,"** producerHash calculated");
-
-
-    // ### Updating generation time ranges
-
-    uint glen = nptr->mGenerationInfoList.getLength();
-    for (uint g=0; g<glen; g++)
-    {
-      if (mShutdownRequested)
-        return;
-
-      auto *ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
-      nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
-    }
+    if (!updateSearchStructureHashes(*nptr))
+      return;
 
     PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping ended");
 
