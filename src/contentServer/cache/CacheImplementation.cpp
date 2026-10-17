@@ -1239,7 +1239,7 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
       return Result::OK;
 
     if (mUpdateInProgress)
-      return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+      return mContentStorage->getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
