@@ -4395,19 +4395,12 @@ void ServiceImplementation::executeConversion(const std::string& function, const
 
 
 
-/*! \brief Query Server: Get content list by parameter generation id and forecast time. */
+/*! \brief Query Server: Register the content caches of the current thread and request their clearing when their clear intervals have passed. */
 
-int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::ProducerId producerId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
+void ServiceImplementation::checkThreadCacheState()
 {
   try
   {
-    uint fmiId = 0;
-    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-    {
-      parameterKeyType = T::ParamKeyTypeValue::FMI_ID;
-      fmiId = toUInt32(parameterKey.c_str()+4);
-    }
-
     if (!thread_init)
     {
       thread_init = true;
@@ -4421,6 +4414,303 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     if ((mContentSearchCache_clearTime + mContentSearchCache_clearInterval) < currentTime)
       mContentSearchCache_clearRequiredTime = currentTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Find the content cache entry of the hash or of the level independent hash3 (then the hash is set to hash3), or return a new entry. */
+
+ContentCacheEntry_sptr ServiceImplementation::findContentCacheEntry(std::size_t& hash,std::size_t hash3,bool& newEntry)
+{
+  try
+  {
+    ContentCacheEntry_sptr entry;
+
+    auto cc = mContentCache.find(hash);
+    auto cc3 = cc;
+
+    if (cc != mContentCache.end())
+    {
+      // The required content information is was found from the cache
+
+      mContentCache_hits++;
+      entry = cc->second;
+    }
+    else
+    {
+      mContentCache_misses++;
+
+      // Trying to find the required content with another hash value
+
+      cc3 = mContentCache.find(hash3);
+      if (cc3 != mContentCache.end())
+      {
+        // The required content information was found from the cache
+
+        mContentCache_hits++;
+        entry = cc3->second;
+        hash = hash3;
+      }
+      else
+      {
+        // No cache entry available. We have to fetch the required content
+        // information from the contentServer.
+
+        mContentCache_misses++;
+
+        entry = std::make_shared<ContentCacheEntry>();
+        newEntry = true;
+      }
+    }
+
+    return entry;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the contents of the parameter of the generation into the content cache entry (on any level if there are none on the level, then the hash is set to hash3). */
+
+void ServiceImplementation::updateContentCacheEntry(ContentCacheEntry& entry,bool newEntry,T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t hash3)
+{
+  try
+  {
+    // Track the old record count so we can adjust the counter for in-place updates
+    std::size_t oldLen = newEntry ? 0 : std::max(entry.contentInfoList.getLength(), (uint)1);
+
+    time_t startTime = 0;
+    time_t endTime = 0xFFFFFFFF;
+
+    mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry.contentInfoList);
+    if (entry.contentInfoList.getLength() == 0)
+    {
+      // It seems that the content information on the required level is not available. Let's ignore
+      // the level requirement.
+
+      mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry.contentInfoList);
+      if (entry.contentInfoList.getLength() == 0)
+        hash = hash3;
+    }
+
+    entry.producerHash = producerHash;
+    entry.generationId = generationId;
+
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+        break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+        entry.contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
+        break;
+      default:
+        break;
+    }
+
+    // Adjust the records counter for in-place updates (when the entry already existed)
+    if (!newEntry && oldLen > 0)
+    {
+      std::size_t newLen = std::max(entry.contentInfoList.getLength(), (uint)1);
+      if (newLen > oldLen)
+      {
+        mContentCache_records += (newLen - oldLen);
+        mContentCache_size += (newLen - oldLen);
+      }
+      else if (oldLen > newLen)
+      {
+        mContentCache_records -= (oldLen - newLen);
+        mContentCache_size -= (oldLen - newLen);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Search the contents of the forecast time and level from the content list. */
+
+void ServiceImplementation::searchContentList(T::ContentInfoList& contentList,T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,uint fmiId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& cList)
+{
+  try
+  {
+    switch (parameterKeyType)
+    {
+      case T::ParamKeyTypeValue::FMI_ID:
+      {
+        if (fmiId == 0)
+          fmiId = toUInt32(parameterKey);
+
+        contentList.getContentInfoListByFmiParameterIdAndGenerationId2(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,cList);
+        if (cList.getLength() == 0)
+          contentList.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,cList);
+      }
+      break;
+
+      case T::ParamKeyTypeValue::FMI_NAME:
+      {
+        contentList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,cList);
+        if (cList.getLength() == 0)
+          contentList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,cList);
+      }
+      break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Store the search result into the content search cache (clearing the cache first when required). */
+
+void ServiceImplementation::storeContentSearchResult(std::size_t hash2,const std::shared_ptr<T::ContentInfoList>& cList,UInt64 producerHash,T::GenerationId generationId)
+{
+  try
+  {
+    if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
+        mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
+        mContentSearchCache_records >= mContentSearchCache_maxRecordsPerThread)
+    {
+      //printf("CLEAR CONTENT SEARCH CACHE %ld %ld %ld\n",mContentSearchCache_records,mContentSearchCache_maxRecords,(std::size_t)mContentSearchCache_size);
+      mContentSearchCache_size -= mContentSearchCache_records;
+      mContentSearchCache.clear();
+      mContentSearchCache_records = 0;
+      mContentSearchCache_clearTime = time(nullptr);
+      mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
+      mContentSearchCache_hits = 0;
+      mContentSearchCache_misses = 0;
+      mContentSearchCache_inserts = 0;
+    }
+
+    auto rr = mContentSearchCache.find(hash2);
+    if (rr == mContentSearchCache.end())
+    {
+      // Current search result is new. We should add in into the cache.
+
+      mContentSearchCache_misses++;
+      ContentSearchCacheEntry rc;
+      rc.contentInfoList = cList;
+      rc.producerHash = producerHash;
+      rc.generationId = generationId;
+      mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
+
+      auto len = cList->getLength();
+      if (!len)
+        len = 1;
+
+      mContentSearchCache_records += len;
+      mContentSearchCache_inserts++;
+      mContentSearchCache_size += len;
+    }
+    else
+    {
+      // Current search result is already in use, but it has old information. We should update this information.
+      mContentSearchCache_hits++;
+
+      rr->second.contentInfoList = cList;
+      rr->second.producerHash = producerHash;
+      rr->second.generationId = generationId;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Store the new entry into the content cache (clearing the cache first when required). */
+
+void ServiceImplementation::storeContentCacheEntry(std::size_t hash,const ContentCacheEntry_sptr& entry)
+{
+  try
+  {
+    if (mContentCache_clearTime < mContentCache_clearRequiredTime ||
+        mContentCache_clearTime < mContentCache_globalClearRequiredTime ||
+        mContentCache_records > mContentCache_maxRecordsPerThread)
+    {
+      //printf("CLEAR CONTENT CACHE %ld %ld %ld\n",mContentCache_records,mContentCache_maxRecordsPerThread,(std::size_t)mContentCache_size);
+      mContentCache_size -= mContentCache_records;
+      mContentCache.clear();
+      mContentCache_hits = 0;
+      mContentCache_misses = 0;
+      mContentCache_inserts = 0;
+      mContentCache_records = 0;
+      mContentCache_clearTime = time(nullptr);
+      mContentCache_stats.starttime = Fmi::SecondClock::universal_time();
+
+      mLevelContentCache.clear();
+    }
+
+    if (mContentCache.find(hash) == mContentCache.end())
+    {
+      mContentCache.insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
+
+      auto len = entry->contentInfoList.getLength();
+      if (!len)
+        len = 1;
+
+      mContentCache_records += len;
+      mContentCache_inserts++;
+      mContentCache_size += len;
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog,"%s:%d:%s: The code should never reach this point!\n",BCP);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get content list by parameter generation id and forecast time. */
+
+int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::ProducerId producerId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
+{
+  try
+  {
+    uint fmiId = 0;
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+    {
+      parameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+      fmiId = toUInt32(parameterKey.c_str()+4);
+    }
+
+    checkThreadCacheState();
 
     std::size_t hash = 0;
     Fmi::hash_merge(hash,producerId);
@@ -4466,211 +4756,28 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     // ### Checking if we have already cached the required content information.
 
-    ContentCacheEntry_sptr entry;
     bool newEntry = false;
-
-    auto cc = mContentCache.find(hash);
-    auto cc3 = cc;
-
-    if (cc != mContentCache.end())
-    {
-      // The required content information is was found from the cache
-
-      mContentCache_hits++;
-      entry = cc->second;
-    }
-    else
-    {
-      mContentCache_misses++;
-
-      // Trying to find the required content with another hash value
-
-      cc3 = mContentCache.find(hash3);
-      if (cc3 != mContentCache.end())
-      {
-        // The required content information was found from the cache
-
-        mContentCache_hits++;
-        entry = cc3->second;
-        hash = hash3;
-      }
-      else
-      {
-        // No cache entry available. We have to fetch the required content
-        // information from the contentServer.
-
-        mContentCache_misses++;
-
-        entry = std::make_shared<ContentCacheEntry>();
-        newEntry = true;
-      }
-    }
+    ContentCacheEntry_sptr entry = findContentCacheEntry(hash,hash3,newEntry);
 
 
     if (newEntry || entry->producerHash != producerHash)
     {
       // The content entry in the cache seems to be old or missing. That's why we should update this entry.
-
-      // Track the old record count so we can adjust the counter for in-place updates
-      std::size_t oldLen = newEntry ? 0 : std::max(entry->contentInfoList.getLength(), (uint)1);
-
-      time_t startTime = 0;
-      time_t endTime = 0xFFFFFFFF;
-
-      mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,level,level,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
-      if (entry->contentInfoList.getLength() == 0)
-      {
-        // It seems that the content information on the required level is not available. Let's ignore
-        // the level requirement.
-
-        mContentServerPtr->getContentListByParameterAndGenerationId(sessionId,generationId,parameterKeyType,parameterKey,parameterLevelId,0,1000000000,forecastType,forecastNumber,geometryId,startTime,endTime,0,entry->contentInfoList);
-        if (entry->contentInfoList.getLength() == 0)
-          hash = hash3;
-      }
-
-      entry->producerHash = producerHash;
-      entry->generationId = generationId;
-
-      switch (parameterKeyType)
-      {
-        case T::ParamKeyTypeValue::FMI_ID:
-          break;
-
-        case T::ParamKeyTypeValue::FMI_NAME:
-          entry->contentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time);
-          break;
-        default:
-          break;
-      }
-
-      // Adjust the records counter for in-place updates (when the entry already existed)
-      if (!newEntry && oldLen > 0)
-      {
-        std::size_t newLen = std::max(entry->contentInfoList.getLength(), (uint)1);
-        if (newLen > oldLen)
-        {
-          mContentCache_records += (newLen - oldLen);
-          mContentCache_size += (newLen - oldLen);
-        }
-        else if (oldLen > newLen)
-        {
-          mContentCache_records -= (oldLen - newLen);
-          mContentCache_size -= (oldLen - newLen);
-        }
-      }
+      updateContentCacheEntry(*entry,newEntry,sessionId,producerHash,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,hash,hash3);
     }
 
 
     // ### Now we should have the required content information ready for the search.
 
     std::shared_ptr<T::ContentInfoList> cList = std::make_shared<T::ContentInfoList>();
-    switch (parameterKeyType)
-    {
-      case T::ParamKeyTypeValue::FMI_ID:
-      {
-        if (fmiId == 0)
-          fmiId = toUInt32(parameterKey);
-
-        entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId2(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-        if (cList->getLength() == 0)
-          entry->contentInfoList.getContentInfoListByFmiParameterIdAndGenerationId(producerId,generationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-      }
-      break;
-
-      case T::ParamKeyTypeValue::FMI_NAME:
-      {
-        entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId2(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-        if (cList->getLength() == 0)
-          entry->contentInfoList.getContentInfoListByFmiParameterNameAndGenerationId(producerId,generationId,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
-      }
-      break;
-      default:
-        break;
-    }
+    searchContentList(entry->contentInfoList,producerId,generationId,parameterKeyType,parameterKey,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime,*cList);
 
     contentInfoList = cList;
 
-    if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
-        mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
-        mContentSearchCache_records >= mContentSearchCache_maxRecordsPerThread)
-    {
-      //printf("CLEAR CONTENT SEARCH CACHE %ld %ld %ld\n",mContentSearchCache_records,mContentSearchCache_maxRecords,(std::size_t)mContentSearchCache_size);
-      mContentSearchCache_size -= mContentSearchCache_records;
-      mContentSearchCache.clear();
-      mContentSearchCache_records = 0;
-      mContentSearchCache_clearTime = time(nullptr);
-      mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
-      mContentSearchCache_hits = 0;
-      mContentSearchCache_misses = 0;
-      mContentSearchCache_inserts = 0;
-    }
-
-    auto rr = mContentSearchCache.find(hash2);
-    if (rr == mContentSearchCache.end())
-    {
-      // Current search result is new. We should add in into the cache.
-
-      mContentSearchCache_misses++;
-      ContentSearchCacheEntry rc;
-      rc.contentInfoList = cList;
-      rc.producerHash = producerHash;
-      rc.generationId = generationId;
-      mContentSearchCache.insert(std::pair<std::size_t,ContentSearchCacheEntry>(hash2,rc));
-
-      auto len = cList->getLength();
-      if (!len)
-        len = 1;
-
-      mContentSearchCache_records += len;
-      mContentSearchCache_inserts++;
-      mContentSearchCache_size += len;
-    }
-    else
-    {
-      // Current search result is already in use, but it has old information. We should update this information.
-      mContentSearchCache_hits++;
-
-      rr->second.contentInfoList = cList;
-      rr->second.producerHash = producerHash;
-      rr->second.generationId = generationId;
-    }
+    storeContentSearchResult(hash2,cList,producerHash,generationId);
 
     if (newEntry)
-    {
-      if (mContentCache_clearTime < mContentCache_clearRequiredTime ||
-          mContentCache_clearTime < mContentCache_globalClearRequiredTime ||
-          mContentCache_records > mContentCache_maxRecordsPerThread)
-      {
-        //printf("CLEAR CONTENT CACHE %ld %ld %ld\n",mContentCache_records,mContentCache_maxRecordsPerThread,(std::size_t)mContentCache_size);
-        mContentCache_size -= mContentCache_records;
-        mContentCache.clear();
-        mContentCache_hits = 0;
-        mContentCache_misses = 0;
-        mContentCache_inserts = 0;
-        mContentCache_records = 0;
-        mContentCache_clearTime = time(nullptr);
-        mContentCache_stats.starttime = Fmi::SecondClock::universal_time();
-
-        mLevelContentCache.clear();
-      }
-
-      if (mContentCache.find(hash) == mContentCache.end())
-      {
-        mContentCache.insert(std::pair<std::size_t,ContentCacheEntry_sptr>(hash,entry));
-
-        auto len = entry->contentInfoList.getLength();
-        if (!len)
-          len = 1;
-
-        mContentCache_records += len;
-        mContentCache_inserts++;
-        mContentCache_size += len;
-      }
-      else
-      {
-        PRINT_DATA(mDebugLog,"%s:%d:%s: The code should never reach this point!\n",BCP);
-      }
-    }
+      storeContentCacheEntry(hash,entry);
 
     return Result::OK;
   }

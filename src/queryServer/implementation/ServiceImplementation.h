@@ -348,6 +348,12 @@ class ServiceImplementation : public ServiceInterface
      QueryParameter newFunctionParameter(const QueryParameter& queryParam,const std::string& paramStr,const FunctionParam& functionParam,int contourCoordinateType);
      bool           updateQueryParameter(Query& query,QueryParameter& qParam,std::vector<QueryParameter>& additionalParameterList);
      void           checkContentServerRestart();
+     void           checkThreadCacheState();
+     ContentCacheEntry_sptr findContentCacheEntry(std::size_t& hash,std::size_t hash3,bool& newEntry);
+     void           updateContentCacheEntry(ContentCacheEntry& entry,bool newEntry,T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t hash3);
+     void           searchContentList(T::ContentInfoList& contentList,T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,uint fmiId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& cList);
+     void           storeContentSearchResult(std::size_t hash2,const std::shared_ptr<T::ContentInfoList>& cList,UInt64 producerHash,T::GenerationId generationId);
+     void           storeContentCacheEntry(std::size_t hash,const ContentCacheEntry_sptr& entry);
      void           updateRequestStatistics(time_t& prevTime,Int64& prevCounter);
      void           setConversionParameters(const std::vector<std::string>& functionParams,T::ParamValue value,time_t forecastTime,const T::Coordinate& coordinate,std::vector<double>& parameters);
      void           loadHeightConversionFile();
