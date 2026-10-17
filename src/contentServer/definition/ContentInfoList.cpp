@@ -3448,6 +3448,106 @@ bool matchesLevelRange(const ContentInfo *info,T::ParamLevelId parameterLevelId,
 
 
 
+/*! \brief Return true if the content matches the forecast type/number, geometry, level id and level range filters. */
+
+bool matchesContentFilters(const ContentInfo *info,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId)
+{
+  return matchesForecastGeometryAndLevelId(info,forecastType,forecastNumber,geometryId,parameterLevelId)  &&
+         matchesLevelRange(info,parameterLevelId,minLevel,maxLevel);
+}
+
+
+
+/*! \brief Return true if the forecast time of the content is within the time range. */
+
+bool isWithinTimeRange(const ContentInfo *info,time_t startTimeUTC,time_t endTimeUTC)
+{
+  return info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC;
+}
+
+
+
+/*! \brief Add the content if it is within the time range, and remember the closest contents before and after the range. */
+
+void collectTimeRangeContent(ContentInfo *info,time_t startTimeUTC,time_t endTimeUTC,ContentInfo*& prev,ContentInfo*& next,ContentInfoList& contentInfoList)
+{
+  if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
+    prev = info;
+
+  if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
+    next = info;
+
+  if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
+  {
+    addContent(contentInfoList,info);
+  }
+}
+
+
+
+/*! \brief Add the closest contents before and after the time range when the request flags ask for them. */
+
+void addTimeRangeNeighbours(ContentInfo *prev,ContentInfo *next,uint requestFlags,ContentInfoList& contentInfoList)
+{
+  if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
+  {
+    // We need to add the previous entry before the start time.
+
+    addContent(contentInfoList,prev);
+  }
+
+  if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
+  {
+    // We need to add the next entry after the end time.
+
+    addContent(contentInfoList,next);
+  }
+}
+
+
+
+/*! \brief Filters and time range of the time range searches. */
+
+struct TimeRangeQuery
+{
+  T::ParamLevelId parameterLevelId;
+  T::ParamLevel minLevel;
+  T::ParamLevel maxLevel;
+  T::ForecastType forecastType;
+  T::ForecastNumber forecastNumber;
+  T::GeometryId geometryId;
+  time_t startTimeUTC;
+  time_t endTimeUTC;
+};
+
+
+
+/*! \brief Add the matching contents of the generation and parameter name of the search info from an array sorted by fmiName_producer_generation_level_time, starting from the given index. */
+
+void addGenerationContentsByName(ContentInfoPtr *array,uint length,uint idx,const ContentInfo& searchInfo,const TimeRangeQuery& q,ContentInfoList& contentInfoList)
+{
+  for (uint t = idx; t < length && array[t] != nullptr; t++)
+  {
+    ContentInfo *info = array[t];
+    //std::cout << info->mForecastTime << " " << info->mParameterLevel << "\n";
+    if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+      continue;
+
+    if (info->mGenerationId != searchInfo.mGenerationId  ||  strcmp(info->getFmiParameterName(), searchInfo.getFmiParameterName()) != 0)
+    {
+      if (t > idx)
+        break;
+    }
+    else
+    if (matchesContentFilters(info,q.parameterLevelId,q.minLevel,q.maxLevel,q.forecastType,q.forecastNumber,q.geometryId)  &&  isWithinTimeRange(info,q.startTimeUTC,q.endTimeUTC))
+    {
+      addContent(contentInfoList,info);
+    }
+  }
+}
+
+
+
 /*! \brief Return true if the content has the parameter of the search info (compared by name or by id). */
 
 bool isSameParameter(const ContentInfo *info,const ContentInfo& searchInfo,bool byName)
@@ -3832,21 +3932,9 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
       {
         if (info->mFmiParameterId == fmiParameterId)
         {
-          if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
+          if (matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId)  &&  isWithinTimeRange(info,startTimeUTC,endTimeUTC))
           {
-            if (geometryId < 0 || info->mGeometryId == geometryId)
-            {
-              if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-              {
-                if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                {
-                  if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
-                  {
-                    addContent(contentInfoList,info);
-                  }
-                }
-              }
-            }
+            addContent(contentInfoList,info);
           }
         }
       }
@@ -3917,43 +4005,15 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (info->mGenerationId == generationId)
-          {
-            if (info->mFmiParameterId == fmiParameterId)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
+          if (info->mGenerationId != generationId  ||  info->mFmiParameterId != fmiParameterId)
           {
             if (t > C_UINT(idx))
               t = mLength;
+          }
+          else
+          if (matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId))
+          {
+            collectTimeRangeContent(info,startTimeUTC,endTimeUTC,prev,next,contentInfoList);
           }
         }
         t++;
@@ -3962,19 +4022,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
       if (contentInfoList.getLength() != 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,next);
-      }
+      addTimeRangeNeighbours(prev,next,requestFlags,contentInfoList);
     }
     else
     {
@@ -4212,38 +4260,15 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (info->mProducerId == producerId)
-          {
-            if (info->mFmiParameterId == fmiParameterId)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
+          if (info->mProducerId != producerId)
           {
             if (t > C_UINT(idx))
               t = mLength;
+          }
+          else
+          if (info->mFmiParameterId == fmiParameterId  &&  matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId))
+          {
+            collectTimeRangeContent(info,startTimeUTC,endTimeUTC,prev,next,contentInfoList);
           }
         }
         t++;
@@ -4252,19 +4277,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,next);
-      }
+      addTimeRangeNeighbours(prev,next,requestFlags,contentInfoList);
     }
     else
     {
@@ -4330,21 +4343,9 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
       {
         if (strcmp(info->getFmiParameterName(), fmiParameterName.c_str()) == 0)
         {
-          if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
+          if (matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId)  &&  isWithinTimeRange(info,startTimeUTC,endTimeUTC))
           {
-            if (geometryId < 0 || info->mGeometryId == geometryId)
-            {
-              if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-              {
-                if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                {
-                  if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
-                  {
-                    addContent(contentInfoList,info);
-                  }
-                }
-              }
-            }
+            addContent(contentInfoList,info);
           }
         }
       }
@@ -4730,43 +4731,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
         //std::cout << info->mForecastTime << " " << info->mParameterLevel << "\n";
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (info->mGenerationId == generationId)
-          {
-            if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC < startTimeUTC  && (prev == nullptr || prev->mForecastTimeUTC < info->mForecastTimeUTC))
-                        prev = info;
-
-                      if (info->mForecastTimeUTC > endTimeUTC  && (next == nullptr || next->mForecastTimeUTC > info->mForecastTimeUTC))
-                        next = info;
-
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
+          if (info->mGenerationId != generationId  ||  strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) != 0)
           {
             if (t > C_UINT(idx))
               t = mLength;
+          }
+          else
+          if (matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId))
+          {
+            collectTimeRangeContent(info,startTimeUTC,endTimeUTC,prev,next,contentInfoList);
           }
         }
         t++;
@@ -4775,19 +4748,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
       if (contentInfoList.getLength() == 0)
         return;
 
-      if (prev != nullptr  &&  (prev->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_BEFORE))
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prev);
-      }
-
-      if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,next);
-      }
+      addTimeRangeNeighbours(prev,next,requestFlags,contentInfoList);
     }
     else
     {
@@ -4841,49 +4802,8 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::G
         searchInfo.setFmiParameterName(fmiParameterName);
         int idx = getClosestIndexNoLock(mComparisonMethod, searchInfo);
 
-        uint t = C_UINT(idx);
-
-        while (t < mLength && mArray[t] != nullptr)
-        {
-          ContentInfo *info = mArray[t];
-          //std::cout << info->mForecastTime << " " << info->mParameterLevel << "\n";
-          if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-          {
-            if (info->mGenerationId == gInfo->mGenerationId)
-            {
-              if (strcmp(info->getFmiParameterName(), searchInfo.getFmiParameterName()) == 0)
-              {
-                if (forecastType < 0 || (info->mForecastType == forecastType && (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-                {
-                  if (geometryId < 0 || info->mGeometryId == geometryId)
-                  {
-                    if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                    {
-                      if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                      {
-                        if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
-                        {
-                          addContent(contentInfoList,info);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-              else
-              {
-                if (t > C_UINT(idx))
-                  t = mLength;
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          t++;
-        }
+        TimeRangeQuery query = {parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTimeUTC,endTimeUTC};
+        addGenerationContentsByName(mArray,mLength,C_UINT(idx),searchInfo,query,contentInfoList);
       }
     }
     else
@@ -4960,32 +4880,15 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::Produ
         ContentInfo *info = mArray[t];
         if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
-          if (info->mProducerId == producerId)
-          {
-            if (strcmp(info->getFmiParameterName(),fmiParameterName.c_str()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel))
-                    {
-                      if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
+          if (info->mProducerId != producerId)
           {
             if (t > C_UINT(idx))
               t = mLength;
+          }
+          else
+          if (strcmp(info->getFmiParameterName(),fmiParameterName.c_str()) == 0  &&  matchesContentFilters(info,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId)  &&  isWithinTimeRange(info,startTimeUTC,endTimeUTC))
+          {
+            addContent(contentInfoList,info);
           }
         }
         t++;
@@ -5532,10 +5435,8 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
       {
         if (info->mGenerationId == generationId)
         {
-          if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
-          {
+          if (isWithinTimeRange(info,startTimeUTC,endTimeUTC))
             addContent(contentInfoList,info);
-          }
         }
         else
         {
