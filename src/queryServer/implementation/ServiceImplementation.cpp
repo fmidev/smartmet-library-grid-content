@@ -6779,10 +6779,20 @@ void ServiceImplementation::addInterpolatedSpecialValue(const double_vec& valueV
   {
     std::string tmp;
 
-    uint vLen1 = valueVector1.size();
+    // The vectors must have the same layout: the number of the constant values, the constant values and the
+    // values to interpolate. Nothing is added for vectors that do not match.
 
-    // The first number indicates the number of the constant values
-    uint sLen = valueVector1[0];
+    uint vLen1 = valueVector1.size();
+    if (vLen1 <= 1  ||  valueVector2.size() != vLen1  ||  valueVector1[0] != valueVector2[0])
+      return;
+
+    // The first number indicates the number of the constant values (at most the rest of the vector)
+    if (!(valueVector1[0] >= 0))
+      return;
+
+    uint sLen = vLen1 - 1;
+    if (valueVector1[0] < sLen)
+      sLen = valueVector1[0];
 
     T::GridValueList list1;
     T::GridValueList list2;
