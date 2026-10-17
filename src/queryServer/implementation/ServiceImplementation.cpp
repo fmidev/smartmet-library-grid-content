@@ -12017,6 +12017,24 @@ bool ServiceImplementation::getHeightValueVector(const T::ContentInfo& info,ucha
 
 
 
+namespace
+{
+/*! \brief Get the value of the index from the value vector. Returns false if the vector is missing or too short. */
+
+bool getIndexedValue(const std::shared_ptr<T::ParamValue_vec>& valueVec,uint index,T::ParamValue& value)
+{
+  if (!valueVec  ||  index >= valueVec->size())
+    return false;
+
+  value = (*valueVec)[index];
+  return true;
+}
+}  // namespace
+
+
+
+
+
 /*! \brief Query Server: Get closest levels by height. */
 
 bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& contentInfoList,uchar coordinateType,std::vector<T::Coordinate>& coordinates,uint coordinateIndex,std::size_t coordinateHash,int height,int& level1,float& height1,int& level2,float& height2)
@@ -12045,15 +12063,11 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
     std::shared_ptr<T::ParamValue_vec> lastValueVec;
     std::shared_ptr<T::ParamValue_vec> middleValueVec;
 
-    if (!getHeightValueVector(*b.first,coordinateType,coordinates,coordinateHash,firstValueVec))
+    if (!getHeightValueVector(*b.first,coordinateType,coordinates,coordinateHash,firstValueVec)  ||  !getIndexedValue(firstValueVec,coordinateIndex,b.firstValue))
       return false;
 
-    b.firstValue = (*firstValueVec)[coordinateIndex];
-
-    if (!getHeightValueVector(*b.last,coordinateType,coordinates,coordinateHash,lastValueVec))
+    if (!getHeightValueVector(*b.last,coordinateType,coordinates,coordinateHash,lastValueVec)  ||  !getIndexedValue(lastValueVec,coordinateIndex,b.lastValue))
       return false;
-
-    b.lastValue = (*lastValueVec)[coordinateIndex];
 
     bool reverse = false;
     if (b.firstValue > b.lastValue)
@@ -12066,10 +12080,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
       if (mid == nullptr)
         return false;
 
-      if (!getHeightValueVector(*mid,coordinateType,coordinates,coordinateHash,middleValueVec))
+      if (!getHeightValueVector(*mid,coordinateType,coordinates,coordinateHash,middleValueVec)  ||  !getIndexedValue(middleValueVec,coordinateIndex,middleValue))
         return false;
-
-      middleValue = (*middleValueVec)[coordinateIndex];
 
       if (bisectLevelBracket(b,mid,middleIndex,middleValue,height,reverse,level1,height1,level2,height2))
         return true;
