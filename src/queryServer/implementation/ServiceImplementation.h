@@ -347,6 +347,8 @@ class ServiceImplementation : public ServiceInterface
      void           addFunctionParam(const std::string& pname,FunctionParam_vec& functionParams);
      QueryParameter newFunctionParameter(const QueryParameter& queryParam,const std::string& paramStr,const FunctionParam& functionParam,int contourCoordinateType);
      bool           updateQueryParameter(Query& query,QueryParameter& qParam,std::vector<QueryParameter>& additionalParameterList);
+     void           checkContentServerRestart();
+     void           updateRequestStatistics(time_t& prevTime,Int64& prevCounter);
      void           setConversionParameters(const std::vector<std::string>& functionParams,T::ParamValue value,time_t forecastTime,const T::Coordinate& coordinate,std::vector<double>& parameters);
      void           loadHeightConversionFile();
      void           loadUnitConversionFile();

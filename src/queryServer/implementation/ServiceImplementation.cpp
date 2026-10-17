@@ -120,6 +120,22 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Run the function and ignore its exceptions. */
+
+template <class F>
+void runIgnoringExceptions(F f)
+{
+  try
+  {
+    f();
+  }
+  catch (...)
+  {
+  }
+}
+
+
+
 /*! \brief Contour attributes of the query. */
 
 struct ContourAttributes
@@ -12360,6 +12376,82 @@ void ServiceImplementation::checkParameterMappingUpdates()
 
 
 
+/*! \brief Query Server: Clear the cached information if the content server has been restarted. */
+
+void ServiceImplementation::checkContentServerRestart()
+{
+  try
+  {
+    T::EventInfo eventInfo;
+    int result = mContentServerPtr->getLastEventInfo(0,0,eventInfo);
+    if (result == Result::DATA_NOT_FOUND || result == Result::OK)
+    {
+      if (eventInfo.mServerTime > mContentServerStartTime)
+      {
+        if (mContentServerStartTime > 0)
+        {
+          // Content Server has been restarted. We should delete all cached information.
+
+          PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
+
+          mProducerGenerationListCache_clearRequired = time(nullptr);
+          mContentSearchCache_globalClearRequiredTime = time(nullptr);
+          mContentCache_globalClearRequiredTime = time(nullptr);
+
+          mPointHeightCache.clear();
+          mLevelRangeCache.clear();
+          mLevelContentCache.clear();
+
+          mProducerMap_updateTime = 0;
+          mGenerationInfoList_checkTime = 0;
+          mHeightConversionsFile_checkTime = 0;
+        }
+      }
+      mContentServerStartTime = eventInfo.mServerTime;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Update the requests per second statistics every 10 seconds and reload the height conversion file every minute. */
+
+void ServiceImplementation::updateRequestStatistics(time_t& prevTime,Int64& prevCounter)
+{
+  try
+  {
+    time_t currentTime = time(nullptr);
+
+    time_t dt = currentTime - prevTime;
+    if (dt >= 10)
+    {
+      mRequestsPerSecond = (mRequestCounter - prevCounter) / dt;
+      prevCounter = mRequestCounter;
+      prevTime = currentTime;
+    }
+
+    if ((currentTime - mHeightConversionsFile_checkTime) > 60)
+    {
+      loadHeightConversionFile();
+      mHeightConversionsFile_checkTime = currentTime;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Update processing. */
 
 void ServiceImplementation::updateProcessing()
@@ -12374,119 +12466,15 @@ void ServiceImplementation::updateProcessing()
     while (!mShutdownRequested)
     {
 
-      try
-      {
-        T::EventInfo eventInfo;
-        int result = mContentServerPtr->getLastEventInfo(0,0,eventInfo);
-        if (result == Result::DATA_NOT_FOUND || result == Result::OK)
-        {
-          if (eventInfo.mServerTime > mContentServerStartTime)
-          {
-            if (mContentServerStartTime > 0)
-            {
-              // Content Server has been restarted. We should delete all cached information.
-
-              PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
-
-              mProducerGenerationListCache_clearRequired = time(nullptr);
-              mContentSearchCache_globalClearRequiredTime = time(nullptr);
-              mContentCache_globalClearRequiredTime = time(nullptr);
-
-              mPointHeightCache.clear();
-              mLevelRangeCache.clear();
-              mLevelContentCache.clear();
-
-              mProducerMap_updateTime = 0;
-              mGenerationInfoList_checkTime = 0;
-              mHeightConversionsFile_checkTime = 0;
-            }
-          }
-          mContentServerStartTime = eventInfo.mServerTime;
-        }
-      }
-      catch (...)
-      {
-      }
-
-
-      try
-      {
-        checkProducerMapUpdates();
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        checkGenerationUpdates();
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        checkProducerFileUpdates();
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        checkParameterMappingUpdates();
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        mLuaFileCollection.checkUpdates(false);
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        mProducerAliasFileCollection.checkUpdates(false);
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        mAliasFileCollection.checkUpdates(false);
-      }
-      catch (...)
-      {
-      }
-
-      try
-      {
-        time_t currentTime = time(nullptr);
-
-        time_t dt = currentTime - prevTime;
-        if (dt >= 10)
-        {
-          mRequestsPerSecond = (mRequestCounter - prevCounter) / dt;
-          prevCounter = mRequestCounter;
-          prevTime = currentTime;
-        }
-
-        if ((currentTime - mHeightConversionsFile_checkTime) > 60)
-        {
-          loadHeightConversionFile();
-          mHeightConversionsFile_checkTime = currentTime;
-        }
-
-      }
-      catch (...)
-      {
-      }
+      runIgnoringExceptions([this]() { checkContentServerRestart(); });
+      runIgnoringExceptions([this]() { checkProducerMapUpdates(); });
+      runIgnoringExceptions([this]() { checkGenerationUpdates(); });
+      runIgnoringExceptions([this]() { checkProducerFileUpdates(); });
+      runIgnoringExceptions([this]() { checkParameterMappingUpdates(); });
+      runIgnoringExceptions([this]() { mLuaFileCollection.checkUpdates(false); });
+      runIgnoringExceptions([this]() { mProducerAliasFileCollection.checkUpdates(false); });
+      runIgnoringExceptions([this]() { mAliasFileCollection.checkUpdates(false); });
+      runIgnoringExceptions([&]() { updateRequestStatistics(prevTime,prevCounter); });
 
 
       if (!mShutdownRequested)
