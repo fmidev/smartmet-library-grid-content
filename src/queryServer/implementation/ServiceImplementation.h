@@ -350,8 +350,21 @@ class ServiceImplementation : public ServiceInterface
      void           checkContentServerRestart();
      void           checkThreadCacheState();
      void           printContentList(T::ContentInfoList& contentList);
+     bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      bool           checkValueResult(int result,const char *service,const std::vector<const T::ContentInfo*>& contents,bool errorStops,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList);
+
+     /*! \brief Fetch the values with the data server call (unless the query parameter requests no values) and check the result with checkValueResult. */
+
+     template <class Fetch>
+     bool           fetchValues(const QueryParameter& qParam,Fetch fetch,const char *service,const std::vector<const T::ContentInfo*>& contents,bool errorStops,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList)
+     {
+       if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0)
+         return true;
+
+       return checkValueResult(fetch(),service,contents,errorStops,conversionByFunction,function,functionParams,forecastTime,valueList);
+     }
+
      bool           getModificationOperation(const std::string& function,const std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      bool           getPointValueVector(const T::ContentInfo& contentInfo,uchar coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector);
      void           addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
