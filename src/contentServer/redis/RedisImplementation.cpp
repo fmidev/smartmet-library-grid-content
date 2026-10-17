@@ -3494,6 +3494,136 @@ int RedisImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 
 
+/*! \brief Find the file of a file and content pair by name, or add it with a new file id. Sets fileId to the
+           id of an existing file (0 for a new file) and deletes the old contents of an existing file if requested. */
+
+int RedisImplementation::storeFileOfContentList(T::FileAndContent& ff,uint requestFlags,T::FileId& fileId)
+{
+  try
+  {
+    // ### Checking if the filename already exists in the database.
+
+    fileId = getFileId(ff.mFileInfo.mName);
+    if (fileId > 0)
+    {
+      T::FileInfo fInfo;
+      if (getFileById(fileId,fInfo) != Result::OK)
+      {
+        // The filename exists, but the actual FileInfo record does not.
+        deleteFilename(ff.mFileInfo.mName);
+        fileId = 0;
+      }
+    }
+
+    if (fileId > 0)
+    {
+      // ### File with the same name already exists. Let's return
+      // ### the current file-id.
+
+      ff.mFileInfo.mFileId = fileId;
+
+      // ### Deleting old content information.
+
+      if (requestFlags & 0x00000001)
+        deleteContentByFileId(ff.mFileInfo.mFileId);
+    }
+    else
+    {
+      // ### Generating a new file-id.
+
+      if (!allocateFileId(mContext,mTablePrefix,ff.mFileInfo.mFileId))
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      // ### Adding the file information into the database.
+
+      redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff.mFileInfo.mFileId,ff.mFileInfo.getCsv().c_str()));
+      if (reply == nullptr)
+      {
+        closeConnection();
+        return Result::PERMANENT_STORAGE_ERROR;
+      }
+
+      freeReplyObject(reply);
+
+      // ### Adding the filename into the database. This needs to be added to another
+      // ### table so that we can fetch it fast.
+
+      addFilename(ff.mFileInfo.mName,ff.mFileInfo.mFileId);
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Add the contents of a file and content pair that are not yet in the database. fileId is the id of
+           an existing file or 0 for a new file. */
+
+int RedisImplementation::storeNewContentsOfFile(T::FileAndContent& ff,uint requestFlags,T::FileId fileId)
+{
+  try
+  {
+    // ### Adding the content information into the database.
+
+    uint len = ff.mContentInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
+      if (info != nullptr)
+      {
+        // ### Making sure that content data matches the file data.
+
+        info->mFileId = ff.mFileInfo.mFileId;
+        if (info->mFileType == 0)
+          info->mFileType = ff.mFileInfo.mFileType;
+
+        info->mProducerId = ff.mFileInfo.mProducerId;
+        info->mGenerationId = ff.mFileInfo.mGenerationId;
+        info->mFlags = info->mFlags;
+
+        T::ContentInfo contentInfo;
+        if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == DATA_NOT_FOUND)
+        {
+          // ### Creating a key for the content.
+          UInt64 id = getContentKey(info->mFileId,info->mMessageIndex);
+
+          // ### Adding the content record into the database.
+
+          redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %lu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
+          if (reply == nullptr)
+          {
+            closeConnection();
+            return Result::PERMANENT_STORAGE_ERROR;
+          }
+
+          freeReplyObject(reply);
+
+          if (fileId > 0  &&  (requestFlags & 0x00000001) == 0)
+            addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mFlags);
+        }
+      }
+    }
+
+    return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
 /*! \brief Redis backend: adds a batch of files with their content lists according to the request flags. */
 
 int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
@@ -3524,100 +3654,16 @@ int RedisImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
       if (producerInfo.mProducerId != generationInfo.mProducerId)
         return Result::PRODUCER_AND_GENERATION_DO_NOT_MATCH;
 
-      // ### Checking if the filename already exists in the database.
+      T::FileId fileId = 0;
+      int result = storeFileOfContentList(ff,requestFlags,fileId);
+      if (result != Result::OK)
+        return result;
 
-      T::FileId fileId = getFileId(ff.mFileInfo.mName);
-      if (fileId > 0)
-      {
-        T::FileInfo fInfo;
-        if (getFileById(fileId,fInfo) != Result::OK)
-        {
-          // The filename exists, but the actual FileInfo record does not.
-          deleteFilename(ff.mFileInfo.mName);
-          fileId = 0;
-        }
-      }
-
-      if (fileId > 0)
-      {
-        // ### File with the same name already exists. Let's return
-        // ### the current file-id.
-
-        ff.mFileInfo.mFileId = fileId;
-
-        // ### Deleting old content information.
-
-        if (requestFlags & 0x00000001)
-          deleteContentByFileId(ff.mFileInfo.mFileId);
-      }
-      else
-      {
-        // ### Generating a new file-id.
-
-        if (!allocateFileId(mContext,mTablePrefix,ff.mFileInfo.mFileId))
-        {
-          closeConnection();
-          return Result::PERMANENT_STORAGE_ERROR;
-        }
-
-        // ### Adding the file information into the database.
-
-        redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %sfiles %lu %s",mTablePrefix.c_str(),ff.mFileInfo.mFileId,ff.mFileInfo.getCsv().c_str()));
-        if (reply == nullptr)
-        {
-          closeConnection();
-          return Result::PERMANENT_STORAGE_ERROR;
-        }
-
-        freeReplyObject(reply);
-
-        // ### Adding the filename into the database. This needs to be added to another
-        // ### table so that we can fetch it fast.
-
-        addFilename(ff.mFileInfo.mName,ff.mFileInfo.mFileId);
-      }
-
-
-      // ### Adding the content information into the database.
+      result = storeNewContentsOfFile(ff,requestFlags,fileId);
+      if (result != Result::OK)
+        return result;
 
       uint len = ff.mContentInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
-        if (info != nullptr)
-        {
-          // ### Making sure that content data matches the file data.
-
-          info->mFileId = ff.mFileInfo.mFileId;
-          if (info->mFileType == 0)
-            info->mFileType = ff.mFileInfo.mFileType;
-
-          info->mProducerId = ff.mFileInfo.mProducerId;
-          info->mGenerationId = ff.mFileInfo.mGenerationId;
-          info->mFlags = info->mFlags;
-
-          T::ContentInfo contentInfo;
-          if (getContent(info->mFileId,info->mMessageIndex,contentInfo) == DATA_NOT_FOUND)
-          {
-            // ### Creating a key for the content.
-            UInt64 id = getContentKey(info->mFileId,info->mMessageIndex);
-
-            // ### Adding the content record into the database.
-
-            redisReply *reply = static_cast<redisReply*>(redisCommand(mContext,"ZADD %scontent %lu %s",mTablePrefix.c_str(),id,info->getCsv().c_str()));
-            if (reply == nullptr)
-            {
-              closeConnection();
-              return Result::PERMANENT_STORAGE_ERROR;
-            }
-
-            freeReplyObject(reply);
-
-            if (fileId > 0  &&  (requestFlags & 0x00000001) == 0)
-              addEvent(EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,info->mFlags);
-          }
-        }
-      }
 
       // ### Adding an event to the event list.
 

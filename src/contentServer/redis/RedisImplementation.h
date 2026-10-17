@@ -265,6 +265,8 @@ class RedisImplementation : public ServiceInterface
      int            connectRedis(redisContext*& context);
      void           setConnection(redisContext *context);
      bool           authenticateRedis(redisContext *context,int& result);
+     int            storeFileOfContentList(T::FileAndContent& ff,uint requestFlags,T::FileId& fileId);
+     int            storeNewContentsOfFile(T::FileAndContent& ff,uint requestFlags,T::FileId fileId);
      int            deleteFilename(const std::string& filename);
      T::FileId      getFileId(const std::string& filename);
      void           getFilenames(std::map<std::string,T::FileId>& fileList);
