@@ -7819,18 +7819,62 @@ bool ServiceImplementation::addLevelInterpolatedPointValue(
 
 
 
-/*! \brief Query Server: Add the time and level interpolated value of the point (if the times of the height record match
-           the content times). Returns false on a data server error. */
+/*! \brief Query Server: Get the content of the level at the second time (time2) of the time interpolation pair of the
+           forecast time. The content list holds the returned content. Returns nullptr if there is no such content. */
+
+const T::ContentInfo* ServiceImplementation::getSecondTimeLevelContent(
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId levelId,
+    T::ParamLevel level,
+    const QueryParameter& qParam,
+    time_t time2,
+    std::shared_ptr<T::ContentInfoList>& contentList)
+{
+  try
+  {
+    contentList = std::make_shared<T::ContentInfoList>();
+    time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,levelId,level,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
+    if (fTime == 0  ||  contentList->getLength() != 2)
+      return nullptr;
+
+    const T::ContentInfo* contentInfo = contentList->getContentInfoByIndex(1);
+    if (contentInfo == nullptr  ||  contentInfo->mForecastTimeUTC != time2)
+      return nullptr;
+
+    return contentInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Add the time and level interpolated value of the point. The lower and upper contents are the
+           contents of the levels of the first time of the height record (level1_1, level1_2) at the first time.
+           The contents of the second time are the contents of the levels of the second time (level2_1, level2_2)
+           at the second time. The value of each time is interpolated by the heights of that time, and the two values
+           are interpolated in time. No value is added if the content times do not match the times of the height
+           record. Returns false on a data server error. */
 
 bool ServiceImplementation::addTimeLevelInterpolatedPointValue(
     const Query& query,
     const T::Coordinate& coordinate,
     const HeightRec& rec,
     const QueryParameter& qParam,
-    const T::ContentInfo& contentInfo1_1,
-    const T::ContentInfo& contentInfo1_2,
-    const T::ContentInfo& contentInfo2_1,
-    const T::ContentInfo& contentInfo2_2,
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    ParameterMapping& pInfo,
+    const T::ContentInfo& lowerContent1,
+    const T::ContentInfo& upperContent1,
     time_t forecastTime,
     T::ParamLevel paramLevel,
     short areaInterpolationMethod,
@@ -7846,27 +7890,34 @@ bool ServiceImplementation::addTimeLevelInterpolatedPointValue(
 
     valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
 
-    if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0  ||  rec.time1 != contentInfo1_1.mForecastTimeUTC  ||  rec.time2 != contentInfo1_2.mForecastTimeUTC)
+    if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0  ||  rec.time1 != lowerContent1.mForecastTimeUTC  ||  rec.time1 != upperContent1.mForecastTimeUTC)
       return true;
 
-    T::ParamValue value1_1 = NAN;
-    if (!getHeightPointValue(contentInfo1_1,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,value1_1))
+    std::shared_ptr<T::ContentInfoList> lowerList2;
+    std::shared_ptr<T::ContentInfoList> upperList2;
+    const T::ContentInfo* lowerContent2 = getSecondTimeLevelContent(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,rec.levelId,rec.level2_1,qParam,rec.time2,lowerList2);
+    const T::ContentInfo* upperContent2 = getSecondTimeLevelContent(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,rec.levelId,rec.level2_2,qParam,rec.time2,upperList2);
+    if (lowerContent2 == nullptr  ||  upperContent2 == nullptr)
+      return true;
+
+    T::ParamValue lowerValue1 = NAN;
+    if (!getHeightPointValue(lowerContent1,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,lowerValue1))
       return false;
 
-    T::ParamValue value1_2 = NAN;
-    if (!getHeightPointValue(contentInfo1_2,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,value1_2))
+    T::ParamValue upperValue1 = NAN;
+    if (!getHeightPointValue(upperContent1,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,upperValue1))
       return false;
 
-    T::ParamValue value2_1 = NAN;
-    if (!getHeightPointValue(contentInfo2_1,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,value2_1))
+    T::ParamValue lowerValue2 = NAN;
+    if (!getHeightPointValue(*lowerContent2,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,lowerValue2))
       return false;
 
-    T::ParamValue value2_2 = NAN;
-    if (!getHeightPointValue(contentInfo2_2,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,value2_2))
+    T::ParamValue upperValue2 = NAN;
+    if (!getHeightPointValue(*upperContent2,query.mCoordinateType,coordinate,areaInterpolationMethod,modificationOperation,modificationParameters,upperValue2))
       return false;
 
-    T::ParamValue val1 = levelInterpolation(value1_1,value2_1,rec.height1_1,rec.height1_2,paramLevel,levelInterpolationMethod);
-    T::ParamValue val2 = levelInterpolation(value1_2,value2_2,rec.height2_1,rec.height2_2,paramLevel,levelInterpolationMethod);
+    T::ParamValue val1 = levelInterpolation(lowerValue1,upperValue1,rec.height1_1,rec.height1_2,paramLevel,levelInterpolationMethod);
+    T::ParamValue val2 = levelInterpolation(lowerValue2,upperValue2,rec.height2_1,rec.height2_2,paramLevel,levelInterpolationMethod);
     T::ParamValue val = timeInterpolation(val1,val2,rec.time1,rec.time2,forecastTime,timeInterpolationMethod);
 
     T::GridValue v(coordinate.x(),coordinate.y(),val);
@@ -7951,7 +8002,6 @@ bool ServiceImplementation::addPointValuesByHeight(
       T::ContentInfo* contentInfo1_1 = contentList1->getContentInfoByIndex(0);
       T::ContentInfo* contentInfo1_2 = contentList1->getContentInfoByIndex(1);
       T::ContentInfo* contentInfo2_1 = contentList2->getContentInfoByIndex(0);
-      T::ContentInfo* contentInfo2_2 = contentList2->getContentInfoByIndex(1);
 
       setLevelValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,generationFlags,paramLevel,contentInfo1_1);
 
@@ -7970,7 +8020,7 @@ bool ServiceImplementation::addPointValuesByHeight(
         return false;
 
       if (contentLen1 == 2  &&  isTimeInterpolationPair(*contentInfo1_1,*contentInfo1_2,fTime1,timeInterpolationMethod)  &&
-          !addTimeLevelInterpolatedPointValue(query,coordinates[r],recs[r],qParam,*contentInfo1_1,*contentInfo1_2,*contentInfo2_1,*contentInfo2_2,forecastTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList))
+          !addTimeLevelInterpolatedPointValue(query,coordinates[r],recs[r],qParam,producerInfo,producerGeometryId,generationId,pInfo,*contentInfo1_1,*contentInfo2_1,forecastTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList))
         return false;
     }
     return true;
