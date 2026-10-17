@@ -7172,14 +7172,12 @@ bool ServiceImplementation::getValueVectors(
 
       valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-      if (!fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+      return fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
             [&]() { return mDataServerPtr->getGridValueVectorByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVector(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,modificationOperation,modificationParameters,valueVector); }); },
-          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByGeometry","getGridValueVectorByCoordinateList","getGridValueVector"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
-        return false;
-
-      return finishValueVectors(qParam,pInfo,coordinates);
+          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByGeometry","getGridValueVectorByCoordinateList","getGridValueVector"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList)  &&
+             finishValueVectors(qParam,pInfo,coordinates);
     }
 
     short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
@@ -7194,14 +7192,12 @@ bool ServiceImplementation::getValueVectors(
       valueList.mFileId[1] = contentInfo2->mFileId;
       valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-      if (!fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+      return fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
             [&]() { return mDataServerPtr->getGridValueVectorByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,timeInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
-          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByTimeAndGeometry","getGridValueVectorByTimeAndCoordinateList","getGridValueVectorByTime"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
-        return false;
-
-      return finishValueVectors(qParam,pInfo,coordinates);
+          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByTimeAndGeometry","getGridValueVectorByTimeAndCoordinateList","getGridValueVectorByTime"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList)  &&
+             finishValueVectors(qParam,pInfo,coordinates);
     }
 
     if (contentLen == 2  &&  isLevelInterpolationPair(*contentInfo1,*contentInfo2,fTime,paramLevel,levelInterpolationMethod))
@@ -7216,14 +7212,12 @@ bool ServiceImplementation::getValueVectors(
 
       // The level is set only when the values are fetched.
 
-      if (!fetchValueVector(query,qParam,[&]() { valueList.mParameterLevel = paramLevel; return fetchByValueVectorLocation(qParam.mLocationType,
+      return fetchValueVector(query,qParam,[&]() { valueList.mParameterLevel = paramLevel; return fetchByValueVectorLocation(qParam.mLocationType,
             [&]() { return mDataServerPtr->getGridValueVectorByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
-          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByLevelAndGeometry","getGridValueVectorByLevelAndCoordinateList","getGridValueVectorByLevel"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
-        return false;
-
-      return finishValueVectors(qParam,pInfo,coordinates);
+          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByLevelAndGeometry","getGridValueVectorByLevelAndCoordinateList","getGridValueVectorByLevel"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList)  &&
+             finishValueVectors(qParam,pInfo,coordinates);
     }
 
     if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
@@ -7237,14 +7231,12 @@ bool ServiceImplementation::getValueVectors(
       valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
       valueList.mParameterLevel = paramLevel;
 
-      if (!fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+      return fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
             [&]() { return mDataServerPtr->getGridValueVectorByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
             [&]() { return mDataServerPtr->getGridValueVectorByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
-          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByTimeLevelAndGeometry","getGridValueVectorByTimeLevelAndCoordinateList","getGridValueVectorByTimeAndLevel"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
-        return false;
-
-      return finishValueVectors(qParam,pInfo,coordinates);
+          valueVectorServiceName(qParam.mLocationType,"getGridValueVectorByTimeLevelAndGeometry","getGridValueVectorByTimeLevelAndCoordinateList","getGridValueVectorByTimeAndLevel"),*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList)  &&
+             finishValueVectors(qParam,pInfo,coordinates);
     }
 
     return false;
