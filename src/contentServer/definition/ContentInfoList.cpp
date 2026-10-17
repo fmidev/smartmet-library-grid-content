@@ -3425,6 +3425,339 @@ void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,Co
 
 
 
+namespace
+{
+
+/*! \brief Return true if the content matches the forecast type/number, geometry and level id filters (negative filters match anything). */
+
+bool matchesForecastGeometryAndLevelId(const ContentInfo *info,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,T::ParamLevelId parameterLevelId)
+{
+  return (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))  &&
+         (geometryId < 0  ||  info->mGeometryId == geometryId)  &&
+         (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId);
+}
+
+
+
+/*! \brief Return true if the content level is within the range (any level matches when parameterLevelId is negative). */
+
+bool matchesLevelRange(const ContentInfo *info,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel)
+{
+  return parameterLevelId < 0 || (info->mParameterLevel >= minLevel && info->mParameterLevel <= maxLevel);
+}
+
+
+
+/*! \brief Return true if the content has the parameter of the search info (compared by name or by id). */
+
+bool isSameParameter(const ContentInfo *info,const ContentInfo& searchInfo,bool byName)
+{
+  if (byName)
+    return strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0;
+
+  return info->mFmiParameterId == searchInfo.mFmiParameterId;
+}
+
+
+
+/*! \brief Return true if the content parameter sorts before the parameter of the search info (compared by name or by id). */
+
+bool isBeforeParameter(const ContentInfo *info,const ContentInfo& searchInfo,bool byName)
+{
+  if (byName)
+    return strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) < 0;
+
+  return info->mFmiParameterId < searchInfo.mFmiParameterId;
+}
+
+
+
+/*! \brief Add the content to the list if it exists and is not deleted. */
+
+void addLiveContent(ContentInfoList& contentInfoList,ContentInfo *info)
+{
+  if (isLiveContent(info))
+    addContent(contentInfoList,info);
+}
+
+
+
+/*! \brief Search criteria of the forecast time and level neighbour searches. */
+
+struct TimeLevelQuery
+{
+  T::GenerationId generationId;
+  T::ParamLevelId parameterLevelId;
+  T::ParamLevel level;
+  T::ForecastType forecastType;
+  T::ForecastNumber forecastNumber;
+  T::GeometryId geometryId;
+  time_t forecastTimeUTC;
+};
+
+
+
+/*! \brief Contents closest to the requested forecast time and level. */
+
+struct TimeLevelNeighbours
+{
+  ContentInfo *prevTimeSameLevel = nullptr;
+  ContentInfo *nextTimeSameLevel = nullptr;
+  ContentInfo *sameTimePrevLevel = nullptr;
+  ContentInfo *sameTimeNextLevel = nullptr;
+  ContentInfo *prevTimePrevLevel = nullptr;
+  ContentInfo *prevTimeNextLevel = nullptr;
+  ContentInfo *nextTimePrevLevel = nullptr;
+  ContentInfo *nextTimeNextLevel = nullptr;
+};
+
+
+
+/*! \brief Update the neighbours from a content before the requested time. With anyLevel every level counts as the same level. */
+
+void updatePrevTimeNeighbours(TimeLevelNeighbours& n,ContentInfo *info,T::ParamLevel level,bool anyLevel)
+{
+  if (info->mParameterLevel == level || anyLevel)
+  {
+    if (n.prevTimeSameLevel == nullptr || n.prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
+      n.prevTimeSameLevel = info;
+    }
+  }
+  else
+  if (info->mParameterLevel < level)
+  {
+    if (n.prevTimePrevLevel == nullptr || n.prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (n.prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  n.prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
+      n.prevTimePrevLevel = info;
+    }
+  }
+  else
+  if (info->mParameterLevel > level)
+  {
+    if (n.prevTimeNextLevel == nullptr || n.prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (n.prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  n.prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
+      n.prevTimeNextLevel = info;
+    }
+  }
+}
+
+
+
+/*! \brief Update the neighbours from a content after the requested time. Returns true when the scan can stop. */
+
+bool updateNextTimeNeighbours(TimeLevelNeighbours& n,ContentInfo *info,T::ParamLevel level,bool anyLevel)
+{
+  if (info->mParameterLevel == level || anyLevel)
+  {
+    if (n.nextTimeSameLevel == nullptr)
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
+      n.nextTimeSameLevel = info;
+      return true;
+    }
+  }
+  else
+  if (info->mParameterLevel < level)
+  {
+    if (n.nextTimePrevLevel == nullptr || n.nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (n.nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  n.nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
+      n.nextTimePrevLevel = info;
+    }
+  }
+  else
+  if (info->mParameterLevel > level)
+  {
+    if (n.nextTimeNextLevel == nullptr || (n.nextTimePrevLevel != nullptr && n.nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (n.nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  n.nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << "next time next level\n";
+      n.nextTimeNextLevel = info;
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+/*! \brief Update the neighbours from a content of the requested time but another level. Returns true when the scan can stop. */
+
+bool updateSameTimeNeighbours(TimeLevelNeighbours& n,ContentInfo *info,T::ParamLevel level)
+{
+  if (info->mParameterLevel < level)
+  {
+    if (n.sameTimePrevLevel == nullptr || n.sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
+      n.sameTimePrevLevel = info;
+    }
+  }
+  else
+  if (info->mParameterLevel > level)
+  {
+    if (n.sameTimeNextLevel == nullptr || n.sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
+    {
+      //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
+      n.sameTimeNextLevel = info;
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+/*! \brief Neighbour update of a content. Returns true when the scan can stop. */
+
+using TimeLevelUpdate = bool (*)(TimeLevelNeighbours& n,ContentInfo *info,const TimeLevelQuery& query,ContentInfoList& contentInfoList);
+
+
+
+/*! \brief Neighbour update of getContentInfoListBy*AndGenerationId: all exact matches are collected. */
+
+bool updateTimeLevelNeighbours(TimeLevelNeighbours& n,ContentInfo *info,const TimeLevelQuery& query,ContentInfoList& contentInfoList)
+{
+  //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
+  if (info->mForecastTimeUTC < query.forecastTimeUTC)
+  {
+    updatePrevTimeNeighbours(n,info,query.level,false);
+    return false;
+  }
+
+  if (info->mForecastTimeUTC > query.forecastTimeUTC)
+    return updateNextTimeNeighbours(n,info,query.level,query.parameterLevelId < 0);
+
+  if (info->mParameterLevel == query.level || query.parameterLevelId < 0)
+  {
+    addContent(contentInfoList,info);
+    return false;
+  }
+
+  return updateSameTimeNeighbours(n,info,query.level);
+}
+
+
+
+/*! \brief Neighbour update of getContentInfoListBy*AndGenerationId2: the first exact match ends the search. */
+
+bool updateTimeLevelNeighbours2(TimeLevelNeighbours& n,ContentInfo *info,const TimeLevelQuery& query,ContentInfoList& contentInfoList)
+{
+  //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
+  if (info->mForecastTimeUTC == query.forecastTimeUTC)
+  {
+    if (info->mParameterLevel == query.level)
+    {
+      addContent(contentInfoList,info);
+      return true;
+    }
+    return updateSameTimeNeighbours(n,info,query.level);
+  }
+
+  if (info->mForecastTimeUTC < query.forecastTimeUTC)
+  {
+    updatePrevTimeNeighbours(n,info,query.level,query.parameterLevelId < 0);
+    return false;
+  }
+
+  return updateNextTimeNeighbours(n,info,query.level,query.parameterLevelId < 0);
+}
+
+
+
+/*! \brief Scan the contents of the search generation and parameter, sorted by producer, generation, level and time, starting from the given index. */
+
+void scanTimeLevelNeighbours(ContentInfoPtr *array,uint length,uint idx,const ContentInfo& searchInfo,bool byName,const TimeLevelQuery& query,TimeLevelUpdate update,TimeLevelNeighbours& n,ContentInfoList& contentInfoList)
+{
+  uint t = idx;
+  while (t < length  &&  array[t] != nullptr)
+  {
+    ContentInfo *info = array[t];
+    if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+    {
+      if (info->mGenerationId != query.generationId  ||  !isSameParameter(info,searchInfo,byName))
+      {
+        if (t > idx)
+          t = length;
+      }
+      else
+      if (matchesForecastGeometryAndLevelId(info,query.forecastType,query.forecastNumber,query.geometryId,query.parameterLevelId)  &&
+          update(n,info,query,contentInfoList))
+      {
+        t = length;
+      }
+    }
+    t++;
+  }
+}
+
+
+
+/*! \brief Add the closest neighbours when no exact match was found: same level at other times, or interpolation pairs of levels. */
+
+void addTimeLevelNeighbours(const TimeLevelNeighbours& n,ContentInfoList& contentInfoList)
+{
+  // We need to add the previous entry before the start time.
+  addLiveContent(contentInfoList,n.prevTimeSameLevel);
+
+  // We need to add the next entry after the end time.
+  addLiveContent(contentInfoList,n.nextTimeSameLevel);
+
+  if (contentInfoList.getLength() == 2)
+    return;
+
+
+  if (n.sameTimePrevLevel != nullptr  && n.sameTimeNextLevel != nullptr)
+  {
+    addLiveContent(contentInfoList,n.sameTimePrevLevel);
+    addLiveContent(contentInfoList,n.sameTimeNextLevel);
+  }
+
+  if (contentInfoList.getLength() == 2)
+    return;
+
+
+  if (n.prevTimePrevLevel != nullptr  &&  n.prevTimeNextLevel != nullptr)
+  {
+    addLiveContent(contentInfoList,n.prevTimePrevLevel);
+    addLiveContent(contentInfoList,n.prevTimeNextLevel);
+  }
+
+  if (n.nextTimePrevLevel != nullptr  &&  n.nextTimeNextLevel != nullptr)
+  {
+    addLiveContent(contentInfoList,n.nextTimePrevLevel);
+    addLiveContent(contentInfoList,n.nextTimeNextLevel);
+  }
+}
+
+
+
+/*! \brief Move the start index of the *2 searches to the first content of the closest level and past preceding parameters. */
+
+int adjustTimeLevelStartIndex(ContentInfoPtr *array,uint length,int idx,const ContentInfo& searchInfo,bool byName,T::ParamLevel level)
+{
+  if ( array[idx] != nullptr  &&  array[idx]->mParameterLevel < level)
+  {
+    int lev = array[idx]->mParameterLevel;
+    while (C_UINT(idx) > 0  &&  array[idx-1] != nullptr  &&  array[idx-1]->mParameterLevel == lev)
+      idx--;
+  }
+
+  if (C_UINT(idx) < length  &&  array[idx] != nullptr  &&  isBeforeParameter(array[idx],searchInfo,byName))
+    idx++;
+
+  return idx;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Append entries matching the given FMI parameter id to the target list. */
 
 void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParameterId,ContentInfoList& contentInfoList)
@@ -3712,218 +4045,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
       searchInfo.mFmiParameterId = fmiParameterId;
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      uint t = C_UINT(idx);
-
-      ContentInfo *prevTimeSameLevel = nullptr;
-      ContentInfo *nextTimeSameLevel = nullptr;
-
-      ContentInfo *sameTimePrevLevel = nullptr;
-      ContentInfo *sameTimeNextLevel = nullptr;
-      ContentInfo *prevTimePrevLevel = nullptr;
-      ContentInfo *prevTimeNextLevel = nullptr;
-      ContentInfo *nextTimePrevLevel = nullptr;
-      ContentInfo *nextTimeNextLevel = nullptr;
-
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (info->mFmiParameterId == searchInfo.mFmiParameterId)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
-                    if (info->mForecastTimeUTC < forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level)
-                      {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
-                          prevTimeSameLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
-                          prevTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
-                          prevTimeNextLevel = info;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC > forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (nextTimeSameLevel == nullptr)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
-                          nextTimeSameLevel = info;
-                          t = mLength;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
-                          nextTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << "next time next level\n";
-                          nextTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC == forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
-                          sameTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
-                          sameTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
+      TimeLevelQuery query = {generationId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC};
+      TimeLevelNeighbours neighbours;
+      scanTimeLevelNeighbours(mArray,mLength,C_UINT(idx),searchInfo,false,query,updateTimeLevelNeighbours,neighbours,contentInfoList);
 
       if (contentInfoList.getLength() > 0)
         return;
 
-
-      if (prevTimeSameLevel != nullptr  &&  (prevTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prevTimeSameLevel);
-      }
-
-      if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,nextTimeSameLevel);
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (sameTimePrevLevel != nullptr  && sameTimeNextLevel != nullptr)
-      {
-        if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,sameTimePrevLevel);
-        }
-
-        if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,sameTimeNextLevel);
-        }
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (prevTimePrevLevel != nullptr  &&  prevTimeNextLevel != nullptr)
-      {
-        if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimePrevLevel);
-        }
-
-        if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimeNextLevel);
-        }
-      }
-
-      if (nextTimePrevLevel != nullptr  &&  nextTimeNextLevel != nullptr)
-      {
-        if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimePrevLevel);
-        }
-
-        if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimeNextLevel);
-        }
-      }
+      addTimeLevelNeighbours(neighbours,contentInfoList);
     }
     else
     {
@@ -3997,229 +4126,16 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if ( mArray[idx] != nullptr  &&  mArray[idx]->mParameterLevel < level)
-      {
-        int lev = mArray[idx]->mParameterLevel;
-        while (C_UINT(idx) > 0  &&  mArray[idx-1] != nullptr  &&  mArray[idx-1]->mParameterLevel == lev)
-          idx--;
-      }
+      idx = adjustTimeLevelStartIndex(mArray,mLength,idx,searchInfo,false,level);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  mArray[idx]->mFmiParameterId < searchInfo.mFmiParameterId)
-        idx++;
-
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prevTimeSameLevel = nullptr;
-      ContentInfo *nextTimeSameLevel = nullptr;
-      ContentInfo *sameTimePrevLevel = nullptr;
-      ContentInfo *sameTimeNextLevel = nullptr;
-      ContentInfo *prevTimePrevLevel = nullptr;
-      ContentInfo *prevTimeNextLevel = nullptr;
-      ContentInfo *nextTimePrevLevel = nullptr;
-      ContentInfo *nextTimeNextLevel = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ***** \n";
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mFmiParameterId == searchInfo.mFmiParameterId)
-          {
-            if (info->mGenerationId == generationId)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
-                    if (info->mForecastTimeUTC == forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level)
-                      {
-                        addContent(contentInfoList,info);
-
-                        return;
-                      }
-                      if (info->mParameterLevel < level)
-                      {
-                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
-                          sameTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
-                          sameTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC < forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
-                          prevTimeSameLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
-                          prevTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
-                          prevTimeNextLevel = info;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC > forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (nextTimeSameLevel == nullptr)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
-                          nextTimeSameLevel = info;
-                          t = mLength;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
-                          nextTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time next level\n";
-                          nextTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
+      TimeLevelQuery query = {generationId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC};
+      TimeLevelNeighbours neighbours;
+      scanTimeLevelNeighbours(mArray,mLength,C_UINT(idx),searchInfo,false,query,updateTimeLevelNeighbours2,neighbours,contentInfoList);
 
       if (contentInfoList.getLength() > 0)
         return;
 
-
-      if (prevTimeSameLevel != nullptr  &&  (prevTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prevTimeSameLevel);
-      }
-
-      if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,nextTimeSameLevel);
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (sameTimePrevLevel != nullptr  && sameTimeNextLevel != nullptr)
-      {
-        if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,sameTimePrevLevel);
-        }
-
-        if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,sameTimeNextLevel);
-        }
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (prevTimePrevLevel != nullptr  &&  prevTimeNextLevel != nullptr)
-      {
-        if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimePrevLevel);
-        }
-
-        if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimeNextLevel);
-        }
-      }
-
-      if (nextTimePrevLevel != nullptr  &&  nextTimeNextLevel != nullptr)
-      {
-        if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimePrevLevel);
-        }
-
-        if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimeNextLevel);
-        }
-      }
+      addTimeLevelNeighbours(neighbours,contentInfoList);
     }
     else
     {
@@ -4643,218 +4559,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
       searchInfo.setFmiParameterName(fmiParameterName);
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      uint t = C_UINT(idx);
-
-      ContentInfo *prevTimeSameLevel = nullptr;
-      ContentInfo *nextTimeSameLevel = nullptr;
-
-      ContentInfo *sameTimePrevLevel = nullptr;
-      ContentInfo *sameTimeNextLevel = nullptr;
-      ContentInfo *prevTimePrevLevel = nullptr;
-      ContentInfo *prevTimeNextLevel = nullptr;
-      ContentInfo *nextTimePrevLevel = nullptr;
-      ContentInfo *nextTimeNextLevel = nullptr;
-
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
-                    if (info->mForecastTimeUTC < forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level)
-                      {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
-                          prevTimeSameLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
-                          prevTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
-                          prevTimeNextLevel = info;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC > forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (nextTimeSameLevel == nullptr)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
-                          nextTimeSameLevel = info;
-                          t = mLength;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
-                          nextTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << "next time next level\n";
-                          nextTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC == forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        addContent(contentInfoList,info);
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
-                          sameTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
-                          sameTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
+      TimeLevelQuery query = {generationId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC};
+      TimeLevelNeighbours neighbours;
+      scanTimeLevelNeighbours(mArray,mLength,C_UINT(idx),searchInfo,true,query,updateTimeLevelNeighbours,neighbours,contentInfoList);
 
       if (contentInfoList.getLength() > 0)
         return;
 
-
-      if (prevTimeSameLevel != nullptr  &&  (prevTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prevTimeSameLevel);
-      }
-
-      if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,nextTimeSameLevel);
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (sameTimePrevLevel != nullptr  && sameTimeNextLevel != nullptr)
-      {
-        if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,sameTimePrevLevel);
-        }
-
-        if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,sameTimeNextLevel);
-        }
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (prevTimePrevLevel != nullptr  &&  prevTimeNextLevel != nullptr)
-      {
-        if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimePrevLevel);
-        }
-
-        if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimeNextLevel);
-        }
-      }
-
-      if (nextTimePrevLevel != nullptr  &&  nextTimeNextLevel != nullptr)
-      {
-        if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimePrevLevel);
-        }
-
-        if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimeNextLevel);
-        }
-      }
+      addTimeLevelNeighbours(neighbours,contentInfoList);
     }
     else
     {
@@ -4928,229 +4640,16 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
 
       int idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
-      if ( mArray[idx] != nullptr  &&  mArray[idx]->mParameterLevel < level)
-      {
-        int lev = mArray[idx]->mParameterLevel;
-        while (C_UINT(idx) > 0  &&  mArray[idx-1] != nullptr  &&  mArray[idx-1]->mParameterLevel == lev)
-          idx--;
-      }
+      idx = adjustTimeLevelStartIndex(mArray,mLength,idx,searchInfo,true,level);
 
-      if (C_UINT(idx) < mLength  &&  mArray[idx] != nullptr  &&  strcmp(mArray[idx]->getFmiParameterName(),searchInfo.getFmiParameterName()) < 0)
-        idx++;
-
-
-      uint t = C_UINT(idx);
-
-      ContentInfo *prevTimeSameLevel = nullptr;
-      ContentInfo *nextTimeSameLevel = nullptr;
-      ContentInfo *sameTimePrevLevel = nullptr;
-      ContentInfo *sameTimeNextLevel = nullptr;
-      ContentInfo *prevTimePrevLevel = nullptr;
-      ContentInfo *prevTimeNextLevel = nullptr;
-      ContentInfo *nextTimePrevLevel = nullptr;
-      ContentInfo *nextTimeNextLevel = nullptr;
-
-      while (t < mLength  &&  mArray[t] != nullptr)
-      {
-        ContentInfo *info = mArray[t];
-        //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ***** \n";
-        if ((info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (strcmp(info->getFmiParameterName(),searchInfo.getFmiParameterName()) == 0)
-          {
-            if (info->mGenerationId == generationId)
-            {
-              if (forecastType < 0 || (info->mForecastType == forecastType  &&  (info->mForecastNumber == forecastNumber || forecastNumber < 0)))
-              {
-                if (geometryId < 0  ||  info->mGeometryId == geometryId)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    //std::cout << info->mForecastTime << " " << info->mParameterLevel << " ------ \n";
-                    if (info->mForecastTimeUTC == forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level)
-                      {
-                        addContent(contentInfoList,info);
-
-                        return;
-                      }
-                      if (info->mParameterLevel < level)
-                      {
-                        if (sameTimePrevLevel == nullptr || sameTimePrevLevel->mParameterLevel < info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time prev level\n";
-                          sameTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (sameTimeNextLevel == nullptr || sameTimeNextLevel->mParameterLevel > info->mParameterLevel)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " same time next level\n";
-                          sameTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC < forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (prevTimeSameLevel == nullptr || prevTimeSameLevel->mForecastTimeUTC < info->mForecastTimeUTC)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time same level\n";
-                          prevTimeSameLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (prevTimePrevLevel == nullptr || prevTimePrevLevel->mForecastTimeUTC < info->mForecastTimeUTC  || (prevTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  prevTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time prev level\n";
-                          prevTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (prevTimeNextLevel == nullptr || prevTimeNextLevel->mForecastTimeUTC < info->mForecastTimeUTC  ||  (prevTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  prevTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " prev time next level\n";
-                          prevTimeNextLevel = info;
-                        }
-                      }
-                    }
-                    else
-                    if (info->mForecastTimeUTC > forecastTimeUTC)
-                    {
-                      if (info->mParameterLevel == level || parameterLevelId < 0)
-                      {
-                        if (nextTimeSameLevel == nullptr)
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time same level\n";
-                          nextTimeSameLevel = info;
-                          t = mLength;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel < level)
-                      {
-                        if (nextTimePrevLevel == nullptr || nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC || (nextTimePrevLevel->mForecastTimeUTC == info->mForecastTimeUTC  &&  nextTimePrevLevel->mParameterLevel < info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time prev level\n";
-                          nextTimePrevLevel = info;
-                        }
-                      }
-                      else
-                      if (info->mParameterLevel > level)
-                      {
-                        if (nextTimeNextLevel == nullptr || (nextTimePrevLevel != nullptr && nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
-                        {
-                          //std::cout << info->mForecastTime << " " << info->mParameterLevel << " next time next level\n";
-                          nextTimeNextLevel = info;
-                          t = mLength;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-              if (t > C_UINT(idx))
-                t = mLength;
-            }
-          }
-          else
-          {
-            if (t > C_UINT(idx))
-              t = mLength;
-          }
-        }
-        t++;
-      }
+      TimeLevelQuery query = {generationId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTimeUTC};
+      TimeLevelNeighbours neighbours;
+      scanTimeLevelNeighbours(mArray,mLength,C_UINT(idx),searchInfo,true,query,updateTimeLevelNeighbours2,neighbours,contentInfoList);
 
       if (contentInfoList.getLength() > 0)
         return;
 
-
-      if (prevTimeSameLevel != nullptr  &&  (prevTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the previous entry before the start time.
-
-        addContent(contentInfoList,prevTimeSameLevel);
-      }
-
-      if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-      {
-        // We need to add the next entry after the end time.
-
-        addContent(contentInfoList,nextTimeSameLevel);
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (sameTimePrevLevel != nullptr  && sameTimeNextLevel != nullptr)
-      {
-        if (sameTimePrevLevel != nullptr  &&  (sameTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,sameTimePrevLevel);
-        }
-
-        if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,sameTimeNextLevel);
-        }
-      }
-
-      if (contentInfoList.getLength() == 2)
-        return;
-
-
-      if (prevTimePrevLevel != nullptr  &&  prevTimeNextLevel != nullptr)
-      {
-        if (prevTimePrevLevel != nullptr  &&  (prevTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimePrevLevel);
-        }
-
-        if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the previous entry before the start time.
-
-          addContent(contentInfoList,prevTimeNextLevel);
-        }
-      }
-
-      if (nextTimePrevLevel != nullptr  &&  nextTimeNextLevel != nullptr)
-      {
-        if (nextTimePrevLevel != nullptr  &&  (nextTimePrevLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimePrevLevel);
-        }
-
-        if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          // We need to add the next entry after the end time.
-
-          addContent(contentInfoList,nextTimeNextLevel);
-        }
-      }
+      addTimeLevelNeighbours(neighbours,contentInfoList);
     }
     else
     {
