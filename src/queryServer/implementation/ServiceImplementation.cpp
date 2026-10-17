@@ -1355,6 +1355,19 @@ bool finishValueVectors(QueryParameter& qParam,const ParameterMapping& pInfo,T::
 
 
 
+/*! \brief Return the generation flag (the bit of the generation flags) of the generation index. The generations
+           after the 64th have no flag and cannot be selected by the flags. */
+
+UInt64 generationFlag(uint index)
+{
+  if (index >= 64)
+    return 0;
+
+  return (UInt64)1 << index;
+}
+
+
+
 /*! \brief Return true if the generation (of the index in the generation list) is selected by the analysis time of the
            time range request, or (without an analysis time) by the generation flags. */
 
@@ -10064,7 +10077,7 @@ bool ServiceImplementation::hasClimatologicalMappings(const ParameterMapping_vec
 /*! \brief Query Server: Return true if the generation (of the index in the analysis times) is selected by the analysis
            time of the request, or (without an analysis time) by the generation flags. */
 
-bool ServiceImplementation::isGenerationSelected(const GridValueRequest& r,const std::vector<std::string>& analysisTimes,uint g,uint gflags)
+bool ServiceImplementation::isGenerationSelected(const GridValueRequest& r,const std::vector<std::string>& analysisTimes,uint g,UInt64 gflags)
 {
   try
   {
@@ -10284,7 +10297,7 @@ bool ServiceImplementation::getGenerationsGridValues(GridValueRequest& r,const s
 
       printGeneration(r.analysisTime,analysisTimes,g,origGenerationInfo != nullptr);
 
-      uint gflags = 1 << g;
+      UInt64 gflags = generationFlag(g);
 
       bool generationValid = (origGenerationInfo != nullptr  ||  isGenerationSelected(r,analysisTimes,g,gflags));
 
@@ -10322,7 +10335,7 @@ bool ServiceImplementation::getGenerationsGridValues(GridValueRequest& r,const s
 /*! \brief Query Server: Get the grid values of the parameter mapping by the query type. Returns true if the values were
            found (or the search must end). */
 
-bool ServiceImplementation::getMappingGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo)
+bool ServiceImplementation::getMappingGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,UInt64 gflags,ParameterMapping& pInfo)
 {
   try
   {
@@ -10396,7 +10409,7 @@ bool ServiceImplementation::getMappingGridValues(GridValueRequest& r,const std::
 /*! \brief Query Server: Get the grid values of the streamline, isoline, isoband, vector or grid file query. Returns true
            if the values were found. */
 
-bool ServiceImplementation::getTypeGridValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+bool ServiceImplementation::getTypeGridValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,UInt64 gflags,ParameterMapping& pInfo,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
 {
   try
   {
@@ -10449,7 +10462,7 @@ bool ServiceImplementation::getTypeGridValues(GridValueRequest& r,T::GeometryId 
 /*! \brief Query Server: Get the point values of the parameter mapping by the location type. Returns true if the values
            were found (or the search must end). */
 
-bool ServiceImplementation::getPointTypeGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+bool ServiceImplementation::getPointTypeGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,UInt64 gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
 {
   try
   {
@@ -10516,7 +10529,7 @@ bool ServiceImplementation::getPointTypeGridValues(GridValueRequest& r,const std
 /*! \brief Query Server: Get the point values by a simple interpolation, or the special values for an external
            interpolation (for a single point). Returns true if the values were found. */
 
-bool ServiceImplementation::getInterpolatedPointValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+bool ServiceImplementation::getInterpolatedPointValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,UInt64 gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
 {
   try
   {
@@ -10894,7 +10907,7 @@ void ServiceImplementation::collectTimeRangeContentTimes(const TimeRangeValueReq
     uint validCount = 0;
     for (int g=gLen-1; g>=0; g--)
     {
-      UInt64 gFlags = 1 << c;
+      UInt64 gFlags = generationFlag(c);
       c++;
 
       bool generationValid = false;
