@@ -352,6 +352,21 @@ class ServiceImplementation : public ServiceInterface
      void           printContentList(T::ContentInfoList& contentList);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
+     void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);
+
+     /*! \brief Fetch the contours with the data server call (unless the query parameter requests no values) and log the errors. */
+
+     template <class Fetch>
+     void           fetchContours(const QueryParameter& qParam,Fetch fetch,const char *service,const std::vector<const T::ContentInfo*>& contents)
+     {
+       if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0)
+         return;
+
+       int result = fetch();
+       if (result != 0)
+         reportDataServerError(service,qParam.mLocationType,result,contents);
+     }
+
      bool           checkValueResult(int result,const char *service,const std::vector<const T::ContentInfo*>& contents,bool errorStops,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,const T::GridValueList& valueList);
 
      /*! \brief Fetch the values with the data server call (unless the query parameter requests no values) and check the result with checkValueResult. */

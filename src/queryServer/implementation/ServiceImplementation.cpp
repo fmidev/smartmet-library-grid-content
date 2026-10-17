@@ -120,6 +120,29 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Call the data server service of the location type: by geometry, by grid (with the grid width and height,
+           or no call if they are missing) or by the grid of the content. Returns the result of the call (0 without a call). */
+
+template <class ByGeometry,class ByGrid,class ByDefault>
+int fetchByLocationType(uchar locationType,const char *gridWidthStr,const char *gridHeightStr,ByGeometry byGeometry,ByGrid byGrid,ByDefault byDefault)
+{
+  switch (locationType)
+  {
+    case QueryParameter::LocationType::Geometry:
+      return byGeometry();
+
+    case QueryParameter::LocationType::Grid:
+      if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
+        return byGrid(toUInt32(gridWidthStr),toUInt32(gridHeightStr));
+      return 0;
+
+    default:
+      return byDefault();
+  }
+}
+
+
+
 /*! \brief Return the polygon path in the grid coordinates of the grid definition. The path is in lat/lon or (with original) in the original coordinates. */
 
 T::AreaCoordinates toGridPolygonPath(GRIB2::GridDefinition& def,const T::AreaCoordinates& polygonPath,bool original)
@@ -5205,6 +5228,44 @@ bool ServiceImplementation::getValueConversion(const ParameterMapping& pInfo,std
 
 
 
+/*! \brief Query Server: Log the error of the data server service of the location type for the contents. */
+
+void ServiceImplementation::reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents)
+{
+  try
+  {
+    Fmi::Exception exception(BCP, "DataServer returns an error!");
+    exception.addParameter("Service", service);
+    exception.addParameter("LocationType",Fmi::to_string(locationType));
+    exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+    if (contents.size() == 1)
+    {
+      exception.addParameter("FileId", std::to_string(contents[0]->mFileId));
+      exception.addParameter("MessageIndex", std::to_string(contents[0]->mMessageIndex));
+    }
+    else
+    {
+      for (std::size_t t = 0; t < contents.size(); t++)
+      {
+        std::string fileIdName = "FileId" + std::to_string(t+1);
+        std::string messageIndexName = "MessageIndex" + std::to_string(t+1);
+        exception.addParameter(fileIdName.c_str(), std::to_string(contents[t]->mFileId));
+        exception.addParameter(messageIndexName.c_str(), std::to_string(contents[t]->mMessageIndex));
+      }
+    }
+    std::string errorMsg = exception.getStackTrace();
+    PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Print the content list into the debug log (if it is enabled). */
 
 void ServiceImplementation::printContentList(T::ContentInfoList& contentList)
@@ -8422,40 +8483,12 @@ bool ServiceImplementation::getStreamlineValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridStreamlinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridStreamlinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridStreamlinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridStreamlinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridStreamlinesByTimeAndGeometry / getGridStreamlinesByTimeAndGrid / getGridStreamlinesByTime",{contentInfo1,contentInfo2});
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8472,40 +8505,12 @@ bool ServiceImplementation::getStreamlineValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridStreamlinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridStreamlinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridStreamlinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridStreamlinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridStreamlinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridStreamlinesByLevelAndGeometry / getGridStreamlinesByLevelAndGrid / getGridStreamlinesByLevel",{contentInfo1,contentInfo2});
 
         valueList.mParameterLevel = paramLevel;
 
@@ -8527,44 +8532,12 @@ bool ServiceImplementation::getStreamlineValues(
         valueList.mFileId[3] = contentInfo4->mFileId;
         valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridStreamlinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridStreamlinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridStreamlinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
-            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridStreamlinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridStreamlinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridStreamlinesByTimeLevelAndGeometry / getGridStreamlinesByTimeLevelAndGrid / getGridStreamlinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
 
         valueList.mParameterLevel = paramLevel;
 
@@ -8759,40 +8732,12 @@ bool ServiceImplementation::getIsolineValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsolinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsolinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsolinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsolinesByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsolinesByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsolinesByTimeAndGeometry / getGridIsolinesByTimeAndGrid / getGridIsolinesByTime",{contentInfo1,contentInfo2});
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -8809,40 +8754,12 @@ bool ServiceImplementation::getIsolineValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsolinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsolinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsolinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsolinesByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsolinesByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsolinesByLevelAndGeometry / getGridIsolinesByLevelAndGrid / getGridIsolinesByLevel",{contentInfo1,contentInfo2});
 
         valueList.mParameterLevel = paramLevel;
 
@@ -8864,44 +8781,12 @@ bool ServiceImplementation::getIsolineValues(
         valueList.mFileId[3] = contentInfo4->mFileId;
         valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsolinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsolinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsolinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
-            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsolinesByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsolinesByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsolinesByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsolinesByTimeLevelAndGeometry / getGridIsolinesByTimeLevelAndGrid / getGridIsolinesByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
 
         valueList.mParameterLevel = paramLevel;
 
@@ -9086,40 +8971,12 @@ bool ServiceImplementation::getIsobandValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsobandsByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsobandsByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsobandsByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsobandsByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsobandsByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsobandsByTimeAndGeometry / getGridIsobandsByTimeAndGrid / getGridIsobandsByTime",{contentInfo1,contentInfo2});
 
         setDefaultPrecision(qParam,pInfo);
 
@@ -9137,40 +8994,12 @@ bool ServiceImplementation::getIsobandValues(
         valueList.mFileId[1] = contentInfo2->mFileId;
         valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsobandsByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsobandsByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsobandsByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsobandsByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsobandsByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsobandsByLevelAndGeometry / getGridIsobandsByLevelAndGrid / getGridIsobandsByLevel",{contentInfo1,contentInfo2});
 
         valueList.mParameterLevel = paramLevel;
 
@@ -9192,44 +9021,12 @@ bool ServiceImplementation::getIsobandValues(
         valueList.mFileId[3] = contentInfo4->mFileId;
         valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridIsobandsByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              if (gridWidthStr != nullptr &&  gridHeightStr != nullptr)
-                result = mDataServerPtr->getGridIsobandsByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,toUInt32(gridWidthStr),toUInt32(gridHeightStr),query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-
-            default:
-              result = mDataServerPtr->getGridIsobandsByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData);
-              break;
-          }
-
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel");
-            exception.addParameter("LocationType",Fmi::to_string(qParam.mLocationType));
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
-            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            // throw exception;
-          }
-        }
+        fetchContours(qParam,[&]() {
+            return fetchByLocationType(qParam.mLocationType,gridWidthStr,gridHeightStr,
+              [&]() { return mDataServerPtr->getGridIsobandsByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&](uint width,uint height) { return mDataServerPtr->getGridIsobandsByTimeLevelAndGrid(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,width,height,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); },
+              [&]() { return mDataServerPtr->getGridIsobandsByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,newContourLowValues,newContourHighValues,query.mAttributeList,modificationOperation,modificationParameters,valueList.mValueData); }); },
+          "getGridIsobandsByTimeLevelAndGeometry / getGridIsobandsByTimeLevelAndGrid / getGridIsobandsByTimeAndLevel",{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
 
         valueList.mParameterLevel = paramLevel;
 
