@@ -225,6 +225,8 @@ class CacheImplementation : public ServiceInterface
         a content update replaces it meanwhile. (The structures used to be raw pointers that an
         update deleted while long running requests could still use them.) */
     SearchStructure_sptr activeSearchStructure() const;
+    bool                 hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo);
+    void                 getCachedContentTimeList(SearchStructure& ss,T::GenerationInfo& generationInfo,std::set<std::string>& contentTimeList);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

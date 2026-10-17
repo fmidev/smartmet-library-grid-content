@@ -5253,6 +5253,46 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
+/*! \brief Return true (and log the error) if the file, generation or producer of the content is missing. */
+
+bool CacheImplementation::hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfo *fileInfo = ss.mFileInfoList.getFileInfoById(cInfo.mFileId);
+    if (fileInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo.mFileId);
+      return true;
+    }
+
+    T::GenerationInfo *generationInfo = ss.mGenerationInfoList.getGenerationInfoById(cInfo.mGenerationId);
+    if (generationInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo.mGenerationId);
+      return true;
+    }
+
+    T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoById(cInfo.mProducerId);
+    if (producerInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo.mProducerId);
+      return true;
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Cache override: returns content records whose producer/generation/geometry links are inconsistent. */
 
 int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
@@ -5279,39 +5319,8 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = nullptr;
-      if (cInfo != nullptr)
-      {
-        T::FileInfo *fileInfo = ssp->mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == nullptr)
-        {
-          PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
-          cError = cInfo;
-        }
-
-        if (cError == nullptr)
-        {
-          T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError == nullptr)
-        {
-          T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError != nullptr)
-          contentInfoList.addContentInfo(cError->duplicate());
-      }
+      if (cInfo != nullptr  &&  hasInvalidIntegrity(*ssp,*cInfo))
+        contentInfoList.addContentInfo(cInfo->duplicate());
     }
     return Result::OK;
   }
@@ -5703,6 +5712,44 @@ int CacheImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
 
 
 
+/*! \brief Get the forecast times of the generation from the content time cache, or from the contents (caching them when the generation is ready). */
+
+void CacheImplementation::getCachedContentTimeList(SearchStructure& ss,T::GenerationInfo& generationInfo,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
+    auto it = mContentTimeCache.find(generationInfo.mGenerationId);
+    if (it == mContentTimeCache.end())
+    {
+      ss.mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo.mProducerId,generationInfo.mGenerationId,contentTimeList);
+
+      if (generationInfo.mStatus == T::GenerationInfo::Status::Ready)
+      {
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        if (mContentTimeCache.size() > 100000)
+          mContentTimeCache.clear();
+
+        mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationInfo.mGenerationId,contentTimeList));
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+    }
+    else
+    {
+      contentTimeList = it->second;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Cache override: lists distinct forecast times for the given generation. */
 
 int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
@@ -5725,61 +5772,16 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
 
     contentTimeList.clear();
 
-    if (!mContentSwapEnabled)
-    {
-      AutoReadLock readLock(&mSearchModificationLock);
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
-      if (generationInfo == nullptr)
-        return Result::UNKNOWN_GENERATION_ID;
+    ModificationLock *mlock = &mSearchModificationLock;
+    if (mContentSwapEnabled)
+      mlock = nullptr;
 
-      AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
-      auto it = mContentTimeCache.find(generationId);
-      if (it == mContentTimeCache.end())
-      {
-        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
+    AutoReadLock readLock(mlock);
+    T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
 
-        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
-        {
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          if (mContentTimeCache.size() > 100000)
-            mContentTimeCache.clear();
-
-          mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationId,contentTimeList));
-          mContentTimeCache_modificationLock.writeUnlock();
-        }
-      }
-      else
-      {
-        contentTimeList = it->second;
-      }
-    }
-    else
-    {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
-      if (generationInfo == nullptr)
-        return Result::UNKNOWN_GENERATION_ID;
-
-      AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
-      auto it = mContentTimeCache.find(generationId);
-      if (it == mContentTimeCache.end())
-      {
-        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
-
-        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
-        {
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          if (mContentTimeCache.size() > 100000)
-            mContentTimeCache.clear();
-
-          mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationId,contentTimeList));
-          mContentTimeCache_modificationLock.writeUnlock();
-        }
-      }
-      else
-      {
-        contentTimeList = it->second;
-      }
-    }
+    getCachedContentTimeList(*ssp,*generationInfo,contentTimeList);
     return Result::OK;
   }
   catch (...)

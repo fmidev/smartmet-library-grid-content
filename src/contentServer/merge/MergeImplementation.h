@@ -228,6 +228,7 @@ class MergeImplementation : public ServiceInterface
     /*! \brief Returns the active search structure. The returned reference keeps it alive even if
         a content update replaces it meanwhile. */
     SearchStructure_sptr activeSearchStructure() const;
+    bool                 hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

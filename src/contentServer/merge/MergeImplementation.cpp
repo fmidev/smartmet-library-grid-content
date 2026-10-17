@@ -4287,6 +4287,46 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
 
 
+/*! \brief Return true (and log the error) if the file, generation or producer of the content is missing. */
+
+bool MergeImplementation::hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfo *fileInfo = ss.mFileInfoList.getFileInfoById(cInfo.mFileId);
+    if (fileInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo.mFileId);
+      return true;
+    }
+
+    T::GenerationInfo *generationInfo = ss.mGenerationInfoList.getGenerationInfoById(cInfo.mGenerationId);
+    if (generationInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo.mGenerationId);
+      return true;
+    }
+
+    T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoById(cInfo.mProducerId);
+    if (producerInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo.mProducerId);
+      return true;
+    }
+
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: return merged content records referencing missing producers, generations or files. */
 
 int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
@@ -4307,39 +4347,8 @@ int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = nullptr;
-      if (cInfo != nullptr)
-      {
-        T::FileInfo *fileInfo = ssp->mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == nullptr)
-        {
-          PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
-          cError = cInfo;
-        }
-
-        if (cError == nullptr)
-        {
-          T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError == nullptr)
-        {
-          T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError != nullptr)
-          contentInfoList.addContentInfo(cError->duplicate());
-      }
+      if (cInfo != nullptr  &&  hasInvalidIntegrity(*ssp,*cInfo))
+        contentInfoList.addContentInfo(cInfo->duplicate());
     }
     return Result::OK;
   }
