@@ -120,6 +120,71 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Split the parameter string into fields at the separators that are not inside functions. Returns the number of fields. */
+
+uint splitParameterFields(char* buf,char fieldSeparator,char** field)
+{
+  uint c = 1;
+  field[0] = buf;
+  char* p = buf;
+  int level = 0;
+  while (*p != '\0' && c < 100)
+  {
+    if (*p == '{')
+      level++;
+
+    if (*p == '}')
+      level--;
+
+    if (level == 0 && *p == fieldSeparator)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Return true if the field of the index exists and is not empty. */
+
+bool hasField(char** field,uint c,uint index)
+{
+  return c > index  &&  field[index][0] != '\0';
+}
+
+
+
+/*! \brief Add the comma separated levels of the level field ("M" prefix for metric levels). */
+
+void addLevels(const char *levelField,uint& flags,std::vector<T::ParamLevel>& paramLevelVec)
+{
+  std::vector<std::string> numbers;
+  if (isdigit(levelField[0]))
+  {
+    splitNumbers(levelField,numbers);
+  }
+  else
+  {
+    if (toupper(levelField[0]) == 'M')
+    {
+      flags |= QueryServer::QueryParameter::Flags::MetricLevels;
+      splitNumbers(levelField+1,numbers);
+    }
+  }
+  for (auto& number : numbers)
+    paramLevelVec.emplace_back(toInt32(number));
+}
+
+
+
 /*! \brief Split the function parameters at the ';' separators that are not inside functions. Returns true if the parameters contain a function. */
 
 bool splitFunctionParams(const std::string& functionParamsStr,std::vector<std::string>& pnames)
@@ -1832,30 +1897,7 @@ void ServiceImplementation::getParameterStringInfo(
     strcpy(buf, param.c_str());
 
     char* field[100];
-    uint c = 1;
-    field[0] = buf;
-    char* p = buf;
-    int level = 0;
-    while (*p != '\0' && c < 100)
-    {
-      if (*p == '{')
-        level++;
-
-      if (*p == '}')
-        level--;
-
-      if (level == 0 && *p == fieldSeparator)
-      {
-        *p = '\0';
-        p++;
-        field[c] = p;
-        c++;
-      }
-      else
-      {
-        p++;
-      }
-    }
+    uint c = splitParameterFields(buf,fieldSeparator,field);
 
     key = field[0];
     std::string alias;
@@ -1865,91 +1907,45 @@ void ServiceImplementation::getParameterStringInfo(
       if (strchr(alias.c_str(),'{') == nullptr)
         key = alias;
     }
-    if (c > 1)
+    if (hasField(field,c,1))
     {
-      if (field[1][0] != '\0')
-      {
-        producerName = field[1];
-        T::ProducerInfo producerInfo;
-        if (getProducerInfoByName(producerName, producerInfo))
-          producerId = producerInfo.mProducerId;
-      }
+      producerName = field[1];
+      T::ProducerInfo producerInfo;
+      if (getProducerInfoByName(producerName, producerInfo))
+        producerId = producerInfo.mProducerId;
     }
 
-    if (c > 2)
+    if (hasField(field,c,2))
+      geometryId = toInt32(field[2]);
+
+    if (hasField(field,c,3))
+      paramLevelId = toUInt8(field[3]);
+
+    if (hasField(field,c,4))
+      addLevels(field[4],flags,paramLevelVec);
+
+    if (hasField(field,c,5))
+      forecastType = toInt16(field[5]);
+
+    if (hasField(field,c,6))
     {
-      if (field[2][0] != '\0')
-        geometryId = toInt32(field[2]);
+      std::vector<std::string> numbers;
+      splitNumbers(field[6],numbers);
+      for (auto& number : numbers)
+        forecastNumberVec.emplace_back(toInt16(number));
     }
 
-    if (c > 3)
-    {
-      if (field[3][0] != '\0')
-        paramLevelId = toUInt8(field[3]);
-    }
+    if (hasField(field,c,7))
+      generationFlags = toUInt64(field[7]);
 
-    if (c > 4)
-    {
-      if (field[4][0] != '\0')
-      {
-        std::vector<std::string> numbers;
-        if (isdigit(field[4][0]))
-        {
-          splitNumbers(field[4],numbers);
-        }
-        else
-        {
-          if (toupper(field[4][0]) == 'M')
-          {
-            flags |= QueryServer::QueryParameter::Flags::MetricLevels;
-            splitNumbers(field[4]+1,numbers);
-          }
-        }
-        for (auto& number : numbers)
-          paramLevelVec.emplace_back(toInt32(number));
-      }
-    }
+    if (hasField(field,c,8))
+      areaInterpolationMethod = toInt16(field[8]);
 
-    if (c > 5)
-    {
-      if (field[5][0] != '\0')
-        forecastType = toInt16(field[5]);
-    }
+    if (hasField(field,c,9))
+      timeInterpolationMethod = toInt16(field[9]);
 
-    if (c > 6)
-    {
-      if (field[6][0] != '\0')
-      {
-        std::vector<std::string> numbers;
-        splitNumbers(field[6],numbers);
-        for (auto& number : numbers)
-          forecastNumberVec.emplace_back(toInt16(number));
-      }
-    }
-
-    if (c > 7)
-    {
-      if (field[7][0] != '\0')
-        generationFlags = toUInt64(field[7]);
-    }
-
-    if (c > 8)
-    {
-      if (field[8][0] != '\0')
-        areaInterpolationMethod = toInt16(field[8]);
-    }
-
-    if (c > 9)
-    {
-      if (field[9][0] != '\0')
-        timeInterpolationMethod = toInt16(field[9]);
-    }
-
-    if (c > 10)
-    {
-      if (field[10][0] != '\0')
-        levelInterpolationMethod = toInt16(field[10]);
-    }
+    if (hasField(field,c,10))
+      levelInterpolationMethod = toInt16(field[10]);
   }
   catch (...)
   {
