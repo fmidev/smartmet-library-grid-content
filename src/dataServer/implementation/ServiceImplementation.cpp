@@ -498,6 +498,9 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
         {
           addFile(fileInfo,contentList);
           gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
+          if (!gridFile)
+            return nullptr;
+
           if (!gridFile->isMemoryMapped())
             gridFile->mapToMemory();
 
