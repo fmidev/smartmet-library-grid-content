@@ -42,6 +42,7 @@ class AliasFile
   protected:
 
     virtual void  loadFile();
+    void          addAliasLine(char *st,uint lineCount);
 
     std::string       mFilename;          //!< Path to the alias definition file on disk.
     time_t            mLastModified;      //!< File mtime at last load, used for change detection.
