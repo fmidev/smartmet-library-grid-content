@@ -12,6 +12,7 @@
 #include <macgyver/Cache.h>
 #include <boost/unordered_map.hpp>
 #include <unordered_map>
+#include <unordered_set>
 #include <atomic>
 
 
@@ -139,6 +140,39 @@ class HeightConversion
 };
 
 using HeightConversionMap = std::unordered_map<std::size_t,HeightConversion>;                 //!< Map from hash key to HeightConversion rule.
+
+
+// ====================================================================================
+/*! \brief State shared by the parameters of a time range or time step query while their values are fetched. */
+// ====================================================================================
+class QueryFetchState
+{
+  public:
+    Producer_vec              producers;                            //!< Producers of the query.
+    std::set<T::GeometryId>   geometryIdList;                       //!< Geometries that support the query coordinates.
+    T::Coordinate_vec         coordinates;                          //!< Coordinates of the first values found.
+    std::string               analysisTime;                         //!< Analysis time required (or selected) for the parameters.
+    std::unordered_set<uint>  alternativeRequired;                  //!< Ids of the alternative parameters that must be fetched.
+    uint                      queryFlags = 0;                       //!< Query flags (the analysis time match requirement can be added).
+    int                       globalGeometryId = 0;                 //!< Geometry of the first values of a parameter without a geometry.
+    bool                      containsInternalAggregation = false;  //!< Whether the query has internal aggregation parameters.
+};
+
+
+// ====================================================================================
+/*! \brief Parsed data parameter of a query: the name and the producer and generation selections. */
+// ====================================================================================
+class ParameterRequest
+{
+  public:
+    std::string     paramName;                //!< Parameter name (without the '$' prefix).
+    std::string     producerName;             //!< Requested producer name (or empty).
+    T::ProducerId   producerId = 0;           //!< Requested (or selected) producer.
+    int             geometryId = 0;           //!< Requested geometry (or 0).
+    UInt64          generationFlags = 0;      //!< Requested generations (the query generations if 0).
+    std::size_t     paramHash = 0;            //!< Hash of the parameter name.
+    bool            useAlternative = false;   //!< Whether the alternative parameter is used (the geometry does not cover the area).
+};
 
 
 // ====================================================================================
@@ -363,6 +397,13 @@ class ServiceImplementation : public ServiceInterface
      bool           addLevelInterpolatedPointValue(const Query& query,const T::Coordinate& coordinate,const HeightRec& rec,const QueryParameter& qParam,const T::ContentInfo& contentInfo1_1,const T::ContentInfo& contentInfo2_1,T::ParamLevel paramLevel,short areaInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,ParameterValues& valueList);
      bool           addTimeLevelInterpolatedPointValue(const Query& query,const T::Coordinate& coordinate,const HeightRec& rec,const QueryParameter& qParam,const T::ContentInfo& contentInfo1_1,const T::ContentInfo& contentInfo1_2,const T::ContentInfo& contentInfo2_1,const T::ContentInfo& contentInfo2_2,time_t forecastTime,T::ParamLevel paramLevel,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,ParameterValues& valueList);
      bool           addPointValuesByHeight(const Query& query,T::Coordinate_vec& coordinates,const HeightRec_vec& recs,QueryParameter& qParam,const T::ProducerInfo& producerInfo,T::GeometryId producerGeometryId,T::GenerationId generationId,const std::string& analysisTime,UInt64 generationFlags,ParameterMapping& pInfo,time_t forecastTime,T::ParamLevelId paramLevelId,T::ParamLevel paramLevel,T::ProducerId& newProducerId,short areaInterpolationMethod,short timeInterpolationMethod,short levelInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,ParameterValues& valueList);
+     void           getQueryGeometryIdList(Query& query,Producer_vec& producers,std::set<T::GeometryId>& geometryIdList);
+     void           parseParameterRequest(const Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req);
+     void           checkAlternativeRequest(Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req);
+     void           fetchTimeRangeParameter(Query& query,QueryParameter& qParam,QueryFetchState& state,std::unordered_map<std::string,T::ProducerId>& parameterProducers);
+     void           getTimeRangeProducersAndGeometries(const QueryParameter& qParam,const QueryFetchState& state,const ParameterRequest& req,Producer_vec& tmpProducers,std::set<T::GeometryId>& geomIdList);
+     void           fetchTimeRangeValues(Query& query,QueryParameter& qParam,QueryFetchState& state,std::unordered_map<std::string,T::ProducerId>& parameterProducers,ParameterRequest& req);
+     void           addMissingTimeRangeValues(const Query& query,QueryParameter& qParam,time_t tt,size_t timeCnt,const std::set<time_t>& originalTimeList,const QueryFetchState& state);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);
