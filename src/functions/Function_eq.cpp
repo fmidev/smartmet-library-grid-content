@@ -171,22 +171,25 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 {
   try
   {
-    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
-
     if (inParameters.size() == 1  &&  extParameters.size() == 2)
     {
       // Comparison with the given number of decimals
       double mp = pow(10,extParameters[1]);
       std::vector<double> value = {extParameters[0]};
       compareGridValues(columns,rows,inParameters,value,roundedEqual(mp),outParameters);
+      return;
     }
 
     if (inParameters.size() == 2  &&  extParameters.size() == 1)
     {
-      // Comparison with the given number of decimals
+      // Comparison with the given number of decimals. The extra parameter is the number of decimals,
+      // not a value, so the grids are not compared exactly.
       double mp = pow(10,extParameters[0]);
       compareGridValues(columns,rows,inParameters,extParameters,roundedEqual(mp),outParameters);
+      return;
     }
+
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
   }
   catch (...)
   {
@@ -204,22 +207,25 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 {
   try
   {
-    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
-
     if (inParameters.size() == 1  &&  extParameters.size() == 2)
     {
       // Comparison with the given number of decimals
       double mp = pow(10,extParameters[1]);
       std::vector<double> value = {extParameters[0]};
       compareGridValues(columns,rows,inParameters,value,roundedEqual(mp),outParameters);
+      return;
     }
 
     if (inParameters.size() == 2  &&  extParameters.size() == 1)
     {
-      // Comparison with the given number of decimals
+      // Comparison with the given number of decimals. The extra parameter is the number of decimals,
+      // not a value, so the grids are not compared exactly.
       double mp = pow(10,extParameters[0]);
       compareGridValues(columns,rows,inParameters,extParameters,roundedEqual(mp),outParameters);
+      return;
     }
+
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
   }
   catch (...)
   {
