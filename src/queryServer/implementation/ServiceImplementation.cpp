@@ -9969,7 +9969,11 @@ ParameterMapping_vec_sptr ServiceImplementation::getGridValueMappings(const T::P
         ParameterMapping_vec_sptr tmpMappings;
         getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
         if (!tmpMappings->empty())
+        {
+          // The mapping vector may be shared by the mapping cache. It is not modified.
+          mappings = std::make_shared<ParameterMapping_vec>();
           mappings->emplace_back((*tmpMappings)[0]);
+        }
       }
     }
     else
@@ -9987,6 +9991,9 @@ ParameterMapping_vec_sptr ServiceImplementation::getGridValueMappings(const T::P
       mp.mGeometryId = producerGeometryId;
       mp.mParameterLevelId = qParam.mParameterLevelId;
       mp.mParameterLevel = qParam.mParameterLevel;
+
+      // The mapping vector may be shared by the mapping cache. It is not modified.
+      mappings = std::make_shared<ParameterMapping_vec>();
       mappings->emplace_back(mp);
     }
 
@@ -10813,6 +10820,9 @@ ParameterMapping_vec_sptr ServiceImplementation::getTimeRangeMappings(const T::P
         {
           ParameterMapping m((*tmpMappings)[0]);
           m.mParameterLevel = qParam.mParameterLevel;
+
+          // The mapping vector may be shared by the mapping cache. It is not modified.
+          mappings = std::make_shared<ParameterMapping_vec>();
           mappings->emplace_back(m);
         }
       }
