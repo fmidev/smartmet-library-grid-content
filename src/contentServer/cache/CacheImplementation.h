@@ -235,6 +235,28 @@ class CacheImplementation : public ServiceInterface
     void                 updateContentIfRequired();
     bool                 reloadAfterRestart(const T::EventInfo& eventInfo);
     bool                 processNextEvents(uint& len,uint& ecnt);
+    void                 deleteMarkedRecords();
+    bool                 isSearchStructureCurrent();
+    bool                 isCachedFileWaitAllowed();
+    bool                 isMissingFromLocalCache(T::FileInfo& fInfo);
+    T::FileInfo*         getFileMissingFromLocalCache();
+    void                 delayContentSwap(T::FileInfo& file);
+    void                 reportExceededCachedFileWait();
+    SearchStructure_sptr newSearchStructure();
+    bool                 updateProducerHashes(SearchStructure& ss,uint contentListIndex);
+    bool                 updateGenerationTimeRanges(SearchStructure& ss);
+    bool                 swapSearchStructure(SearchStructure_sptr ssp);
+    SearchStructure_sptr createSearchStructure();
+    void                 setSearchStructureLocking(SearchStructure& ss,bool enabled);
+    void                 deleteMarkedSearchRecords(SearchStructure& ss);
+    void                 moveNewMetadata(SearchStructure& ss);
+    void                 moveNewProducers(SearchStructure& ss);
+    void                 moveNewGeometries(SearchStructure& ss);
+    void                 moveNewGenerations(SearchStructure& ss);
+    void                 deleteMarkedSearchContentAndFiles(SearchStructure& ss);
+    void                 deleteMarkedSearchMetadata(SearchStructure& ss);
+    void                 moveNewFilesAndContents(SearchStructure& ss);
+    bool                 updateSearchStructure(SearchStructure_sptr ssp);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 
