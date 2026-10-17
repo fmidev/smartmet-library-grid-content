@@ -3678,7 +3678,7 @@ bool updateNextTimeNeighbours(TimeLevelNeighbours& n,ContentInfo *info,T::ParamL
   else
   if (info->mParameterLevel > level)
   {
-    if (n.nextTimeNextLevel == nullptr || (n.nextTimePrevLevel != nullptr && n.nextTimePrevLevel->mForecastTimeUTC > info->mForecastTimeUTC) || (n.nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  n.nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
+    if (n.nextTimeNextLevel == nullptr || n.nextTimeNextLevel->mForecastTimeUTC > info->mForecastTimeUTC || (n.nextTimeNextLevel->mForecastTimeUTC == info->mForecastTimeUTC &&  n.nextTimeNextLevel->mParameterLevel > info->mParameterLevel))
     {
       //std::cout << info->mForecastTime << " " << info->mParameterLevel << "next time next level\n";
       n.nextTimeNextLevel = info;
