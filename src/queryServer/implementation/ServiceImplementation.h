@@ -455,6 +455,21 @@ class ServiceImplementation : public ServiceInterface
        return checkValueResult(fetch(),service,contents,errorStops,conversionByFunction,function,functionParams,forecastTime,valueList);
      }
 
+     bool           getMetricLevelValueVectors(Query& query,QueryParameter& qParam,const T::ProducerInfo& producerInfo,T::GeometryId producerGeometryId,T::GenerationId generationId,const std::string& analysisTime,UInt64 generationFlags,ParameterMapping& pInfo,time_t forecastTime,T::ParamLevelId paramLevelId,T::ParamLevel paramLevel,T::ProducerId& newProducerId,ParameterValues& valueList,T::Coordinate_vec& coordinates);
+     void           getValueVectorCoordinates(Query& query,const QueryParameter& qParam,const T::ContentInfo& contentInfo1,bool conversionByFunction,T::Coordinate_vec& coordinates);
+     bool           checkValueVectorResult(int result,Query& query,const QueryParameter& qParam,const char *service,const T::ContentInfo& contentInfo1,bool errorStops,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,ParameterValues& valueList);
+
+     /*! \brief Fetch the value vector with the data server call (unless the query parameter requests no values) and check the result with checkValueVectorResult. */
+
+     template <class Fetch>
+     bool           fetchValueVector(Query& query,const QueryParameter& qParam,Fetch fetch,const char *service,const T::ContentInfo& contentInfo1,bool errorStops,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,ParameterValues& valueList)
+     {
+       if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0)
+         return true;
+
+       return checkValueVectorResult(fetch(),query,qParam,service,contentInfo1,errorStops,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
+     }
+
      bool           getModificationOperation(const std::string& function,const std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      bool           getPointValueVector(const T::ContentInfo& contentInfo,uchar coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector);
      void           addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);

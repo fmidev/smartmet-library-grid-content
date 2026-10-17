@@ -1244,6 +1244,41 @@ GRID::Message* newGrib2Message(GRID::GridFile& newGridFile,const char *geometryI
 
 
 
+/*! \brief Call the data server service of the location type of the value vector query: by geometry, by the grid
+           coordinates or by the grid of the content. Returns the result of the call. */
+
+template <class ByGeometry,class ByGrid,class ByDefault>
+int fetchByValueVectorLocation(uchar locationType,ByGeometry byGeometry,ByGrid byGrid,ByDefault byDefault)
+{
+  switch (locationType)
+  {
+    case QueryParameter::LocationType::Geometry:
+      return byGeometry();
+
+    case QueryParameter::LocationType::Grid:
+      return byGrid();
+
+    default:
+      return byDefault();
+  }
+}
+
+
+
+/*! \brief Finish the value vectors: set the default precision and clear the coordinates unless they are requested. */
+
+bool finishValueVectors(QueryParameter& qParam,const ParameterMapping& pInfo,T::Coordinate_vec& coordinates)
+{
+  setDefaultPrecision(qParam,pInfo);
+
+  if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
+    coordinates.clear();
+
+  return true;
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -6618,6 +6653,150 @@ bool ServiceImplementation::getSpecialValues(
 
 
 
+/*! \brief Query Server: Get the value vectors of the metric level (height) query for the geometry or the grid of the query. */
+
+bool ServiceImplementation::getMetricLevelValueVectors(
+    Query& query,
+    QueryParameter& qParam,
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    const std::string& analysisTime,
+    UInt64 generationFlags,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId paramLevelId,
+    T::ParamLevel paramLevel,
+    T::ProducerId& newProducerId,
+    ParameterValues& valueList,
+    T::Coordinate_vec& coordinates)
+{
+  try
+  {
+    if (qParam.mLocationType == QueryParameter::LocationType::Geometry)
+    {
+      uint width = 0;
+      uint height = 0;
+      T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+
+      Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
+
+      if (!sCoordinates)
+        return false;
+
+      bool res = getValueVectorsByHeight(query,query.mCoordinateType,*sCoordinates,qParam,producerInfo,producerGeometryId,generationId,
+        analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
+
+      //if (((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0))
+      coordinates = *sCoordinates;
+
+      return res;
+    }
+
+    bool res = getValueVectorsByHeight(query,query.mCoordinateType,query.mAreaCoordinates[0],qParam,producerInfo,producerGeometryId,generationId,
+      analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
+
+    coordinates = query.mAreaCoordinates[0];
+    return res;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the coordinates of the value vector (if there are none yet, and they are requested or needed
+           by the conversion function): from the query geometry, from the query grid or from the grid of the content. */
+
+void ServiceImplementation::getValueVectorCoordinates(Query& query,const QueryParameter& qParam,const T::ContentInfo& contentInfo1,bool conversionByFunction,T::Coordinate_vec& coordinates)
+{
+  try
+  {
+    if (!coordinates.empty() || ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0  && !conversionByFunction))
+      return;
+
+    switch (qParam.mLocationType)
+    {
+      case QueryParameter::LocationType::Geometry:
+      {
+        uint width = 0;
+        uint height = 0;
+        T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
+
+        if (qParam.mFlags & QueryServer::QueryParameter::Flags::OriginalCoordinates)
+        {
+          T::Coordinate_svec latlonCoordinates(new T::Coordinate_vec());
+          Identification::gridDef.getGridOriginalCoordinatesByGeometry(query.mAttributeList,latlonCoordinates,3,sCoordinates,width,height);
+        }
+        else
+        {
+          Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
+        }
+        if (sCoordinates)
+          coordinates = *sCoordinates;
+      }
+      break;
+
+      case QueryParameter::LocationType::Grid:
+        coordinates = query.mAreaCoordinates[0];
+        break;
+
+      default:
+      {
+        T::GridCoordinates coord;
+        if (mDataServerPtr->getGridCoordinates(0,contentInfo1.mFileId, contentInfo1.mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
+          coordinates = coord.mCoordinateList;
+      }
+      break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Check the result of the value vector fetch: get the coordinates on success, log the error (and
+           return false if the error stops), and set the values (converted by the function if requested). */
+
+bool ServiceImplementation::checkValueVectorResult(int result,Query& query,const QueryParameter& qParam,const char *service,const T::ContentInfo& contentInfo1,bool errorStops,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,ParameterValues& valueList)
+{
+  try
+  {
+    if (result == 0)
+      getValueVectorCoordinates(query,qParam,contentInfo1,conversionByFunction,coordinates);
+
+    if (result != 0  &&  errorStops)
+    {
+      reportDataServerError(service,result,{&contentInfo1});
+      return false;
+    }
+
+    if (conversionByFunction)
+       executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
+    else
+      valueList.mValueVector = valueVector;
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get value vectors. */
 
 bool ServiceImplementation::getValueVectors(
@@ -6641,44 +6820,8 @@ bool ServiceImplementation::getValueVectors(
   {
     PRINT_DATA(mDebugLog, "getValueVectors()\n");
 
-    if (isMetricLevelQuery(qParam))
-    {
-      switch (qParam.mLocationType)
-      {
-        case QueryParameter::LocationType::Geometry:
-        {
-          uint width = 0;
-          uint height = 0;
-          T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
-
-          Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
-
-          if (sCoordinates)
-          {
-            bool res = getValueVectorsByHeight(query,query.mCoordinateType,*sCoordinates,qParam,producerInfo,producerGeometryId,generationId,
-              analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
-
-          //if (((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0))
-            coordinates = *sCoordinates;
-
-            return res;
-          }
-          return false;
-        }
-
-        case QueryParameter::LocationType::Grid:
-        {
-          bool res = getValueVectorsByHeight(query,query.mCoordinateType,query.mAreaCoordinates[0],qParam,producerInfo,producerGeometryId,generationId,
-            analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
-
-          coordinates = query.mAreaCoordinates[0];
-          return res;
-
-        }
-        default:
-          break;
-      }
-    }
+    if (isMetricLevelQuery(qParam)  &&  (qParam.mLocationType == QueryParameter::LocationType::Geometry  ||  qParam.mLocationType == QueryParameter::LocationType::Grid))
+      return getMetricLevelValueVectors(query,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList,coordinates);
 
 
     short areaInterpolationMethod = getAreaInterpolationMethod(qParam,pInfo);
@@ -6693,11 +6836,8 @@ bool ServiceImplementation::getValueVectors(
     double_vec modificationParameters;
     std::string function;
     std::vector<std::string> functionParams;
-    bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
+    bool conversionByFunction = getValueConversion(pInfo,function,functionParams,modificationOperation,modificationParameters);
     T::ParamValue_vec valueVector;
-
-    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
-      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -6726,89 +6866,8 @@ bool ServiceImplementation::getValueVectors(
     query.mAttributeList.setAttribute("grid.areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
     //query.mAttributeList.setAttribute("grid.levelInterpolationMethod",Fmi::to_string(levelInterpolationMethod));
 
-    if (contentLen == 1)
+    if (contentLen == 1  &&  contentInfo1->mForecastTimeUTC != fTime)
     {
-      if (contentInfo1->mForecastTimeUTC == fTime)
-      {
-        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
-
-        valueList.mFlags = ParameterValues::Flags::DataAvailable;
-
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
-
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridValueVectorByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  uint width = 0;
-                  uint height = 0;
-                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
-
-                  if (qParam.mFlags & QueryServer::QueryParameter::Flags::OriginalCoordinates)
-                  {
-                    T::Coordinate_svec latlonCoordinates(new T::Coordinate_vec());
-                    Identification::gridDef.getGridOriginalCoordinatesByGeometry(query.mAttributeList,latlonCoordinates,3,sCoordinates,width,height);
-                  }
-                  else
-                  {
-                    Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
-                  }
-                  if (sCoordinates)
-                    coordinates = *sCoordinates;
-                }
-              }
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  coordinates = query.mAreaCoordinates[0];
-                }
-              }
-              break;
-
-            default:
-              result = mDataServerPtr->getGridValueVector(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  T::GridCoordinates coord;
-                  if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
-                    coordinates = coord.mCoordinateList;
-                }
-              }
-              break;
-          }
-
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueVector",result,{contentInfo1});
-            return false;
-          }
-
-          if (conversionByFunction)
-             executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-          else
-            valueList.mValueVector = valueVector;
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
-          coordinates.clear();
-
-        return true;
-      }
       // There is one content record in place, but its time does not match to
       // the requested forecast time. This is used for indicating that there
       // are content records available, but not for the requested time.
@@ -6818,260 +6877,85 @@ bool ServiceImplementation::getValueVectors(
       return false;
     }
 
-    short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
-
-    if (contentLen == 2)
+    if (contentLen == 1)
     {
-      if (isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
-      {
-        // We did not find a grid with the exact forecast time, but we find grids that
-        // are before and after the current forecast time. This means that we should do
-        // some time interpolation.
+      // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
+      if (!fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+            [&]() { return mDataServerPtr->getGridValueVectorByGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVector(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,modificationOperation,modificationParameters,valueVector); }); },
+          "getGridValueVector",*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
+        return false;
 
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridValueVectorByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  uint width = 0;
-                  uint height = 0;
-                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
-                  if (qParam.mFlags & QueryServer::QueryParameter::Flags::OriginalCoordinates)
-                  {
-                    T::Coordinate_svec latlonCoordinates(new T::Coordinate_vec());
-                    Identification::gridDef.getGridOriginalCoordinatesByGeometry(query.mAttributeList,latlonCoordinates,3,sCoordinates,width,height);
-                  }
-                  else
-                  {
-                    Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
-                  }
-                  if (sCoordinates)
-                    coordinates = *sCoordinates;
-                }
-              }
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  coordinates = query.mAreaCoordinates[0];
-                }
-              }
-              break;
-
-            default:
-              result = mDataServerPtr->getGridValueVectorByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,timeInterpolationMethod,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  T::GridCoordinates coord;
-                  if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
-                    coordinates = coord.mCoordinateList;
-                }
-              }
-              break;
-          }
-
-          if (result != 0)
-          {
-            reportDataServerError("getGridValueVectorByTimeAndGeometry",result,{contentInfo1});
-            return false;
-          }
-
-          if (conversionByFunction)
-             executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-          else
-            valueList.mValueVector = valueVector;
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
-          coordinates.clear();
-
-        return true;
-      }
-
-      if (contentInfo1->mForecastTimeUTC == fTime  &&  contentInfo2->mForecastTimeUTC == fTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact level but we find grids that
-        // are before and after the current level. This means that we should do
-        // some level interpolation.
-
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          valueList.mParameterLevel = paramLevel;
-
-          int result = 0;
-
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridValueVectorByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  uint width = 0;
-                  uint height = 0;
-                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
-                  if (qParam.mFlags & QueryServer::QueryParameter::Flags::OriginalCoordinates)
-                  {
-                    T::Coordinate_svec latlonCoordinates(new T::Coordinate_vec());
-                    Identification::gridDef.getGridOriginalCoordinatesByGeometry(query.mAttributeList,latlonCoordinates,3,sCoordinates,width,height);
-                  }
-                  else
-                  {
-                    Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
-                  }
-                  if (sCoordinates)
-                    coordinates = *sCoordinates;
-                }
-              }
-              break;
-
-            case QueryParameter::LocationType::Grid:
-              result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  coordinates = query.mAreaCoordinates[0];
-                }
-              }
-              break;
-
-            default:
-              result = mDataServerPtr->getGridValueVectorByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  T::GridCoordinates coord;
-                  if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
-                    coordinates = coord.mCoordinateList;
-                }
-              }
-              break;
-          }
-
-          if (conversionByFunction)
-             executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-          else
-            valueList.mValueVector = valueVector;
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
-          coordinates.clear();
-
-        return true;
-      }
+      return finishValueVectors(qParam,pInfo,coordinates);
     }
 
-    if (contentLen == 4)
+    short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
+
+    if (contentLen == 2  &&  isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
     {
-      if (contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC < fTime  &&  contentInfo3->mForecastTimeUTC > fTime  &&  contentInfo4->mForecastTimeUTC > fTime  &&
-          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
-          &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden   &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
-        valueList.mFileId[1] = contentInfo2->mFileId;
-        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
-        valueList.mFileId[2] = contentInfo3->mFileId;
-        valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
-        valueList.mFileId[3] = contentInfo4->mFileId;
-        valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
-        valueList.mParameterLevel = paramLevel;
+      // We did not find a grid with the exact forecast time, but we find grids that
+      // are before and after the current forecast time. This means that we should do
+      // some time interpolation.
 
-        if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = 0;
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-          switch (qParam.mLocationType)
-          {
-            case QueryParameter::LocationType::Geometry:
-              result = mDataServerPtr->getGridValueVectorByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  uint width = 0;
-                  uint height = 0;
-                  T::Coordinate_svec sCoordinates(new T::Coordinate_vec());
-                  if (qParam.mFlags & QueryServer::QueryParameter::Flags::OriginalCoordinates)
-                  {
-                    T::Coordinate_svec latlonCoordinates(new T::Coordinate_vec());
-                    Identification::gridDef.getGridOriginalCoordinatesByGeometry(query.mAttributeList,latlonCoordinates,3,sCoordinates,width,height);
-                  }
-                  else
-                  {
-                    Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,sCoordinates,width,height);
-                  }
-                  if (sCoordinates)
-                    coordinates = *sCoordinates;
-                }
-              }
-              break;
+      if (!fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+            [&]() { return mDataServerPtr->getGridValueVectorByTimeAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByTime(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,timeInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
+          "getGridValueVectorByTimeAndGeometry",*contentInfo1,true,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList))
+        return false;
 
-            case QueryParameter::LocationType::Grid:
-              result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  coordinates = query.mAreaCoordinates[0];
-                }
-              }
-              break;
+      return finishValueVectors(qParam,pInfo,coordinates);
+    }
 
-            default:
-              result = mDataServerPtr->getGridValueVectorByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector);
-              if (result == 0)
-              {
-                if (coordinates.empty() && ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) != 0  || conversionByFunction))
-                {
-                  T::GridCoordinates coord;
-                  if (mDataServerPtr->getGridCoordinates(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,T::CoordinateTypeValue::LATLON_COORDINATES,coord) == 0)
-                    coordinates = coord.mCoordinateList;
-                }
-              }
-              break;
-          }
+    if (contentLen == 2  &&  isLevelInterpolationPair(*contentInfo1,*contentInfo2,fTime,paramLevel,levelInterpolationMethod))
+    {
+      // We did not find a grid with the exact level but we find grids that
+      // are before and after the current level. This means that we should do
+      // some level interpolation.
 
-          if (conversionByFunction)
-             executeConversion(function, functionParams, forecastTime, coordinates, valueVector, valueList.mValueVector);
-          else
-            valueList.mValueVector = valueVector;
-        }
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-        setDefaultPrecision(qParam,pInfo);
+      // The level is set only when the values are fetched. Data server errors are not checked.
 
-        if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
-          coordinates.clear();
+      fetchValueVector(query,qParam,[&]() { valueList.mParameterLevel = paramLevel; return fetchByValueVectorLocation(qParam.mLocationType,
+            [&]() { return mDataServerPtr->getGridValueVectorByLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
+          "getGridValueVectorByLevelAndGeometry",*contentInfo1,false,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
 
-        return true;
-      }
+      return finishValueVectors(qParam,pInfo,coordinates);
+    }
+
+    if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,fTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
+    {
+      valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation | ParameterValues::Flags::DataAvailableByLevelInterpolation;
+      valueList.mFileId[1] = contentInfo2->mFileId;
+      valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+      valueList.mFileId[2] = contentInfo3->mFileId;
+      valueList.mMessageIndex[2] = contentInfo3->mMessageIndex;
+      valueList.mFileId[3] = contentInfo4->mFileId;
+      valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
+      valueList.mParameterLevel = paramLevel;
+
+      // Data server errors are not checked.
+
+      fetchValueVector(query,qParam,[&]() { return fetchByValueVectorLocation(qParam.mLocationType,
+            [&]() { return mDataServerPtr->getGridValueVectorByTimeLevelAndGeometry(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],query.mAttributeList,modificationOperation,modificationParameters,valueVector); },
+            [&]() { return mDataServerPtr->getGridValueVectorByTimeAndLevel(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,fTime,paramLevel,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueVector); }); },
+          "getGridValueVectorByTimeLevelAndGeometry",*contentInfo1,false,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
+
+      return finishValueVectors(qParam,pInfo,coordinates);
     }
 
     return false;
