@@ -5435,9 +5435,6 @@ void ServiceImplementation::fetchTimeStepParameter(Query& query,QueryParameter& 
 {
   try
   {
-    T::ForecastType forecastType = qParam.mForecastType;
-    T::ForecastNumber forecastNumber = qParam.mForecastNumber;
-
     ParameterRequest req;
     parseParameterRequest(query,qParam,state,req);
     checkAlternativeRequest(query,qParam,state,req);
@@ -5480,7 +5477,7 @@ void ServiceImplementation::fetchTimeStepParameter(Query& query,QueryParameter& 
       try
       {
         if (qParam.mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !req.useAlternative)
-          fetchTimeStepValues(query,qParam,state,req,*fTime,gflags,forecastType,forecastNumber,tmpProducers,tmpGeomIdList,*valueList);
+          fetchTimeStepValues(query,qParam,state,req,*fTime,gflags,tmpProducers,tmpGeomIdList,*valueList);
       }
       catch (...)
       {
@@ -5617,7 +5614,7 @@ bool ServiceImplementation::fetchConcatenatedProducerValues(Query& query,QueryPa
 
 /*! \brief Query Server: Fetch the values of the parameter for the time step and update the query state accordingly. */
 
-void ServiceImplementation::fetchTimeStepValues(Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,time_t forecastTime,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList)
+void ServiceImplementation::fetchTimeStepValues(Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,time_t forecastTime,UInt64& gflags,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList)
 {
   try
   {
@@ -5646,7 +5643,7 @@ void ServiceImplementation::fetchTimeStepValues(Query& query,QueryParameter& qPa
     //printf("SEARCH END %s %u %u %d\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),(int)concat);
 
     if (valueList.mValueList.getLength() > 0  || ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) != 0))
-      updateTimeStepFetchState(query,qParam,state,req,concat,gflags,forecastType,forecastNumber,valueList);
+      updateTimeStepFetchState(query,qParam,state,req,concat,gflags,valueList);
   }
   catch (...)
   {
@@ -5659,9 +5656,9 @@ void ServiceImplementation::fetchTimeStepValues(Query& query,QueryParameter& qPa
 
 
 /*! \brief Query Server: Update the query state and the parameter selections (producer, geometry, analysis time,
-           generations, forecast number) by the values found for the time step. */
+           generations) by the values found for the time step. */
 
-void ServiceImplementation::updateTimeStepFetchState(const Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,bool concat,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,ParameterValues& valueList)
+void ServiceImplementation::updateTimeStepFetchState(const Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,bool concat,UInt64& gflags,ParameterValues& valueList)
 {
   try
   {
@@ -5680,13 +5677,6 @@ void ServiceImplementation::updateTimeStepFetchState(const Query& query,const Qu
       updateSameAnalysisTime(query,valueList,state);
 
       updateTimeStepGenerationFlags(query,qParam,req.generationFlags,valueList,gflags);
-    }
-
-    // We should not change the forecast number.
-    if (forecastType < 0  &&  forecastNumber < 0)
-    {
-      forecastType = valueList.mForecastType;
-      forecastNumber = valueList.mForecastNumber;
     }
 
     addValueCoordinates(valueList,state.coordinates);
