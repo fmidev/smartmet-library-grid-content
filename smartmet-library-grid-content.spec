@@ -113,6 +113,14 @@ FMI Grid Content library development files
 
 %changelog
 * Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
+- Height queries interpolated in time used the contents and levels of the first time for both times;
+  each time is now interpolated in height with its own contents and levels before the time
+  interpolation (value vectors and point values)
+- The per-thread parameter mapping, content and generation list caches are invalidated with atomic
+  generation counters instead of unsynchronized one-second timestamps that could lose a reload
+- getClosestLevelsByHeight checks the coordinate index of the height vectors
+- addInterpolatedSpecialValue checks its own input
+- Cache and Merge: removed dead branches in the content additions
 - MemoryImplementation::sync*List: rescan the whole list when clearing the sync marks
 - ContentInfoList: extract addContent and use isLiveContent everywhere (getContentInfoListByFileId
   34, getContentInfoListByForecastTime 34, getContentInfoListByGenerationId 30,
