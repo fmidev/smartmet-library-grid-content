@@ -15,6 +15,7 @@
 #include <macgyver/CharsetTools.h>
 #include <macgyver/NumericCast.h>
 #include <macgyver/Hash.h>
+#include <fmt/format.h>
 #include <cmath>
 #include <algorithm>
 #include <boost/numeric/conversion/cast.hpp>
@@ -471,14 +472,63 @@ void collectFunctionInputVectors(Query& query,QueryParameter& qParam,int tCount,
 
 /*! \brief Throw an exception if the maximum processing time of the query has been reached. */
 
-void checkMaxProcessingTime(const Query& query)
+void checkMaxProcessingTime(const Query& query,const char *parameterName)
 {
   if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
   {
     Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
-    exception.addParameter("maxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
+    exception.addParameter(parameterName, std::to_string(query.mMaxProcessingTimeInSeconds));
     throw exception;
   }
+}
+
+
+
+/*! \brief Throw an exception if the query has no area (coordinates, geometry, grid or crs) for the parameter, or if a
+           polygon has less than 3 coordinates. */
+
+void checkGridValueArea(const Query& query,const QueryParameter& qParam,const char *polygonError)
+{
+  if (qParam.mType != QueryParameter::Type::GridFile  &&  query.mAreaCoordinates.empty()  &&
+      query.mAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&
+      query.mAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&
+      query.mAttributeList.getAttributeValue("grid.urn") == nullptr  &&
+      query.mAttributeList.getAttributeValue("grid.crs") == nullptr)
+  {
+    Fmi::Exception exception(BCP, "No query.mAreaCoordinates defined!");
+    throw exception;
+  }
+
+  if (qParam.mLocationType == QueryParameter::LocationType::Polygon)
+  {
+    for (const auto& mAreaCoordinate : query.mAreaCoordinates)
+    {
+      if (mAreaCoordinate.size() < 3)
+      {
+        Fmi::Exception exception(BCP, polygonError);
+        throw exception;
+      }
+    }
+  }
+}
+
+
+
+/*! \brief Return the special value list (the values of the value string) of the single value, or the missing list. */
+
+std::vector<double> getSpecialValueList(ParameterValues& values,const std::vector<double>& missingList)
+{
+  std::vector<double> list;
+  if (values.mValueList.getLength() == 1)
+  {
+    T::GridValue *v = values.mValueList.getGridValuePtrByIndex(0);
+    if (v != nullptr)
+      splitString(v->mValueString,';',list);
+  }
+  if (list.empty())
+    list = missingList;
+
+  return list;
 }
 
 
@@ -5055,7 +5105,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
-      checkMaxProcessingTime(query);
+      checkMaxProcessingTime(query,"maxProcessingTimeInSeconds");
 
       // Checking that the parameter is "a data parameter" - not a function.
 
@@ -5487,7 +5537,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
-      checkMaxProcessingTime(query);
+      checkMaxProcessingTime(query,"maxProcessingTimeInSeconds");
 
       if (isRequiredDataParameter(*qParam,state.alternativeRequired))
         fetchTimeStepParameter(query,*qParam,state);
@@ -9553,6 +9603,831 @@ bool ServiceImplementation::getVerticalValueVectors(
 
 
 
+/*! \brief Query Server: Print the arguments of the forecast time grid value request to the debug log (if enabled). */
+
+void ServiceImplementation::printGridValueRequest(const GridValueRequest& r,const Producer_vec& producers,const std::set<T::GeometryId>& geometryIdList)
+{
+  try
+  {
+    if (mDebugLog == nullptr ||  !mDebugLog->isEnabled())
+      return;
+
+    std::string text = "\nMETHOD getGridValues()\n";
+    text += fmt::format("  - producers                : {} items\n", producers.size());
+    for (auto it = producers.begin(); it != producers.end(); ++it)
+      text += fmt::format("    * {}:{}\n", it->first, it->second);
+    text += fmt::format("  - geometryIdList           : {} items\n", geometryIdList.size());
+    for (int it : geometryIdList)
+      text += fmt::format("    * {}\n",it);
+    text += fmt::format("  - producerId               : {}\n", r.producerId);
+    text += fmt::format("  - analysisTime             : {}\n", r.analysisTime);
+    text += fmt::format("  - maxAnalysisTime          : {}\n", r.maxAnalysisTime);
+    text += fmt::format("  - generationFlags          : {}\n", r.generationFlags);
+    text += fmt::format("  - parameterKey             : {}\n", r.parameterKey);
+    text += fmt::format("  - queryFlags               : {:04x}\n", r.queryFlags);
+    text += fmt::format("  - forecastTime             : {}\n", utcTimeFromTimeT(r.forecastTime));
+    text += fmt::format("  - forecastTimeT            : {}\n", r.forecastTime);
+    text += fmt::format("  - timeMatchRequired        : {}\n", static_cast<int>(r.timeMatchRequired));
+
+    PRINT_DATA(mDebugLog, "%s", text.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Print the reason why the producer is not valid to the debug log. */
+
+void ServiceImplementation::printInvalidProducer(const std::string& producerName,bool producerOk)
+{
+  try
+  {
+    if (!producerOk)
+    {
+      PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Return false if the data is requested from an area and the concatenated producers of the
+           producer have different geometries (the data concatenation is not accepted then). */
+
+bool ServiceImplementation::isAreaProducerAccepted(std::size_t producerCount,const QueryParameter& qParam,const std::string& producerName,T::GeometryId producerGeometryId)
+{
+  try
+  {
+    if (producerCount <= 1 || (qParam.mLocationType != QueryParameter::LocationType::Polygon && qParam.mLocationType != QueryParameter::LocationType::Circle && qParam.mLocationType != QueryParameter::LocationType::Path))
+      return true;
+
+    // We do not accept data concatenation if the data is requested from an area and
+    // if geometries are different.
+
+    std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
+
+    auto rec = mProducerConcatMap.find(pStr);
+    if (rec == mProducerConcatMap.end()  ||  rec->second.empty())
+      return true;
+
+    for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
+    {
+      if (producerGeometryId != gg->second)
+        return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the parameter mappings of the parameter for the producer and the geometry (by the level of
+           the query parameter if it is defined). An FMI-key parameter without mappings gets a mapping of its own. */
+
+ParameterMapping_vec_sptr ServiceImplementation::getGridValueMappings(const T::ProducerInfo& producerInfo,const std::string& parameterKey,std::size_t parameterHash,T::GeometryId producerGeometryId,const QueryParameter& qParam)
+{
+  try
+  {
+    ParameterMapping_vec_sptr mappings;
+    if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
+    {
+      getParameterMappings(producerInfo.mName,producerInfo.mProducerId,parameterKey,parameterHash,producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
+      if (mappings->empty())
+      {
+        // Getting a mapping by using the levelId. This probably returns all levels belonging
+        // to the current levelId. We need just one for mapping.
+        ParameterMapping_vec_sptr tmpMappings;
+        getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
+        if (!tmpMappings->empty())
+          mappings->emplace_back((*tmpMappings)[0]);
+      }
+    }
+    else
+    {
+      getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
+    }
+
+    if (mappings->empty() &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+    {
+      ParameterMapping mp;
+      mp.mProducerName = producerInfo.mName;
+      mp.mParameterName = parameterKey;
+      mp.mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+      mp.mParameterKey = parameterKey.c_str() + 4;
+      mp.mGeometryId = producerGeometryId;
+      mp.mParameterLevelId = qParam.mParameterLevelId;
+      mp.mParameterLevel = qParam.mParameterLevel;
+      mappings->emplace_back(mp);
+    }
+
+    if (mappings->empty())
+      PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel);
+
+    return mappings;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the generation requested by the analysis time or by the latest / oldest generation flags
+           (nullptr if no generation is requested). */
+
+T::GenerationInfo* ServiceImplementation::getRequestedGenerationInfo(const CacheEntry& cacheEntry,const std::string& analysisTime,uint queryFlags,bool acceptNotReadyGenerations)
+{
+  try
+  {
+    T::GenerationInfo* origGenerationInfo = nullptr;
+    if (!analysisTime.empty())
+    {
+      origGenerationInfo = cacheEntry.generationInfoList->getGenerationInfoByAnalysisTime(analysisTime);
+      if (mDebugLog != nullptr &&  mDebugLog->isEnabled()  &&  origGenerationInfo)
+      {
+        PRINT_DATA(mDebugLog, "    - generation found by analysis time (%s)!\n",analysisTime.c_str());
+      }
+    }
+
+    if (queryFlags & Query::Flags::LatestGeneration)
+    {
+      if (acceptNotReadyGenerations)
+        origGenerationInfo = cacheEntry.generationInfoList->getLastGenerationInfoByAnalysisTime();
+      else
+        origGenerationInfo = cacheEntry.generationInfoList->getLastGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
+    }
+
+    if (queryFlags & Query::Flags::OldestGeneration)
+    {
+      if (acceptNotReadyGenerations)
+        origGenerationInfo = cacheEntry.generationInfoList->getFirstGenerationInfoByAnalysisTime();
+      else
+        origGenerationInfo = cacheEntry.generationInfoList->getFirstGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
+    }
+
+    return origGenerationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Return true if there are climatological (or global) mappings. */
+
+bool ServiceImplementation::hasClimatologicalMappings(const ParameterMapping_vec& mappings)
+{
+  try
+  {
+    for (const auto& pInfo : mappings)
+    {
+      if (pInfo.mGroupFlags & (ParameterMapping::GroupFlags::climatology | ParameterMapping::GroupFlags::global))
+      {
+        PRINT_DATA(mDebugLog, "    - Climatological mappings found!\n");
+        return true;
+      }
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Return true if the generation (of the index in the analysis times) is selected by the analysis
+           time of the request, or (without an analysis time) by the generation flags. */
+
+bool ServiceImplementation::isGenerationSelected(const GridValueRequest& r,const std::vector<std::string>& analysisTimes,uint g,uint gflags)
+{
+  try
+  {
+    if (r.analysisTime.empty())
+      return (r.generationFlags == 0 || (r.generationFlags & gflags) != 0);
+
+    uint gLen = analysisTimes.size();
+
+    if (r.analysisTime == analysisTimes[g])
+    {
+      PRINT_DATA(mDebugLog, "      - Analysis time equals\n");
+      return true;
+    }
+
+    if ((r.queryFlags & Query::Flags::AnalysisTimeMatchRequired) != 0)
+      return false;
+
+    if (g == 0  &&  analysisTimes[g] < r.analysisTime)
+      return true;
+
+    if ((g+1) == gLen  &&  analysisTimes[g] > r.analysisTime)
+      return true;
+
+    return (analysisTimes[g] > r.analysisTime  &&  (g+1) < gLen  &&  analysisTimes[g+1] < r.analysisTime);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Return true if the geometry of the generation (or the generation, if the geometry status is
+           not checked) is ready. */
+
+bool ServiceImplementation::isGenerationReady(const T::GenerationInfo& generationInfo,T::GeometryId producerGeometryId)
+{
+  try
+  {
+    // Checking if the geometry is ready.
+    if (mCheckGeometryStatus)
+    {
+      if (!isGeometryReady(generationInfo.mGenerationId,producerGeometryId,0))
+      {
+        PRINT_DATA(mDebugLog, "      - Geometry is not ready\n");
+        return false;
+      }
+      return true;
+    }
+
+    if (generationInfo.mStatus != T::GenerationInfo::Status::Ready)
+    {
+      PRINT_DATA(mDebugLog, "      - Generation is not ready\n");
+      return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Check that the selected generation can be used: it is not deleted soon, it (or its geometry) is
+           ready, its analysis time is not after the maximum analysis time, and (with a producer) its time range
+           contains the forecast time. Returns the validity of the generation. */
+
+bool ServiceImplementation::isGenerationUsable(const GridValueRequest& r,T::GenerationInfo *generationInfo,T::GeometryId producerGeometryId,bool climatologicalMappings,bool generationValid)
+{
+  try
+  {
+    // ### Checking if the generation is going to be deleted in few minutes
+
+    if (generationInfo == nullptr || (generationInfo != nullptr && generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < r.requiredAccessTime))
+    {
+      PRINT_DATA(mDebugLog, "      - Generation deletion time is close\n");
+      return false;
+    }
+
+    if (!generationValid)
+      return false;
+
+    if (!r.acceptNotReadyGenerations  &&  !isGenerationReady(*generationInfo,producerGeometryId))
+      return false;
+
+    if (!r.maxAnalysisTime.empty()  &&  generationInfo->mAnalysisTime > r.maxAnalysisTime)
+    {
+      PRINT_DATA(mDebugLog, "      - Generation analysisTime > maxAnalysisTime (%s)\n",r.maxAnalysisTime.c_str());
+      return false;
+    }
+
+    if (climatologicalMappings  ||  r.producerId == 0)
+      return true;
+
+    // Checking if the requested forecast time is outside of the generation's time range.
+
+    if (generationInfo->mContentStartTime == 0 || generationInfo->mContentEndTime == 0)
+      getGenerationTimeRangeByProducerAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,generationInfo->mContentStartTime,generationInfo->mContentEndTime);
+
+    if (r.forecastTime < generationInfo->mContentStartTime || r.forecastTime > generationInfo->mContentEndTime)
+    {
+      PRINT_DATA(mDebugLog, "      - Requested time is outside of the generation's time range\n");
+      return false;
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the grid values of the producer and the geometry: go through the generations from the
+           newest to the oldest and the parameter mappings, until the values are found. Returns true if the values
+           were found. */
+
+bool ServiceImplementation::getProducerGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo)
+{
+  try
+  {
+    PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
+
+    // Reading generations supported by the current producer.
+
+    auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
+
+    uint gLen = cacheEntry->generationInfoList->getLength();
+    if (gLen == 0)
+      PRINT_DATA(mDebugLog, "    - No generations found for the current producer!\n");
+
+    // Sorting generation analysis times.
+
+    std::vector<std::string> analysisTimesVec;
+    std::vector<std::string> *analysisTimes = cacheEntry->analysisTimes.get();
+    if (r.queryFlags & Query::Flags::ReverseGenerationFlags)
+    {
+      cacheEntry->generationInfoList->getAnalysisTimes(analysisTimesVec,false);
+      analysisTimes = &analysisTimesVec;
+    }
+
+
+    // Going through all the parameter mapping files, until we find a match.
+
+    ParameterMapping_vec_sptr mappings = getGridValueMappings(producerInfo,r.parameterKey,r.parameterHash,producerGeometryId,r.qParam);
+
+    T::GenerationInfo* origGenerationInfo = getRequestedGenerationInfo(*cacheEntry,r.analysisTime,r.queryFlags,r.acceptNotReadyGenerations);
+
+    if (mappings->empty())
+      return false;
+
+    bool climatologicalMappings = hasClimatologicalMappings(*mappings);
+
+    return getGenerationsGridValues(r,producerName,producerGeometryId,producerInfo,*cacheEntry,*analysisTimes,origGenerationInfo,*mappings,climatologicalMappings);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Print the analysis time of the generation (or of the requested generation) to the debug log. */
+
+void ServiceImplementation::printGeneration(const std::string& analysisTime,const std::vector<std::string>& analysisTimes,uint g,bool requestedGeneration)
+{
+  try
+  {
+    if (requestedGeneration)
+    {
+      PRINT_DATA(mDebugLog, "    * %s (requested generation)\n", analysisTime.c_str());
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog, "    * %s\n", analysisTimes[g].c_str());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Go through the generations from the newest to the oldest (or the requested generation only)
+           and the parameter mappings, until the values are found. Returns true if the values were found. */
+
+bool ServiceImplementation::getGenerationsGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,const std::vector<std::string>& analysisTimes,T::GenerationInfo* origGenerationInfo,ParameterMapping_vec& mappings,bool climatologicalMappings)
+{
+  try
+  {
+    uint gLen = analysisTimes.size();
+
+    PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest (generationCount = %u).\n",gLen);
+
+    for (uint g = 0; g < gLen; g++)
+    {
+      if (origGenerationInfo != nullptr)
+        g = gLen; // Making sure that the loop is executed only once
+
+      printGeneration(r.analysisTime,analysisTimes,g,origGenerationInfo != nullptr);
+
+      uint gflags = 1 << g;
+
+      bool generationValid = (origGenerationInfo != nullptr  ||  isGenerationSelected(r,analysisTimes,g,gflags));
+
+      if (!generationValid  &&  climatologicalMappings)
+        generationValid = true;
+
+      T::GenerationInfo *generationInfo = origGenerationInfo;
+      if (origGenerationInfo == nullptr)
+        generationInfo = cacheEntry.generationInfoList->getGenerationInfoByAnalysisTime(analysisTimes[g]);
+
+      if (!isGenerationUsable(r,generationInfo,producerGeometryId,climatologicalMappings,generationValid))
+        continue;
+
+      r.producerStr = toUpperString(producerInfo.mName) + ":" + std::to_string(producerGeometryId);
+
+      PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
+      for (auto& pInfo : mappings)
+      {
+        if (getMappingGridValues(r,producerName,producerGeometryId,producerInfo,*generationInfo,gflags,pInfo))
+          return true;
+      }
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the grid values of the parameter mapping by the query type. Returns true if the values were
+           found (or the search must end). */
+
+bool ServiceImplementation::getMappingGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo)
+{
+  try
+  {
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      pInfo.print(stream, 5, 0);
+      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+    }
+    short areaInterpolation = r.qParam.mAreaInterpolationMethod;
+    if (areaInterpolation == T::AreaInterpolationMethod::Undefined)
+      areaInterpolation = pInfo.mAreaInterpolationMethod;
+
+    /*
+    short timeInterpolation = qParam.mTimeInterpolationMethod;
+    if (timeInterpolation == T::TimeInterpolationMethod::Undefined)
+      timeInterpolation = pInfo->mTimeInterpolationMethod;
+
+    short levelInterpolation = qParam.mLevelInterpolationMethod;
+    if (levelInterpolation == T::LevelInterpolationMethod::Undefined)
+      levelInterpolation = pInfo->mLevelInterpolationMethod;
+*/
+    T::ParamLevelId pLevelId = pInfo.mParameterLevelId;
+    T::ParamLevel pLevel = pInfo.mParameterLevel;
+
+    if (r.qParam.mParameterLevelId > 0)
+    {
+      pLevelId = r.qParam.mParameterLevelId;
+      if (r.qParam.mParameterLevel >= 0)
+        pLevel = r.qParam.mParameterLevel;
+    }
+
+    if (r.qParam.mParameterLevel > 0)
+      pLevel = r.qParam.mParameterLevel;
+
+
+    // ### QUERY TYPE : PointValues
+
+    if (r.qParam.mType == QueryParameter::Type::PointValues  &&  getPointTypeGridValues(r,producerName,producerGeometryId,producerInfo,generationInfo,gflags,pInfo,areaInterpolation,pLevelId,pLevel))
+      return true;
+
+
+    if (r.qParam.mType == QueryParameter::Type::VerticalVector  &&  r.qParam.mLocationType == QueryParameter::LocationType::Point  &&
+        getVerticalValueVectors(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo,
+            r.forecastTime, pLevelId, r.qParam.mParameterLevels,r.producerId, r.valueList))
+    {
+      return true;
+    }
+
+
+    if ((r.qParam.mFlags & QueryServer::QueryParameter::Flags::MetricLevels)  &&  (r.qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
+    {
+      // This is metric query. We should post-process isobands, isolines, etc.
+
+      return getValueVectors(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo,
+          r.forecastTime, pLevelId, pLevel,r.producerId, r.valueList, r.qParam.mCoordinates);
+    }
+
+    return getTypeGridValues(r,producerGeometryId,producerInfo,generationInfo,gflags,pInfo,pLevelId,pLevel);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the grid values of the streamline, isoline, isoband, vector or grid file query. Returns true
+           if the values were found. */
+
+bool ServiceImplementation::getTypeGridValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+{
+  try
+  {
+    switch (r.qParam.mType)
+    {
+      // ### STREAMLINE QUERY
+
+      case QueryParameter::Type::StreamLine:
+        return getStreamlineValues(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo, r.forecastTime, pLevelId, pLevel,
+            r.producerId, r.valueList);
+
+      // ### ISOLINE QUERY
+
+      case QueryParameter::Type::Isoline:
+        return getIsolineValues(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags,
+            pInfo, r.forecastTime, pLevelId, pLevel, r.producerId, r.valueList);
+
+      // ### ISOBAND QUERY
+
+      case QueryParameter::Type::Isoband:
+        return getIsobandValues(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags,
+            pInfo, r.forecastTime, pLevelId, pLevel, r.producerId, r.valueList);
+
+      // ### VECTOR QUERY
+
+      case QueryParameter::Type::Vector:
+        return getValueVectors(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo,
+            r.forecastTime, pLevelId, pLevel,r.producerId, r.valueList, r.qParam.mCoordinates);
+
+      // ### GRID FILE QUERY
+
+      case QueryParameter::Type::GridFile:
+        return getGridFiles(r.query,r.qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags,
+            pInfo, r.forecastTime, pLevelId, pLevel,r.producerId, r.valueList);
+
+      default:
+        return false;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the point values of the parameter mapping by the location type. Returns true if the values
+           were found (or the search must end). */
+
+bool ServiceImplementation::getPointTypeGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+{
+  try
+  {
+    Query& query = r.query;
+    QueryParameter& qParam = r.qParam;
+    bool singlePoint = (query.mAreaCoordinates.size() == 1 && query.mAreaCoordinates[0].size() == 1);
+
+    // ### LOCATION TYPE : Polygon
+
+    // ### Simple interpolation
+
+    if (qParam.mLocationType == QueryParameter::LocationType::Polygon  &&
+        getPolygonValues(query,qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags,
+            pInfo, r.forecastTime, pLevelId, pLevel,r.producerId, r.valueList))
+      return true;
+
+
+    // ### LOCATION TYPE : Circle
+
+    // ### Simple interpolation
+
+    if (qParam.mLocationType == QueryParameter::LocationType::Circle && singlePoint  &&
+        getCircleValues(query,qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo, r.forecastTime, pLevelId, pLevel,
+            query.mCoordinateType, query.mAreaCoordinates[0][0].x(), query.mAreaCoordinates[0][0].y(), query.mRadius, r.producerId, r.valueList))
+      return true;
+
+
+    // ### LOCATION TYPE : Path
+
+    if (qParam.mLocationType == QueryParameter::LocationType::Path  &&  getInterpolatedPointValues(r,producerGeometryId,producerInfo,generationInfo,gflags,pInfo,areaInterpolation,pLevelId,pLevel))
+      return true;
+
+
+    // ### LOCATION TYPE : Point
+
+    if (qParam.mLocationType != QueryParameter::LocationType::Point)
+      return false;
+
+    if (areaInterpolation == T::AreaInterpolationMethod::Landscape && singlePoint)
+    {
+      double x = query.mAreaCoordinates[0][0].x();
+      double y = query.mAreaCoordinates[0][0].y();
+
+      if (getSpecialValues(query,qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo, r.forecastTime, pLevelId, pLevel, qParam.mForecastType, qParam.mForecastNumber,
+          qParam.mFlags, T::AreaInterpolationMethod::List, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, query.mCoordinateType, x, y, r.producerId, r.valueList))
+      {
+        setLandscapeValue(r,producerName,producerGeometryId,x,y);
+      }
+      return true;
+    }
+
+    return getInterpolatedPointValues(r,producerGeometryId,producerInfo,generationInfo,gflags,pInfo,areaInterpolation,pLevelId,pLevel);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the point values by a simple interpolation, or the special values for an external
+           interpolation (for a single point). Returns true if the values were found. */
+
+bool ServiceImplementation::getInterpolatedPointValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel)
+{
+  try
+  {
+    Query& query = r.query;
+    QueryParameter& qParam = r.qParam;
+
+    // ### Simple interpolation
+
+    if (areaInterpolation < T::AreaInterpolationMethod::List  &&
+        getPointValues(query,qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags,
+            pInfo, r.forecastTime, pLevelId, pLevel, r.producerId, r.valueList))
+      return true;
+
+    if (areaInterpolation >= T::AreaInterpolationMethod::List && areaInterpolation < T::AreaInterpolationMethod::External && query.mAreaCoordinates.size() == 1  && query.mAreaCoordinates[0].size() == 1)
+    {
+      // ### No actual intepolation. Fetching special value for external interpolation
+
+      double x = query.mAreaCoordinates[0][0].x();
+      double y = query.mAreaCoordinates[0][0].y();
+
+      return getSpecialValues(query,qParam,producerInfo, producerGeometryId, generationInfo.mGenerationId, generationInfo.mAnalysisTime, gflags, pInfo, r.forecastTime, pLevelId, pLevel, qParam.mForecastType, qParam.mForecastNumber,
+          qParam.mFlags, qParam.mAreaInterpolationMethod, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, query.mCoordinateType, x, y, r.producerId, r.valueList);
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the values of the landscape interpolation parameter (GeopHeight, LapseRate or LandSeaMask)
+           of the producer and the geometry. The producer of the parameter is added to the producer and geometry lists. */
+
+void ServiceImplementation::getLandscapeParameterValues(GridValueRequest& r,const std::string& name,const std::string& producerName,T::GeometryId producerGeometryId,Producer_vec& pList,std::set<T::GeometryId>& gList,ParameterValues& values)
+{
+  try
+  {
+    std::string param = name + ";" + producerName + ";" + std::to_string(producerGeometryId);
+    std::string paramStr;
+
+    if (!getAlias(param,paramStr))
+      paramStr = param;
+
+    QueryParameter newParam = r.qParam;
+    newParam.mGeometryId = producerGeometryId;
+    newParam.mAreaInterpolationMethod = 500;
+
+    getParameterStringInfo(paramStr,';',newParam.mParam,newParam.mGeometryId,newParam.mParameterLevelId,
+        newParam.mParameterLevel,newParam.mForecastType,newParam.mForecastNumber,newParam.mProducerName,newParam.mProducerId,newParam.mGenerationFlags,
+        newParam.mAreaInterpolationMethod,newParam.mTimeInterpolationMethod,newParam.mLevelInterpolationMethod,newParam.mFlags);
+
+    if (strcasecmp(newParam.mProducerName.c_str(),producerName.c_str()) != 0)
+    {
+      pList.emplace_back(newParam.mProducerName,newParam.mGeometryId);
+      gList.insert(newParam.mGeometryId);
+    }
+
+    getGridValues(r.query,newParam,pList,gList,newParam.mProducerId,r.analysisTime,r.maxAnalysisTime,
+      r.generationFlags,newParam.mParam,0,
+      r.queryFlags,r.forecastTime,r.timeMatchRequired,values,r.producerStr);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Replace the special values of the point with the landscape interpolated value. */
+
+void ServiceImplementation::setLandscapeValue(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,double x,double y)
+{
+  try
+  {
+    Producer_vec pList;
+    std::set<T::GeometryId> gList;
+
+    pList.emplace_back(producerName,producerGeometryId);
+    gList.insert(producerGeometryId);
+
+    ParameterValues zhValueList;
+    getLandscapeParameterValues(r,"GeopHeight",producerName,producerGeometryId,pList,gList,zhValueList);
+
+    ParameterValues lrValueList;
+    getLandscapeParameterValues(r,"LapseRate",producerName,producerGeometryId,pList,gList,lrValueList);
+
+    ParameterValues lsValueList;
+    getLandscapeParameterValues(r,"LandSeaMask",producerName,producerGeometryId,pList,gList,lsValueList);
+
+    std::vector<double> vList;
+    std::vector<double> missingList = {ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing};
+
+    double dem = getAdditionalValue("dem",r.forecastTime,x,y);
+    int coverType = getAdditionalValue("coverType",r.forecastTime,x,y);
+
+    std::vector<double> zhList = getSpecialValueList(zhValueList,missingList);
+    std::vector<double> lrList = getSpecialValueList(lrValueList,missingList);
+    std::vector<double> lsList = getSpecialValueList(lsValueList,missingList);
+
+    if (r.valueList.mValueList.getLength() != 1)
+      return;
+
+    T::GridValue *v = r.valueList.mValueList.getGridValuePtrByIndex(0);
+    if (v == nullptr)
+      return;
+
+    splitString(v->mValueString,';',vList);
+    if (vList.empty())
+      return;
+
+    PRINT_DATA(mDebugLog, "  - Landscape interpolation : %f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+        dem,coverType,
+        vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
+        zhList[3],zhList[4],zhList[5],zhList[6],
+        lrList[3],lrList[4],lrList[5],lrList[6],
+        lsList[3],lsList[4],lsList[5],lsList[6]);
+
+    double val = landscapeInterpolation(
+        dem,coverType,
+        vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
+        zhList[3],zhList[4],zhList[5],zhList[6],
+        lrList[3],lrList[4],lrList[5],lrList[6],
+        lsList[3],lsList[4],lsList[5],lsList[6]);
+
+    v->mValueString = "";
+    v->mValue = val;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get grid values. */
 
 void ServiceImplementation::getGridValues(
@@ -9575,60 +10450,18 @@ void ServiceImplementation::getGridValues(
   FUNCTION_TRACE
   try
   {
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
-      PRINT_DATA(mDebugLog, "  - producers                : %lu items\n", producers.size());
-      for (auto it = producers.begin(); it != producers.end(); ++it)
-        PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
-      PRINT_DATA(mDebugLog, "  - geometryIdList           : %lu items\n", geometryIdList.size());
-      for (int it : geometryIdList)
-        PRINT_DATA(mDebugLog, "    * %d\n",it);
-      PRINT_DATA(mDebugLog, "  - producerId               : %u\n", producerId);
-      PRINT_DATA(mDebugLog, "  - analysisTime             : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - maxAnalysisTime          : %s\n", maxAnalysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags          : %lu\n", generationFlags);
-      PRINT_DATA(mDebugLog, "  - parameterKey             : %s\n", parameterKey.c_str());
-      PRINT_DATA(mDebugLog, "  - queryFlags               : %04x\n", queryFlags);
-      PRINT_DATA(mDebugLog, "  - forecastTime             : %s\n", utcTimeFromTimeT(forecastTime).c_str());
-      PRINT_DATA(mDebugLog, "  - forecastTimeT            : %ld\n", forecastTime);
-      PRINT_DATA(mDebugLog, "  - timeMatchRequired        : %d\n", timeMatchRequired);
-    }
+    GridValueRequest r{query,qParam,producerId,analysisTime,maxAnalysisTime,generationFlags,parameterKey,parameterHash,queryFlags,forecastTime,timeMatchRequired,valueList,producerStr,0,false};
 
-    if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
-    {
-      Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
-      exception.addParameter("mMaxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
-      throw exception;
-    }
+    printGridValueRequest(r,producers,geometryIdList);
 
-    if (qParam.mType != QueryParameter::Type::GridFile  &&  query.mAreaCoordinates.empty()  &&
-        query.mAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.urn") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.crs") == nullptr)
-    {
-      Fmi::Exception exception(BCP, "No query.mAreaCoordinates defined!");
-      throw exception;
-    }
+    checkMaxProcessingTime(query,"mMaxProcessingTimeInSeconds");
 
-    if (qParam.mLocationType == QueryParameter::LocationType::Polygon)
-    {
-      for (const auto& mAreaCoordinate : query.mAreaCoordinates)
-      {
-        if (mAreaCoordinate.size() < 3)
-        {
-          Fmi::Exception exception(BCP, "Polygon definition requires at least 3 query.mAreaCoordinates!");
-          throw exception;
-        }
-      }
-    }
+    checkGridValueArea(query,qParam,"Polygon definition requires at least 3 query.mAreaCoordinates!");
 
-    time_t requiredAccessTime = time(nullptr) + 120;
+    r.requiredAccessTime = time(nullptr) + 120;
 
-    bool acceptNotReadyGenerations = false;
     if (query.mFlags & Query::Flags::AcceptNotReadyGenerations)
-      acceptNotReadyGenerations = true;
+      r.acceptNotReadyGenerations = true;
 
     // Going through the producer list.
 
@@ -9639,626 +10472,25 @@ void ServiceImplementation::getGridValues(
 
       PRINT_DATA(mDebugLog, "  - Producer and Geometry : %s:%d\n", producerName.c_str(), producerGeometryId);
 
-      if (geometryIdList.find(producerGeometryId) != geometryIdList.end())
+      if (geometryIdList.find(producerGeometryId) == geometryIdList.end())
       {
-        bool producerOk = true;
-        if (producers.size() > 1 && (qParam.mLocationType == QueryParameter::LocationType::Polygon || qParam.mLocationType == QueryParameter::LocationType::Circle || qParam.mLocationType == QueryParameter::LocationType::Path))
-        {
-          // We do not accept data concatenation if the data is requested from an area and
-          // if geometries are different.
-
-          std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
-
-          auto rec = mProducerConcatMap.find(pStr);
-          if (rec != mProducerConcatMap.end()  &&  !rec->second.empty())
-          {
-            for (auto gg = rec->second.begin(); gg != rec->second.end() && producerOk; ++gg)
-            {
-              if (producerGeometryId != gg->second)
-                producerOk = false;
-            }
-          }
-        }
-
-        // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
-
-        T::ProducerInfo producerInfo;
-        if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
-        {
-          PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
-
-          // Reading generations supported by the current producer.
-
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
-
-          uint gLen = cacheEntry->generationInfoList->getLength();
-          if (gLen == 0)
-            PRINT_DATA(mDebugLog, "    - No generations found for the current producer!\n");
-
-          // Sorting generation analysis times.
-
-          std::vector<std::string> analysisTimesVec;
-          std::vector<std::string> *analysisTimes = cacheEntry->analysisTimes.get();
-          if (queryFlags & Query::Flags::ReverseGenerationFlags)
-          {
-            cacheEntry->generationInfoList->getAnalysisTimes(analysisTimesVec,false);
-            analysisTimes = &analysisTimesVec;
-          }
-
-
-          // Going through all the parameter mapping files, until we find a match.
-
-          ParameterMapping_vec_sptr mappings;
-          if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
-          {
-            getParameterMappings(producerInfo.mName,producerInfo.mProducerId,parameterKey,parameterHash,producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
-            if (mappings->empty())
-            {
-              // Getting a mapping by using the levelId. This probably returns all levels belonging
-              // to the current levelId. We need just one for mapping.
-              ParameterMapping_vec_sptr tmpMappings;
-              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
-              if (!tmpMappings->empty())
-                mappings->emplace_back((*tmpMappings)[0]);
-            }
-          }
-          else
-          {
-            getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
-          }
-
-          if (mappings->empty() &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-          {
-            ParameterMapping mp;
-            mp.mProducerName = producerInfo.mName;
-            mp.mParameterName = parameterKey;
-            mp.mParameterKeyType = T::ParamKeyTypeValue::FMI_ID;
-            mp.mParameterKey = parameterKey.c_str() + 4;
-            mp.mGeometryId = producerGeometryId;
-            mp.mParameterLevelId = qParam.mParameterLevelId;
-            mp.mParameterLevel = qParam.mParameterLevel;
-            mappings->emplace_back(mp);
-          }
-
-          if (mappings->empty())
-            PRINT_DATA(mDebugLog, "    - No parameter mappings '%s:%s:%d:%d:%d' found!\n", producerInfo.mName.c_str(), parameterKey.c_str(), producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel);
-
-
-          T::GenerationInfo* origGenerationInfo = nullptr;
-          if (!analysisTime.empty())
-          {
-            origGenerationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime(analysisTime);
-            if (mDebugLog != nullptr &&  mDebugLog->isEnabled()  &&  origGenerationInfo)
-            {
-              PRINT_DATA(mDebugLog, "    - generation found by analysis time (%s)!\n",analysisTime.c_str());
-            }
-          }
-
-          if (queryFlags & Query::Flags::LatestGeneration)
-          {
-            if (acceptNotReadyGenerations)
-              origGenerationInfo = cacheEntry->generationInfoList->getLastGenerationInfoByAnalysisTime();
-            else
-              origGenerationInfo = cacheEntry->generationInfoList->getLastGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
-          }
-
-          if (queryFlags & Query::Flags::OldestGeneration)
-          {
-            if (acceptNotReadyGenerations)
-              origGenerationInfo = cacheEntry->generationInfoList->getFirstGenerationInfoByAnalysisTime();
-            else
-              origGenerationInfo = cacheEntry->generationInfoList->getFirstGenerationInfoByAnalysisTime(T::GenerationInfo::Status::Ready);
-          }
-
-          bool climatologicalMappings = false;
-          if (!mappings->empty())
-          {
-            for (auto pInfo = mappings->begin(); pInfo != mappings->end() && !climatologicalMappings; ++pInfo)
-            {
-              if (pInfo->mGroupFlags & (ParameterMapping::GroupFlags::climatology | ParameterMapping::GroupFlags::global))
-              {
-                climatologicalMappings = true;
-                PRINT_DATA(mDebugLog, "    - Climatological mappings found!\n");
-              }
-            }
-
-            uint gLen = analysisTimes->size();
-
-            PRINT_DATA(mDebugLog, "  - Going through the generations from the newest to the oldest (generationCount = %u).\n",gLen);
-
-            for (uint g = 0; g < gLen; g++)
-            {
-              bool generationValid = false;
-
-              if (origGenerationInfo != nullptr)
-              {
-                generationValid = true;
-                g = gLen; // Making sure that the loop is executed only once
-                PRINT_DATA(mDebugLog, "    * %s (requested generation)\n", analysisTime.c_str());
-              }
-              else
-              {
-                PRINT_DATA(mDebugLog, "    * %s\n", (*analysisTimes)[g].c_str());
-              }
-
-              uint gflags = 1 << g;
-
-              if (!analysisTime.empty()  &&  origGenerationInfo == nullptr)
-              {
-                if (analysisTime == (*analysisTimes)[g])
-                {
-                  PRINT_DATA(mDebugLog, "      - Analysis time equals\n");
-                  generationValid = true;
-                }
-                else
-                if ((queryFlags & Query::Flags::AnalysisTimeMatchRequired) == 0)
-                {
-                  if (g == 0  &&  (*analysisTimes)[g] < analysisTime)
-                  {
-                    generationValid = true;
-                  }
-                  else
-                  if ((g+1) == gLen  &&  (*analysisTimes)[g] > analysisTime)
-                  {
-                    generationValid = true;
-                  }
-                  else
-                  if ((*analysisTimes)[g] > analysisTime  &&  (g+1) < gLen  &&  (*analysisTimes)[g+1] < analysisTime)
-                  {
-                    generationValid = true;
-                  }
-                }
-              }
-              else
-              {
-                if (generationFlags == 0 || (generationFlags & gflags) != 0)
-                  generationValid = true;
-              }
-
-              if (!generationValid  &&  climatologicalMappings)
-                generationValid = true;
-
-              // ### Checking if the generation is going to be deleted in few minutes
-
-              T::GenerationInfo *generationInfo = origGenerationInfo;
-              if (origGenerationInfo == nullptr)
-                generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime((*analysisTimes)[g]);
-
-              if (generationInfo == nullptr || (generationInfo != nullptr && generationInfo->mDeletionTime > 0 && generationInfo->mDeletionTime < requiredAccessTime))
-              {
-                PRINT_DATA(mDebugLog, "      - Generation deletion time is close\n");
-                generationValid = false;
-              }
-
-              if (generationValid  &&  generationInfo != nullptr  &&  !acceptNotReadyGenerations)
-              {
-                // Checking if the geometry is ready.
-                if (mCheckGeometryStatus)
-                {
-                  if (!isGeometryReady(generationInfo->mGenerationId,producerGeometryId,0))
-                  {
-                    PRINT_DATA(mDebugLog, "      - Geometry is not ready\n");
-                    generationValid = false;
-                  }
-                }
-                else
-                {
-                  if (generationInfo->mStatus != T::GenerationInfo::Status::Ready)
-                  {
-                    PRINT_DATA(mDebugLog, "      - Generation is not ready\n");
-                    generationValid = false;
-                  }
-                }
-              }
-
-              if (generationValid  &&  !maxAnalysisTime.empty()  &&  generationInfo->mAnalysisTime > maxAnalysisTime)
-              {
-                PRINT_DATA(mDebugLog, "      - Generation analysisTime > maxAnalysisTime (%s)\n",maxAnalysisTime.c_str());
-                generationValid = false;
-              }
-
-              if (generationValid  &&  generationInfo != nullptr  &&  !climatologicalMappings  &&  producerId != 0)
-              {
-                // Checking if the requested forecast time is outside of the generation's time range.
-
-                if (generationInfo->mContentStartTime == 0 || generationInfo->mContentEndTime == 0)
-                  getGenerationTimeRangeByProducerAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,generationInfo->mContentStartTime,generationInfo->mContentEndTime);
-
-                if (forecastTime < generationInfo->mContentStartTime || forecastTime > generationInfo->mContentEndTime)
-                {
-                  PRINT_DATA(mDebugLog, "      - Requested time is outside of the generation's time range\n");
-                  generationValid = false;
-                }
-              }
-
-              if (generationValid)
-              {
-                producerStr = toUpperString(producerInfo.mName) + ":" + std::to_string(producerGeometryId);
-
-                PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
-                for (auto& pInfo : *mappings)
-                {
-                  if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-                  {
-                    std::stringstream stream;
-                    pInfo.print(stream, 5, 0);
-                    PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-                  }
-                  short areaInterpolation = qParam.mAreaInterpolationMethod;
-                  if (areaInterpolation == T::AreaInterpolationMethod::Undefined)
-                    areaInterpolation = pInfo.mAreaInterpolationMethod;
-
-                  /*
-                  short timeInterpolation = qParam.mTimeInterpolationMethod;
-                  if (timeInterpolation == T::TimeInterpolationMethod::Undefined)
-                    timeInterpolation = pInfo->mTimeInterpolationMethod;
-
-                  short levelInterpolation = qParam.mLevelInterpolationMethod;
-                  if (levelInterpolation == T::LevelInterpolationMethod::Undefined)
-                    levelInterpolation = pInfo->mLevelInterpolationMethod;
-*/
-                  T::ParamLevelId pLevelId = pInfo.mParameterLevelId;
-                  T::ParamLevel pLevel = pInfo.mParameterLevel;
-
-                  if (qParam.mParameterLevelId > 0)
-                  {
-                    pLevelId = qParam.mParameterLevelId;
-                    if (qParam.mParameterLevel >= 0)
-                      pLevel = qParam.mParameterLevel;
-                  }
-
-                  if (qParam.mParameterLevel > 0)
-                    pLevel = qParam.mParameterLevel;
-
-
-                  // ### QUERY TYPE : PointValues
-
-                  if (qParam.mType == QueryParameter::Type::PointValues)
-                  {
-
-                    // ### LOCATION TYPE : Polygon
-
-                    if (qParam.mLocationType == QueryParameter::LocationType::Polygon)
-                    {
-                      // ### Simple interpolation
-
-                      if (getPolygonValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                          pInfo, forecastTime, pLevelId, pLevel,producerId, valueList))
-                        return;
-                    }
-
-
-                    // ### LOCATION TYPE : Circle
-
-                    if (qParam.mLocationType == QueryParameter::LocationType::Circle && query.mAreaCoordinates.size() == 1 && query.mAreaCoordinates[0].size() == 1)
-                    {
-                      // ### Simple interpolation
-
-                      double x = query.mAreaCoordinates[0][0].x();
-                      double y = query.mAreaCoordinates[0][0].y();
-
-                      if (getCircleValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo, forecastTime, pLevelId, pLevel,
-                          query.mCoordinateType, x, y, query.mRadius, producerId, valueList))
-                        return;
-                    }
-
-
-                    // ### LOCATION TYPE : Path
-
-                    if (qParam.mLocationType == QueryParameter::LocationType::Path)
-                    {
-                      if (areaInterpolation < T::AreaInterpolationMethod::List)
-                      {
-                        // ### Simple interpolation
-
-                        if (getPointValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                            pInfo, forecastTime, pLevelId, pLevel, producerId, valueList))
-                          return;
-                      }
-
-                      if (areaInterpolation >= T::AreaInterpolationMethod::List && areaInterpolation < T::AreaInterpolationMethod::External && query.mAreaCoordinates.size() == 1  && query.mAreaCoordinates[0].size() == 1)
-                      {
-                        // ### No actual intepolation. Fetching special value for external interpolation
-
-                        double x = query.mAreaCoordinates[0][0].x();
-                        double y = query.mAreaCoordinates[0][0].y();
-
-                        if (getSpecialValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo, forecastTime, pLevelId, pLevel, qParam.mForecastType, qParam.mForecastNumber,
-                            qParam.mFlags, qParam.mAreaInterpolationMethod, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, query.mCoordinateType, x, y, producerId, valueList))
-                          return;
-                      }
-                    }
-
-
-                    // ### LOCATION TYPE : Point
-
-                    if (qParam.mLocationType == QueryParameter::LocationType::Point)
-                    {
-                      if (areaInterpolation == T::AreaInterpolationMethod::Landscape && query.mAreaCoordinates.size() == 1 && query.mAreaCoordinates[0].size() == 1)
-                      {
-                        double x = query.mAreaCoordinates[0][0].x();
-                        double y = query.mAreaCoordinates[0][0].y();
-
-                        if (getSpecialValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo, forecastTime, pLevelId, pLevel, qParam.mForecastType, qParam.mForecastNumber,
-                            qParam.mFlags, T::AreaInterpolationMethod::List, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, query.mCoordinateType, x, y, producerId, valueList))
-                        {
-                          Producer_vec pList;
-                          std::set<T::GeometryId> gList;
-
-                          pList.emplace_back(it->first,it->second);
-                          gList.insert(it->second);
-
-                          std::string param = "GeopHeight;" + it->first + ";" + std::to_string(it->second);
-                          std::string paramStr;
-
-                          if (!getAlias(param,paramStr))
-                            paramStr = param;
-
-                          QueryParameter zhParam = qParam;
-                          zhParam.mGeometryId = it->second;
-                          zhParam.mAreaInterpolationMethod = 500;
-
-                          getParameterStringInfo(paramStr,';',zhParam.mParam,zhParam.mGeometryId,zhParam.mParameterLevelId,
-                              zhParam.mParameterLevel,zhParam.mForecastType,zhParam.mForecastNumber,zhParam.mProducerName,zhParam.mProducerId,zhParam.mGenerationFlags,
-                              zhParam.mAreaInterpolationMethod,zhParam.mTimeInterpolationMethod,zhParam.mLevelInterpolationMethod,zhParam.mFlags);
-
-                          if (strcasecmp(zhParam.mProducerName.c_str(),it->first.c_str()) != 0)
-                          {
-                            pList.emplace_back(zhParam.mProducerName,zhParam.mGeometryId);
-                            gList.insert(zhParam.mGeometryId);
-                          }
-
-                          ParameterValues zhValueList;
-                          getGridValues(query,zhParam,pList,gList,zhParam.mProducerId,analysisTime,maxAnalysisTime,
-                            generationFlags,zhParam.mParam,0,
-                            queryFlags,forecastTime,timeMatchRequired,zhValueList,producerStr);
-
-                          param = "LapseRate;" + it->first + ";" + std::to_string(it->second);
-                          if (!getAlias(param,paramStr))
-                            paramStr = param;
-
-                          QueryParameter lrParam = qParam;
-                          lrParam.mGeometryId = it->second;
-                          lrParam.mAreaInterpolationMethod = 500;
-
-                          getParameterStringInfo(paramStr,';',lrParam.mParam,lrParam.mGeometryId,lrParam.mParameterLevelId,
-                              lrParam.mParameterLevel,lrParam.mForecastType,lrParam.mForecastNumber,lrParam.mProducerName,lrParam.mProducerId,lrParam.mGenerationFlags,
-                              lrParam.mAreaInterpolationMethod,lrParam.mTimeInterpolationMethod,lrParam.mLevelInterpolationMethod,lrParam.mFlags);
-
-                          if (strcasecmp(lrParam.mProducerName.c_str(),it->first.c_str()) != 0)
-                          {
-                            pList.emplace_back(lrParam.mProducerName,lrParam.mGeometryId);
-                            gList.insert(lrParam.mGeometryId);
-                          }
-
-
-                          ParameterValues lrValueList;
-                          getGridValues(query,lrParam,pList,gList,lrParam.mProducerId,
-                            analysisTime,maxAnalysisTime,generationFlags,lrParam.mParam,0,
-                            queryFlags,forecastTime,timeMatchRequired,lrValueList,producerStr);
-
-                          param = "LandSeaMask;" + it->first + ";" + std::to_string(it->second);
-                          if (!getAlias(param,paramStr))
-                            paramStr = param;
-
-                          QueryParameter lsParam = qParam;
-                          lsParam.mGeometryId = it->second;
-                          lsParam.mAreaInterpolationMethod = 500;
-
-                          getParameterStringInfo(paramStr,';',lsParam.mParam,lsParam.mGeometryId,lsParam.mParameterLevelId,
-                              lsParam.mParameterLevel,lsParam.mForecastType,lsParam.mForecastNumber,lsParam.mProducerName,lsParam.mProducerId,lsParam.mGenerationFlags,
-                              lsParam.mAreaInterpolationMethod,lsParam.mTimeInterpolationMethod,lsParam.mLevelInterpolationMethod,lsParam.mFlags);
-
-                          if (strcasecmp(lsParam.mProducerName.c_str(),it->first.c_str()) != 0)
-                          {
-                            pList.emplace_back(lsParam.mProducerName,lsParam.mGeometryId);
-                            gList.insert(lsParam.mGeometryId);
-                          }
-
-                          ParameterValues lsValueList;
-                          getGridValues(query,lsParam,pList,gList,lsParam.mProducerId,
-                            analysisTime,maxAnalysisTime,generationFlags,lsParam.mParam,0,
-                            queryFlags,forecastTime,timeMatchRequired,lsValueList,producerStr);
-
-                          std::vector<double> vList;
-                          std::vector<double> zhList;
-                          std::vector<double> lrList;
-                          std::vector<double> lsList;
-                          std::vector<double> missingList = {ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing,ParamValueMissing};
-
-                          double dem = getAdditionalValue("dem",forecastTime,x,y);
-                          int coverType = getAdditionalValue("coverType",forecastTime,x,y);
-
-                          if (zhValueList.mValueList.getLength() == 1)
-                          {
-                            T::GridValue *v = zhValueList.mValueList.getGridValuePtrByIndex(0);
-                            if (v != nullptr)
-                              splitString(v->mValueString,';',zhList);
-                          }
-                          if (zhList.empty())
-                            zhList = missingList;
-
-                          if (lrValueList.mValueList.getLength() == 1)
-                          {
-                            T::GridValue *v = lrValueList.mValueList.getGridValuePtrByIndex(0);
-                            if (v != nullptr)
-                              splitString(v->mValueString,';',lrList);
-                          }
-                          if (lrList.empty())
-                            lrList = missingList;
-
-                          if (lsValueList.mValueList.getLength() == 1)
-                          {
-                            T::GridValue *v = lsValueList.mValueList.getGridValuePtrByIndex(0);
-                            if (v != nullptr)
-                              splitString(v->mValueString,';',lsList);
-                          }
-                          if (lsList.empty())
-                            lsList = missingList;
-
-
-                          if (valueList.mValueList.getLength() == 1)
-                          {
-                            T::GridValue *v = valueList.mValueList.getGridValuePtrByIndex(0);
-                            if (v != nullptr)
-                            {
-                              splitString(v->mValueString,';',vList);
-                              if (vList.empty())
-                                return;
-
-                              PRINT_DATA(mDebugLog, "  - Landscape interpolation : %f,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
-                                  dem,coverType,
-                                  vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
-                                  zhList[3],zhList[4],zhList[5],zhList[6],
-                                  lrList[3],lrList[4],lrList[5],lrList[6],
-                                  lsList[3],lsList[4],lsList[5],lsList[6]);
-
-                              double val = landscapeInterpolation(
-                                  dem,coverType,
-                                  vList[1],vList[2],vList[3],vList[4],vList[5],vList[6],
-                                  zhList[3],zhList[4],zhList[5],zhList[6],
-                                  lrList[3],lrList[4],lrList[5],lrList[6],
-                                  lsList[3],lsList[4],lsList[5],lsList[6]);
-
-                              v->mValueString = "";
-                              v->mValue = val;
-                              return;
-                            }
-                          }
-                        }
-                        return;
-                      }
-
-
-                      if (areaInterpolation < T::AreaInterpolationMethod::List)
-                      {
-                        // ### Simple interpolation
-
-                        if (getPointValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                            pInfo, forecastTime, pLevelId, pLevel, producerId, valueList))
-                          return;
-                      }
-
-
-                      if (areaInterpolation >= T::AreaInterpolationMethod::List && areaInterpolation < T::AreaInterpolationMethod::External && query.mAreaCoordinates.size() == 1 && query.mAreaCoordinates[0].size() == 1)
-                      {
-                        // ### No actual intepolation. Fetching special value for external interpolation
-
-                        double x = query.mAreaCoordinates[0][0].x();
-                        double y = query.mAreaCoordinates[0][0].y();
-
-                        if (getSpecialValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo, forecastTime, pLevelId, pLevel, qParam.mForecastType, qParam.mForecastNumber,
-                            qParam.mFlags, qParam.mAreaInterpolationMethod, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, query.mCoordinateType, x, y, producerId, valueList))
-                          return;
-                      }
-
-                    }
-
-                  }
-
-
-                  if (qParam.mType == QueryParameter::Type::VerticalVector)
-                  {
-                    if (qParam.mLocationType == QueryParameter::LocationType::Point)
-                    {
-                      if (getVerticalValueVectors(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo,
-                          forecastTime, pLevelId, qParam.mParameterLevels,producerId, valueList))
-                      {
-                        return;
-                      }
-                    }
-                  }
-
-
-                  if ((qParam.mFlags & QueryServer::QueryParameter::Flags::MetricLevels)  &&  (qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-                  {
-                    // This is metric query. We should post-process isobands, isolines, etc.
-
-                    if (getValueVectors(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo,
-                        forecastTime, pLevelId, pLevel,producerId, valueList, qParam.mCoordinates))
-                    {
-                      return;
-                    }
-                  }
-                  else
-                  {
-
-                    // ### STREAMLINE QUERY
-
-                    if (qParam.mType == QueryParameter::Type::StreamLine)
-                    {
-                      if (getStreamlineValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo, forecastTime, pLevelId, pLevel,
-                          producerId, valueList))
-                      {
-                        return;
-                      }
-                    }
-
-                    // ### ISOLINE QUERY
-
-                    if (qParam.mType == QueryParameter::Type::Isoline)
-                    {
-                      if (getIsolineValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                          pInfo, forecastTime, pLevelId, pLevel, producerId, valueList))
-                      {
-                        return;
-                      }
-                    }
-
-
-                    // ### ISOBAND QUERY
-
-                    if (qParam.mType == QueryParameter::Type::Isoband)
-                    {
-                      if (getIsobandValues(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                          pInfo, forecastTime, pLevelId, pLevel, producerId, valueList))
-                      {
-                        return;
-                      }
-                    }
-
-                    // ### VECTOR QUERY
-
-                    if (qParam.mType == QueryParameter::Type::Vector)
-                    {
-                      if (getValueVectors(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags, pInfo,
-                          forecastTime, pLevelId, pLevel,producerId, valueList, qParam.mCoordinates))
-                      {
-                        return;
-                      }
-                    }
-
-                    // ### GRID FILE QUERY
-
-                    if (qParam.mType == QueryParameter::Type::GridFile)
-                    {
-                      if (getGridFiles(query,qParam,producerInfo, producerGeometryId, generationInfo->mGenerationId, generationInfo->mAnalysisTime, gflags,
-                          pInfo, forecastTime, pLevelId, pLevel,producerId, valueList))
-                      {
-                        return;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        else
-        {
-          if (!producerOk)
-          {
-            PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
-          }
-          else
-          {
-            PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
-          }
-        }
+        PRINT_DATA(mDebugLog, "  - Producer's '%s' geometry '%d' does not cover all requested query.mAreaCoordinates!\n", producerName.c_str(), producerGeometryId);
+        continue;
+      }
+
+      bool producerOk = isAreaProducerAccepted(producers.size(),qParam,producerName,producerGeometryId);
+
+      // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
+
+      T::ProducerInfo producerInfo;
+      if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+      {
+        if (getProducerGridValues(r,producerName,producerGeometryId,producerInfo))
+          return;
       }
       else
       {
-        PRINT_DATA(mDebugLog, "  - Producer's '%s' geometry '%d' does not cover all requested query.mAreaCoordinates!\n", producerName.c_str(), producerGeometryId);
+        printInvalidProducer(producerName,producerOk);
       }
     }
   }

@@ -182,6 +182,30 @@ class ParameterRequest
 
 
 // ====================================================================================
+/*! \brief Arguments of the grid value request of a query parameter for a forecast time (see getGridValues). */
+// ====================================================================================
+class GridValueRequest
+{
+  public:
+    Query&              query;                      //!< The query.
+    QueryParameter&     qParam;                     //!< The query parameter.
+    T::ProducerId&      producerId;                 //!< Requested producer (updated by the value searches).
+    const std::string&  analysisTime;               //!< Requested analysis time (or empty).
+    const std::string&  maxAnalysisTime;            //!< Maximum analysis time (or empty).
+    UInt64              generationFlags;            //!< Accepted generations (0 = all).
+    const std::string&  parameterKey;               //!< Parameter key.
+    std::size_t         parameterHash;              //!< Hash of the parameter key.
+    uint                queryFlags;                 //!< Query flags.
+    time_t              forecastTime;               //!< Requested forecast time.
+    bool                timeMatchRequired;          //!< Whether the forecast time must match.
+    ParameterValues&    valueList;                  //!< Result values.
+    std::string&        producerStr;                //!< Producer and geometry of the values ("PRODUCER:geometry").
+    time_t              requiredAccessTime;         //!< The generation must not be deleted before this time.
+    bool                acceptNotReadyGenerations;  //!< Whether generations that are not ready are accepted.
+};
+
+
+// ====================================================================================
 /*! \brief Main implementation of the QueryServer ServiceInterface.
  *
  *  Combines a ContentServer and DataServer to execute named-parameter queries with
@@ -425,6 +449,24 @@ class ServiceImplementation : public ServiceInterface
      bool           getGridFileProperties(const T::ContentInfo& contentInfo1,std::map<uint,Int64 >& oldProperties);
      GRID::Message* newGridFileMessage(const Query& query,uint version,time_t forecastTime,T::ParamLevel paramLevel,const T::ContentInfo& contentInfo1,const std::map<uint,Int64 >& oldProperties,GRID::GridFile& newGridFile);
      bool           addGridFileData(int result,const char *service,const T::ContentInfo& contentInfo1,bool levelInterpolated,T::ParamLevel paramLevel,QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,GRID::GridFile& newGridFile,GRID::Message& newMessage,UInt64 sz,ParameterValues& valueList);
+     void           printGridValueRequest(const GridValueRequest& r,const Producer_vec& producers,const std::set<T::GeometryId>& geometryIdList);
+     bool           isAreaProducerAccepted(std::size_t producerCount,const QueryParameter& qParam,const std::string& producerName,T::GeometryId producerGeometryId);
+     ParameterMapping_vec_sptr getGridValueMappings(const T::ProducerInfo& producerInfo,const std::string& parameterKey,std::size_t parameterHash,T::GeometryId producerGeometryId,const QueryParameter& qParam);
+     T::GenerationInfo* getRequestedGenerationInfo(const CacheEntry& cacheEntry,const std::string& analysisTime,uint queryFlags,bool acceptNotReadyGenerations);
+     bool           hasClimatologicalMappings(const ParameterMapping_vec& mappings);
+     bool           isGenerationSelected(const GridValueRequest& r,const std::vector<std::string>& analysisTimes,uint g,uint gflags);
+     bool           isGenerationReady(const T::GenerationInfo& generationInfo,T::GeometryId producerGeometryId);
+     void           printGeneration(const std::string& analysisTime,const std::vector<std::string>& analysisTimes,uint g,bool requestedGeneration);
+     bool           getGenerationsGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,const std::vector<std::string>& analysisTimes,T::GenerationInfo* origGenerationInfo,ParameterMapping_vec& mappings,bool climatologicalMappings);
+     void           printInvalidProducer(const std::string& producerName,bool producerOk);
+     bool           isGenerationUsable(const GridValueRequest& r,T::GenerationInfo *generationInfo,T::GeometryId producerGeometryId,bool climatologicalMappings,bool generationValid);
+     bool           getProducerGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo);
+     bool           getMappingGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo);
+     bool           getTypeGridValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,T::ParamLevelId pLevelId,T::ParamLevel pLevel);
+     bool           getPointTypeGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel);
+     bool           getInterpolatedPointValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel);
+     void           getLandscapeParameterValues(GridValueRequest& r,const std::string& name,const std::string& producerName,T::GeometryId producerGeometryId,Producer_vec& pList,std::set<T::GeometryId>& gList,ParameterValues& values);
+     void           setLandscapeValue(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,double x,double y);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);
