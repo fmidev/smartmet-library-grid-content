@@ -358,6 +358,18 @@ bool isLiveContent(const ContentInfo *info)
 {
   return info != nullptr  &&  (info->mFlags & ContentInfo::Flags::DeletedContent) == 0;
 }
+
+
+
+/*! \brief Add the content to the list, as a copy if the list owns its objects. */
+
+void addContent(ContentInfoList& contentInfoList,ContentInfo *info)
+{
+  if (contentInfoList.getReleaseObjects())
+    contentInfoList.addContentInfo(info->duplicate());
+  else
+    contentInfoList.addContentInfo(info);
+}
 }  // namespace
 
 
@@ -1027,7 +1039,7 @@ bool ContentInfoList::containsSameForecastTimes()
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (timeList.find(info->mForecastTimeUTC) != timeList.end())
           return true;
@@ -1609,7 +1621,7 @@ void ContentInfoList::getLevelInfoList(T::LevelInfoList& levelInfoList)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         std::size_t seed = 0;
         Fmi::hash_merge(seed,info->mProducerId);
@@ -2231,34 +2243,28 @@ void ContentInfoList::getContentListByForecastTime(time_t forecastTimeUTC,T::Con
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mForecastTimeUTC <= forecastTimeUTC)
       {
-        if (info->mForecastTimeUTC <= forecastTimeUTC)
-        {
-          if (prevInfo == nullptr  ||  info->mForecastTimeUTC > prevInfo->mForecastTimeUTC)
-            prevInfo = info;
-        }
-        else
-        {
-          if (nextInfo == nullptr  ||  info->mForecastTimeUTC < nextInfo->mForecastTimeUTC)
-            nextInfo = info;
-        }
+        if (prevInfo == nullptr  ||  info->mForecastTimeUTC > prevInfo->mForecastTimeUTC)
+          prevInfo = info;
+      }
+      else
+      if (nextInfo == nullptr  ||  info->mForecastTimeUTC < nextInfo->mForecastTimeUTC)
+      {
+        nextInfo = info;
       }
     }
 
     if (prevInfo != nullptr  &&  (nextInfo != nullptr  ||  prevInfo->mForecastTimeUTC == forecastTimeUTC))
     {
-      if (contentInfoList.getReleaseObjects())
-        contentInfoList.addContentInfo(prevInfo->duplicate());
-      else
-        contentInfoList.addContentInfo(prevInfo);
+      addContent(contentInfoList,prevInfo);
 
       if (nextInfo != nullptr  &&  prevInfo->mForecastTimeUTC != forecastTimeUTC)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextInfo->duplicate());
-        else
-          contentInfoList.addContentInfo(nextInfo);
+        addContent(contentInfoList,nextInfo);
       }
     }
   }
@@ -2509,7 +2515,7 @@ bool ContentInfoList::getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::
       return false;
 
     T::ContentInfo *info = mArray[idx];
-    if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex  )
+    if (isLiveContent(info)  &&  info->mFileId == fileId  &&  info->mMessageIndex == messageIndex  )
     {
       contentInfo = *info;
       return true;
@@ -2590,7 +2596,7 @@ ContentInfo* ContentInfoList::getContentInfoByParameterLevelInfo(const T::Parame
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (isLiveContent(info)  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId != 0  &&  info->mFmiParameterId == pkey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strcmp(info->getFmiParameterName(),levelInfo.mParameterKey.c_str()) == 0))
@@ -2631,17 +2637,14 @@ void ContentInfoList::getContentInfoListByParameterLevelInfo(const T::ParameterL
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mParameterLevel == levelInfo.mLevel)
+      if (isLiveContent(info)  &&  info->mParameterLevel == levelInfo.mLevel)
       {
         if ((levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_ID  &&  info->mFmiParameterId != 0  &&  info->mFmiParameterId == pkey) ||
             (levelInfo.mParameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strcmp(info->getFmiParameterName(),levelInfo.mParameterKey.c_str()) == 0))
         {
           if (info->mFmiParameterLevelId == levelInfo.mParameterLevelId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
           }
         }
       }
@@ -2692,12 +2695,9 @@ void ContentInfoList::getContentInfoListNoClear(ContentInfoList& contentInfoList
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        addContent(contentInfoList,info);
       }
     }
   }
@@ -2752,12 +2752,9 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
         for (uint t=startFileId; t<mLength; t++)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+          if (isLiveContent(info))
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -2769,12 +2766,9 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
         for (int t=startFileId; t>=0; t--)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+          if (isLiveContent(info))
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -2798,14 +2792,11 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -2821,14 +2812,11 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -2915,7 +2903,7 @@ void ContentInfoList::getContentParamKeyListByGenerationId(T::ProducerId produce
     for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
+      if (isLiveContent(info)  &&  info->mGenerationId == generationId  && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
         if (!addParamKey(info,parameterKeyType,paramKeyList))
           return;
@@ -2964,7 +2952,7 @@ void ContentInfoList::getContentParamKeyListByGenerationAndGeometryId(T::Produce
     for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+      if (isLiveContent(info)  &&
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
@@ -3014,7 +3002,7 @@ void ContentInfoList::getContentParamKeyListByGenerationGeometryAndLevelId(T::Pr
     for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+      if (isLiveContent(info)  &&
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           info->mFmiParameterLevelId == levelId && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
@@ -3064,7 +3052,7 @@ void ContentInfoList::getContentLevelListByGenerationGeometryAndLevelId(T::Produ
     for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+      if (isLiveContent(info)  &&
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           info->mFmiParameterLevelId == levelId && (info->mDeletionTime == 0 || info->mDeletionTime > timeLimit))
       {
@@ -3113,7 +3101,7 @@ void ContentInfoList::getContentLevelListByParameterGenerationGeometryAndLevelId
     for (uint t=idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&
+      if (isLiveContent(info)  &&
           info->mGenerationId == generationId && info->mGeometryId == geometryId  &&
           info->mFmiParameterLevelId == levelId &&
           strcmp(info->getFmiParameterName(),parameterKey.c_str()) == 0 &&
@@ -3172,7 +3160,7 @@ void ContentInfoList::getContentGeometryIdListByGenerationId(T::ProducerId produ
     {
       ContentInfo *info = mArray[t];
 
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info->mGenerationId == generationId)
         {
@@ -3213,7 +3201,7 @@ void ContentInfoList::getContentGeometryIdList(std::set<T::GeometryId>& geometry
     {
       ContentInfo *info = mArray[t];
 
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         geometryIdList.insert(info->mGeometryId);
       }
@@ -3246,7 +3234,7 @@ void ContentInfoList::getGenerationIdListByGeometryId(T::GeometryId geometryId,s
     {
       ContentInfo *info = mArray[t];
 
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
+      if (isLiveContent(info)  &&  info->mGeometryId == geometryId)
       {
         generationIdList.insert(info->mGenerationId);
       }
@@ -3289,17 +3277,14 @@ void ContentInfoList::getContentInfoListByFileId(T::FileId fileId,ContentInfoLis
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mFileId > fileId)
             return;
 
           if (info->mFileId == fileId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
           }
         }
         t++;
@@ -3311,12 +3296,9 @@ void ContentInfoList::getContentInfoListByFileId(T::FileId fileId,ContentInfoLis
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFileId == fileId)
+      if (isLiveContent(info)  &&  info->mFileId == fileId)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        addContent(contentInfoList,info);
       }
     }
   }
@@ -3347,12 +3329,9 @@ void ContentInfoList::getContentInfoListByGeometryId(T::GeometryId geometryId,Co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGeometryId == geometryId)
+      if (isLiveContent(info)  &&  info->mGeometryId == geometryId)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        addContent(contentInfoList,info);
       }
     }
   }
@@ -3411,17 +3390,14 @@ void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,Co
       while (t < mLength)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mForecastTimeUTC > forecastTimeUTC)
             return;
 
           if (info->mForecastTimeUTC == forecastTimeUTC)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
           }
         }
         t++;
@@ -3433,12 +3409,9 @@ void ContentInfoList::getContentInfoListByForecastTime(time_t forecastTimeUTC,Co
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mForecastTimeUTC == forecastTimeUTC)
+      if (isLiveContent(info)  &&  info->mForecastTimeUTC == forecastTimeUTC)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        addContent(contentInfoList,info);
       }
     }
   }
@@ -3468,12 +3441,9 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+      if (isLiveContent(info)  &&  info->mFmiParameterId == fmiParameterId)
       {
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(info->duplicate());
-        else
-          contentInfoList.addContentInfo(info);
+        addContent(contentInfoList,info);
       }
     }
   }
@@ -3539,10 +3509,7 @@ void ContentInfoList::getContentInfoListByFmiParameterId(T::FmiParamId fmiParame
                 {
                   if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    addContent(contentInfoList,info);
                   }
                 }
               }
@@ -3637,10 +3604,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
 
                       if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                     }
                   }
@@ -3669,20 +3633,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
+        addContent(contentInfoList,prev);
       }
 
       if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
+        addContent(contentInfoList,next);
       }
     }
     else
@@ -3849,10 +3807,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
                     {
                       if (info->mParameterLevel == level || parameterLevelId < 0)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                       else
                       if (info->mParameterLevel < level)
@@ -3901,20 +3856,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimeSameLevel);
+        addContent(contentInfoList,prevTimeSameLevel);
       }
 
       if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimeSameLevel);
+        addContent(contentInfoList,nextTimeSameLevel);
       }
 
       if (contentInfoList.getLength() == 2)
@@ -3927,20 +3876,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimePrevLevel);
+          addContent(contentInfoList,sameTimePrevLevel);
         }
 
         if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimeNextLevel);
+          addContent(contentInfoList,sameTimeNextLevel);
         }
       }
 
@@ -3954,20 +3897,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimePrevLevel);
+          addContent(contentInfoList,prevTimePrevLevel);
         }
 
         if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimeNextLevel);
+          addContent(contentInfoList,prevTimeNextLevel);
         }
       }
 
@@ -3977,20 +3914,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId(T::Produ
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimePrevLevel);
+          addContent(contentInfoList,nextTimePrevLevel);
         }
 
         if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimeNextLevel);
+          addContent(contentInfoList,nextTimeNextLevel);
         }
       }
     }
@@ -4109,10 +4040,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
                     {
                       if (info->mParameterLevel == level)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
 
                         return;
                       }
@@ -4224,20 +4152,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimeSameLevel);
+        addContent(contentInfoList,prevTimeSameLevel);
       }
 
       if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimeSameLevel);
+        addContent(contentInfoList,nextTimeSameLevel);
       }
 
       if (contentInfoList.getLength() == 2)
@@ -4250,20 +4172,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimePrevLevel);
+          addContent(contentInfoList,sameTimePrevLevel);
         }
 
         if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimeNextLevel);
+          addContent(contentInfoList,sameTimeNextLevel);
         }
       }
 
@@ -4277,20 +4193,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimePrevLevel);
+          addContent(contentInfoList,prevTimePrevLevel);
         }
 
         if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimeNextLevel);
+          addContent(contentInfoList,prevTimeNextLevel);
         }
       }
 
@@ -4300,20 +4210,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndGenerationId2(T::Prod
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimePrevLevel);
+          addContent(contentInfoList,nextTimePrevLevel);
         }
 
         if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimeNextLevel);
+          addContent(contentInfoList,nextTimeNextLevel);
         }
       }
     }
@@ -4412,10 +4316,7 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
 
                       if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                     }
                   }
@@ -4439,20 +4340,14 @@ void ContentInfoList::getContentInfoListByFmiParameterIdAndProducerId(T::Produce
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
+        addContent(contentInfoList,prev);
       }
 
       if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
+        addContent(contentInfoList,next);
       }
     }
     else
@@ -4529,10 +4424,7 @@ void ContentInfoList::getContentInfoListByFmiParameterName(const std::string& fm
                 {
                   if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
                   {
-                    if (contentInfoList.getReleaseObjects())
-                      contentInfoList.addContentInfo(info->duplicate());
-                    else
-                      contentInfoList.addContentInfo(info);
+                    addContent(contentInfoList,info);
                   }
                 }
               }
@@ -4846,10 +4738,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
                     {
                       if (info->mParameterLevel == level || parameterLevelId < 0)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                       else
                       if (info->mParameterLevel < level)
@@ -4898,20 +4787,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimeSameLevel);
+        addContent(contentInfoList,prevTimeSameLevel);
       }
 
       if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimeSameLevel);
+        addContent(contentInfoList,nextTimeSameLevel);
       }
 
       if (contentInfoList.getLength() == 2)
@@ -4924,20 +4807,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimePrevLevel);
+          addContent(contentInfoList,sameTimePrevLevel);
         }
 
         if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimeNextLevel);
+          addContent(contentInfoList,sameTimeNextLevel);
         }
       }
 
@@ -4951,20 +4828,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimePrevLevel);
+          addContent(contentInfoList,prevTimePrevLevel);
         }
 
         if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimeNextLevel);
+          addContent(contentInfoList,prevTimeNextLevel);
         }
       }
 
@@ -4974,20 +4845,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimePrevLevel);
+          addContent(contentInfoList,nextTimePrevLevel);
         }
 
         if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimeNextLevel);
+          addContent(contentInfoList,nextTimeNextLevel);
         }
       }
     }
@@ -5106,10 +4971,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
                     {
                       if (info->mParameterLevel == level)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
 
                         return;
                       }
@@ -5221,20 +5083,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prevTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(prevTimeSameLevel);
+        addContent(contentInfoList,prevTimeSameLevel);
       }
 
       if (nextTimeSameLevel != nullptr  &&  (nextTimeSameLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(nextTimeSameLevel->duplicate());
-        else
-          contentInfoList.addContentInfo(nextTimeSameLevel);
+        addContent(contentInfoList,nextTimeSameLevel);
       }
 
       if (contentInfoList.getLength() == 2)
@@ -5247,20 +5103,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimePrevLevel);
+          addContent(contentInfoList,sameTimePrevLevel);
         }
 
         if (sameTimeNextLevel != nullptr  &&  (sameTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(sameTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(sameTimeNextLevel);
+          addContent(contentInfoList,sameTimeNextLevel);
         }
       }
 
@@ -5274,20 +5124,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimePrevLevel);
+          addContent(contentInfoList,prevTimePrevLevel);
         }
 
         if (prevTimeNextLevel != nullptr  &&  (prevTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the previous entry before the start time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(prevTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(prevTimeNextLevel);
+          addContent(contentInfoList,prevTimeNextLevel);
         }
       }
 
@@ -5297,20 +5141,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId2(T::Pr
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimePrevLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimePrevLevel);
+          addContent(contentInfoList,nextTimePrevLevel);
         }
 
         if (nextTimeNextLevel != nullptr  &&  (nextTimeNextLevel->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
         {
           // We need to add the next entry after the end time.
 
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(nextTimeNextLevel->duplicate());
-          else
-            contentInfoList.addContentInfo(nextTimeNextLevel);
+          addContent(contentInfoList,nextTimeNextLevel);
         }
       }
     }
@@ -5413,10 +5251,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
 
                       if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                     }
                   }
@@ -5445,20 +5280,14 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationId(T::Pro
       {
         // We need to add the previous entry before the start time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(prev->duplicate());
-        else
-          contentInfoList.addContentInfo(prev);
+        addContent(contentInfoList,prev);
       }
 
       if (next != nullptr  &&  (next->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  (requestFlags & ContentServer::RequestFlags::INCLUDE_TIME_AFTER))
       {
         // We need to add the next entry after the end time.
 
-        if (contentInfoList.getReleaseObjects())
-          contentInfoList.addContentInfo(next->duplicate());
-        else
-          contentInfoList.addContentInfo(next);
+        addContent(contentInfoList,next);
       }
     }
     else
@@ -5535,10 +5364,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndGenerationList(T::G
                       {
                         if (info->mForecastTimeUTC >= startTimeUTC && info->mForecastTimeUTC <= endTimeUTC)
                         {
-                          if (contentInfoList.getReleaseObjects())
-                            contentInfoList.addContentInfo(info->duplicate());
-                          else
-                            contentInfoList.addContentInfo(info);
+                          addContent(contentInfoList,info);
                         }
                       }
                     }
@@ -5649,10 +5475,7 @@ void ContentInfoList::getContentInfoListByFmiParameterNameAndProducerId(T::Produ
                     {
                       if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
                       {
-                        if (contentInfoList.getReleaseObjects())
-                          contentInfoList.addContentInfo(info->duplicate());
-                        else
-                          contentInfoList.addContentInfo(info);
+                        addContent(contentInfoList,info);
                       }
                     }
                   }
@@ -5719,12 +5542,9 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
         for (uint t=startFileId; t<mLength; t++)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+          if (isLiveContent(info)  &&  info->mProducerId == producerId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -5736,12 +5556,9 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
         for (int t=startFileId; t>=0; t--)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+          if (isLiveContent(info)  &&  info->mProducerId == producerId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -5766,12 +5583,9 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -5786,12 +5600,9 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mProducerId == producerId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -5829,12 +5640,9 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,Co
       for (uint t=0; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        if (isLiveContent(info)  &&  info->mProducerId == producerId)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
         }
       }
       return;
@@ -5850,14 +5658,11 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,Co
     for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info->mProducerId == producerId)
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
         }
         else
         {
@@ -5901,12 +5706,9 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
         for (uint t=startFileId; t<mLength; t++)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+          if (isLiveContent(info)  &&  info->mGenerationId == generationId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -5918,12 +5720,9 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
         for (int t=startFileId; t>=0; t--)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId)
+          if (isLiveContent(info)  &&  info->mGenerationId == generationId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -5947,12 +5746,9 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -5967,12 +5763,9 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mGenerationId == generationId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -6007,7 +5800,7 @@ std::size_t ContentInfoList::getHash()
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         Fmi::hash_merge(hash,info->mFileId);
         Fmi::hash_merge(hash,info->mMessageIndex);
@@ -6043,7 +5836,7 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
       for (uint t=0; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mProducerId == producerId)
+        if (isLiveContent(info)  &&  info->mProducerId == producerId)
         {
           Fmi::hash_merge(hash,info->mFileId);
           Fmi::hash_merge(hash,info->mMessageIndex);
@@ -6062,7 +5855,7 @@ std::size_t ContentInfoList::getHashByProducerId(T::ProducerId producerId)
     for (uint t=startIdx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info->mProducerId == producerId)
         {
@@ -6111,12 +5904,9 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
         for (uint t=startFileId; t<mLength; t++)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+          if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -6128,12 +5918,9 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
         for (int t=startFileId; t>=0; t--)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
+          if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -6157,12 +5944,9 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -6177,12 +5961,9 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -6248,16 +6029,13 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info->mGenerationId == generationId)
         {
           if (info->mForecastTimeUTC >= startTimeUTC  &&  info->mForecastTimeUTC <= endTimeUTC)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
           }
         }
         else
@@ -6301,12 +6079,9 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
         for (uint t=startFileId; t<mLength; t++)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+          if (isLiveContent(info)  &&  info->mSourceId == sourceId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -6318,12 +6093,9 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
         for (int t=startFileId; t>=0; t--)
         {
           ContentInfo *info = mArray[t];
-          if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId)
+          if (isLiveContent(info)  &&  info->mSourceId == sourceId)
           {
-            if (contentInfoList.getReleaseObjects())
-              contentInfoList.addContentInfo(info->duplicate());
-            else
-              contentInfoList.addContentInfo(info);
+            addContent(contentInfoList,info);
 
             if (contentInfoList.getLength() >= max)
               return;
@@ -6348,12 +6120,9 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -6368,12 +6137,9 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mSourceId == sourceId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
+        if (isLiveContent(info)  &&  info->mSourceId == sourceId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
         {
-          if (contentInfoList.getReleaseObjects())
-            contentInfoList.addContentInfo(info->duplicate());
-          else
-            contentInfoList.addContentInfo(info);
+          addContent(contentInfoList,info);
 
           if (contentInfoList.getLength() >= max)
             return;
@@ -6440,7 +6206,7 @@ void ContentInfoList::getFmiParamLevelIdListByFmiParameterId(T::FmiParamId fmiPa
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+      if (isLiveContent(info)  &&  info->mFmiParameterId == fmiParameterId)
         insertSortedLevelId(paramLevelIdList,info->mFmiParameterLevelId);
     }
   }
@@ -6470,7 +6236,7 @@ void ContentInfoList::getParamLevelListByFmiLevelId(T::ParamLevelId paramLevelId
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterLevelId == paramLevelId)
+      if (isLiveContent(info)  &&  info->mFmiParameterLevelId == paramLevelId)
       {
         paramLevelList.insert(info->mParameterLevel);
       }
@@ -6502,7 +6268,7 @@ void ContentInfoList::getParamLevelInfoListByFmiParameterId(T::FmiParamId fmiPar
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0  &&  info->mFmiParameterId == fmiParameterId)
+      if (isLiveContent(info)  &&  info->mFmiParameterId == fmiParameterId)
       {
         auto id = std::to_string(info->mFmiParameterId);
         ParameterLevelInfo *pInfo = parameterLevelInfoList.getParameterLevelInfo(T::ParamKeyTypeValue::FMI_ID,
@@ -6542,7 +6308,7 @@ void ContentInfoList::getForecastTimeList(std::set<std::string>& forecastTimeLis
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info != nullptr)
         {
@@ -6577,7 +6343,7 @@ void ContentInfoList::getForecastTimeList(std::set<time_t>& forecastTimeList)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
       {
         if (info != nullptr)
         {
@@ -6964,7 +6730,7 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
       ContentInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mProducerId == producerId)
           {
@@ -7017,7 +6783,7 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
       ContentInfo *info = mArray[t];
       if (info != nullptr)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (isLiveContent(info))
         {
           if (info->mProducerId == producerId)
           {
@@ -7387,7 +7153,7 @@ void ContentInfoList::writeToFile(const std::string& filename,const char *filemo
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
 
@@ -7416,7 +7182,7 @@ void ContentInfoList::print(std::ostream& stream,uint level,uint optionFlags)
     for (uint t=0; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+      if (isLiveContent(info))
         info->print(stream,level+1,optionFlags);
     }
   }
