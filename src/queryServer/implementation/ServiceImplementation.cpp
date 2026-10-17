@@ -382,6 +382,93 @@ std::set<T::ParamLevel> indexHeightLevels(HeightRec_vec& recs,T::ParamLevel Heig
 
 
 
+/*! \brief Split the function name of the form "function:subfunction" (the name is the function otherwise). */
+
+void splitSubfunction(const std::string& name,std::string& function,std::string& subfunction)
+{
+  function = name;
+  std::vector<std::string> subVec;
+  splitString(function,':',subVec);
+  if (subVec.size() == 2)
+  {
+    function = subVec[0];
+    subfunction = subVec[1];
+  }
+}
+
+
+
+/*! \brief Get the row range (the second and the third function parameter) and the constant parameters (from the fifth
+           function parameter on) of the row range function of the query parameter. */
+
+template <class P>
+void getRowRangeFunctionParameters(const QueryParameter& qParam,int& startIdx,int& endIdx,P& parameters)
+{
+  int fpLen = qParam.mFunctionParams.size();
+
+  if (fpLen > 1)
+    startIdx = toInt32(qParam.mFunctionParams[1].second);
+
+  if (fpLen > 2)
+    endIdx = toInt32(qParam.mFunctionParams[2].second);
+
+  for (int t=4; t<fpLen; t++)
+    parameters.emplace_back(toDouble(qParam.mFunctionParams[t].second));
+}
+
+
+
+/*! \brief Source information of the function values: taken from the first function parameter with a producer. */
+
+struct FunctionSource
+{
+  T::ProducerId producerId = 0;
+  T::GenerationId generationId = 0;
+  uint geometryId = 0;
+  uint flags = 0;
+};
+
+
+
+/*! \brief Collect the value vectors of the function parameters for the time step (the constant parameters into the
+           parameter list) and the source information. Coordinates are copied from the first parameter that has them. */
+
+void collectFunctionInputVectors(Query& query,QueryParameter& qParam,int tCount,std::vector<T::ParamValue_vec>& inputVectors,std::vector<double>& parameters,FunctionSource& source)
+{
+  for (auto it = qParam.mFunctionParams.begin(); it != qParam.mFunctionParams.end(); ++it)
+  {
+    double a = toDouble(it->second.c_str());
+    QueryParameter* q = query.getQueryParameterPtr(it->first);
+    if (q == nullptr)
+    {
+      parameters.emplace_back(a);
+      continue;
+    }
+
+    if ((std::size_t)tCount >= q->mValueList.size())
+      continue;
+
+    if (source.producerId == 0 && q->mValueList[tCount]->mProducerId > 0)
+    {
+      source.producerId = q->mValueList[tCount]->mProducerId;
+      source.generationId = q->mValueList[tCount]->mGenerationId;
+      source.geometryId = q->mValueList[tCount]->mGeometryId;
+
+      if (q->mValueList[tCount]->mFlags & ParameterValues::Flags::AggregationValue)
+        source.flags |= ParameterValues::Flags::AggregationValue;
+
+      if (q->mValueList[tCount]->mFlags & ParameterValues::Flags::InternalAggregationValue)
+        source.flags |= ParameterValues::Flags::InternalAggregationValue;
+    }
+
+    inputVectors.emplace_back(q->mValueList[tCount]->mValueVector);
+    if (!q->mCoordinates.empty()  &&  qParam.mCoordinates.empty())
+      qParam.mCoordinates = q->mCoordinates;
+  }
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -2999,6 +3086,197 @@ void ServiceImplementation::postProcessQuery(Query& query)
 
 
 
+/*! \brief Query Server: Print the query object to the debug log (if enabled) with the title. */
+
+void ServiceImplementation::printQueryObject(Query& query,const char *title)
+{
+  try
+  {
+    if (mDebugLog == nullptr ||  !mDebugLog->isEnabled())
+      return;
+
+    std::stringstream stream;
+    query.print(stream, 0, 0);
+    PRINT_DATA(mDebugLog, "\n%s\n", title);
+    PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the vector function of the Lua function type (8 or 9, other types do nothing). */
+
+void ServiceImplementation::executeLuaVectorFunction(uint type,const std::string& luaFunction,const std::string& subfunction,uint columns,uint rows,std::vector<T::ParamValue_vec>& inputVectors,const std::vector<double>& parameters,T::ParamValue_vec& outputVector)
+{
+  try
+  {
+    switch (type)
+    {
+      case 8:
+        mLuaFileCollection.executeFunctionCall8(luaFunction,subfunction.c_str(),columns,rows,inputVectors,parameters,outputVector);
+        break;
+
+      case 9:
+        mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,outputVector);
+        break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the vector function (a built-in function or a Lua function). */
+
+void ServiceImplementation::executeVectorFunction(const std::string& function,const std::string& subfunction,uint columns,uint rows,std::vector<T::ParamValue_vec>& inputVectors,const std::vector<double>& parameters,T::ParamValue_vec& outputVector)
+{
+  try
+  {
+    //UInt64 startTime = getTime();
+
+    auto *functionPtr = mFunctionCollection.getFunction(function);
+    if (functionPtr)
+    {
+      functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,outputVector);
+    }
+    else
+    {
+      std::string luaFunction;
+      uint type = mLuaFileCollection.getFunction(function, luaFunction);
+      executeLuaVectorFunction(type,luaFunction,subfunction,columns,rows,inputVectors,parameters,outputVector);
+    }
+    //UInt64 endTime = getTime();
+    //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the vector function of the query parameter for the time step and add the result to the
+           value list of the parameter. */
+
+void ServiceImplementation::executeTimeStepVectorFunction(Query& query,QueryParameter& qParam,const std::string& function,const std::string& subfunction,uint columns,uint rows,int tCount,time_t forecastTime)
+{
+  try
+  {
+    std::string f = function.substr(0, 1);
+
+    std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
+    pValues->mForecastTimeUTC = forecastTime;
+
+    std::vector<T::ParamValue_vec> inputVectors;
+    std::vector<double> parameters;
+    FunctionSource source;
+
+    collectFunctionInputVectors(query,qParam,tCount,inputVectors,parameters,source);
+
+    if (f == "/"  &&  !inputVectors.empty())
+    {
+      pValues->mValueVector = inputVectors[0];
+    }
+    else if (f != "@"  &&  !inputVectors.empty())
+    {
+      executeVectorFunction(function,subfunction,columns,rows,inputVectors,parameters,pValues->mValueVector);
+    }
+
+    pValues->mProducerId = source.producerId;
+    pValues->mGenerationId = source.generationId;
+    pValues->mGeometryId = source.geometryId;
+    pValues->mFlags = source.flags;
+    qParam.mValueList.emplace_back(pValues);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Execute the vector function ("/function") of the query parameter over the row ranges of its
+           value vectors and replace the value vectors with the results. */
+
+void ServiceImplementation::executeRowRangeVectorFunction(Query& query,QueryParameter& qParam,uint columns,uint rows)
+{
+  try
+  {
+    std::vector<double> parameters;
+    std::string function;
+    std::string subfunction;
+    splitSubfunction(qParam.mFunction.substr(1),function,subfunction);
+    auto *functionPtr = mFunctionCollection.getFunction(function);
+    uint type = 0;
+    std::string luaFunction;
+    if (!functionPtr)
+      type = mLuaFileCollection.getFunction(function, luaFunction);
+
+    int startIdx = 0;
+    int endIdx = 0;
+    getRowRangeFunctionParameters(qParam,startIdx,endIdx,parameters);
+
+    int len = qParam.mValueList.size();
+
+    std::vector<std::vector<T::ParamValue>> outputVectors;
+
+    for (int r = 0; r<len; r++)
+    {
+      std::vector<T::ParamValue> outputVector;
+      std::vector<std::vector<T::ParamValue>> inputVectors;
+
+      qParam.getValueVectorsByRowRange(r+startIdx,r+endIdx,inputVectors);
+
+      if (!inputVectors.empty())
+      {
+        //UInt64 startTime = getTime();
+        if (functionPtr)
+          functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,outputVector);
+        else
+          executeLuaVectorFunction(type,luaFunction,subfunction,columns,rows,inputVectors,parameters,outputVector);
+        //UInt64 endTime = getTime();
+        //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
+      }
+
+      outputVectors.emplace_back(outputVector);
+    }
+
+    for (int r = 0; r<len; r++)
+    {
+      (*qParam.mValueList[r]).mValueVector = outputVectors[r];
+      if (query.mAggregationTimes.find((*qParam.mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
+        (*qParam.mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Execute query functions vector. */
 
 void ServiceImplementation::executeQueryFunctions_vector(Query& query)
@@ -3017,196 +3295,23 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
     for (auto qParam = query.mQueryParameterList.rbegin(); qParam != query.mQueryParameterList.rend(); ++qParam)
     {
-      std::string function = qParam->mFunction;
+      std::string function;
       std::string subfunction;
-      std::vector<std::string> subVec;
-      splitString(function,':',subVec);
-      if (subVec.size() == 2)
-      {
-        function = subVec[0];
-        subfunction = subVec[1];
-      }
+      splitSubfunction(qParam->mFunction,function,subfunction);
       //printf("FUNCTION [%s][%s][%s]\n",qParam->mFunction.c_str(),function.c_str(),subfunction.c_str());
 
       if (!function.empty())
       {
-        std::string f = function.substr(0, 1);
-
         int tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
-          std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
-          pValues->mForecastTimeUTC = *tt;
-
-          std::vector<T::ParamValue_vec> inputVectors;
-          std::vector<double> parameters;
-
-          T::ProducerId producerId = 0;
-          T::GenerationId generationId = 0;
-          uint geometryId = 0;
-          uint flags = 0;
-
-          for (auto it = qParam->mFunctionParams.begin(); it != qParam->mFunctionParams.end(); ++it)
-          {
-            double a = toDouble(it->second.c_str());
-            QueryParameter* q = query.getQueryParameterPtr(it->first);
-            if (q != nullptr)
-            {
-              if ((std::size_t)tCount < q->mValueList.size())
-              {
-                if (producerId == 0 && q->mValueList[tCount]->mProducerId > 0)
-                {
-                  producerId = q->mValueList[tCount]->mProducerId;
-                  generationId = q->mValueList[tCount]->mGenerationId;
-                  geometryId = q->mValueList[tCount]->mGeometryId;
-
-                  if (q->mValueList[tCount]->mFlags & ParameterValues::Flags::AggregationValue)
-                  {
-                    flags |= ParameterValues::Flags::AggregationValue;
-                  }
-
-                  if (q->mValueList[tCount]->mFlags & ParameterValues::Flags::InternalAggregationValue)
-                  {
-                    flags |= ParameterValues::Flags::InternalAggregationValue;
-                  }
-                }
-
-                inputVectors.emplace_back(q->mValueList[tCount]->mValueVector);
-                if (!q->mCoordinates.empty()  &&  qParam->mCoordinates.empty())
-                  qParam->mCoordinates = q->mCoordinates;
-              }
-            }
-            else
-            {
-              parameters.emplace_back(a);
-            }
-          }
-
-          if (f == "/"  &&  !inputVectors.empty())
-          {
-            pValues->mValueVector = inputVectors[0];
-          }
-          else if (f != "@"  &&  !inputVectors.empty())
-          {
-            //UInt64 startTime = getTime();
-
-            auto *functionPtr = mFunctionCollection.getFunction(function);
-            if (functionPtr)
-            {
-              functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,pValues->mValueVector);
-            }
-            else
-            {
-              std::string luaFunction;
-              uint type = mLuaFileCollection.getFunction(function, luaFunction);
-              switch (type)
-              {
-                case 8:
-                  mLuaFileCollection.executeFunctionCall8(luaFunction,subfunction.c_str(),columns,rows,inputVectors,parameters,pValues->mValueVector);
-                  break;
-
-                case 9:
-                  mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,pValues->mValueVector);
-                  break;
-                default:
-                  break;
-              }
-            }
-            //UInt64 endTime = getTime();
-            //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
-          }
-
-          pValues->mProducerId = producerId;
-          pValues->mGenerationId = generationId;
-          pValues->mGeometryId = geometryId;
-          pValues->mFlags = flags;
-          qParam->mValueList.emplace_back(pValues);
+          executeTimeStepVectorFunction(query,*qParam,function,subfunction,columns,rows,tCount,*tt);
           tCount++;
         }
       }
 
-      if (!qParam->mFunction.empty() > 0  &&  qParam->mFunction.substr(0,1) == "/")
-      {
-        std::vector<double> parameters;
-        std::string function = qParam->mFunction.substr(1);
-        std::string subfunction;
-        std::vector<std::string> subVec;
-        splitString(function,':',subVec);
-        if (subVec.size() == 2)
-        {
-          function = subVec[0];
-          subfunction = subVec[1];
-        }
-        auto *functionPtr = mFunctionCollection.getFunction(function);
-        uint type = 0;
-        std::string luaFunction;
-        if (!functionPtr)
-          type = mLuaFileCollection.getFunction(function, luaFunction);
-
-        int startIdx = 0;
-        int endIdx = 0;
-
-        int fpLen = qParam->mFunctionParams.size();
-
-        if (fpLen > 1)
-          startIdx = toInt32(qParam->mFunctionParams[1].second);
-
-        if (fpLen > 2)
-          endIdx = toInt32(qParam->mFunctionParams[2].second);
-
-        for (int t=4; t<fpLen; t++)
-          parameters.emplace_back(toDouble(qParam->mFunctionParams[t].second));
-
-
-        int len = qParam->mValueList.size();
-
-        std::vector<std::vector<T::ParamValue>> outputVectors;
-
-        for (int r = 0; r<len; r++)
-        {
-          T::GridValueList list;
-
-          std::vector<T::ParamValue> outputVector;
-          std::vector<std::vector<T::ParamValue>> inputVectors;
-
-          qParam->getValueVectorsByRowRange(r+startIdx,r+endIdx,inputVectors);
-
-          if (!inputVectors.empty())
-          {
-            //UInt64 startTime = getTime();
-            if (functionPtr)
-            {
-              functionPtr->executeFunctionCall9(columns,rows,inputVectors,parameters,outputVector);
-            }
-            else
-            {
-              switch (type)
-              {
-                case 8:
-                  mLuaFileCollection.executeFunctionCall8(luaFunction,subfunction.c_str(),columns,rows,inputVectors,parameters,outputVector);
-                  break;
-
-                case 9:
-                  mLuaFileCollection.executeFunctionCall9(luaFunction,columns,rows,inputVectors,parameters,outputVector);
-                  break;
-                default:
-                  break;
-              }
-            }
-            //UInt64 endTime = getTime();
-            //printf("TIME %f\n",(float)(endTime-startTime)/1000000.0);
-          }
-
-          outputVectors.emplace_back(outputVector);
-        }
-
-        for (int r = 0; r<len; r++)
-        {
-          (*qParam->mValueList[r]).mValueVector = outputVectors[r];
-          if (query.mAggregationTimes.find((*qParam->mValueList[r]).mForecastTimeUTC) != query.mAggregationTimes.end())
-            (*qParam->mValueList[r]).mFlags |= ParameterValues::Flags::InternalAggregationValue;
-        }
-      }
+      if (!qParam->mFunction.empty()  &&  qParam->mFunction.substr(0,1) == "/")
+        executeRowRangeVectorFunction(query,*qParam,columns,rows);
     }
     query.removeTemporaryParameters();
 
@@ -3220,23 +3325,11 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
 
     query.updateForecastTimeList();
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object before post processing:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryObject(query,"Query -object before post processing:");
 
     postProcessQuery(query);
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object after post processing:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryObject(query,"Query -object after post processing:");
 
   }
   catch (...)
