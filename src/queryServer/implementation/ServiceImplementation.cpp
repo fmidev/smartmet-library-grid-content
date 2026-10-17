@@ -8026,8 +8026,10 @@ bool ServiceImplementation::getPointValuesByHeight(
 
 
 
-/*! \brief Query Server: Get the value vectors of the levels (one vector per level) at the coordinates. Returns false if
-           a content is missing or the data server call fails. */
+/*! \brief Query Server: Get the value vectors of the levels (one vector per level) at the coordinates. The content of
+           the level is the first content found for the forecast time. If the exact time is required, the forecast
+           time of the content must be the forecast time. Returns false if a content is missing or does not match,
+           or if the data server call fails. */
 
 bool ServiceImplementation::getHeightLevelValueVectors(
     const Query& query,
@@ -8039,6 +8041,7 @@ bool ServiceImplementation::getHeightLevelValueVectors(
     time_t forecastTime,
     T::ParamLevelId levelId,
     const std::set<T::ParamLevel>& levels,
+    bool requireExactTime,
     const QueryParameter& qParam,
     short areaInterpolationMethod,
     double_vec& modificationParameters,
@@ -8061,6 +8064,8 @@ bool ServiceImplementation::getHeightLevelValueVectors(
         return false;
 
       T::ContentInfo* contentInfo = contentList->getContentInfoByIndex(0);
+      if (contentInfo == nullptr  ||  (requireExactTime  &&  contentInfo->mForecastTimeUTC != forecastTime))
+        return false;
 
       std::shared_ptr<T::ParamValue_vec> values(new T::ParamValue_vec());
       int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
@@ -8070,7 +8075,83 @@ bool ServiceImplementation::getHeightLevelValueVectors(
         return false;
       }
 
+      // The values are indexed by the coordinate index
+      if (values->size() != coordinates.size())
+        return false;
+
       valueVectors.push_back(values);
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the height interpolated values at the coordinates (one height record per coordinate) at
+           the first (timeIndex = 0) or at the second (timeIndex = 1) time of the height records. The values of the
+           levels of that time are fetched from the content of that time, and interpolated by the heights of that
+           time. Returns false if a content is missing or does not match, or if the data server call fails. */
+
+bool ServiceImplementation::getHeightInterpolatedValueVector(
+    const Query& query,
+    T::Coordinate_vec& coordinates,
+    HeightRec_vec& recs,
+    uint timeIndex,
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevel paramLevel,
+    const QueryParameter& qParam,
+    short areaInterpolationMethod,
+    short levelInterpolationMethod,
+    double_vec& modificationParameters,
+    T::ParamValue_vec& valueVector)
+{
+  try
+  {
+    T::ParamLevel HeightRec::*levelA = &HeightRec::level1_1;
+    T::ParamLevel HeightRec::*levelB = &HeightRec::level1_2;
+    T::ParamValue HeightRec::*heightA = &HeightRec::height1_1;
+    T::ParamValue HeightRec::*heightB = &HeightRec::height1_2;
+    if (timeIndex != 0)
+    {
+      levelA = &HeightRec::level2_1;
+      levelB = &HeightRec::level2_2;
+      heightA = &HeightRec::height2_1;
+      heightB = &HeightRec::height2_2;
+    }
+
+    // Without time interpolation the first content found for the forecast time is used. In time interpolation
+    // the contents must be the contents of the time (= the time of the heights).
+
+    uint rlen = recs.size();
+    bool timeInterpolated = (recs[0].time1 != recs[0].time2);
+    time_t contentTime = forecastTime;
+    if (timeInterpolated)
+      contentTime = (timeIndex == 0) ? recs[0].time1 : recs[0].time2;
+
+    // Replaces the levels of the time in the records with their indexes in the level set (= in the value vectors)
+    std::set<T::ParamLevel> levels = indexHeightLevels(recs,levelA,levelB);
+
+    std::vector<std::shared_ptr<T::ParamValue_vec>> levelValues;
+    if (!getHeightLevelValueVectors(query,coordinates,producerInfo,producerGeometryId,generationId,pInfo,contentTime,recs[0].levelId,levels,timeInterpolated,qParam,areaInterpolationMethod,modificationParameters,levelValues))
+      return false;
+
+    valueVector.clear();
+    valueVector.reserve(rlen);
+    for (uint r=0; r<rlen; r++)
+    {
+      const HeightRec& rec = recs[r];
+      T::ParamValue val = levelInterpolation((*levelValues[rec.*levelA])[r],(*levelValues[rec.*levelB])[r],rec.*heightA,rec.*heightB,paramLevel,levelInterpolationMethod);
+      valueVector.push_back(val);
     }
     return true;
   }
@@ -8145,55 +8226,37 @@ bool ServiceImplementation::getValueVectorsByHeight(
     std::vector<std::string> functionParams;
     bool conversionByFunction = getValueConversion(pInfo,function,functionParams,modificationOperation,modificationParameters);
 
-    T::ParamValue_vec valueVector;
     HeightRec_vec recs;
     recs.reserve(coordinates.size());
-    valueVector.reserve(coordinates.size());
 
     if (!getClosestLevelsByHeight(producerInfo.mProducerId,generationId,producerGeometryId,qParam.mParameterLevelId,qParam.mForecastType,qParam.mForecastNumber,forecastTime,coordinateType,coordinates,paramLevel,recs))
       return false;
 
     uint rlen = recs.size();
-    if (rlen != coordinates.size())
+    if (rlen == 0  ||  rlen != coordinates.size())
       return false;
 
-    std::set<T::ParamLevel> levels1 = indexHeightLevels(recs,&HeightRec::level1_1,&HeightRec::level1_2);
+    // The values at the first time of the height records, interpolated by the heights of the first time
 
-    std::vector<std::shared_ptr<T::ParamValue_vec>> valueList1;
-
-    if (!getHeightLevelValueVectors(query,coordinates,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,levels1,qParam,areaInterpolationMethod,modificationParameters,valueList1))
+    T::ParamValue_vec valueVector;
+    if (!getHeightInterpolatedValueVector(query,coordinates,recs,0,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,paramLevel,qParam,areaInterpolationMethod,levelInterpolationMethod,modificationParameters,valueVector))
       return false;
 
-    if (recs[0].time1 == recs[0].time2)
+    if (recs[0].time1 != recs[0].time2)
     {
-      valueVector.reserve(rlen);
+      // The forecast time is between the two times of the height records. The values at the second time are
+      // fetched from the contents of the second time and interpolated by the heights and the levels of the second
+      // time. Finally the height interpolated values of the two times are interpolated in time.
+
+      if (timeInterpolationMethod == T::TimeInterpolationMethod::Forbidden)
+        return false;
+
+      T::ParamValue_vec valueVector2;
+      if (!getHeightInterpolatedValueVector(query,coordinates,recs,1,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,paramLevel,qParam,areaInterpolationMethod,levelInterpolationMethod,modificationParameters,valueVector2))
+        return false;
+
       for (uint r=0; r<rlen; r++)
-      {
-        T::ParamValue val = levelInterpolation((*valueList1[recs[r].level1_1])[r],(*valueList1[recs[r].level1_2])[r],recs[r].height1_1,recs[r].height1_2,paramLevel,levelInterpolationMethod);
-        valueVector.push_back(val);
-      }
-
-      setHeightValueVector(qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
-
-      return true;
-    }
-
-
-    std::set<T::ParamLevel> levels2 = indexHeightLevels(recs,&HeightRec::level2_1,&HeightRec::level2_2);
-
-    std::vector<std::shared_ptr<T::ParamValue_vec>> valueList2;
-
-    if (!getHeightLevelValueVectors(query,coordinates,producerInfo,producerGeometryId,generationId,pInfo,forecastTime,recs[0].levelId,levels2,qParam,areaInterpolationMethod,modificationParameters,valueList2))
-      return false;
-
-    valueVector.reserve(rlen);
-    for (uint r=0; r<rlen; r++)
-    {
-      T::ParamValue val1 = levelInterpolation((*valueList1[recs[r].level1_1])[r],(*valueList2[recs[r].level2_1])[r],recs[r].height1_1,recs[r].height1_2,paramLevel,levelInterpolationMethod);
-      T::ParamValue val2 = levelInterpolation((*valueList1[recs[r].level1_2])[r],(*valueList2[recs[r].level2_2])[r],recs[r].height2_1,recs[r].height2_2,paramLevel,levelInterpolationMethod);
-      T::ParamValue val = timeInterpolation(val1,val2,recs[r].time1,recs[r].time2,forecastTime,timeInterpolationMethod);
-
-      valueVector.push_back(val);
+        valueVector[r] = timeInterpolation(valueVector[r],valueVector2[r],recs[r].time1,recs[r].time2,forecastTime,timeInterpolationMethod);
     }
 
     setHeightValueVector(qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,coordinates,valueVector,valueList);
