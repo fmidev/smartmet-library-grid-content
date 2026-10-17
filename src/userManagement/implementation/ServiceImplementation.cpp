@@ -18,6 +18,90 @@ ServiceImplementation localUserManagement;
 
 
 
+namespace
+{
+
+/*! \brief Split the line into ';'-separated fields (separators within quotes are ignored). Returns the number of fields. */
+
+uint splitFields(char *st,char **field)
+{
+  bool ind = false;
+  uint c = 1;
+  field[0] = st;
+  char *p = st;
+  while (*p != '\0'  &&  c < 100)
+  {
+    if (*p == '"')
+      ind = !ind;
+
+    if ((*p == ';'  || *p == '\n') && !ind)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Add the comma separated groups and the permissions of the known groups to the user. */
+
+void addUserGroups(UserInfo& user,const char *groupList,const GroupPermissionList& groups)
+{
+  std::vector<std::string> list;
+  splitString(groupList,',',list);
+  for (auto& it : list)
+  {
+    user.addUserGroup(it.c_str());
+
+    auto group = groups.find(it);
+    if (group != groups.end())
+    {
+      for (const auto& p : group->second)
+        user.addPermission(p.c_str());
+    }
+  }
+}
+
+
+
+
+/*! \brief Return a new user of the fields of a users file line with c (more than 3) fields. */
+
+UserInfo *newUserInfo(char **field,uint c,const GroupPermissionList& groups)
+{
+  auto *user = new UserInfo();
+
+  if (field[0][0] != '\0')
+    user->setUserId(toInt32(field[0]));
+
+  if (field[1][0] != '\0')
+    user->setUsername(field[1]);
+
+  if (field[2][0] != '\0')
+    user->setPassword(field[2]);
+
+  if (field[3][0] != '\0')
+    user->setFullName(field[3]);
+
+  if (c > 4 && field[4][0] != '\0')
+    addUserGroups(*user,field[4],groups);
+
+  return user;
+}
+
+}  // namespace
+
+
+
+
 /*! \brief Constructor. */
 
 ServiceImplementation::ServiceImplementation()
@@ -128,28 +212,8 @@ void ServiceImplementation::updateGroups()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char *field[100];
-        uint c = 1;
-        field[0] = st;
-        char *p = st;
-        while (*p != '\0'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';'  || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
 
         if (c > 1)
         {
@@ -213,63 +277,12 @@ void ServiceImplementation::updateUsers()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char *field[100];
-        uint c = 1;
-        field[0] = st;
-        char *p = st;
-        while (*p != '\0'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';'  || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
 
         if (c > 3)
         {
-          auto *user = new UserInfo();
-
-          if (field[0][0] != '\0')
-            user->setUserId(toInt32(field[0]));
-
-          if (field[1][0] != '\0')
-            user->setUsername(field[1]);
-
-          if (field[2][0] != '\0')
-            user->setPassword(field[2]);
-
-          if (field[3][0] != '\0')
-            user->setFullName(field[3]);
-
-          if (c > 4 && field[4][0] != '\0')
-          {
-            std::vector<std::string> list;
-            splitString(field[4],',',list);
-            for (auto& it : list)
-            {
-              user->addUserGroup(it.c_str());
-
-              auto group = mGroups.find(it);
-              if (group != mGroups.end())
-              {
-                for (const auto& p : group->second)
-                  user->addPermission(p.c_str());
-              }
-            }
-          }
-
-          UserInfo_sptr u(user);
+          UserInfo_sptr u(newUserInfo(field,c,mGroups));
           AutoWriteLock writeLock(&mModificationLock);
           mUsers.insert(std::pair<uint,UserInfo_sptr>(u->getUserId(),u));
           mUsernameToUserId.insert(std::pair<std::string,uint>(u->getUsername(),u->getUserId()));
