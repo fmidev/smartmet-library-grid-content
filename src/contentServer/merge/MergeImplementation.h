@@ -229,6 +229,9 @@ class MergeImplementation : public ServiceInterface
         a content update replaces it meanwhile. */
     SearchStructure_sptr activeSearchStructure() const;
     bool                 hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo);
+    void                 addMergedContent(T::ContentInfo *contentInfo);
+    void                 addEventFileAndContents(uint contentStorageIndex,T::FileId newFileId,const std::string& eventData);
+    void                 addStoredFileAndContents(uint contentStorageIndex,T::FileId newFileId,T::EventInfo& eventInfo);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

@@ -227,6 +227,9 @@ class CacheImplementation : public ServiceInterface
     SearchStructure_sptr activeSearchStructure() const;
     bool                 hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo);
     void                 getCachedContentTimeList(SearchStructure& ss,T::GenerationInfo& generationInfo,std::set<std::string>& contentTimeList);
+    void                 addCachedContent(T::ContentInfo *contentInfo);
+    void                 addEventFileAndContents(const std::string& eventData);
+    void                 addStoredFileAndContents(T::EventInfo& eventInfo);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

@@ -5977,6 +5977,166 @@ void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& deleteCoun
 
 
 
+/*! \brief Add the content (with the merged ids) into the content list, and its forecast time into the cached forecast times of its generation. */
+
+void MergeImplementation::addMergedContent(T::ContentInfo *contentInfo)
+{
+  try
+  {
+    AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
+    auto it = mContentTimeCache.find(contentInfo->mGenerationId);
+    if (it != mContentTimeCache.end())
+    {
+      //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
+        it->second.insert(contentInfo->getForecastTime());
+    }
+
+    addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file (first line) and the contents (other lines) of the FILE_ADDED event data of the content storage
+           that are not yet in the lists, with the merged ids. */
+
+void MergeImplementation::addEventFileAndContents(uint contentStorageIndex,T::FileId newFileId,const std::string& eventData)
+{
+  try
+  {
+    std::string bufStr(eventData);
+    char *s = bufStr.data();
+
+    while (s != nullptr)
+    {
+      char *p = strstr(s,"\n");
+      if (p == nullptr)
+        break;
+
+      *p = '\0';
+      if (s == bufStr.data())
+      {
+        auto *fileInfo = new T::FileInfo();
+        fileInfo->setCsv(s);
+
+        if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
+        {
+          fileInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo->mProducerId);
+          fileInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo->mGenerationId);
+          fileInfo->mFileId = getNewFileId(contentStorageIndex,fileInfo->mFileId);
+          fileInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo->mSourceId);
+          fileInfo->mStorageId = contentStorageIndex;
+          mFileInfoList.addFileInfo(fileInfo);
+        }
+        else
+        {
+          delete fileInfo;
+        }
+      }
+      else
+      {
+        auto *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(s);
+
+        T::FileId newContentFileId = getNewFileId(contentStorageIndex,contentInfo->mFileId);
+        T::GenerationId newGenerationId = getNewGenerationId(contentStorageIndex,contentInfo->mGenerationId);
+        T::SourceId newSourceId = getNewSourceId(contentStorageIndex,contentInfo->mSourceId);
+
+        if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(newContentFileId,contentInfo->mMessageIndex) == nullptr)
+        {
+          contentInfo->mProducerId = getNewProducerId(contentStorageIndex,contentInfo->mProducerId);
+          contentInfo->mGenerationId = newGenerationId;
+          contentInfo->mFileId = newContentFileId;
+          contentInfo->mSourceId = newSourceId;
+          contentInfo->mStorageId = contentStorageIndex;
+
+          addMergedContent(contentInfo);
+        }
+        else
+        {
+          delete contentInfo;
+        }
+      }
+      s = p + 1;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file of the FILE_ADDED event and its contents (if the event says it has some) from the content storage, with the merged ids. */
+
+void MergeImplementation::addStoredFileAndContents(uint contentStorageIndex,T::FileId newFileId,T::EventInfo& eventInfo)
+{
+  try
+  {
+    T::FileInfo fileInfo;
+
+    if (mContentSources[contentStorageIndex].mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) != Result::OK)
+      return;
+
+    T::FileInfo *fInfo = fileInfo.duplicate();
+    fInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
+    fInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
+    fInfo->mFileId = newFileId;
+    fInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
+    fInfo->mStorageId = contentStorageIndex;
+    mFileInfoList.addFileInfo(fInfo);
+
+    if (eventInfo.mId3 == 0)
+      return;
+
+    T::ContentInfoList contentInfoList;
+    if (mContentSources[contentStorageIndex].mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) != Result::OK)
+      return;
+
+    uint len = contentInfoList.getLength();
+    for (uint c=0; c<len; c++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+      if (info != nullptr &&  (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)))
+      {
+        if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+        {
+          // We should remove the old content before the addition
+        }
+        else
+        {
+          T::ContentInfo *cInfo = info->duplicate();
+          cInfo->mFileId = newFileId;
+          cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
+          cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
+          cInfo->mSourceId = fInfo->mSourceId;
+          cInfo->mStorageId = contentStorageIndex;
+
+          addMergedContent(cInfo);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: handle a file-added event from an upstream content storage. */
 
 void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
@@ -5990,131 +6150,9 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
     uint len = eventInfo.mEventData.length();
 
     if (len > 0)
-    {
-      std::string bufStr(eventInfo.mEventData);
-      char *s = bufStr.data();
-
-      while (s != nullptr)
-      {
-        char *p = strstr(s,"\n");
-        if (p != nullptr)
-        {
-          *p = '\0';
-          if (s == bufStr.data())
-          {
-            auto *fileInfo = new T::FileInfo();
-            fileInfo->setCsv(s);
-
-            if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
-            {
-              fileInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo->mProducerId);
-              fileInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo->mGenerationId);
-              fileInfo->mFileId = getNewFileId(contentStorageIndex,fileInfo->mFileId);
-              fileInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo->mSourceId);
-              fileInfo->mStorageId = contentStorageIndex;
-              mFileInfoList.addFileInfo(fileInfo);
-            }
-            else
-            {
-              delete fileInfo;
-            }
-          }
-          else
-          {
-            auto *contentInfo = new T::ContentInfo();
-            contentInfo->setCsv(s);
-
-            T::FileId newFileId = getNewFileId(contentStorageIndex,contentInfo->mFileId);
-            T::GenerationId newGenerationId = getNewGenerationId(contentStorageIndex,contentInfo->mGenerationId);
-            T::SourceId newSourceId = getNewSourceId(contentStorageIndex,contentInfo->mSourceId);
-
-            if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,contentInfo->mMessageIndex) == nullptr)
-            {
-              AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-              auto it = mContentTimeCache.find(newGenerationId);
-              if (it != mContentTimeCache.end())
-              {
-                //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
-                  it->second.insert(contentInfo->getForecastTime());
-              }
-
-              contentInfo->mProducerId = getNewProducerId(contentStorageIndex,contentInfo->mProducerId);
-              contentInfo->mGenerationId = newGenerationId;
-              contentInfo->mFileId = newFileId;
-              contentInfo->mSourceId = newSourceId;
-              contentInfo->mStorageId = contentStorageIndex;
-
-              addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
-            }
-            else
-            {
-              delete contentInfo;
-            }
-          }
-          s = p + 1;
-        }
-        else
-        {
-          s = nullptr;
-        }
-      }
-    }
+      addEventFileAndContents(contentStorageIndex,newFileId,eventInfo.mEventData);
     else
-    {
-      T::FileInfo fileInfo;
-
-      if (mContentSources[contentStorageIndex].mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
-      {
-        T::FileInfo *fInfo = fileInfo.duplicate();
-        fInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
-        fInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
-        fInfo->mFileId = newFileId;
-        fInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
-        fInfo->mStorageId = contentStorageIndex;
-        mFileInfoList.addFileInfo(fInfo);
-
-        if (eventInfo.mId3 > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          if (mContentSources[contentStorageIndex].mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
-          {
-            uint len = contentInfoList.getLength();
-            for (uint c=0; c<len; c++)
-            {
-              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-              T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-              if (info != nullptr &&  (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)))
-              {
-                if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-                {
-                  // We should remove the old content before the addition
-                }
-                else
-                {
-                  T::ContentInfo *cInfo = info->duplicate();
-                  cInfo->mFileId = newFileId;
-                  cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
-                  cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
-                  cInfo->mSourceId = fInfo->mSourceId;
-                  cInfo->mStorageId = contentStorageIndex;
-
-                  AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
-                  if (it != mContentTimeCache.end())
-                  {
-                    //if (it->second.find(cInfo->mForecastTime) == it->second.end())
-                      it->second.insert(cInfo->getForecastTime());
-                  }
-
-                  addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
-                }
-              }
-            }
-          }
-
-        }
-      }
-    }
+      addStoredFileAndContents(contentStorageIndex,newFileId,eventInfo);
 
     addEvent(eventInfo.mType,newFileId,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
   }
