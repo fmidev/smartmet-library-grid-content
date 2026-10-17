@@ -1076,51 +1076,49 @@ int PostgresqlImplementation::_getProducerParameterList(T::SessionId sessionId,T
         }
       }
 
-      if (producerInfo != nullptr  &&  producerInfo->mProducerId == contentInfo->mProducerId)
+      if (producerInfo == nullptr  ||  producerInfo->mProducerId != contentInfo->mProducerId)
+        continue;
+
+      sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
+      targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
+
+      if (sourceParamKey.empty()  ||  targetParamKey.empty())
+        continue;
+
+      std::size_t seed = 0;
+      Fmi::hash_merge(seed,producerInfo->mName);
+      Fmi::hash_merge(seed,sourceParamKey);
+      Fmi::hash_merge(seed,targetParameterKeyType);
+      Fmi::hash_merge(seed,targetParamKey);
+      Fmi::hash_merge(seed,contentInfo->mGeometryId);
+      Fmi::hash_merge(seed,paramLevelId);
+      Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+      Fmi::hash_merge(seed,contentInfo->mForecastType);
+      Fmi::hash_merge(seed,contentInfo->mForecastNumber);
+
+
+      if (tmpList.find(seed) == tmpList.end())
       {
-        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
+        tmpList.insert(seed);
 
+        std::string tmp = fmt::format("{};{};{};{};{};;{};{:05d};{};{}",
+              producerInfo->mName,
+              sourceParamKey,
+              static_cast<int>(targetParameterKeyType),
+              targetParamKey,
+              static_cast<int>(contentInfo->mGeometryId),
+              //paramLevelIdType,
+              static_cast<int>(paramLevelId),
+              static_cast<int>(contentInfo->mParameterLevel),
+              static_cast<int>(contentInfo->mForecastType),
+              static_cast<int>(contentInfo->mForecastNumber));
 
-        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
+        if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
+          tmp += ";1";
+        else
+          tmp += ";0";
 
-        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
-        {
-          std::size_t seed = 0;
-          Fmi::hash_merge(seed,producerInfo->mName);
-          Fmi::hash_merge(seed,sourceParamKey);
-          Fmi::hash_merge(seed,targetParameterKeyType);
-          Fmi::hash_merge(seed,targetParamKey);
-          Fmi::hash_merge(seed,contentInfo->mGeometryId);
-          Fmi::hash_merge(seed,paramLevelId);
-          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
-          Fmi::hash_merge(seed,contentInfo->mForecastType);
-          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
-
-
-          if (tmpList.find(seed) == tmpList.end())
-          {
-            tmpList.insert(seed);
-
-            std::string tmp = fmt::format("{};{};{};{};{};;{};{:05d};{};{}",
-                  producerInfo->mName,
-                  sourceParamKey,
-                  static_cast<int>(targetParameterKeyType),
-                  targetParamKey,
-                  static_cast<int>(contentInfo->mGeometryId),
-                  //paramLevelIdType,
-                  static_cast<int>(paramLevelId),
-                  static_cast<int>(contentInfo->mParameterLevel),
-                  static_cast<int>(contentInfo->mForecastType),
-                  static_cast<int>(contentInfo->mForecastNumber));
-
-            if ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0)
-              tmp += ";1";
-            else
-              tmp += ";0";
-
-            list.insert(tmp);
-          }
-        }
+        list.insert(tmp);
       }
     }
 

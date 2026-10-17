@@ -56,6 +56,27 @@ void reportMissingGeneration(const char *eventName,T::GenerationId generationId,
   exception.addParameter("ServiceResult",getResultString(result));
   exception.printError();
 }
+
+
+
+/*! \brief Return the producer parameter line "producer;sourceKey;targetKeyType;targetKey;geometry;;levelId;level;forecastType;forecastNumber;preload". */
+
+std::string getProducerParameterLine(const std::string& producerName,const std::string& sourceParamKey,T::ParamKeyType targetParameterKeyType,const std::string& targetParamKey,const T::ContentInfo& contentInfo)
+{
+  T::ParamLevelId paramLevelId = contentInfo.mFmiParameterLevelId;
+  char levelBuf[10];
+  snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo.mParameterLevel);
+  return producerName + ";" +
+         sourceParamKey + ";" +
+         std::to_string(targetParameterKeyType) + ";" +
+         targetParamKey + ";" +
+         std::to_string(contentInfo.mGeometryId) + ";;" +
+         std::to_string(paramLevelId) + ";" +
+         levelBuf + ";" +
+         std::to_string(contentInfo.mForecastType) + ";" +
+         std::to_string(contentInfo.mForecastNumber) + ";" +
+         ((contentInfo.mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+}
 }  // namespace
 
 
@@ -1165,56 +1186,34 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = ssp->mContentInfoList[0].getContentInfoByIndex(t);
-      if (contentInfo != nullptr)
-      {
-        std::string sourceParamKey;
-        std::string targetParamKey;
-        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+      if (contentInfo == nullptr)
+        continue;
 
-        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
+      std::string sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
+      std::string targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
 
+      if (sourceParamKey.empty()  ||  targetParamKey.empty())
+        continue;
 
-        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
+      std::size_t seed = 0;
+      Fmi::hash_merge(seed,contentInfo->mProducerId);
+      Fmi::hash_merge(seed,sourceParamKey);
+      Fmi::hash_merge(seed,targetParameterKeyType);
+      Fmi::hash_merge(seed,targetParamKey);
+      Fmi::hash_merge(seed,contentInfo->mGeometryId);
+      Fmi::hash_merge(seed,contentInfo->mFmiParameterLevelId);
+      Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+      Fmi::hash_merge(seed,contentInfo->mForecastType);
+      Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
-        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
-        {
-          std::size_t seed = 0;
-          Fmi::hash_merge(seed,contentInfo->mProducerId);
-          Fmi::hash_merge(seed,sourceParamKey);
-          Fmi::hash_merge(seed,targetParameterKeyType);
-          Fmi::hash_merge(seed,targetParamKey);
-          Fmi::hash_merge(seed,contentInfo->mGeometryId);
-          Fmi::hash_merge(seed,paramLevelId);
-          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
-          Fmi::hash_merge(seed,contentInfo->mForecastType);
-          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
+      if (tmpList.find(seed) != tmpList.end())
+        continue;
 
+      tmpList.insert(seed);
 
-          if (tmpList.find(seed) == tmpList.end())
-          {
-            tmpList.insert(seed);
-
-            auto it = producers.find(contentInfo->mProducerId);
-            if (it != producers.end())
-            {
-              char levelBuf[10];
-              snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
-              std::string tmp =
-                    it->second->mName + ";" +
-                    sourceParamKey + ";" +
-                    std::to_string(targetParameterKeyType) + ";" +
-                    targetParamKey + ";" +
-                    std::to_string(contentInfo->mGeometryId) + ";;" +
-                    std::to_string(paramLevelId) + ";" +
-                    levelBuf + ";" +
-                    std::to_string(contentInfo->mForecastType) + ";" +
-                    std::to_string(contentInfo->mForecastNumber) + ";" +
-                    ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
-              list.insert(tmp);
-            }
-          }
-        }
-      }
+      auto it = producers.find(contentInfo->mProducerId);
+      if (it != producers.end())
+        list.insert(getProducerParameterLine(it->second->mName,sourceParamKey,targetParameterKeyType,targetParamKey,*contentInfo));
     }
 
     return Result::OK;
