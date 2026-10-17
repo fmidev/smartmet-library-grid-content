@@ -781,7 +781,7 @@ uint getGribVersion(const std::map<uint,Int64 >& oldProperties)
 
   if (version == 0)
   {
-    const int id = GRIB1::Property::IndicatorSection::EditionNumber;
+    const int id = GRIB2::Property::IndicatorSection::EditionNumber;
     auto v2 = oldProperties.find(id);
     if (v2 != oldProperties.end())
       version = 2;
