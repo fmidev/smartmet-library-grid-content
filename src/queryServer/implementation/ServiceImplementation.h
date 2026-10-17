@@ -350,6 +350,7 @@ class ServiceImplementation : public ServiceInterface
      void           checkContentServerRestart();
      void           checkThreadCacheState();
      void           printContentList(T::ContentInfoList& contentList);
+     bool           getContentLevels(const T::ProducerInfo& producerInfo,T::GenerationId generationId,T::GeometryId producerGeometryId,const ParameterMapping& pInfo,T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& parameterLevels);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);

@@ -120,6 +120,24 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Append the values of the grid value list (missing values for missing records). */
+
+template <class V>
+void appendGridValues(T::GridValueList& valList,V& valueVector)
+{
+  uint len = valList.getLength();
+  for (uint t=0; t<len; t++)
+  {
+    T::GridValue *rec = valList.getGridValuePtrByIndex(t);
+    if (rec)
+      valueVector.push_back(rec->mValue);
+    else
+      valueVector.push_back(ParamValueMissing);
+  }
+}
+
+
+
 /*! \brief Call the data server service of the location type: by geometry, by grid (with the grid width and height,
            or no call if they are missing) or by the grid of the content. Returns the result of the call (0 without a call). */
 
@@ -315,6 +333,20 @@ void setValueListContentInfo(ParameterValues& valueList,const ParameterMapping& 
   valueList.mForecastNumber = contentInfo1.mForecastNumber;
   valueList.mParameterLevel = contentInfo1.mParameterLevel;
   valueList.mParameterLevelId = contentInfo1.mFmiParameterLevelId;
+}
+
+
+
+/*! \brief Set the content information of the value list of the level (if there is a content). */
+
+void setLevelValueListContentInfo(ParameterValues& valueList,const ParameterMapping& pInfo,T::ParamLevelId paramLevelId,time_t forecastTime,const std::string& analysisTime,UInt64 generationFlags,T::ParamLevel parameterLevel,const T::ContentInfo *contentInfo1)
+{
+  if (contentInfo1 == nullptr)
+    return;
+
+  setValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,*contentInfo1);
+  valueList.mGenerationFlags = generationFlags;
+  valueList.mParameterLevel = parameterLevel;
 }
 
 
@@ -8921,6 +8953,36 @@ bool ServiceImplementation::getIsobandValues(
 
 
 
+/*! \brief Query Server: Add the levels of the parameter contents of the generation and geometry. Returns false on a content server error. */
+
+bool ServiceImplementation::getContentLevels(const T::ProducerInfo& producerInfo,T::GenerationId generationId,T::GeometryId producerGeometryId,const ParameterMapping& pInfo,T::ParamLevelId paramLevelId,std::vector<T::ParamLevel>& parameterLevels)
+{
+  try
+  {
+    std::set<T::ParamLevel> levels;
+    if (mContentServerPtr->getContentLevelListByParameterGenerationGeometryAndLevelId(producerInfo.mProducerId,generationId,producerGeometryId,pInfo.mParameterKey,paramLevelId,levels) != 0)
+    {
+      return false; // Error
+    }
+
+    for (int level : levels)
+    {
+      parameterLevels.push_back(level);
+      std::cout << "LEVEL " << level << "\n";
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get vertical value vectors. */
 
 bool ServiceImplementation::getVerticalValueVectors(
@@ -8954,20 +9016,8 @@ bool ServiceImplementation::getVerticalValueVectors(
     bool conversionByFunction = getValueConversion(pInfo,function,functionParams,modificationOperation,modificationParameters);
 
 
-    if (parameterLevels.empty())
-    {
-      std::set<T::ParamLevel> levels;
-      if (mContentServerPtr->getContentLevelListByParameterGenerationGeometryAndLevelId(producerInfo.mProducerId,generationId,producerGeometryId,pInfo.mParameterKey,paramLevelId,levels) != 0)
-      {
-        return false; // Error
-      }
-
-      for (int level : levels)
-      {
-        parameterLevels.push_back(level);
-        std::cout << "LEVEL " << level << "\n";
-      }
-    }
+    if (parameterLevels.empty()  &&  !getContentLevels(producerInfo,generationId,producerGeometryId,pInfo,paramLevelId,parameterLevels))
+      return false; // Error
 
     if (parameterLevels.empty())
     {
@@ -8986,12 +9036,7 @@ bool ServiceImplementation::getVerticalValueVectors(
       //if (fTime == 0)
       //  return false;
 
-      if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-      {
-        std::stringstream stream;
-        contentList->print(stream, 0, 4);
-        PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-      }
+      printContentList(*contentList);
 
       uint contentLen = contentList->getLength();
       //if (contentLen == 0)
@@ -9000,100 +9045,57 @@ bool ServiceImplementation::getVerticalValueVectors(
       T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
       T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
 
-      if (contentLen > 0)
+      setLevelValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,generationFlags,parameterLevel,contentInfo1);
+
+      if (contentLen == 1  &&  contentInfo1->mForecastTimeUTC != fTime)
       {
-        valueList.mParameterKeyType = pInfo.mParameterKeyType;
-        valueList.mParameterKey = pInfo.mParameterKey;
-        valueList.mParameterLevelId = paramLevelId;
-        valueList.mForecastTimeUTC = forecastTime;
-        valueList.mProducerId = contentInfo1->mProducerId;
-        valueList.mGenerationId = contentInfo1->mGenerationId;
-        valueList.mGenerationFlags = generationFlags;
-        valueList.mGeometryId = contentInfo1->mGeometryId;
-        valueList.mFileId[0] = contentInfo1->mFileId;
-        valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-        valueList.mModificationTime = contentInfo1->mModificationTime;
-        valueList.mAnalysisTime = analysisTime;
-        valueList.mForecastType = contentInfo1->mForecastType;
-        valueList.mForecastNumber = contentInfo1->mForecastNumber;
-        valueList.mParameterLevel = parameterLevel;
-        valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
+        // There is one content record in place, but its time does not match to
+        // the requested forecast time. This is used for indicating that there
+        // are content records available, but not for the requested time.
+        // So, we should use this producer.
+
+        setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
+        return false;
       }
 
       if (contentLen == 1)
       {
-        if (contentInfo1->mForecastTimeUTC == fTime)
-        {
-          // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
+        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
-          valueList.mFlags = ParameterValues::Flags::DataAvailable;
+        valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
-          T::GridValueList valList;
-          if (!fetchValues(qParam,[&]() { return mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList); },"getGridValueListByPointList",{contentInfo1},true,conversionByFunction,function,functionParams,forecastTime,valList))
-            return false;
-
-          uint len = valList.getLength();
-          for (uint t=0; t<len; t++)
-          {
-            T::GridValue *rec = valList.getGridValuePtrByIndex(t);
-            if (rec)
-            {
-              valueList.mValueVector.push_back(rec->mValue);
-            }
-            else
-            {
-              valueList.mValueVector.push_back(ParamValueMissing);
-            }
-          }
-
-          setDefaultPrecision(qParam,pInfo);
-
-          //return true;
-        }
-        else
-        {
-          // There is one content record in place, but its time does not match to
-          // the requested forecast time. This is used for indicating that there
-          // are content records available, but not for the requested time.
-          // So, we should use this producer.
-
-          setProducerWithoutValues(producerInfo,pInfo,forecastTime,newProducerId,valueList);
+        T::GridValueList valList;
+        if (!fetchValues(qParam,[&]() { return mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList); },"getGridValueListByPointList",{contentInfo1},true,conversionByFunction,function,functionParams,forecastTime,valList))
           return false;
-        }
+
+        appendGridValues(valList,valueList.mValueVector);
+
+        setDefaultPrecision(qParam,pInfo);
+
+        //return true;
       }
 
 
       //short levelInterpolationMethod = getLevelInterpolationMethod(paramLevelId,qParam.mLevelInterpolationMethod,qParam.mFlags);
 
-      if (contentLen == 2)
+      if (contentLen == 2  &&  contentInfo1->mParameterLevel == parameterLevel  &&  contentInfo2->mParameterLevel == parameterLevel  &&
+          isTimeInterpolationPair(*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod))
       {
-        if (contentInfo1->mParameterLevel == parameterLevel  &&  contentInfo2->mParameterLevel == parameterLevel  &&
-            contentInfo1->mForecastTimeUTC < fTime  &&  contentInfo2->mForecastTimeUTC > fTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
-        {
-          // Content records have different times, but the same levels, so we need to do time interpolation.
+        // Content records have different times, but the same levels, so we need to do time interpolation.
 
-          valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
-          valueList.mFileId[1] = contentInfo2->mFileId;
-          valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
+        valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByTimeInterpolation;
+        valueList.mFileId[1] = contentInfo2->mFileId;
+        valueList.mMessageIndex[1] = contentInfo2->mMessageIndex;
 
-          T::GridValueList valList;
-          if (!fetchValues(qParam,[&]() { return mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList); },"getGridValueListByTimeAndPointList",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valList))
-            return false;
+        T::GridValueList valList;
+        if (!fetchValues(qParam,[&]() { return mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList); },"getGridValueListByTimeAndPointList",{contentInfo1,contentInfo2},true,conversionByFunction,function,functionParams,forecastTime,valList))
+          return false;
 
-          uint len = valList.getLength();
-          for (uint t=0; t<len; t++)
-          {
-            T::GridValue *rec = valList.getGridValuePtrByIndex(t);
-            if (rec)
-              valueList.mValueVector.push_back(rec->mValue);
-            else
-              valueList.mValueVector.push_back(ParamValueMissing);
-          }
+        appendGridValues(valList,valueList.mValueVector);
 
-          setDefaultPrecision(qParam,pInfo);
+        setDefaultPrecision(qParam,pInfo);
 
-          //return true;
-        }
+        //return true;
       }
     }
     return !valueList.mValueVector.empty();
