@@ -6109,7 +6109,7 @@ void MergeImplementation::addStoredFileAndContents(uint contentStorageIndex,T::F
       if (info == nullptr)
         continue;
 
-      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
+      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex);
       if (oInfo == nullptr  ||  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
       {
         if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
