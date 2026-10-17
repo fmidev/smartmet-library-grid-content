@@ -349,6 +349,11 @@ class ServiceImplementation : public ServiceInterface
      bool           updateQueryParameter(Query& query,QueryParameter& qParam,std::vector<QueryParameter>& additionalParameterList);
      void           checkContentServerRestart();
      void           checkThreadCacheState();
+     void           printContentList(T::ContentInfoList& contentList);
+     bool           getModificationOperation(const std::string& function,const std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
+     bool           getPointValueVector(const T::ContentInfo& contentInfo,uchar coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector);
+     void           addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
+     void           addInterpolatedSpecialValue(const double_vec& valueVector1,const double_vec& valueVector2,const T::ContentInfo& contentInfo1,const T::ContentInfo& contentInfo2,time_t fTime,short timeInterpolationMethod,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
      ContentCacheEntry_sptr findContentCacheEntry(std::size_t& hash,std::size_t hash3,bool& newEntry);
      void           updateContentCacheEntry(ContentCacheEntry& entry,bool newEntry,T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t hash3);
      void           searchContentList(T::ContentInfoList& contentList,T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,uint fmiId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& cList);

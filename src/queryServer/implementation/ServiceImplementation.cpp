@@ -120,6 +120,57 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Use the default precision of the parameter mapping if the query parameter has no precision. */
+
+void setDefaultPrecision(QueryParameter& qParam,const ParameterMapping& pInfo)
+{
+  if (qParam.mPrecision < 0)
+    qParam.mPrecision = pInfo.mDefaultPrecision;
+}
+
+
+
+/*! \brief Throw an exception if the forecast time is not between the times of the contents. */
+
+void checkInterpolationTimes(const T::ContentInfo& contentInfo1,const T::ContentInfo& contentInfo2,time_t fTime)
+{
+  if (contentInfo1.mForecastTimeUTC >= fTime || contentInfo2.mForecastTimeUTC <= fTime)
+  {
+    Fmi::Exception exception(BCP, "Unexpected result!");
+    exception.addDetail("The given forecast time should been between the found content times.");
+    exception.addParameter("Content 1 ForecastTime", contentInfo1.getForecastTime());
+    exception.addParameter("Content 2 ForecastTime", contentInfo2.getForecastTime());
+    exception.addParameter("Request ForecastTime", utcTimeFromTimeT(fTime));
+    throw exception;
+  }
+}
+
+
+
+/*! \brief Set the content information of the value list. */
+
+void setValueListContentInfo(ParameterValues& valueList,const ParameterMapping& pInfo,T::ParamLevelId paramLevelId,time_t forecastTime,const std::string& analysisTime,const T::ContentInfo& contentInfo1)
+{
+  valueList.mParameterKeyType = pInfo.mParameterKeyType;
+  valueList.mParameterKey = pInfo.mParameterKey;
+  valueList.mParameterLevelId = paramLevelId;
+  //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
+  valueList.mForecastTimeUTC = forecastTime;
+  valueList.mProducerId = contentInfo1.mProducerId;
+  valueList.mGenerationId = contentInfo1.mGenerationId;
+  valueList.mGeometryId = contentInfo1.mGeometryId;
+  valueList.mFileId[0] = contentInfo1.mFileId;
+  valueList.mMessageIndex[0] = contentInfo1.mMessageIndex;
+  valueList.mModificationTime = contentInfo1.mModificationTime;
+  valueList.mAnalysisTime = analysisTime;
+  valueList.mForecastType = contentInfo1.mForecastType;
+  valueList.mForecastNumber = contentInfo1.mForecastNumber;
+  valueList.mParameterLevel = contentInfo1.mParameterLevel;
+  valueList.mParameterLevelId = contentInfo1.mFmiParameterLevelId;
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -4940,6 +4991,195 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
 
 
+/*! \brief Query Server: Print the content list into the debug log (if it is enabled). */
+
+void ServiceImplementation::printContentList(T::ContentInfoList& contentList)
+{
+  try
+  {
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      contentList.print(stream, 0, 4);
+      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Return true if the conversion function is a data server modification operation, and set the operation and its (non "$") parameters. */
+
+bool ServiceImplementation::getModificationOperation(const std::string& function,const std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters)
+{
+  try
+  {
+    std::string f = toUpperString(function);
+    auto p = mOperationNames.find(f);
+    if (p == mOperationNames.end())
+      return false;
+
+    modificationOperation = p->second;
+    for (const auto& functionParam : functionParams)
+    {
+      if (functionParam != "$")
+        modificationParameters.push_back(toDouble(functionParam.c_str()));
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the value vector of the content at the point from the data server. Errors are logged and return false. */
+
+bool ServiceImplementation::getPointValueVector(const T::ContentInfo& contentInfo,uchar coordinateType,double x,double y,short areaInterpolationMethod,uint modificationOperation,double_vec& modificationParameters,double_vec& valueVector)
+{
+  try
+  {
+    int result = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo.mFileId, contentInfo.mMessageIndex, coordinateType, x, y, areaInterpolationMethod,modificationOperation,modificationParameters, valueVector);
+    if (result != 0)
+    {
+      Fmi::Exception exception(BCP, "DataServer returns an error!");
+      exception.addParameter("Service", "getGridValueVectorByPoint");
+      exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+      exception.addParameter("FileId", std::to_string(contentInfo.mFileId));
+      exception.addParameter("MessageIndex", std::to_string(contentInfo.mMessageIndex));
+      std::string errorMsg = exception.getStackTrace();
+      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+      return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Add the special value of the value vector (its constants and its converted values as a ";" separated string). */
+
+void ServiceImplementation::addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList)
+{
+  try
+  {
+    uint vSize = valueVector.size();
+    PRINT_DATA(mDebugLog, "-- Value vector size %u\n",vSize);
+    if (vSize > 0)
+    {
+      // The first number indicates the number of the constant values
+      uint sLen = valueVector[0];
+
+      char tmp[1000];
+      tmp[0] = '\0';
+      char* p = tmp;
+
+      T::GridValueList list;
+      for (uint vv = sLen + 1; vv < vSize; vv++)
+      {
+        T::GridValue rec(x, y, valueVector[vv]);
+        list.addGridValue(rec);
+      }
+
+      if (conversionByFunction)
+        executeConversion(function, functionParams, forecastTime, list);
+
+      for (uint vv = 0; vv <= sLen; vv++)
+        p += sprintf(p, "%f;", valueVector[vv]);
+
+      uint len = list.getLength();
+      for (uint vv = 0; vv < len; vv++)
+      {
+        T::GridValue rec;
+        list.getGridValueByIndex(vv,rec);
+        p += sprintf(p, "%f;", rec.mValue);
+      }
+
+      T::GridValue rec(x, y, tmp);
+      valueList.mValueList.addGridValue(rec);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Add the special value time interpolated from the value vectors (the constants of the first vector and the converted interpolated values as a ";" separated string). */
+
+void ServiceImplementation::addInterpolatedSpecialValue(const double_vec& valueVector1,const double_vec& valueVector2,const T::ContentInfo& contentInfo1,const T::ContentInfo& contentInfo2,time_t fTime,short timeInterpolationMethod,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList)
+{
+  try
+  {
+    char tmp[1000];
+    tmp[0] = '\0';
+    char* p = tmp;
+
+    uint vLen1 = valueVector1.size();
+
+    // The first number indicates the number of the constant values
+    uint sLen = valueVector1[0];
+
+    T::GridValueList list1;
+    T::GridValueList list2;
+    for (uint vv = sLen + 1; vv < vLen1; vv++)
+    {
+      T::GridValue val1(x, y, valueVector1[vv]);
+      T::GridValue val2(x, y, valueVector2[vv]);
+      list1.addGridValue(val1);
+      list2.addGridValue(val2);
+    }
+
+    T::GridValueList list;
+    timeInterpolation(list1,list2,contentInfo1.mForecastTimeUTC, contentInfo2.mForecastTimeUTC,fTime,timeInterpolationMethod,list);
+
+    if (conversionByFunction)
+      executeConversion(function, functionParams, forecastTime, list);
+
+    for (uint s = 0; s <= sLen; s++)
+      p += sprintf(p, "%f;", valueVector1[s]);
+
+    uint len = list.getLength();
+    for (uint s = 0; s < len; s++)
+    {
+      T::GridValue rec;
+       list.getGridValueByIndex(s,rec);
+      p += sprintf(p, "%f;", rec.mValue);
+    }
+
+    T::GridValue rec(x, y, tmp);
+    valueList.mValueList.addGridValue(rec);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get special values. */
 
 bool ServiceImplementation::getSpecialValues(
@@ -4975,21 +5215,8 @@ bool ServiceImplementation::getSpecialValues(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -5000,12 +5227,7 @@ bool ServiceImplementation::getSpecialValues(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -5014,22 +5236,7 @@ bool ServiceImplementation::getSpecialValues(
     T::ContentInfo* contentInfo1 = contentList->getContentInfoByIndex(0);
     T::ContentInfo* contentInfo2 = contentList->getContentInfoByIndex(1);
 
-    valueList.mParameterKeyType = pInfo.mParameterKeyType;
-    valueList.mParameterKey = pInfo.mParameterKey;
-    valueList.mParameterLevelId = paramLevelId;
-    //valueList.mForecastTime = utcTimeFromTimeT(forecastTime);
-    valueList.mForecastTimeUTC = forecastTime;
-    valueList.mProducerId = contentInfo1->mProducerId;
-    valueList.mGenerationId = contentInfo1->mGenerationId;
-    valueList.mGeometryId = contentInfo1->mGeometryId;
-    valueList.mFileId[0] = contentInfo1->mFileId;
-    valueList.mMessageIndex[0] = contentInfo1->mMessageIndex;
-    valueList.mModificationTime = contentInfo1->mModificationTime;
-    valueList.mAnalysisTime = analysisTime;
-    valueList.mForecastType = contentInfo1->mForecastType;
-    valueList.mForecastNumber = contentInfo1->mForecastNumber;
-    valueList.mParameterLevel = contentInfo1->mParameterLevel;
-    valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
+    setValueListContentInfo(valueList,pInfo,paramLevelId,forecastTime,analysisTime,*contentInfo1);
 
     if (contentLen == 1)
     {
@@ -5040,60 +5247,13 @@ bool ServiceImplementation::getSpecialValues(
         valueList.mFlags = ParameterValues::Flags::DataAvailable;
 
         double_vec valueVector;
-        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
-        {
-          int result = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, areaInterpolationMethod,modificationOperation,modificationParameters, valueVector);
-          if (result != 0)
-          {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueVectorByPoint");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-            return false;
-          }
-        }
+        if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+            !getPointValueVector(*contentInfo1,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters,valueVector))
+          return false;
 
-        uint vSize = valueVector.size();
-        PRINT_DATA(mDebugLog, "-- Value vector size %u\n",vSize);
-        if (vSize > 0)
-        {
-          // The first number indicates the number of the constant values
-          uint sLen = valueVector[0];
+        addSpecialValue(valueVector,x,y,conversionByFunction,function,functionParams,forecastTime,valueList);
 
-          char tmp[1000];
-          tmp[0] = '\0';
-          char* p = tmp;
-
-          T::GridValueList list;
-          for (uint vv = sLen + 1; vv < vSize; vv++)
-          {
-            T::GridValue rec(x, y, valueVector[vv]);
-            list.addGridValue(rec);
-          }
-
-          if (conversionByFunction)
-            executeConversion(function, functionParams, forecastTime, list);
-
-          for (uint vv = 0; vv <= sLen; vv++)
-            p += sprintf(p, "%f;", valueVector[vv]);
-
-          uint len = list.getLength();
-          for (uint vv = 0; vv < len; vv++)
-          {
-            T::GridValue rec;
-            list.getGridValueByIndex(vv,rec);
-            p += sprintf(p, "%f;", rec.mValue);
-          }
-
-          T::GridValue rec(x, y, tmp);
-          valueList.mValueList.addGridValue(rec);
-        }
-
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -5113,15 +5273,7 @@ bool ServiceImplementation::getSpecialValues(
 
     if (contentLen == 2  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
     {
-      if (contentInfo1->mForecastTimeUTC >= fTime || contentInfo2->mForecastTimeUTC <= fTime)
-      {
-        Fmi::Exception exception(BCP, "Unexpected result!");
-        exception.addDetail("The given forecast time should been between the found content times.");
-        exception.addParameter("Content 1 ForecastTime", contentInfo1->getForecastTime());
-        exception.addParameter("Content 2 ForecastTime", contentInfo2->getForecastTime());
-        exception.addParameter("Request ForecastTime", utcTimeFromTimeT(fTime));
-        throw exception;
-      }
+      checkInterpolationTimes(*contentInfo1,*contentInfo2,fTime);
 
       // We did not find a grid with the exact forecast time, but we find grids that
       // are before and after the current forecast time. This means that we should do
@@ -5136,79 +5288,19 @@ bool ServiceImplementation::getSpecialValues(
       double_vec valueVector1;
       double_vec valueVector2;
 
-      if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0)
-      {
-        int result1 = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, areaInterpolationMethod,modificationOperation,modificationParameters, valueVector1);
-        if (result1 != 0)
-        {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByPoint");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-
-        int result2 = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo2->mFileId, contentInfo2->mMessageIndex, coordinateType, x, y, areaInterpolationMethod,modificationOperation,modificationParameters, valueVector2);
-        if (result2 != 0)
-        {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByPoint");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
-          exception.addParameter("FileId", std::to_string(contentInfo2->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo2->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-      }
-
-      char tmp[1000];
-      tmp[0] = '\0';
-      char* p = tmp;
+      if ((parameterFlags & QueryParameter::Flags::NoReturnValues) == 0  &&
+          (!getPointValueVector(*contentInfo1,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters,valueVector1)  ||
+           !getPointValueVector(*contentInfo2,coordinateType,x,y,areaInterpolationMethod,modificationOperation,modificationParameters,valueVector2)))
+        return false;
 
       uint vLen1 = valueVector1.size();
       uint vLen2 = valueVector2.size();
 
       if (vLen1 == vLen2 && vLen1 > 1)
       {
-        // The first number indicates the number of the constant values
-        uint sLen = valueVector1[0];
+        addInterpolatedSpecialValue(valueVector1,valueVector2,*contentInfo1,*contentInfo2,fTime,timeInterpolationMethod,x,y,conversionByFunction,function,functionParams,forecastTime,valueList);
 
-        T::GridValueList list1;
-        T::GridValueList list2;
-        for (uint vv = sLen + 1; vv < vLen1; vv++)
-        {
-          T::GridValue val1(x, y, valueVector1[vv]);
-          T::GridValue val2(x, y, valueVector2[vv]);
-          list1.addGridValue(val1);
-          list2.addGridValue(val2);
-        }
-
-        T::GridValueList list;
-        timeInterpolation(list1,list2,contentInfo1->mForecastTimeUTC, contentInfo2->mForecastTimeUTC,fTime,timeInterpolationMethod,list);
-
-        if (conversionByFunction)
-          executeConversion(function, functionParams, forecastTime, list);
-
-        for (uint s = 0; s <= sLen; s++)
-          p += sprintf(p, "%f;", valueVector1[s]);
-
-        uint len = list.getLength();
-        for (uint s = 0; s < len; s++)
-        {
-          T::GridValue rec;
-           list.getGridValueByIndex(s,rec);
-          p += sprintf(p, "%f;", rec.mValue);
-        }
-
-        T::GridValue rec(x, y, tmp);
-        valueList.mValueList.addGridValue(rec);
-
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -5333,12 +5425,7 @@ bool ServiceImplementation::getValueVectors(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -5817,12 +5904,7 @@ bool ServiceImplementation::getGridFiles(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -7735,12 +7817,7 @@ bool ServiceImplementation::getPointValues(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -8021,12 +8098,7 @@ bool ServiceImplementation::getCircleValues(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
 
@@ -8415,12 +8487,7 @@ bool ServiceImplementation::getPolygonValues(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
 
@@ -8695,12 +8762,7 @@ bool ServiceImplementation::getStreamlineValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -9049,12 +9111,7 @@ bool ServiceImplementation::getIsolineValues(
 
     PRINT_DATA(mDebugLog, "         + Found %u content records\n", contentList->getLength());
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
@@ -9413,12 +9470,7 @@ bool ServiceImplementation::getIsobandValues(
     if (fTime == 0)
       return false;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      contentList->print(stream, 0, 4);
-      PRINT_DATA(mDebugLog, "%s", stream.str().c_str());
-    }
+    printContentList(*contentList);
 
     uint contentLen = contentList->getLength();
     if (contentLen == 0)
