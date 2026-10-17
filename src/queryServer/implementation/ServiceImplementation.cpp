@@ -4065,6 +4065,40 @@ bool ServiceImplementation::conversionFunction(const std::string& conversionFunc
 
 
 
+/*! \brief Query Server: Set the "$" parameters of the conversion to the value and the "$name" parameters to the additional value of the time and coordinate. */
+
+void ServiceImplementation::setConversionParameters(const std::vector<std::string>& functionParams,T::ParamValue value,time_t forecastTime,const T::Coordinate& coordinate,std::vector<double>& parameters)
+{
+  try
+  {
+    int fps = functionParams.size();
+    for (int p = 0; p<fps; p++)
+    {
+      const char *f = functionParams[p].c_str();
+
+      if (f[0] == '$')
+      {
+        if (f[1] == '\0')
+        {
+          parameters[p] = value;
+        }
+        else
+        {
+          T::ParamValue val = getAdditionalValue(f+1,forecastTime,coordinate.x(), coordinate.y());
+          parameters[p] = val;
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 /*! \brief Query Server: Execute conversion. */
 
 void ServiceImplementation::executeConversion(const std::string& function, std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueList, T::ParamValue_vec& newValueList)
@@ -4089,41 +4123,6 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
     for (int p = 0; p<fps; p++)
       parameters.emplace_back(toDouble(functionParams[p].c_str()));
 
-    if (functionPtr)
-    {
-      for (int t=0; t<size; t++)
-      {
-        if (valueList[t] == ParamValueMissing)
-        {
-          newValueList.emplace_back(ParamValueMissing);
-        }
-        else
-        {
-          for (int p = 0; p<fps; p++)
-          {
-            const char *f = functionParams[p].c_str();
-
-            if (f[0] == '$')
-            {
-              if (f[1] == '\0')
-              {
-                parameters[p] = valueList[t];
-              }
-              else
-              {
-                T::ParamValue val = getAdditionalValue(f+1,forecastTime,coordinates[t].x(), coordinates[t].y());
-                parameters[p] = val;
-              }
-            }
-          }
-
-          T::ParamValue newValue = functionPtr->executeFunctionCall1(parameters);
-          newValueList.emplace_back(newValue);
-        }
-      }
-      return;
-    }
-
     for (int t=0; t<size; t++)
     {
       if (valueList[t] == ParamValueMissing)
@@ -4132,25 +4131,9 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
       }
       else
       {
-        for (int p = 0; p<fps; p++)
-        {
-          const char *f = functionParams[p].c_str();
+        setConversionParameters(functionParams,valueList[t],forecastTime,coordinates[t],parameters);
 
-          if (f[0] == '$')
-          {
-            if (f[1] == '\0')
-            {
-              parameters[p] = valueList[t];
-            }
-            else
-            {
-              T::ParamValue val = getAdditionalValue(f+1,forecastTime,coordinates[t].x(), coordinates[t].y());
-              parameters[p] = val;
-            }
-          }
-        }
-
-        T::ParamValue newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+        T::ParamValue newValue = (functionPtr ? functionPtr->executeFunctionCall1(parameters) : mLuaFileCollection.executeFunctionCall1(function, parameters));
         newValueList.emplace_back(newValue);
       }
     }
@@ -4214,30 +4197,6 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
     for (int p = 0; p<fps; p++)
       parameters.emplace_back(toDouble(functionParams[p].c_str()));
 
-    if (functionPtr)
-    {
-      for (int t=0; t<size; t++)
-      {
-        if (valueList[t] == ParamValueMissing)
-        {
-          newValueList.emplace_back(ParamValueMissing);
-        }
-        else
-        {
-          for (int p = 0; p<fps; p++)
-          {
-            const char *f = functionParams[p].c_str();
-            if (f[0] == '$'  &&  f[1] == '\0')
-              parameters[p] = valueList[t];
-          }
-
-          T::ParamValue newValue = functionPtr->executeFunctionCall1(parameters);
-          newValueList.emplace_back(newValue);
-        }
-      }
-      return;
-    }
-
     for (int t=0; t<size; t++)
     {
       if (valueList[t] == ParamValueMissing)
@@ -4253,7 +4212,7 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
             parameters[p] = valueList[t];
         }
 
-        T::ParamValue newValue = mLuaFileCollection.executeFunctionCall1(function, parameters);
+        T::ParamValue newValue = (functionPtr ? functionPtr->executeFunctionCall1(parameters) : mLuaFileCollection.executeFunctionCall1(function, parameters));
         newValueList.emplace_back(newValue);
       }
     }

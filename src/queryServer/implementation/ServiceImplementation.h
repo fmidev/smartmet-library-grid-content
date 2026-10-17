@@ -325,6 +325,7 @@ class ServiceImplementation : public ServiceInterface
 
      void           loadProducerFile();
      void           addProducerField(uint t,const char *field,std::string& key);
+     void           setConversionParameters(const std::vector<std::string>& functionParams,T::ParamValue value,time_t forecastTime,const T::Coordinate& coordinate,std::vector<double>& parameters);
      void           loadHeightConversionFile();
      void           loadUnitConversionFile();
 
