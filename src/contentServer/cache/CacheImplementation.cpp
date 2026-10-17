@@ -7485,8 +7485,11 @@ void CacheImplementation::addStoredFileAndContents(T::EventInfo& eventInfo)
     for (uint c=0; c<len; c++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+      if (info == nullptr)
+        continue;
+
       T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-      if (info != nullptr &&  (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)))
+      if (oInfo == nullptr  ||  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
       {
         if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
         {
