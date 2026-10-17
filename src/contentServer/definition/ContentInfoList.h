@@ -192,6 +192,8 @@ class ContentInfoList
     bool                mReleaseObjects;    //!< If true, destructor deletes the pointed-to ContentInfo objects.
     uint                mComparisonMethod;  //!< Current sort order (one of ContentInfo::ComparisonMethod constants).
 
+    void                getContentInfoListByIndexNoClear(T::FileId startIndex,int maxRecords,ContentInfoList& contentInfoList);
+
   public:
 
     int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)

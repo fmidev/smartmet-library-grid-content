@@ -810,6 +810,46 @@ void ContentInfoList::addContentInfoList(ContentInfoList& contentInfoList)
 
 
 
+namespace
+{
+
+/*! \brief Fill in the UTC forecast times missing from the contents, ignoring unparsable times. */
+
+void fillMissingForecastTimes(ContentInfoList& contentInfoList)
+{
+  uint len = contentInfoList.getLength();
+  for (uint t=0; t<len; t++)
+  {
+    ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
+    if (cInfo  && cInfo->mForecastTimeUTC == 0)
+    {
+      try
+      {
+        cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->getForecastTime());
+      }
+      catch (...)
+      {
+      }
+    }
+  }
+}
+
+
+
+
+/*! \brief Add the content to the list. Returns true when the list has reached the given length. */
+
+bool addContentUntilFull(ContentInfoList& contentInfoList,ContentInfo *info,uint max)
+{
+  addContent(contentInfoList,info);
+  return contentInfoList.getLength() >= max;
+}
+
+}  // namespace
+
+
+
+
 /*! \brief Add all entries from another ContentInfoList without acquiring the lock. */
 
 void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
@@ -820,20 +860,7 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
     uint len1 = mLength;
     uint len2 = contentInfoList.getLength();
 
-    for (uint t=0; t<len2; t++)
-    {
-      ContentInfo *cInfo = contentInfoList.getContentInfoByIndex(t);
-      if (cInfo  && cInfo->mForecastTimeUTC == 0)
-      {
-        try
-        {
-          cInfo->mForecastTimeUTC = utcTimeToTimeT(cInfo->getForecastTime());
-        }
-        catch (...)
-        {
-        }
-      }
-    }
+    fillMissingForecastTimes(contentInfoList);
 
     if (mComparisonMethod == ContentInfo::ComparisonMethod::none)
     {
@@ -877,49 +904,29 @@ void ContentInfoList::addContentInfoListNoLock(ContentInfoList& contentInfoList)
       if (b < len2)
         cInfo2 = contentInfoList.getContentInfoByIndex(b);
 
-      if (cInfo1 == nullptr  &&  cInfo2 == nullptr)
-      {
-        a++;
-        b++;
-        newArray[t] = nullptr;
-      }
-      else
-      if (cInfo1 != nullptr  &&  cInfo2 == nullptr)
-      {
-        newArray[c] = cInfo1;
-        c++;
-        a++;
-      }
-      else
-      if (cInfo1 == nullptr  &&  cInfo2 != nullptr)
+      // Take the new content when it does not sort after the current one
+      if (cInfo2 != nullptr  &&  (cInfo1 == nullptr  ||  cInfo2->compare(mComparisonMethod,cInfo1) <= 0))
       {
         if (mReleaseObjects)
           newArray[c] = cInfo2->duplicate();
         else
           newArray[c] = cInfo2;
 
-        c++;
         b++;
+        c++;
       }
       else
-      if (cInfo1 != nullptr  &&  cInfo2 != nullptr)
+      if (cInfo1 != nullptr)
       {
-        if (cInfo2->compare(mComparisonMethod,cInfo1) > 0)
-        {
-          newArray[c] = cInfo1;
-          a++;
-          c++;
-        }
-        else
-        {
-          if (mReleaseObjects)
-            newArray[c] = cInfo2->duplicate();
-          else
-            newArray[c] = cInfo2;
-
-          b++;
-          c++;
-        }
+        newArray[c] = cInfo1;
+        a++;
+        c++;
+      }
+      else
+      {
+        a++;
+        b++;
+        newArray[t] = nullptr;
       }
     }
 
@@ -2731,6 +2738,42 @@ void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex s
 
 
 
+/*! \brief Append a paginated slice of the list starting from the given index (forwards or, with a negative maxRecords, backwards). */
+
+void ContentInfoList::getContentInfoListByIndexNoClear(T::FileId startIndex,int maxRecords,ContentInfoList& contentInfoList)
+{
+  try
+  {
+    uint max = (uint)abs(maxRecords);
+    if (maxRecords >= 0)
+    {
+      for (uint t=startIndex; t<mLength; t++)
+      {
+        ContentInfo *info = mArray[t];
+        if (isLiveContent(info)  &&  addContentUntilFull(contentInfoList,info,max))
+          return;
+      }
+    }
+    else
+    {
+      for (int t=startIndex; t>=0; t--)
+      {
+        ContentInfo *info = mArray[t];
+        if (isLiveContent(info)  &&  addContentUntilFull(contentInfoList,info,max))
+          return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Append a paginated slice of the list starting from the given file id and message index. */
 
 void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
@@ -2747,34 +2790,7 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      if (maxRecords >= 0)
-      {
-        for (uint t=startFileId; t<mLength; t++)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info))
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-      else
-      {
-        for (int t=startFileId; t>=0; t--)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info))
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
+      getContentInfoListByIndexNoClear(startFileId,maxRecords,contentInfoList);
       return;
     }
 
@@ -2792,16 +2808,8 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       for (uint t=startIdx; t<mLength; t++)
       {
         ContentInfo *info = mArray[t];
-        if (isLiveContent(info))
-        {
-          if (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
+        if (isLiveContent(info)  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
+          return;
       }
     }
     else
@@ -2812,16 +2820,8 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       for (int t=startIdx; t>=0; t--)
       {
         ContentInfo *info = mArray[t];
-        if (isLiveContent(info))
-        {
-          if (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
+        if (isLiveContent(info)  &&  (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
+          return;
       }
     }
 
