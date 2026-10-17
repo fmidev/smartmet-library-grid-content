@@ -7950,9 +7950,7 @@ bool ServiceImplementation::getCircleValues(
       return true;
     }
 
-    if (contentLen == 2  &&  contentInfo1->mForecastTimeUTC == fTime  &&  contentInfo2->mForecastTimeUTC == fTime  &&
-            contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel
-            &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
+    if (contentLen == 2  &&  isLevelInterpolationPair(*contentInfo1,*contentInfo2,fTime,paramLevel,levelInterpolationMethod))
     {
       // Content records have the same time but different levels, so we need to level interpolation.
       valueList.mFlags = ParameterValues::Flags::DataAvailable | ParameterValues::Flags::DataAvailableByLevelInterpolation;
@@ -7980,34 +7978,12 @@ bool ServiceImplementation::getCircleValues(
       valueList.mMessageIndex[3] = contentInfo4->mMessageIndex;
       valueList.mParameterLevel = paramLevel;
 
-      if ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0)
-      {
-        int result = mDataServerPtr->getGridValueListByTimeLevelAndCircle(0,
+      if (!fetchValues(qParam,[&]() { return mDataServerPtr->getGridValueListByTimeLevelAndCircle(0,
             contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,
             contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,
-            fTime,paramLevel,coordinateType,x,y,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
-
-        if (result != 0)
-        {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueListByTimeLevelAndCircle");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-          exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-          exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-          exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-          exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-          exception.addParameter("MessageIndex2", std::to_string(contentInfo3->mMessageIndex));
-          exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-          exception.addParameter("MessageIndex2", std::to_string(contentInfo4->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-
-        if (conversionByFunction)
-          executeConversion(function, functionParams, forecastTime, valueList.mValueList);
-      }
+            fTime,paramLevel,coordinateType,x,y,radius,timeInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList); },
+            "getGridValueListByTimeLevelAndCircle",{contentInfo1,contentInfo2,contentInfo3,contentInfo4},true,conversionByFunction,function,functionParams,forecastTime,valueList.mValueList))
+        return false;
 
       setDefaultPrecision(qParam,pInfo);
 
