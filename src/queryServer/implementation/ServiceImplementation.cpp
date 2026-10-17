@@ -1109,12 +1109,19 @@ void addGrib2LambertConformalProperties(const GridFileArea& a,const ProjectionPa
   else
     newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
 
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(pp.lon_0*1000000)));
+  if (pp.lon_0 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(pp.lon_0*1000000)));
+
   newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )(a.xStepMetric*1000)));
   newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )(a.yStepMetric*1000)));
   //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(pp.lat_1*1000000)));
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(pp.lat_2*1000000)));
+
+  if (pp.lat_1 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(pp.lat_1*1000000)));
+
+  if (pp.lat_2 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(pp.lat_2*1000000)));
+
   //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
   //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
 
