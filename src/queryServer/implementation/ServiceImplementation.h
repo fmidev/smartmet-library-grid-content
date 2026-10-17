@@ -206,6 +206,35 @@ class GridValueRequest
 
 
 // ====================================================================================
+/*! \brief Arguments and state of the grid value request of a query parameter for a time range (see getGridValues). */
+// ====================================================================================
+class TimeRangeValueRequest
+{
+  public:
+    Query&              query;                            //!< The query.
+    QueryParameter&     qParam;                           //!< The query parameter.
+    T::ProducerId       producerId;                       //!< Requested producer (or 0).
+    const std::string&  analysisTime;                     //!< Requested analysis time (or empty).
+    UInt64              generationFlags;                  //!< Accepted generations (0 = all).
+    const std::string&  parameterKey;                     //!< Parameter key.
+    std::size_t         parameterHash;                    //!< Hash of the parameter key.
+    uint                queryFlags;                       //!< Query flags.
+    time_t              startTime;                        //!< Start time of the time range.
+    time_t              endTime;                          //!< End time of the time range.
+    std::string&        producerStr;                      //!< Producer and geometry of the values ("PRODUCER:geometry").
+    uint                valueCounter;                     //!< Number of the time steps selected so far.
+    uint                recursionCounter;                 //!< Recursion depth of the concatenated producer searches.
+    std::string         maxAnalysisTime;                  //!< Maximum analysis time (or empty).
+    uint                queryTimestepSizeInSeconds;       //!< Time step of the query.
+    uint                parameterTimestepSizeInSeconds;   //!< Time step of the aggregation of the parameter.
+    time_t              requiredAccessTime;               //!< The generation must not be deleted before this time.
+    bool                ignoreStartTimeValue;             //!< Whether the value of the start time is left out.
+    bool                timeStepIsData;                   //!< Whether the time steps are the data times.
+    bool                acceptNotReadyGenerations;        //!< Whether generations that are not ready are accepted.
+};
+
+
+// ====================================================================================
 /*! \brief Main implementation of the QueryServer ServiceInterface.
  *
  *  Combines a ContentServer and DataServer to execute named-parameter queries with
@@ -467,6 +496,15 @@ class ServiceImplementation : public ServiceInterface
      bool           getInterpolatedPointValues(GridValueRequest& r,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,uint gflags,ParameterMapping& pInfo,short areaInterpolation,T::ParamLevelId pLevelId,T::ParamLevel pLevel);
      void           getLandscapeParameterValues(GridValueRequest& r,const std::string& name,const std::string& producerName,T::GeometryId producerGeometryId,Producer_vec& pList,std::set<T::GeometryId>& gList,ParameterValues& values);
      void           setLandscapeValue(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,double x,double y);
+     void           printTimeRangeValueRequest(const TimeRangeValueRequest& r,const Producer_vec& producers,const std::set<T::GeometryId>& geometryIdList);
+     ParameterMapping_vec_sptr getTimeRangeMappings(const T::ProducerInfo& producerInfo,const std::string& parameterKey,std::size_t parameterHash,T::GeometryId producerGeometryId,const QueryParameter& qParam);
+     T::GenerationInfo* getTimeRangeContentList(const TimeRangeValueRequest& r,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,const ParameterMapping& pInfo,T::GeometryId producerGeometryId,T::ContentInfoList& contentInfoList);
+     void           collectTimeRangeContentTimes(const TimeRangeValueRequest& r,const CacheEntry& cacheEntry,uint gLen,T::GenerationInfo* generationInfo,T::ContentInfoList& contentInfoList,const T::ContentInfo& cFirst,std::map<time_t,std::string>& contentTimeList);
+     void           getTimeRangeDataTimes(const TimeRangeValueRequest& r,std::map<time_t,std::string>& contentTimeList,time_t& startTime_tt,time_t& endTime_tt);
+     time_t         fetchTimeRangeTimeValues(TimeRangeValueRequest& r,Producer_vec& producers2,std::set<T::GeometryId>& geometryIdList2,const T::ProducerInfo& producerInfo,const std::map<time_t,std::string>& contentTimeList2,const std::set<time_t>& originalTimes);
+     void           fetchTimeRangeContentValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo,std::map<time_t,std::string>& contentTimeList);
+     bool           getMappingTimeRangeValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,uint gLen,const ParameterMapping& pInfo);
+     bool           getProducerTimeRangeValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);

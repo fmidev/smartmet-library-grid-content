@@ -1329,6 +1329,220 @@ bool finishValueVectors(QueryParameter& qParam,const ParameterMapping& pInfo,T::
 
 
 
+/*! \brief Return true if the generation (of the index in the generation list) is selected by the analysis time of the
+           time range request, or (without an analysis time) by the generation flags. */
+
+bool isTimeRangeGenerationSelected(const TimeRangeValueRequest& r,const T::GenerationInfo *gInfo,const T::GenerationInfo *gNext,int g,uint gLen,UInt64 gFlags)
+{
+  if (r.analysisTime.empty())
+    return (r.generationFlags == 0 || (r.generationFlags & gFlags) != 0);
+
+  if (r.analysisTime == gInfo->mAnalysisTime)
+    return true;
+
+  if ((r.queryFlags & Query::Flags::AnalysisTimeMatchRequired) != 0)
+    return false;
+
+  if (g == 0 &&  r.analysisTime < gInfo->mAnalysisTime)
+    return true;
+
+  if (g == C_INT(gLen-1)  &&  r.analysisTime > gInfo->mAnalysisTime)
+    return true;
+
+  return (r.analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < r.analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > r.analysisTime)));
+}
+
+
+
+/*! \brief Check that the selected generation of the time range request can be used: it is not deleted soon, its
+           analysis time is not after the maximum analysis time, it is ready, and only one generation is used for the
+           latest generation. Returns the validity of the generation. */
+
+bool isTimeRangeGenerationUsable(const TimeRangeValueRequest& r,const T::GenerationInfo *gInfo,bool generationValid,uint validCount)
+{
+  if (gInfo == nullptr || (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < r.requiredAccessTime))
+    return false;
+
+  if (!r.maxAnalysisTime.empty() &&  r.maxAnalysisTime < gInfo->mAnalysisTime)
+    return false;
+
+  if (gInfo->mStatus != 1  &&  !r.acceptNotReadyGenerations)
+    return false;
+
+  if (generationValid  &&  (r.queryFlags & Query::Flags::LatestGeneration)  &&  validCount > 0)
+    return false;
+
+  return generationValid;
+}
+
+
+
+/*! \brief Add the forecast times (with the analysis time of the generation) of the contents of the generation in the
+           time range of the request. The times start over when a content extends further than the previous ones. */
+
+void addGenerationContentTimes(const TimeRangeValueRequest& r,const T::GenerationInfo& gInfo,T::ContentInfoList& contentInfoList,const T::ContentInfo& cFirst,time_t& firstTime,time_t& lastTime,std::map<time_t,std::string>& contentTimeList)
+{
+  int cLen = contentInfoList.getLength();
+  for (int t = cLen-1; t >= 0; t--)
+  {
+    T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
+    if (cInfo == nullptr  ||  cInfo->mGenerationId != gInfo.mGenerationId)
+      continue;
+
+    if (cInfo->mForecastTimeUTC < r.startTime  ||  cInfo->mForecastTimeUTC > r.endTime  ||  cInfo->mForecastType != cFirst.mForecastType  ||  cInfo->mForecastNumber != cFirst.mForecastNumber)
+      continue;
+
+    if (cInfo->mForecastTimeUTC > lastTime)
+    {
+      contentTimeList.clear();
+      lastTime = cInfo->mForecastTimeUTC;
+      firstTime = 0xFFFFFFFF;
+    }
+
+    if (cInfo->mForecastTimeUTC < firstTime)
+    {
+      contentTimeList.insert(std::pair<time_t,std::string>(cInfo->mForecastTimeUTC,gInfo.mAnalysisTime));
+      firstTime = cInfo->mForecastTimeUTC;
+    }
+  }
+}
+
+
+
+/*! \brief Add the aggregation time with the analysis time of the content time (or of the data time if there is no
+           content for the time), unless the time is already added. */
+
+void addDataAggregationTime(const std::map<time_t,std::string>& contentTimeList,std::map<time_t,std::string>& contentTimeList2,time_t nt,const std::string& dataAnalysisTime)
+{
+  if (contentTimeList2.find(nt) != contentTimeList2.end())
+    return;
+
+  // Required aggregation time might have different analysis time than the actual data time.
+
+  auto at = contentTimeList.find(nt);
+  if (at != contentTimeList.end())
+    contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
+  else
+    contentTimeList2.insert(std::pair<time_t,std::string>(nt,dataAnalysisTime));
+}
+
+
+
+/*! \brief Return the analysis time of the content time, or of the next (or the same) content time, or the given
+           analysis time if there is no such content time. */
+
+std::string getNearestAnalysisTime(const std::map<time_t,std::string>& contentTimeList,time_t t,const std::string& analysisTime)
+{
+  auto at = contentTimeList.find(t);
+  if (at != contentTimeList.end())
+    return at->second;
+
+  auto upper = contentTimeList.upper_bound(t);
+  if (upper != contentTimeList.end())
+    return upper->second;
+
+  auto lower = contentTimeList.lower_bound(t);
+  if (lower != contentTimeList.end())
+    return lower->second;
+
+  return analysisTime;
+}
+
+
+
+/*! \brief Add the aggregation time with the nearest analysis time, unless the time is already added. */
+
+void addQueryAggregationTime(const std::map<time_t,std::string>& contentTimeList,std::map<time_t,std::string>& contentTimeList2,time_t nt,const std::string& analysisTime)
+{
+  if (contentTimeList2.find(nt) == contentTimeList2.end())
+    contentTimeList2.insert(std::pair<time_t,std::string>(nt,getNearestAnalysisTime(contentTimeList,nt,analysisTime)));
+}
+
+
+
+/*! \brief Add the data times of the time range (and the aggregation times before and after them) to the selected
+           times, until the requested number of time steps is reached. */
+
+void addDataTimeSteps(TimeRangeValueRequest& r,const std::map<time_t,std::string>& contentTimeList,time_t startTime_tt,time_t endTime_tt,std::map<time_t,std::string>& contentTimeList2,std::set<time_t>& originalTimes)
+{
+  for (auto it1 = contentTimeList.begin(); it1 != contentTimeList.end(); ++it1)
+  {
+    // We should pick data times that are in the given time range.
+
+    if (it1->first < startTime_tt  ||  it1->first > endTime_tt)
+      continue;
+
+    if (r.query.mTimesteps != 0  &&  r.valueCounter >= r.query.mTimesteps)
+      continue;
+
+    // If the parameter requires aggregation then we have to pick some additional times.
+
+    for (uint tt=r.qParam.mTimestepsBefore; tt > 0; tt--)
+      addDataAggregationTime(contentTimeList,contentTimeList2,it1->first - (tt * r.parameterTimestepSizeInSeconds),it1->second);
+
+    // Adding the data time.
+
+    contentTimeList2.insert(std::pair<time_t,std::string>(it1->first,it1->second));
+    originalTimes.insert(it1->first);
+
+    // If the parameter requires aggregation then we have to pick some additional times.
+
+    for (uint tt=1; tt <= r.qParam.mTimestepsAfter; tt++)
+      addDataAggregationTime(contentTimeList,contentTimeList2,it1->first + (tt * r.parameterTimestepSizeInSeconds),it1->second);
+
+    r.valueCounter++;
+  }
+}
+
+
+
+/*! \brief Add the query time steps of the time range (and the aggregation times before and after them) to the selected
+           times with their nearest analysis times, until the requested number of time steps is reached. */
+
+void addQueryTimeSteps(TimeRangeValueRequest& r,const std::map<time_t,std::string>& contentTimeList,time_t startTime_tt,time_t endTime_tt,std::map<time_t,std::string>& contentTimeList2,std::set<time_t>& originalTimes)
+{
+  if (r.queryTimestepSizeInSeconds == 0)
+    return;
+
+  auto qst = r.query.mTimesteps;
+  if (r.query.mTimesteps == 0  && startTime_tt <= endTime_tt)
+  {
+    auto td = endTime_tt - startTime_tt;
+    qst = (td/r.queryTimestepSizeInSeconds) + 1;
+  }
+
+  if (qst <= 0  ||  qst >= 10000)
+    return;
+
+  auto stt = startTime_tt;
+  for (uint ts = 0; ts<qst; ts++)
+  {
+    if (r.query.mTimesteps != 0  &&  r.valueCounter >= r.query.mTimesteps)
+      continue;
+
+    // If the parameter requires aggregation then we have to pick some additional times.
+
+    for (uint tt=r.qParam.mTimestepsBefore; tt > 0; tt--)
+      addQueryAggregationTime(contentTimeList,contentTimeList2,stt - (tt * r.parameterTimestepSizeInSeconds),r.analysisTime);
+
+    // Adding the timestep time and its analysis time.
+
+    contentTimeList2.insert(std::pair<time_t,std::string>(stt,getNearestAnalysisTime(contentTimeList,stt,r.analysisTime)));
+
+    originalTimes.insert(stt);
+
+    // If the parameter requires aggregation then we have to pick some additional times.
+
+    for (uint tt=1; tt <= r.qParam.mTimestepsAfter; tt++)
+      addQueryAggregationTime(contentTimeList,contentTimeList2,stt + (tt * r.parameterTimestepSizeInSeconds),r.analysisTime);
+
+    stt += r.queryTimestepSizeInSeconds;
+    r.valueCounter++;
+  }
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -10504,6 +10718,475 @@ void ServiceImplementation::getGridValues(
 
 
 
+/*! \brief Query Server: Print the arguments of the time range grid value request to the debug log (if enabled). */
+
+void ServiceImplementation::printTimeRangeValueRequest(const TimeRangeValueRequest& r,const Producer_vec& producers,const std::set<T::GeometryId>& geometryIdList)
+{
+  try
+  {
+    if (mDebugLog == nullptr ||  !mDebugLog->isEnabled())
+      return;
+
+    std::string text = "\nMETHOD getGridValues()\n";
+    text += fmt::format("  - producers                      : {} items\n", producers.size());
+    for (auto it = producers.begin(); it != producers.end(); ++it)
+      text += fmt::format("    * {}:{}\n", it->first, it->second);
+    text += fmt::format("  - geometryIdList                 : {} items\n", geometryIdList.size());
+    for (int it : geometryIdList)
+      text += fmt::format("    * {}\n",it);
+    text += fmt::format("  - producerId                     : {}\n", r.producerId);
+    text += fmt::format("  - analysisTime                   : {}\n", r.analysisTime);
+    text += fmt::format("  - generationFlags                : {}\n", r.generationFlags);
+    text += fmt::format("  - parameterKey                   : {}\n", r.parameterKey);
+    text += fmt::format("  - queryFlags                     : {:04x}\n", r.queryFlags);
+    //PRINT_DATA(mDebugLog, "  - parameterFlags                 : %04x\n", parameterFlags);
+    text += fmt::format("  - startTime                      : {}\n", utcTimeFromTimeT(r.startTime));
+    text += fmt::format("  - endTime                        : {}\n", utcTimeFromTimeT(r.endTime));
+    text += fmt::format("  - valueCounter                   : {}\n", r.valueCounter);
+    text += fmt::format("  - recursionCounter               : {}\n", r.recursionCounter);
+
+    PRINT_DATA(mDebugLog, "%s", text.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the parameter mappings of the parameter for the producer and the geometry (by the level of
+           the query parameter if it is defined) for the time range request. */
+
+ParameterMapping_vec_sptr ServiceImplementation::getTimeRangeMappings(const T::ProducerInfo& producerInfo,const std::string& parameterKey,std::size_t parameterHash,T::GeometryId producerGeometryId,const QueryParameter& qParam)
+{
+  try
+  {
+    ParameterMapping_vec_sptr mappings;
+    if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
+    {
+      getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
+      if (mappings->empty())
+      {
+        // Getting a mapping by using the levelId. This probably returns all levels belonging
+        // to the current levelId. We need just one for mapping.
+        ParameterMapping_vec_sptr tmpMappings;
+        getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
+        if (!tmpMappings->empty())
+        {
+          ParameterMapping m((*tmpMappings)[0]);
+          m.mParameterLevel = qParam.mParameterLevel;
+          mappings->emplace_back(m);
+        }
+      }
+    }
+    else
+      getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
+
+    return mappings;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the contents of the parameter mapping: from the generation of the requested analysis time,
+           or from all generations of the producer. Returns the generation of the analysis time (or nullptr). */
+
+T::GenerationInfo* ServiceImplementation::getTimeRangeContentList(const TimeRangeValueRequest& r,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,const ParameterMapping& pInfo,T::GeometryId producerGeometryId,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    T::GenerationInfo* generationInfo = nullptr;
+    if (!r.analysisTime.empty())
+    {
+      generationInfo = cacheEntry.generationInfoList->getGenerationInfoByAnalysisTime(r.analysisTime);
+      if (generationInfo != nullptr)
+      {
+        int result = mContentServerPtr->getContentListByParameterAndGenerationId(0, generationInfo->mGenerationId, pInfo.mParameterKeyType, pInfo.mParameterKey,
+            pInfo.mParameterLevelId, pInfo.mParameterLevel, pInfo.mParameterLevel, r.qParam.mForecastType, r.qParam.mForecastNumber, producerGeometryId,
+            std::string("19000101T000000"), std::string("30000101T000000"), 0, contentInfoList);
+
+        if (result != 0)
+        {
+          Fmi::Exception exception(BCP, "ContentServer returns an error!");
+          exception.addParameter("Service", "getContentListByParameterAndGenerationId");
+          exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+          exception.addParameter("generationId", std::to_string(generationInfo->mGenerationId));
+          exception.addParameter("parameter", pInfo.mParameterKey);
+          exception.addParameter("levelId", std::to_string(pInfo.mParameterLevelId));
+          exception.addParameter("level", std::to_string(pInfo.mParameterLevel));
+          exception.addParameter("geometryId", std::to_string(producerGeometryId));
+          throw exception;
+        }
+      }
+    }
+
+    if (generationInfo == nullptr)
+    {
+      int result = mContentServerPtr->getContentListByParameterAndProducerId(0, producerInfo.mProducerId, pInfo.mParameterKeyType, pInfo.mParameterKey,
+          pInfo.mParameterLevelId, pInfo.mParameterLevel, pInfo.mParameterLevel, r.qParam.mForecastType, r.qParam.mForecastNumber, producerGeometryId,
+          std::string("19000101T000000"), std::string("30000101T000000"), 0, contentInfoList);
+
+      if (result != 0)
+      {
+        Fmi::Exception exception(BCP, "ContentServer returns an error!");
+        exception.addParameter("Service", "getContentListByParameterAndProducerId");
+        exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
+        exception.addParameter("producerId", std::to_string(producerInfo.mProducerId));
+        exception.addParameter("parameter", pInfo.mParameterKey);
+        exception.addParameter("levelId", std::to_string(pInfo.mParameterLevelId));
+        exception.addParameter("level", std::to_string(pInfo.mParameterLevel));
+        exception.addParameter("geometryId", std::to_string(producerGeometryId));
+        throw exception;
+      }
+    }
+    return generationInfo;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Collect the content times (with their analysis times) of the time range from the valid
+           generations, from the newest to the oldest (or from the requested generation only). */
+
+void ServiceImplementation::collectTimeRangeContentTimes(const TimeRangeValueRequest& r,const CacheEntry& cacheEntry,uint gLen,T::GenerationInfo* generationInfo,T::ContentInfoList& contentInfoList,const T::ContentInfo& cFirst,std::map<time_t,std::string>& contentTimeList)
+{
+  try
+  {
+    time_t firstTime = 0xFFFFFFFF;
+    time_t lastTime = r.startTime;
+
+    uint c = 0;
+    uint validCount = 0;
+    for (int g=gLen-1; g>=0; g--)
+    {
+      UInt64 gFlags = 1 << c;
+      c++;
+
+      bool generationValid = false;
+      T::GenerationInfo *gInfo = nullptr;
+      T::GenerationInfo *gNext = nullptr;
+
+      if (generationInfo != nullptr)
+      {
+        gInfo = generationInfo;
+        generationValid = true;
+        g = 0;
+      }
+      else
+      {
+        gInfo = cacheEntry.generationInfoList->getGenerationInfoByIndex(g);
+        gNext = cacheEntry.generationInfoList->getGenerationInfoByIndex(g+1);
+        generationValid = isTimeRangeGenerationSelected(r,gInfo,gNext,g,gLen,gFlags);
+      }
+
+      if (!isTimeRangeGenerationUsable(r,gInfo,generationValid,validCount))
+        continue;
+
+      validCount++;
+      addGenerationContentTimes(r,*gInfo,contentInfoList,cFirst,firstTime,lastTime,contentTimeList);
+
+      // The requested time interval should contain data only from the same generation.
+      if (((r.qParam.mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (r.queryFlags & Query::Flags::SameAnalysisTime) != 0)  &&  !contentTimeList.empty())
+        g = 0;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Select the start and the end time of the time range by the content times and the query flags. */
+
+void ServiceImplementation::getTimeRangeDataTimes(const TimeRangeValueRequest& r,std::map<time_t,std::string>& contentTimeList,time_t& startTime_tt,time_t& endTime_tt)
+{
+  try
+  {
+    auto dataStartTime_tt = contentTimeList.begin()->first;
+    auto dataEndTime_tt = contentTimeList.rbegin()->first;
+
+    if ((r.queryFlags & Query::Flags::StartTimeFromData) != 0)
+    {
+      startTime_tt = dataStartTime_tt;
+    }
+    else
+    {
+      // Finding first valid start time
+
+      time_t  tt = 0;
+      std::string atime;
+      for (auto tm = contentTimeList.begin(); tm != contentTimeList.end()  &&  tt == 0; ++tm)
+      {
+        if (tm->first >= r.startTime)
+        {
+          tt = tm->first;
+          atime = tm->second;
+        }
+      }
+
+      if (r.queryFlags & Query::Flags::ForceStartTime)
+      {
+        // We have to use the given starttime.
+        contentTimeList.insert(std::pair<time_t,std::string>(startTime_tt,atime));
+      }
+      else
+      {
+        if (tt > 0)
+          startTime_tt = tt;
+      }
+    }
+
+    if ((r.queryFlags & Query::Flags::EndTimeFromData) != 0)
+      endTime_tt = dataEndTime_tt;
+
+    //if (startTime_tt < dataStartTime_tt)
+    //  startTime_tt = dataStartTime_tt;
+
+    endTime_tt = std::min(endTime_tt, dataEndTime_tt);
+
+
+    PRINT_DATA(mDebugLog," -- TIME RANGE %s - %s\n",utcTimeFromTimeT(startTime_tt).c_str(),utcTimeFromTimeT(endTime_tt).c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the values of the selected times in the time range from the producer and add them to the
+           value list of the parameter. The times that are not original times are aggregation times. Returns the
+           latest time of the values (or the start time). */
+
+time_t ServiceImplementation::fetchTimeRangeTimeValues(TimeRangeValueRequest& r,Producer_vec& producers2,std::set<T::GeometryId>& geometryIdList2,const T::ProducerInfo& producerInfo,const std::map<time_t,std::string>& contentTimeList2,const std::set<time_t>& originalTimes)
+{
+  try
+  {
+    time_t a_lastTime = r.startTime;
+    for (const auto& forecastTime : contentTimeList2)
+    {
+      if (!((forecastTime.first == r.startTime && !r.ignoreStartTimeValue) || (forecastTime.first > r.startTime && forecastTime.first <= r.endTime)))
+        continue;
+
+      std::shared_ptr<ParameterValues> valList = std::make_shared<ParameterValues>();
+
+      getGridValues(r.query,r.qParam,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime.second, r.maxAnalysisTime, 0, r.parameterKey, r.parameterHash,
+          r.queryFlags, forecastTime.first, true, *valList, r.producerStr);
+
+      if (valList->mValueList.getLength() == 0 && valList->mValueData.empty() && valList->mValueVector.empty())
+        continue;
+
+      if (valList->mForecastTimeUTC == 0)
+        valList->mForecastTimeUTC = forecastTime.first;
+
+      a_lastTime = std::max(a_lastTime, valList->mForecastTimeUTC);
+
+      if (!originalTimes.empty() && originalTimes.find(valList->mForecastTimeUTC) == originalTimes.end())
+      {
+        valList->mFlags |= ParameterValues::Flags::AggregationValue;
+        r.query.mAggregationTimes.insert(valList->mForecastTimeUTC);
+
+        PRINT_DATA(mDebugLog," ##### set aggregationFlag (%zu) %s\n",originalTimes.size(),utcTimeFromTimeT(valList->mForecastTimeUTC).c_str());
+      }
+
+      r.qParam.mValueList.emplace_back(valList);
+    }
+    return a_lastTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the values of the content times of the time range from the producer, and continue from
+           the concatenated producers after the last time found. */
+
+void ServiceImplementation::fetchTimeRangeContentValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo,std::map<time_t,std::string>& contentTimeList)
+{
+  try
+  {
+    Producer_vec producers2;
+    producers2.emplace_back(producer);
+
+    std::set<T::GeometryId> geometryIdList2;
+    geometryIdList2.insert(producer.second);
+
+    std::set<time_t> originalTimes;
+    std::map<time_t,std::string> contentTimeList2;
+
+    time_t startTime_tt = r.startTime;
+    time_t endTime_tt = r.endTime;
+
+    getTimeRangeDataTimes(r,contentTimeList,startTime_tt,endTime_tt);
+
+    if (r.timeStepIsData)
+      addDataTimeSteps(r,contentTimeList,startTime_tt,endTime_tt,contentTimeList2,originalTimes);
+    else
+      addQueryTimeSteps(r,contentTimeList,startTime_tt,endTime_tt,contentTimeList2,originalTimes);
+
+
+    time_t a_lastTime = fetchTimeRangeTimeValues(r,producers2,geometryIdList2,producerInfo,contentTimeList2,originalTimes);
+
+    auto rec = mProducerConcatMap.find(r.producerStr);
+    if (rec != mProducerConcatMap.end()  &&  !rec->second.empty())
+    {
+      //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
+      std::set<T::GeometryId> tmpGeomIdList;
+
+      for (auto& gg : rec->second)
+      {
+        //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
+        tmpGeomIdList.insert(gg.second);
+      }
+
+      r.producerStr = "";
+      getGridValues(r.query,r.qParam,rec->second, tmpGeomIdList, 0, r.analysisTime, r.generationFlags, r.parameterKey, r.parameterHash,
+          r.queryFlags, a_lastTime+1,r.endTime,r.producerStr,r.valueCounter,r.recursionCounter+1);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the time range values of the parameter mapping. Returns true if content times were found
+           in the time range (the search ends then). */
+
+bool ServiceImplementation::getMappingTimeRangeValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,uint gLen,const ParameterMapping& pInfo)
+{
+  try
+  {
+    T::GeometryId producerGeometryId = producer.second;
+
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      pInfo.print(stream, 5, 0);
+      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+    }
+
+    std::map<time_t,std::string> contentTimeList;
+    T::ContentInfoList contentInfoList;
+
+    T::GenerationInfo* generationInfo = getTimeRangeContentList(r,producerInfo,cacheEntry,pInfo,producerGeometryId,contentInfoList);
+
+    int cLen = contentInfoList.getLength();
+    PRINT_DATA(mDebugLog, "         + Found %d content records\n", cLen);
+
+
+    if (cLen <= 0)
+      return false;
+
+    contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
+    T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
+
+    // The latest generation is selected by the analysis time. Limiting the generations to the
+    // one with the latest content time would reject it if an older generation extends further.
+
+    if (r.analysisTime.empty() && (r.queryFlags & Query::Flags::LatestGeneration) == 0)
+    {
+      T::GenerationInfo *lastGeneration = cacheEntry.generationInfoList->getLastGenerationInfoByContentTime(producerInfo.mProducerId);
+      if (lastGeneration)
+        r.maxAnalysisTime = lastGeneration->mAnalysisTime;
+    }
+
+    collectTimeRangeContentTimes(r,cacheEntry,gLen,generationInfo,contentInfoList,*cFirst,contentTimeList);
+
+    if (contentTimeList.empty())
+      return false;
+
+    fetchTimeRangeContentValues(r,producer,producerInfo,contentTimeList);
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the time range values of the producer and the geometry. Returns true if values were searched
+           for a time range (the search ends then). */
+
+bool ServiceImplementation::getProducerTimeRangeValues(TimeRangeValueRequest& r,const std::pair<std::string,T::GeometryId>& producer,const T::ProducerInfo& producerInfo)
+{
+  try
+  {
+    T::GeometryId producerGeometryId = producer.second;
+
+    PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
+
+    // Reading generations supported by the current producer.
+
+    auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
+    uint gLen = cacheEntry->generationInfoList->getLength();
+
+    if (gLen == 0)
+    {
+      PRINT_DATA(mDebugLog, "    - No generations found for the current producer!\n");
+      return false;
+    }
+
+    ParameterMapping_vec_sptr mappings = getTimeRangeMappings(producerInfo,r.parameterKey,r.parameterHash,producerGeometryId,r.qParam);
+
+    if (mappings->empty())
+    {
+      PRINT_DATA(mDebugLog, "    - No mappings found (%s,%s,%d,%d,%d)!\n",producerInfo.mName.c_str(),r.parameterKey.c_str(),producerGeometryId,r.qParam.mParameterLevelId,r.qParam.mParameterLevel);
+      return false;
+    }
+
+    for (auto& pInfo : *mappings)
+    {
+      if (getMappingTimeRangeValues(r,producer,producerInfo,*cacheEntry,gLen,pInfo))
+        return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get grid values. */
 
 void ServiceImplementation::getGridValues(
@@ -10529,74 +11212,24 @@ void ServiceImplementation::getGridValues(
     if (recursionCounter > 5)
       return;
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      PRINT_DATA(mDebugLog, "\nMETHOD getGridValues()\n");
-      PRINT_DATA(mDebugLog, "  - producers                      : %lu items\n", producers.size());
-      for (auto it = producers.begin(); it != producers.end(); ++it)
-        PRINT_DATA(mDebugLog, "    * %s:%d\n", it->first.c_str(), it->second);
-      PRINT_DATA(mDebugLog, "  - geometryIdList                 : %lu items\n", geometryIdList.size());
-      for (int it : geometryIdList)
-        PRINT_DATA(mDebugLog, "    * %d\n",it);
-      PRINT_DATA(mDebugLog, "  - producerId                     : %u\n", producerId);
-      PRINT_DATA(mDebugLog, "  - analysisTime                   : %s\n", analysisTime.c_str());
-      PRINT_DATA(mDebugLog, "  - generationFlags                : %lu\n", generationFlags);
-      PRINT_DATA(mDebugLog, "  - parameterKey                   : %s\n", parameterKey.c_str());
-      PRINT_DATA(mDebugLog, "  - queryFlags                     : %04x\n", queryFlags);
-      //PRINT_DATA(mDebugLog, "  - parameterFlags                 : %04x\n", parameterFlags);
-      PRINT_DATA(mDebugLog, "  - startTime                      : %s\n", utcTimeFromTimeT(startTime).c_str());
-      PRINT_DATA(mDebugLog, "  - endTime                        : %s\n", utcTimeFromTimeT(endTime).c_str());
-      PRINT_DATA(mDebugLog, "  - valueCounter                   : %u\n", valueCounter);
-      PRINT_DATA(mDebugLog, "  - recursionCounter               : %u\n", recursionCounter);
-    }
+    TimeRangeValueRequest r{query,qParam,producerId,analysisTime,generationFlags,parameterKey,parameterHash,queryFlags,startTime,endTime,producerStr,valueCounter,recursionCounter,std::string(),0,0,0,false,false,false};
 
-    if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
-    {
-      Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
-      exception.addParameter("mMaxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
-      throw exception;
-    }
+    printTimeRangeValueRequest(r,producers,geometryIdList);
 
-    if (qParam.mType != QueryParameter::Type::GridFile  &&  query.mAreaCoordinates.empty()  &&
-        query.mAttributeList.getAttributeValue("grid.geometryId") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.geometryString") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.urn") == nullptr  &&
-        query.mAttributeList.getAttributeValue("grid.crs") == nullptr)
-    {
-      Fmi::Exception exception(BCP, "No query.mAreaCoordinates defined!");
-      throw exception;
-    }
+    checkMaxProcessingTime(query,"mMaxProcessingTimeInSeconds");
 
-    if (qParam.mLocationType == QueryParameter::LocationType::Polygon)
-    {
-      for (const auto& mAreaCoordinate : query.mAreaCoordinates)
-      {
-        if (mAreaCoordinate.size() < 3)
-        {
-          Fmi::Exception exception(BCP, "Area definition requires at least 3 query.mAreaCoordinates!");
-          throw exception;
-        }
-      }
-    }
+    checkGridValueArea(query,qParam,"Area definition requires at least 3 query.mAreaCoordinates!");
 
-    std::string maxAnalysisTime;
+    r.queryTimestepSizeInSeconds = query.mTimestepSizeInMinutes*60;
+    r.parameterTimestepSizeInSeconds = qParam.mTimestepSizeInMinutes*60;
 
-    uint queryTimestepSizeInSeconds = query.mTimestepSizeInMinutes*60;
-    uint parameterTimestepSizeInSeconds = qParam.mTimestepSizeInMinutes*60;
+    r.requiredAccessTime = time(nullptr) + 120;
 
-    time_t requiredAccessTime = time(nullptr) + 120;
+    r.ignoreStartTimeValue = ((queryFlags & Query::Flags::StartTimeNotIncluded) != 0);
 
-    bool ignoreStartTimeValue = false;
-    if ((queryFlags & Query::Flags::StartTimeNotIncluded) != 0)
-      ignoreStartTimeValue = true;
+    r.timeStepIsData = ((queryFlags & Query::Flags::TimeStepIsData) != 0);
 
-    bool timeStepIsData = false;
-    if (queryFlags & Query::Flags::TimeStepIsData)
-      timeStepIsData = true;
-
-    bool acceptNotReadyGenerations = false;
-    if (query.mFlags & Query::Flags::AcceptNotReadyGenerations)
-      acceptNotReadyGenerations = true;
+    r.acceptNotReadyGenerations = ((query.mFlags & Query::Flags::AcceptNotReadyGenerations) != 0);
 
     // Going through the producer list.
 
@@ -10609,537 +11242,25 @@ void ServiceImplementation::getGridValues(
 
       // Checking if the current geometry can be found from the acceptable geometry list
 
-      if (geometryIdList.find(producerGeometryId) != geometryIdList.end())
+      if (geometryIdList.find(producerGeometryId) == geometryIdList.end())
       {
-        // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
-
-        bool producerOk = true;
-        if (producers.size() > 1 && (qParam.mLocationType == QueryParameter::LocationType::Polygon || qParam.mLocationType == QueryParameter::LocationType::Circle || qParam.mLocationType == QueryParameter::LocationType::Path))
-        {
-          // We do not accept data concatenation if the data is requested from an area and
-          // if geometries are different.
-
-          std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
-
-          auto rec = mProducerConcatMap.find(pStr);
-          if (rec != mProducerConcatMap.end()  &&  !rec->second.empty())
-          {
-            for (auto gg = rec->second.begin(); gg != rec->second.end() && producerOk; ++gg)
-            {
-              if (producerGeometryId != gg->second)
-                producerOk = false;
-            }
-          }
-        }
-
-        T::ProducerInfo producerInfo;
-        if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
-        {
-          PRINT_DATA(mDebugLog, "  - The producer and the geometry are acceptable!\n");
-
-          // Reading generations supported by the current producer.
-
-          auto cacheEntry = getGenerationInfoListByProducerId(producerInfo.mProducerId,producerInfo.mHash,true);
-          uint gLen = cacheEntry->generationInfoList->getLength();
-
-          if (gLen > 0)
-          {
-            ParameterMapping_vec_sptr mappings;
-            if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
-            {
-              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
-              if (mappings->empty())
-              {
-                // Getting a mapping by using the levelId. This probably returns all levels belonging
-                // to the current levelId. We need just one for mapping.
-                ParameterMapping_vec_sptr tmpMappings;
-                getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, -1,false, tmpMappings);
-                if (!tmpMappings->empty())
-                {
-                  ParameterMapping m((*tmpMappings)[0]);
-                  m.mParameterLevel = qParam.mParameterLevel;
-                  mappings->emplace_back(m);
-                }
-              }
-            }
-            else
-              getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, true, mappings);
-
-            if (!mappings->empty())
-            {
-              for (auto& pInfo : *mappings)
-              {
-                if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-                {
-                  std::stringstream stream;
-                  pInfo.print(stream, 5, 0);
-                  PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-                }
-
-                std::map<time_t,std::string> contentTimeList;
-                T::ContentInfoList contentInfoList;
-
-                T::GenerationInfo* generationInfo = nullptr;
-                if (!analysisTime.empty())
-                {
-                  generationInfo = cacheEntry->generationInfoList->getGenerationInfoByAnalysisTime(analysisTime);
-                  if (generationInfo != nullptr)
-                  {
-                    int result = mContentServerPtr->getContentListByParameterAndGenerationId(0, generationInfo->mGenerationId, pInfo.mParameterKeyType, pInfo.mParameterKey,
-                        pInfo.mParameterLevelId, pInfo.mParameterLevel, pInfo.mParameterLevel, qParam.mForecastType, qParam.mForecastNumber, producerGeometryId,
-                        std::string("19000101T000000"), std::string("30000101T000000"), 0, contentInfoList);
-
-                    if (result != 0)
-                    {
-                      Fmi::Exception exception(BCP, "ContentServer returns an error!");
-                      exception.addParameter("Service", "getContentListByParameterAndGenerationId");
-                      exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
-                      exception.addParameter("generationId", std::to_string(generationInfo->mGenerationId));
-                      exception.addParameter("parameter", pInfo.mParameterKey);
-                      exception.addParameter("levelId", std::to_string(pInfo.mParameterLevelId));
-                      exception.addParameter("level", std::to_string(pInfo.mParameterLevel));
-                      exception.addParameter("geometryId", std::to_string(producerGeometryId));
-                      throw exception;
-                    }
-                  }
-                }
-
-                if (generationInfo == nullptr)
-                {
-                  int result = mContentServerPtr->getContentListByParameterAndProducerId(0, producerInfo.mProducerId, pInfo.mParameterKeyType, pInfo.mParameterKey,
-                      pInfo.mParameterLevelId, pInfo.mParameterLevel, pInfo.mParameterLevel, qParam.mForecastType, qParam.mForecastNumber, producerGeometryId,
-                      std::string("19000101T000000"), std::string("30000101T000000"), 0, contentInfoList);
-
-                  if (result != 0)
-                  {
-                    Fmi::Exception exception(BCP, "ContentServer returns an error!");
-                    exception.addParameter("Service", "getContentListByParameterAndProducerId");
-                    exception.addParameter("ErrorMessage", ContentServer::getResultString(result));
-                    exception.addParameter("producerId", std::to_string(producerInfo.mProducerId));
-                    exception.addParameter("parameter", pInfo.mParameterKey);
-                    exception.addParameter("levelId", std::to_string(pInfo.mParameterLevelId));
-                    exception.addParameter("level", std::to_string(pInfo.mParameterLevel));
-                    exception.addParameter("geometryId", std::to_string(producerGeometryId));
-                    throw exception;
-                  }
-                }
-
-                int cLen = contentInfoList.getLength();
-                PRINT_DATA(mDebugLog, "         + Found %d content records\n", cLen);
-
-
-                if (cLen > 0)
-                {
-                  contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
-                  T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
-                  time_t firstTime = 0xFFFFFFFF;
-                  time_t lastTime = startTime;
-
-                  // The latest generation is selected by the analysis time. Limiting the generations to the
-                  // one with the latest content time would reject it if an older generation extends further.
-
-                  if (analysisTime.empty() && (queryFlags & Query::Flags::LatestGeneration) == 0)
-                  {
-                    T::GenerationInfo *lastGeneration = cacheEntry->generationInfoList->getLastGenerationInfoByContentTime(producerInfo.mProducerId);
-                    if (lastGeneration)
-                      maxAnalysisTime = lastGeneration->mAnalysisTime;
-                  }
-
-                  uint c = 0;
-                  uint validCount = 0;
-                  for (int g=gLen-1; g>=0; g--)
-                  {
-                    UInt64 gFlags = 1 << c;
-                    c++;
-
-                    bool generationValid = false;
-                    T::GenerationInfo *gInfo = nullptr;
-                    T::GenerationInfo *gNext = nullptr;
-
-                    if (generationInfo != nullptr)
-                    {
-                      gInfo = generationInfo;
-                      generationValid = true;
-                      g = 0;
-                    }
-                    else
-                    {
-                      gInfo = cacheEntry->generationInfoList->getGenerationInfoByIndex(g);
-                      gNext = cacheEntry->generationInfoList->getGenerationInfoByIndex(g+1);
-
-                      if (!analysisTime.empty() && generationInfo == nullptr)
-                      {
-                        if (analysisTime == gInfo->mAnalysisTime)
-                        {
-                          generationValid = true;
-                        }
-                        else
-                        if ((queryFlags & Query::Flags::AnalysisTimeMatchRequired) == 0)
-                        {
-                          if (g == 0 &&  analysisTime < gInfo->mAnalysisTime)
-                          {
-                            generationValid = true;
-                          }
-                          else
-                          if (g == C_INT(gLen-1)  &&  analysisTime > gInfo->mAnalysisTime)
-                          {
-                            generationValid = true;
-                          }
-                          else
-                          if (analysisTime == gInfo->mAnalysisTime || (gInfo->mAnalysisTime < analysisTime  &&  (gNext == nullptr  ||  gNext->mAnalysisTime > analysisTime)))
-                          {
-                            generationValid = true;
-                          }
-                        }
-                      }
-                      else
-                      {
-                        if (generationFlags == 0 || (generationFlags & gFlags) != 0)
-                        {
-                          generationValid = true;
-                        }
-                      }
-                    }
-
-                    if (gInfo == nullptr || (gInfo != nullptr &&  gInfo->mDeletionTime > 0 && gInfo->mDeletionTime < requiredAccessTime))
-                      generationValid = false;
-
-                    if (gInfo != nullptr  &&  !maxAnalysisTime.empty() &&  maxAnalysisTime < gInfo->mAnalysisTime)
-                      generationValid = false;
-
-                    if (gInfo != nullptr  &&  gInfo->mStatus != 1  &&  !acceptNotReadyGenerations)
-                      generationValid = false;
-
-                    if (generationValid  &&  (queryFlags & Query::Flags::LatestGeneration)  &&  validCount > 0)
-                      generationValid = false;
-
-                    if (generationValid)
-                    {
-                      validCount++;
-                      for (int t = cLen-1; t >= 0; t--)
-                      {
-                        T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(t);
-                        if (cInfo != nullptr &&  cInfo->mGenerationId == gInfo->mGenerationId)
-                        {
-                          if (cInfo->mForecastTimeUTC >= startTime  &&  cInfo->mForecastTimeUTC <= endTime  &&  cInfo->mForecastType == cFirst->mForecastType  &&  cInfo->mForecastNumber == cFirst->mForecastNumber)
-                          {
-                            if (cInfo->mForecastTimeUTC > lastTime)
-                            {
-                              contentTimeList.clear();
-                              lastTime = cInfo->mForecastTimeUTC;
-                              firstTime = 0xFFFFFFFF;
-                            }
-
-                            if (cInfo->mForecastTimeUTC < firstTime)
-                            {
-                              contentTimeList.insert(std::pair<time_t,std::string>(cInfo->mForecastTimeUTC,gInfo->mAnalysisTime));
-                              firstTime = cInfo->mForecastTimeUTC;
-                            }
-                          }
-                        }
-                      }
-
-                      if ((qParam.mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (queryFlags & Query::Flags::SameAnalysisTime) != 0)
-                      {
-                        // The requested time interval should contain data only from the same generation.
-                        if (!contentTimeList.empty())
-                          g = 0;
-                      }
-                    }
-                  }
-
-                  if (!contentTimeList.empty())
-                  {
-                    Producer_vec producers2;
-                    producers2.emplace_back(*it);
-
-                    std::set<T::GeometryId> geometryIdList2;
-                    geometryIdList2.insert(producerGeometryId);
-
-                    std::set<time_t> originalTimes;
-                    std::map<time_t,std::string> contentTimeList2;
-
-                    time_t startTime_tt = startTime;
-                    time_t endTime_tt = endTime;
-
-                    auto dataStartTime_tt = contentTimeList.begin()->first;
-                    auto dataEndTime_tt = contentTimeList.rbegin()->first;
-
-                    if ((queryFlags & Query::Flags::StartTimeFromData) != 0)
-                    {
-                      startTime_tt = dataStartTime_tt;
-                    }
-                    else
-                    {
-                      // Finding first valid start time
-
-                      time_t  tt = 0;
-                      std::string atime;
-                      for (auto tm = contentTimeList.begin(); tm != contentTimeList.end()  &&  tt == 0; ++tm)
-                      {
-                        if (tm->first >= startTime)
-                        {
-                          tt = tm->first;
-                          atime = tm->second;
-                        }
-                      }
-
-                      if (queryFlags & Query::Flags::ForceStartTime)
-                      {
-                        // We have to use the given starttime.
-                        contentTimeList.insert(std::pair<time_t,std::string>(startTime_tt,atime));
-                      }
-                      else
-                      {
-                        if (tt > 0)
-                          startTime_tt = tt;
-                      }
-                    }
-
-                    if ((queryFlags & Query::Flags::EndTimeFromData) != 0)
-                      endTime_tt = dataEndTime_tt;
-
-                    //if (startTime_tt < dataStartTime_tt)
-                    //  startTime_tt = dataStartTime_tt;
-
-                    endTime_tt = std::min(endTime_tt, dataEndTime_tt);
-
-
-                    PRINT_DATA(mDebugLog," -- TIME RANGE %s - %s\n",utcTimeFromTimeT(startTime_tt).c_str(),utcTimeFromTimeT(endTime_tt).c_str());
-
-                    if (timeStepIsData)
-                    {
-                      for (auto it1 = contentTimeList.begin(); it1 != contentTimeList.end(); ++it1)
-                      {
-                        // We should pick data times that are in the given time range.
-
-                        if (it1->first >= startTime_tt  &&  it1->first <= endTime_tt)
-                        {
-                          if (query.mTimesteps == 0 ||  valueCounter < query.mTimesteps)
-                          {
-                            // If the parameter requires aggregation then we have to pick some additional times.
-
-                            for (uint tt=qParam.mTimestepsBefore; tt > 0; tt--)
-                            {
-                              time_t nt = it1->first - (tt * parameterTimestepSizeInSeconds);
-                              if (contentTimeList2.find(nt) == contentTimeList2.end())
-                              {
-                                // Required aggregation time might have different analysis time than the actual data time.
-
-                                auto at = contentTimeList.find(nt);
-                                if (at != contentTimeList.end())
-                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
-                                else
-                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,it1->second));
-                              }
-                            }
-
-                            // Adding the data time.
-
-                            contentTimeList2.insert(std::pair<time_t,std::string>(it1->first,it1->second));
-                            originalTimes.insert(it1->first);
-
-                            // If the parameter requires aggregation then we have to pick some additional times.
-
-                            for (uint tt=1; tt <= qParam.mTimestepsAfter; tt++)
-                            {
-                              time_t nt = it1->first + (tt * parameterTimestepSizeInSeconds);
-                              if (contentTimeList2.find(nt) == contentTimeList2.end())
-                              {
-                                // Required aggregation time might have different analysis time than the actual data time.
-
-                                auto at = contentTimeList.find(nt);
-                                if (at != contentTimeList.end())
-                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
-                                else
-                                  contentTimeList2.insert(std::pair<time_t,std::string>(nt,it1->second));
-                              }
-                            }
-
-                            valueCounter++;
-                          }
-                        }
-                      }
-                    }
-                    else
-                    {
-                      if (queryTimestepSizeInSeconds > 0)
-                      {
-                        auto qst = query.mTimesteps;
-                        if (query.mTimesteps == 0  && startTime_tt <= endTime_tt)
-                        {
-                          auto td = endTime_tt - startTime_tt;
-                          qst = (td/queryTimestepSizeInSeconds) + 1;
-                        }
-
-                        if (qst > 0  &&  qst < 10000)
-                        {
-                          auto stt = startTime_tt;
-                          for (uint ts = 0; ts<qst; ts++)
-                          {
-                            if (query.mTimesteps == 0 ||  valueCounter < query.mTimesteps)
-                            {
-                              // If the parameter requires aggregation then we have to pick some additional times.
-
-                              for (uint tt=qParam.mTimestepsBefore; tt > 0; tt--)
-                              {
-                                time_t nt = stt - (tt * parameterTimestepSizeInSeconds);
-                                if (contentTimeList2.find(nt) == contentTimeList2.end())
-                                {
-                                  auto at = contentTimeList.find(nt);
-                                  if (at != contentTimeList.end())
-                                    contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
-                                  else
-                                  {
-                                    auto upper = contentTimeList.upper_bound(nt);
-                                    if (upper != contentTimeList.end())
-                                      contentTimeList2.insert(std::pair<time_t,std::string>(nt,upper->second));
-                                    else
-                                    {
-                                      auto lower = contentTimeList.lower_bound(nt);
-                                      if (lower != contentTimeList.end())
-                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,lower->second));
-                                      else
-                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,analysisTime));
-                                    }
-                                  }
-                                }
-                              }
-
-                              // Adding the timestep time and its analysis time.
-
-                              auto at = contentTimeList.find(stt);
-                              if (at != contentTimeList.end())
-                                contentTimeList2.insert(std::pair<time_t,std::string>(stt,at->second));
-                              else
-                              {
-                                auto upper = contentTimeList.upper_bound(stt);
-                                if (upper != contentTimeList.end())
-                                  contentTimeList2.insert(std::pair<time_t,std::string>(stt,upper->second));
-                                else
-                                {
-                                  auto lower = contentTimeList.lower_bound(stt);
-                                  if (lower != contentTimeList.end())
-                                    contentTimeList2.insert(std::pair<time_t,std::string>(stt,lower->second));
-                                  else
-                                    contentTimeList2.insert(std::pair<time_t,std::string>(stt,analysisTime));
-                                }
-                              }
-
-                              originalTimes.insert(stt);
-
-                              // If the parameter requires aggregation then we have to pick some additional times.
-
-                              for (uint tt=1; tt <= qParam.mTimestepsAfter; tt++)
-                              {
-                                time_t nt = stt + (tt * parameterTimestepSizeInSeconds);
-                                if (contentTimeList2.find(nt) == contentTimeList2.end())
-                                {
-                                  auto at = contentTimeList.find(nt);
-                                  if (at != contentTimeList.end())
-                                    contentTimeList2.insert(std::pair<time_t,std::string>(nt,at->second));
-                                  else
-                                  {
-                                    auto upper = contentTimeList.upper_bound(nt);
-                                    if (upper != contentTimeList.end())
-                                      contentTimeList2.insert(std::pair<time_t,std::string>(nt,upper->second));
-                                    else
-                                    {
-                                      auto lower = contentTimeList.lower_bound(nt);
-                                      if (lower != contentTimeList.end())
-                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,lower->second));
-                                      else
-                                        contentTimeList2.insert(std::pair<time_t,std::string>(nt,analysisTime));
-                                    }
-                                  }
-                                }
-                              }
-
-                              stt += queryTimestepSizeInSeconds;
-                              valueCounter++;
-                            }
-                          }
-                        }
-                      }
-                    }
-
-
-                    time_t a_lastTime = startTime;
-                    for (auto& forecastTime : contentTimeList2)
-                    {
-                      if (((forecastTime.first == startTime && !ignoreStartTimeValue) || (forecastTime.first > startTime && forecastTime.first <= endTime)))
-                      {
-                        std::shared_ptr<ParameterValues> valList = std::make_shared<ParameterValues>();
-
-                        getGridValues(query,qParam,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime.second, maxAnalysisTime, 0, parameterKey, parameterHash,
-                            queryFlags, forecastTime.first, true, *valList, producerStr);
-
-                        if (valList->mValueList.getLength() > 0 || !valList->mValueData.empty() || !valList->mValueVector.empty())
-                        {
-                          if (valList->mForecastTimeUTC == 0)
-                            valList->mForecastTimeUTC = forecastTime.first;
-
-                          a_lastTime = std::max(a_lastTime, valList->mForecastTimeUTC);
-
-                          if (!originalTimes.empty() && originalTimes.find(valList->mForecastTimeUTC) == originalTimes.end())
-                          {
-                            valList->mFlags |= ParameterValues::Flags::AggregationValue;
-                            query.mAggregationTimes.insert(valList->mForecastTimeUTC);
-
-                            PRINT_DATA(mDebugLog," ##### set aggregationFlag (%zu) %s\n",originalTimes.size(),utcTimeFromTimeT(valList->mForecastTimeUTC).c_str());
-                          }
-
-                          qParam.mValueList.emplace_back(valList);
-                        }
-                      }
-                    }
-
-                    auto rec = mProducerConcatMap.find(producerStr);
-                    if (rec != mProducerConcatMap.end()  &&  !rec->second.empty())
-                    {
-                      //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
-                      std::set<T::GeometryId> tmpGeomIdList;
-
-                      for (auto& gg : rec->second)
-                      {
-                        //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
-                        tmpGeomIdList.insert(gg.second);
-                      }
-
-                      producerStr = "";
-                      getGridValues(query,qParam,rec->second, tmpGeomIdList, 0, analysisTime, generationFlags, parameterKey, parameterHash,
-                          queryFlags, a_lastTime+1,endTime,producerStr,valueCounter,recursionCounter+1);
-                    }
-                    return;
-                  }
-                }
-              }
-            }
-            else
-            {
-              PRINT_DATA(mDebugLog, "    - No mappings found (%s,%s,%d,%d,%d)!\n",producerInfo.mName.c_str(),parameterKey.c_str(),producerGeometryId,qParam.mParameterLevelId,qParam.mParameterLevel);
-            }
-          }
-          else
-          {
-            PRINT_DATA(mDebugLog, "    - No generations found for the current producer!\n");
-          }
-        }
-        else
-        {
-          if (!producerOk)
-          {
-            PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
-          }
-          else
-          {
-            PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
-          }
-        }
+        PRINT_DATA(mDebugLog, "  - Producer's '%s' geometry '%d' does not cover all requested query.mAreaCoordinates!\n", producerName.c_str(), producerGeometryId);
+        continue;
+      }
+
+      // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
+
+      bool producerOk = isAreaProducerAccepted(producers.size(),qParam,producerName,producerGeometryId);
+
+      T::ProducerInfo producerInfo;
+      if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+      {
+        if (getProducerTimeRangeValues(r,*it,producerInfo))
+          return;
       }
       else
       {
-        PRINT_DATA(mDebugLog, "  - Producer's '%s' geometry '%d' does not cover all requested query.mAreaCoordinates!\n", producerName.c_str(), producerGeometryId);
+        printInvalidProducer(producerName,producerOk);
       }
     }
   }
