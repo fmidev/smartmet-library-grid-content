@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.16
+Version: 26.10.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -48,10 +48,10 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.10.16
-Requires: smartmet-library-grid-files >= 26.10.16
-Requires: smartmet-library-macgyver >= 26.10.16
-Requires: smartmet-library-spine >= 26.10.16
+Requires: smartmet-library-gis >= 26.10.17
+Requires: smartmet-library-grid-files >= 26.10.17
+Requires: smartmet-library-macgyver >= 26.10.17
+Requires: smartmet-library-spine >= 26.10.17
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: %{smartmet_fmt_devel}
 #TestRequires: gcc-c++
@@ -112,6 +112,39 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
+- MemoryImplementation::sync*List: rescan the whole list when clearing the sync marks
+- ContentInfoList: extract addContent and use isLiveContent everywhere (getContentInfoListByFileId
+  34, getContentInfoListByForecastTime 34, getContentInfoListByGenerationId 30,
+  getContentInfoListByProducerId 32, getContentListByForecastTime 34)
+- QueryServer::ServiceImplementation: use getModificationOperation, setDefaultPrecision and the new
+  reportDataServerError in all value functions
+- QueryServer::ServiceImplementation: extract checkValueResult from the value functions
+- QueryServer::ServiceImplementation: extract fetchContours and fetchByLocationType from the contour
+  value functions
+- ContentInfoList: lock and bound the unsorted paginated searches
+- ContentInfoList: compare the next-time next-level candidate with itself
+- Function_eq: compare two grids only once when the decimals are given
+- QueryConfigurator: parse ISO 8601 timesteps and reject zero timesteps
+- CacheImplementation: forward producer parameter searches by producer id
+- Cache and Merge: check the stored content before using it
+- MergeImplementation: look up stored contents by the merged file id
+- DataServer: handle a grid file that addFile did not add
+- QueryServer: stop the point height bisection when a level value fails
+- QueryServer: remove the fixed size buffers from parameter parsing and special values
+- QueryServer: detect GRIB2 files in getGridFiles
+- QueryServer: keep the sub-metre part of the GRIB2 grid steps
+- QueryServer: skip missing GRIB2 lambert conformal projection parameters
+- QueryServer: check the data server result of interpolated value vectors
+- QueryServer: report the data server service that failed in getValueVectors
+- QueryServer: do not overflow the generation flags of the 32nd generation
+- QueryServer: index the height levels from the original levels
+- QueryServer: do not modify the cached parameter mapping vectors
+- QueryServer: remove the unused forecast type and number of time step queries
+- QueryServer::ServiceImplementation::getValueVectors: return the fetch and finish results directly
+- Split functions with a cognitive complexity above 25 into smaller helpers, no functional changes
+- ABI change: new or changed members in installed headers, dependent packages must be rebuilt
+
 * Fri Oct 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.16-1.fmi
 - PostgresqlImplementation::addContentList(list) renamed to addContentListToDatabase, it hid the
   virtual ServiceInterface::addContentList
