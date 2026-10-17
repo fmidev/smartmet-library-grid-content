@@ -339,6 +339,25 @@ int contentInfo_compare_20(const void *_val1,const void *_val2)
   }
   return 0;
 }
+
+
+
+/*! \brief Return true if the comparison method keeps the contents of a producer generation consecutive. */
+
+bool isSortedByProducerGeneration(uint comparisonMethod)
+{
+  return comparisonMethod == ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
+         comparisonMethod == ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time;
+}
+
+
+
+/*! \brief Return true if the content exists and is not marked as deleted. */
+
+bool isLiveContent(const ContentInfo *info)
+{
+  return info != nullptr  &&  (info->mFlags & ContentInfo::Flags::DeletedContent) == 0;
+}
 }  // namespace
 
 
@@ -6221,12 +6240,7 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId producerId,
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6601,12 +6615,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6615,21 +6624,17 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            forecastTimeList.insert(info->getForecastTime());
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
-        }
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
       }
+
+      forecastTimeList.insert(info->getForecastTime());
     }
   }
   catch (...)
@@ -6661,12 +6666,7 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6675,21 +6675,17 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            forecastTimeList.insert(info->mForecastTimeUTC);
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
-        }
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
       }
+
+      forecastTimeList.insert(info->mForecastTimeUTC);
     }
   }
   catch (...)
@@ -6738,12 +6734,7 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerI
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6754,28 +6745,24 @@ void ContentInfoList::getForecastTimeRangeByGenerationId(T::ProducerId producerI
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            Fmi::hash_merge(hash,info->mFileId);
-            Fmi::hash_merge(hash,info->mMessageIndex);
-
-            if (startTime == 0 || info->mForecastTimeUTC < startTime)
-              startTime = info->mForecastTimeUTC;
-
-            if (endTime == 0 || info->mForecastTimeUTC > endTime)
-              endTime = info->mForecastTimeUTC;
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
-        }
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
       }
+
+      Fmi::hash_merge(hash,info->mFileId);
+      Fmi::hash_merge(hash,info->mMessageIndex);
+
+      if (startTime == 0 || info->mForecastTimeUTC < startTime)
+        startTime = info->mForecastTimeUTC;
+
+      if (endTime == 0 || info->mForecastTimeUTC > endTime)
+        endTime = info->mForecastTimeUTC;
     }
   }
   catch (...)
@@ -6806,12 +6793,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6819,23 +6801,19 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (info->mGeometryId == geometryId)
-            {
-              forecastTimeList.insert(info->getForecastTime());
-            }
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
-        }
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
+      }
+
+      if (info->mGeometryId == geometryId)
+      {
+        forecastTimeList.insert(info->getForecastTime());
       }
     }
   }
@@ -6868,12 +6846,7 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6881,25 +6854,21 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
+      }
+
+      if (info->mGeometryId == geometryId)
+      {
+        if (info->mFmiParameterLevelId == levelId)
         {
-          if (info->mGenerationId == generationId)
-          {
-            if (info->mGeometryId == geometryId)
-            {
-              if (info->mFmiParameterLevelId == levelId)
-              {
-                forecastTimeList.insert(info->getForecastTime());
-              }
-            }
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
+          forecastTimeList.insert(info->getForecastTime());
         }
       }
     }
@@ -6933,12 +6902,7 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     searchInfo.mGenerationId = generationId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -6946,23 +6910,19 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
-      if (info != nullptr)
+      if (!isLiveContent(info))
+        continue;
+
+      if (info->mGenerationId != generationId)
       {
-        if (info != nullptr  &&  (info->mFlags & T::ContentInfo::Flags::DeletedContent) == 0)
-        {
-          if (info->mGenerationId == generationId)
-          {
-            if (info->mGeometryId == geometryId)
-            {
-              forecastTimeList.insert(info->mForecastTimeUTC);
-            }
-          }
-          else
-          {
-            if (sorted && t > (uint)idx)
-              return;
-          }
-        }
+        if (sorted && t > (uint)idx)
+          return;
+        continue;
+      }
+
+      if (info->mGeometryId == geometryId)
+      {
+        forecastTimeList.insert(info->mForecastTimeUTC);
       }
     }
   }
@@ -6994,12 +6954,7 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
     searchInfo.mProducerId = producerId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
@@ -7052,12 +7007,7 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
     searchInfo.mProducerId = producerId;
 
     int idx = 0;
-    bool sorted = false;
-    if (mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time ||
-        mComparisonMethod == T::ContentInfo::ComparisonMethod::fmiName_producer_generation_level_time)
-    {
-      sorted = true;
-    }
+    bool sorted = isSortedByProducerGeneration(mComparisonMethod);
 
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
