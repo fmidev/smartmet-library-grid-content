@@ -100,735 +100,165 @@ void ServerInterface::processRequest(T::RequestMessage& request,T::ResponseMessa
 
     const char *method = methodStr.c_str();
 
+    // The methods are searched in the order of the tables: the first matching name is used.
+
+    using RequestHandler = void (ServerInterface::*)(T::RequestMessage&,T::ResponseMessage&);
+    struct RequestMethod
+    {
+      const char *name;
+      RequestHandler handler;
+    };
+
+    static const RequestMethod writeMethods[] =
+    {
+      {"clear",&ServerInterface::clear},
+      {"reload",&ServerInterface::reload},
+      {"addProducerInfo",&ServerInterface::addProducerInfo},
+      {"deleteProducerInfoById",&ServerInterface::deleteProducerInfoById},
+      {"deleteProducerInfoByName",&ServerInterface::deleteProducerInfoByName},
+      {"deleteProducerInfoListBySourceId",&ServerInterface::deleteProducerInfoListBySourceId},
+      {"addGenerationInfo",&ServerInterface::addGenerationInfo},
+      {"deleteGenerationInfoById",&ServerInterface::deleteGenerationInfoById},
+      {"deleteGenerationInfoByName",&ServerInterface::deleteGenerationInfoByName},
+      {"deleteGenerationInfoListByIdList",&ServerInterface::deleteGenerationInfoListByIdList},
+      {"deleteGenerationInfoListByProducerId",&ServerInterface::deleteGenerationInfoListByProducerId},
+      {"deleteGenerationInfoListByProducerName",&ServerInterface::deleteGenerationInfoListByProducerName},
+      {"deleteGenerationInfoListBySourceId",&ServerInterface::deleteGenerationInfoListBySourceId},
+      {"setGenerationInfoStatusById",&ServerInterface::setGenerationInfoStatusById},
+      {"setGenerationInfoStatusByName",&ServerInterface::setGenerationInfoStatusByName},
+      {"addGeometryInfo",&ServerInterface::addGeometryInfo},
+      {"deleteGeometryInfoById",&ServerInterface::deleteGeometryInfoById},
+      {"deleteGeometryInfoListByGenerationId",&ServerInterface::deleteGeometryInfoListByGenerationId},
+      {"deleteGeometryInfoListByProducerId",&ServerInterface::deleteGeometryInfoListByProducerId},
+      {"deleteGeometryInfoListBySourceId",&ServerInterface::deleteGeometryInfoListBySourceId},
+      {"setGeometryInfo",&ServerInterface::setGeometryInfo},
+      {"setGeometryInfoStatusById",&ServerInterface::setGeometryInfoStatusById},
+      {"addFileInfo",&ServerInterface::addFileInfo},
+      {"addFileInfoWithContentList",&ServerInterface::addFileInfoWithContentList},
+      {"addFileInfoListWithContent",&ServerInterface::addFileInfoListWithContent},
+      {"deleteFileInfoById",&ServerInterface::deleteFileInfoById},
+      {"deleteFileInfoByName",&ServerInterface::deleteFileInfoByName},
+      {"deleteFileInfoListByForecastTimeList",&ServerInterface::deleteFileInfoListByForecastTimeList},
+      {"deleteFileInfoListByProducerId",&ServerInterface::deleteFileInfoListByProducerId},
+      {"deleteFileInfoListByProducerName",&ServerInterface::deleteFileInfoListByProducerName},
+      {"deleteFileInfoListByGenerationId",&ServerInterface::deleteFileInfoListByGenerationId},
+      {"deleteFileInfoListByGenerationName",&ServerInterface::deleteFileInfoListByGenerationName},
+      {"deleteFileInfoListBySourceId",&ServerInterface::deleteFileInfoListBySourceId},
+      {"deleteFileInfoListByFileIdList",&ServerInterface::deleteFileInfoListByFileIdList},
+      {"addEventInfo",&ServerInterface::addEventInfo},
+      {"addContent",&ServerInterface::addContentInfo},
+      {"addContentList",&ServerInterface::addContentList},
+      {"deleteContentInfo",&ServerInterface::deleteContentInfo},
+      {"deleteContentListByFileId",&ServerInterface::deleteContentListByFileId},
+      {"deleteContentListByFileName",&ServerInterface::deleteContentListByFileName},
+      {"deleteContentListByProducerId",&ServerInterface::deleteContentListByProducerId},
+      {"deleteContentListByProducerName",&ServerInterface::deleteContentListByProducerName},
+      {"deleteContentListByGenerationId",&ServerInterface::deleteContentListByGenerationId},
+      {"deleteContentListByGenerationName",&ServerInterface::deleteContentListByGenerationName},
+      {"deleteContentListBySourceId",&ServerInterface::deleteContentListBySourceId}
+    };
+
+    static const RequestMethod readMethods[] =
+    {
+      {"getContentChangeTime",&ServerInterface::getContentChangeTime},
+      {"getProducerInfoById",&ServerInterface::getProducerInfoById},
+      {"getProducerInfoByName",&ServerInterface::getProducerInfoByName},
+      {"getProducerInfoList",&ServerInterface::getProducerInfoList},
+      {"getProducerInfoListByParameter",&ServerInterface::getProducerInfoListByParameter},
+      {"getProducerInfoListBySourceId",&ServerInterface::getProducerInfoListBySourceId},
+      {"getProducerInfoCount",&ServerInterface::getProducerInfoCount},
+      {"getProducerNameAndGeometryList",&ServerInterface::getProducerNameAndGeometryList},
+      {"getProducerParameterList",&ServerInterface::getProducerParameterList},
+      {"getProducerParameterListByProducerId",&ServerInterface::getProducerParameterListByProducerId},
+      {"getGenerationIdGeometryIdAndForecastTimeList",&ServerInterface::getGenerationIdGeometryIdAndForecastTimeList},
+      {"getGenerationInfoById",&ServerInterface::getGenerationInfoById},
+      {"getGenerationInfoByName",&ServerInterface::getGenerationInfoByName},
+      {"getGenerationInfoList",&ServerInterface::getGenerationInfoList},
+      {"getGenerationInfoListByGeometryId",&ServerInterface::getGenerationInfoListByGeometryId},
+      {"getGenerationInfoListByProducerId",&ServerInterface::getGenerationInfoListByProducerId},
+      {"getGenerationInfoListByProducerName",&ServerInterface::getGenerationInfoListByProducerName},
+      {"getGenerationInfoListBySourceId",&ServerInterface::getGenerationInfoListBySourceId},
+      {"getLastGenerationInfoByProducerIdAndStatus",&ServerInterface::getLastGenerationInfoByProducerIdAndStatus},
+      {"getLastGenerationInfoByProducerNameAndStatus",&ServerInterface::getLastGenerationInfoByProducerNameAndStatus},
+      {"getGenerationInfoCount",&ServerInterface::getGenerationInfoCount},
+      {"getGeometryInfoById",&ServerInterface::getGeometryInfoById},
+      {"getGeometryInfoList",&ServerInterface::getGeometryInfoList},
+      {"getGeometryInfoListByGenerationId",&ServerInterface::getGeometryInfoListByGenerationId},
+      {"getGeometryInfoListByProducerId",&ServerInterface::getGeometryInfoListByProducerId},
+      {"getGeometryInfoListBySourceId",&ServerInterface::getGeometryInfoListBySourceId},
+      {"getGeometryInfoCount",&ServerInterface::getGeometryInfoCount},
+      {"getFileInfoById",&ServerInterface::getFileInfoById},
+      {"getFileInfoByName",&ServerInterface::getFileInfoByName},
+      {"getFileInfoList",&ServerInterface::getFileInfoList},
+      {"getFileInfoListByFileIdList",&ServerInterface::getFileInfoListByFileIdList},
+      {"getFileInfoListByProducerId",&ServerInterface::getFileInfoListByProducerId},
+      {"getFileInfoListByProducerName",&ServerInterface::getFileInfoListByProducerName},
+      {"getFileInfoListByGenerationId",&ServerInterface::getFileInfoListByGenerationId},
+      {"getFileInfoListByGenerationName",&ServerInterface::getFileInfoListByGenerationName},
+      {"getFileInfoListBySourceId",&ServerInterface::getFileInfoListBySourceId},
+      {"getFileInfoCount",&ServerInterface::getFileInfoCount},
+      {"getFileInfoCountByProducerId",&ServerInterface::getFileInfoCountByProducerId},
+      {"getFileInfoCountByGenerationId",&ServerInterface::getFileInfoCountByGenerationId},
+      {"getFileInfoCountBySourceId",&ServerInterface::getFileInfoCountBySourceId},
+      {"getLastEventInfo",&ServerInterface::getLastEventInfo},
+      {"getEventInfoList",&ServerInterface::getEventInfoList},
+      {"getEventInfoCount",&ServerInterface::getEventInfoCount},
+      {"getContentInfo",&ServerInterface::getContentInfo},
+      {"getContentList",&ServerInterface::getContentList},
+      {"getContentListByFileId",&ServerInterface::getContentListByFileId},
+      {"getContentListByFileIdList",&ServerInterface::getContentListByFileIdList},
+      {"getContentListByFileName",&ServerInterface::getContentListByFileName},
+      {"getContentListByProducerId",&ServerInterface::getContentListByProducerId},
+      {"getContentListByProducerName",&ServerInterface::getContentListByProducerName},
+      {"getContentListByGenerationId",&ServerInterface::getContentListByGenerationId},
+      {"getContentListByGenerationName",&ServerInterface::getContentListByGenerationName},
+      {"getContentListByGenerationIdAndTimeRange",&ServerInterface::getContentListByGenerationIdAndTimeRange},
+      {"getContentListByGenerationNameAndTimeRange",&ServerInterface::getContentListByGenerationNameAndTimeRange},
+      {"getContentListBySourceId",&ServerInterface::getContentListBySourceId},
+      {"getContentListByParameter",&ServerInterface::getContentListByParameter},
+      {"getContentListByParameterAndGenerationId",&ServerInterface::getContentListByParameterAndGenerationId},
+      {"getContentListByParameterAndGenerationName",&ServerInterface::getContentListByParameterAndGenerationName},
+      {"getContentListByParameterAndProducerId",&ServerInterface::getContentListByParameterAndProducerId},
+      {"getContentListByParameterAndProducerName",&ServerInterface::getContentListByParameterAndProducerName},
+      {"getContentListByParameterGenerationIdAndForecastTime",&ServerInterface::getContentListByParameterGenerationIdAndForecastTime},
+      {"getContentGeometryIdListByGenerationId",&ServerInterface::getContentGeometryIdListByGenerationId},
+      {"getContentLevelListByGenerationGeometryAndLevelId",&ServerInterface::getContentLevelListByGenerationGeometryAndLevelId},
+      {"getContentLevelListByParameterGenerationGeometryAndLevelId",&ServerInterface::getContentLevelListByParameterGenerationGeometryAndLevelId},
+      {"getContentParamListByGenerationId",&ServerInterface::getContentParamListByGenerationId},
+      {"getContentParamKeyListByGenerationId",&ServerInterface::getContentParamKeyListByGenerationId},
+      {"getContentParamKeyListByGenerationAndGeometryId",&ServerInterface::getContentParamKeyListByGenerationAndGeometryId},
+      {"getContentParamKeyListByGenerationGeometryAndLevelId",&ServerInterface::getContentParamKeyListByGenerationGeometryAndLevelId},
+      {"getContentTimeListByGenerationId",&ServerInterface::getContentTimeListByGenerationId},
+      {"getContentTimeRangeByGenerationId",&ServerInterface::getContentTimeRangeByGenerationId},
+      {"getContentTimeListByGenerationAndGeometryId",&ServerInterface::getContentTimeListByGenerationAndGeometryId},
+      {"getContentTimeListByGenerationGeometryAndLevelId",&ServerInterface::getContentTimeListByGenerationGeometryAndLevelId},
+      {"getContentTimeListByProducerId",&ServerInterface::getContentTimeListByProducerId},
+      {"getContentCount",&ServerInterface::getContentCount},
+      {"getHashByProducerId",&ServerInterface::getHashByProducerId},
+      {"getLevelInfoList",&ServerInterface::getLevelInfoList}
+    };
+
     if (mWriteMethodsEnabled)
     {
-      if (strcasecmp(method,"clear") == 0)
+      for (const auto& m : writeMethods)
       {
-        clear(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"reload") == 0)
-      {
-        reload(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addProducerInfo") == 0)
-      {
-        addProducerInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteProducerInfoById") == 0)
-      {
-        deleteProducerInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteProducerInfoByName") == 0)
-      {
-        deleteProducerInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteProducerInfoListBySourceId") == 0)
-      {
-        deleteProducerInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addGenerationInfo") == 0)
-      {
-        addGenerationInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoById") == 0)
-      {
-        deleteGenerationInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoByName") == 0)
-      {
-        deleteGenerationInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoListByIdList") == 0)
-      {
-        deleteGenerationInfoListByIdList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoListByProducerId") == 0)
-      {
-        deleteGenerationInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoListByProducerName") == 0)
-      {
-        deleteGenerationInfoListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGenerationInfoListBySourceId") == 0)
-      {
-        deleteGenerationInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"setGenerationInfoStatusById") == 0)
-      {
-        setGenerationInfoStatusById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"setGenerationInfoStatusByName") == 0)
-      {
-        setGenerationInfoStatusByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addGeometryInfo") == 0)
-      {
-        addGeometryInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGeometryInfoById") == 0)
-      {
-        deleteGeometryInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGeometryInfoListByGenerationId") == 0)
-      {
-        deleteGeometryInfoListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGeometryInfoListByProducerId") == 0)
-      {
-        deleteGeometryInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteGeometryInfoListBySourceId") == 0)
-      {
-        deleteGeometryInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"setGeometryInfo") == 0)
-      {
-        setGeometryInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"setGeometryInfoStatusById") == 0)
-      {
-        setGeometryInfoStatusById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addFileInfo") == 0)
-      {
-        addFileInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addFileInfoWithContentList") == 0)
-      {
-        addFileInfoWithContentList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addFileInfoListWithContent") == 0)
-      {
-        addFileInfoListWithContent(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoById") == 0)
-      {
-        deleteFileInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoByName") == 0)
-      {
-        deleteFileInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByForecastTimeList") == 0)
-      {
-        deleteFileInfoListByForecastTimeList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByProducerId") == 0)
-      {
-        deleteFileInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByProducerName") == 0)
-      {
-        deleteFileInfoListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByGenerationId") == 0)
-      {
-        deleteFileInfoListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByGenerationName") == 0)
-      {
-        deleteFileInfoListByGenerationName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListBySourceId") == 0)
-      {
-        deleteFileInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteFileInfoListByFileIdList") == 0)
-      {
-        deleteFileInfoListByFileIdList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addEventInfo") == 0)
-      {
-        addEventInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addContent") == 0)
-      {
-        addContentInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"addContentList") == 0)
-      {
-        addContentList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentInfo") == 0)
-      {
-        deleteContentInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByFileId") == 0)
-      {
-        deleteContentListByFileId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByFileName") == 0)
-      {
-        deleteContentListByFileName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByProducerId") == 0)
-      {
-        deleteContentListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByProducerName") == 0)
-      {
-        deleteContentListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByGenerationId") == 0)
-      {
-        deleteContentListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListByGenerationName") == 0)
-      {
-        deleteContentListByGenerationName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"deleteContentListBySourceId") == 0)
-      {
-        deleteContentListBySourceId(request,response);
-        return;
+        if (strcasecmp(method,m.name) == 0)
+        {
+          (this->*m.handler)(request,response);
+          return;
+        }
       }
     }
 
     if (mReadMethodsEnabled)
     {
-      if (strcasecmp(method,"getContentChangeTime") == 0)
-      {
-        getContentChangeTime(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoById") == 0)
-      {
-        getProducerInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoByName") == 0)
-      {
-        getProducerInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoList") == 0)
-      {
-        getProducerInfoList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoListByParameter") == 0)
-      {
-        getProducerInfoListByParameter(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoListBySourceId") == 0)
-      {
-        getProducerInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerInfoCount") == 0)
-      {
-        getProducerInfoCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerNameAndGeometryList") == 0)
-      {
-        getProducerNameAndGeometryList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerParameterList") == 0)
-      {
-        getProducerParameterList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getProducerParameterListByProducerId") == 0)
-      {
-        getProducerParameterListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationIdGeometryIdAndForecastTimeList") == 0)
-      {
-        getGenerationIdGeometryIdAndForecastTimeList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoById") == 0)
-      {
-        getGenerationInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoByName") == 0)
-      {
-        getGenerationInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoList") == 0)
-      {
-        getGenerationInfoList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoListByGeometryId") == 0)
-      {
-        getGenerationInfoListByGeometryId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoListByProducerId") == 0)
-      {
-        getGenerationInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoListByProducerName") == 0)
-      {
-        getGenerationInfoListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoListBySourceId") == 0)
-      {
-        getGenerationInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getLastGenerationInfoByProducerIdAndStatus") == 0)
-      {
-        getLastGenerationInfoByProducerIdAndStatus(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getLastGenerationInfoByProducerNameAndStatus") == 0)
-      {
-        getLastGenerationInfoByProducerNameAndStatus(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGenerationInfoCount") == 0)
-      {
-        getGenerationInfoCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoById") == 0)
-      {
-        getGeometryInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoList") == 0)
-      {
-        getGeometryInfoList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoListByGenerationId") == 0)
-      {
-        getGeometryInfoListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoListByProducerId") == 0)
-      {
-        getGeometryInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoListBySourceId") == 0)
-      {
-        getGeometryInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getGeometryInfoCount") == 0)
-      {
-        getGeometryInfoCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoById") == 0)
-      {
-        getFileInfoById(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoByName") == 0)
-      {
-        getFileInfoByName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoList") == 0)
-      {
-        getFileInfoList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListByFileIdList") == 0)
-      {
-        getFileInfoListByFileIdList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListByProducerId") == 0)
-      {
-        getFileInfoListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListByProducerName") == 0)
-      {
-        getFileInfoListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListByGenerationId") == 0)
-      {
-        getFileInfoListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListByGenerationName") == 0)
-      {
-        getFileInfoListByGenerationName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoListBySourceId") == 0)
-      {
-        getFileInfoListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoCount") == 0)
-      {
-        getFileInfoCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoCountByProducerId") == 0)
-      {
-        getFileInfoCountByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoCountByGenerationId") == 0)
-      {
-        getFileInfoCountByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getFileInfoCountBySourceId") == 0)
-      {
-        getFileInfoCountBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getLastEventInfo") == 0)
-      {
-        getLastEventInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getEventInfoList") == 0)
-      {
-        getEventInfoList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getEventInfoCount") == 0)
-      {
-        getEventInfoCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentInfo") == 0)
-      {
-        getContentInfo(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentList") == 0)
-      {
-        getContentList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByFileId") == 0)
-      {
-        getContentListByFileId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByFileIdList") == 0)
-      {
-        getContentListByFileIdList(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByFileName") == 0)
-      {
-        getContentListByFileName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByProducerId") == 0)
-      {
-        getContentListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByProducerName") == 0)
-      {
-        getContentListByProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByGenerationId") == 0)
-      {
-        getContentListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByGenerationName") == 0)
-      {
-        getContentListByGenerationName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByGenerationIdAndTimeRange") == 0)
-      {
-        getContentListByGenerationIdAndTimeRange(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByGenerationNameAndTimeRange") == 0)
-      {
-        getContentListByGenerationNameAndTimeRange(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListBySourceId") == 0)
-      {
-        getContentListBySourceId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameter") == 0)
-      {
-        getContentListByParameter(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameterAndGenerationId") == 0)
-      {
-        getContentListByParameterAndGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameterAndGenerationName") == 0)
-      {
-        getContentListByParameterAndGenerationName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameterAndProducerId") == 0)
-      {
-        getContentListByParameterAndProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameterAndProducerName") == 0)
-      {
-        getContentListByParameterAndProducerName(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentListByParameterGenerationIdAndForecastTime") == 0)
-      {
-        getContentListByParameterGenerationIdAndForecastTime(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentGeometryIdListByGenerationId") == 0)
-      {
-        getContentGeometryIdListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentLevelListByGenerationGeometryAndLevelId") == 0)
-      {
-        getContentLevelListByGenerationGeometryAndLevelId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentLevelListByParameterGenerationGeometryAndLevelId") == 0)
-      {
-        getContentLevelListByParameterGenerationGeometryAndLevelId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentParamListByGenerationId") == 0)
-      {
-        getContentParamListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentParamKeyListByGenerationId") == 0)
-      {
-        getContentParamKeyListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentParamKeyListByGenerationAndGeometryId") == 0)
-      {
-        getContentParamKeyListByGenerationAndGeometryId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentParamKeyListByGenerationGeometryAndLevelId") == 0)
-      {
-        getContentParamKeyListByGenerationGeometryAndLevelId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentTimeListByGenerationId") == 0)
-      {
-        getContentTimeListByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentTimeRangeByGenerationId") == 0)
-      {
-        getContentTimeRangeByGenerationId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentTimeListByGenerationAndGeometryId") == 0)
-      {
-        getContentTimeListByGenerationAndGeometryId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentTimeListByGenerationGeometryAndLevelId") == 0)
-      {
-        getContentTimeListByGenerationGeometryAndLevelId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentTimeListByProducerId") == 0)
-      {
-        getContentTimeListByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getContentCount") == 0)
-      {
-        getContentCount(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getHashByProducerId") == 0)
-      {
-        getHashByProducerId(request,response);
-        return;
-      }
-
-      if (strcasecmp(method,"getLevelInfoList") == 0)
-      {
-        getLevelInfoList(request,response);
-        return;
+      for (const auto& m : readMethods)
+      {
+        if (strcasecmp(method,m.name) == 0)
+        {
+          (this->*m.handler)(request,response);
+          return;
+        }
       }
     }
 
