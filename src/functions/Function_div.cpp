@@ -8,6 +8,87 @@ namespace Functions
 {
 
 
+namespace
+{
+
+/*! \brief Return the product of the external parameters, or missing if any of them is missing. */
+
+template <typename T>
+T productOfParameters(const std::vector<double>& extParameters)
+{
+  T b = 1;
+  for (double p : extParameters)
+  {
+    if (p == ParamValueMissing)
+      return ParamValueMissing;
+
+    b = b * p;
+  }
+  return b;
+}
+
+
+
+/*! \brief Divide the value of the first grid at the index by the values of the other grids. Returns missing if a value is missing. */
+
+template <typename T>
+T divideGridValues(const std::vector<std::vector<T>>& inParameters,uint s)
+{
+  T value = inParameters[0][s];
+  if (value == ParamValueMissing)
+    return value;
+
+  uint len = inParameters.size();
+  for (uint t=1; t<len; t++)
+  {
+    if (s >= inParameters[t].size())
+      return ParamValueMissing;
+
+    double val = inParameters[t][s];
+    if (val == ParamValueMissing)
+      return ParamValueMissing;
+
+    // If the divisor is zero then we ignore the division. Should we return ParamValueMissing instead?
+    if (val != 0)
+      value = value / val;
+  }
+  return value;
+}
+
+
+
+/*! \brief Divide the first grid by the other grids and by the product of the external parameters. */
+
+template <typename T>
+void executeDiv(uint columns,uint rows,const std::vector<std::vector<T>>& inParameters,const std::vector<double>& extParameters,std::vector<T>& outParameters)
+{
+  uint sz = columns*rows;
+  outParameters.reserve(sz);
+
+  T b = productOfParameters<T>(extParameters);
+
+  for (uint s=0; s<sz; s++)
+  {
+    T value = ParamValueMissing;
+    if (s < inParameters[0].size())
+    {
+      value = divideGridValues(inParameters,s);
+
+      if (b == ParamValueMissing)
+        value = ParamValueMissing;
+
+      if (b != 1  &&  b != 0  &&  value != ParamValueMissing)
+        value = value / b;
+    }
+
+    outParameters.emplace_back(value);
+  }
+}
+
+}  // namespace
+
+
+
 /*! \brief Function: Constructor. */
 
 Function_div::Function_div()
@@ -137,69 +218,7 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    uint sz = columns*rows;
-    uint len = inParameters.size();
-    uint elen = extParameters.size();
-    outParameters.reserve(sz);
-
-    float b = 1;
-    if (elen > 0)
-    {
-      for (uint t=0; t<elen; t++)
-      {
-        if (extParameters[t] == ParamValueMissing)
-        {
-          b = ParamValueMissing;
-          t = elen;
-        }
-        else
-        {
-          b = b * extParameters[t];
-        }
-      }
-    }
-
-    for (uint s=0; s<sz; s++)
-    {
-      float value = ParamValueMissing;
-      if (s < inParameters[0].size())
-      {
-        value = inParameters[0][s];
-        if (value != ParamValueMissing)
-        {
-          for (uint t=1; t<len; t++)
-          {
-            if (s < inParameters[t].size())
-            {
-              double val = inParameters[t][s];
-              if (val == ParamValueMissing)
-              {
-                value = ParamValueMissing;
-                t = len;
-              }
-              else
-              {
-                // If the divisor is zero then we ignore the division. Should we return ParamValueMissing instead?
-                if (val != 0)
-                  value = value / val;
-              }
-            }
-            else
-            {
-              value = ParamValueMissing;
-              t = len;
-            }
-          }
-        }
-        if (b == ParamValueMissing)
-          value = ParamValueMissing;
-
-        if (b != 1  &&  b != 0  &&  value != ParamValueMissing)
-          value = value / b;
-      }
-
-      outParameters.emplace_back(value);
-    }
+    executeDiv(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {
@@ -217,68 +236,7 @@ void Function_div::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    uint sz = columns*rows;
-    uint len = inParameters.size();
-    uint elen = extParameters.size();
-    outParameters.reserve(sz);
-
-    double b = 1;
-    if (elen > 0)
-    {
-      for (uint t=0; t<elen; t++)
-      {
-        if (extParameters[t] == ParamValueMissing)
-        {
-          b = ParamValueMissing;
-          t = elen;
-        }
-        else
-        {
-          b = b * extParameters[t];
-        }
-      }
-    }
-
-    for (uint s=0; s<sz; s++)
-    {
-      double value = ParamValueMissing;
-      if (s < inParameters[0].size())
-      {
-        value = inParameters[0][s];
-        if (value != ParamValueMissing)
-        {
-          for (uint t=1; t<len; t++)
-          {
-            if (s < inParameters[t].size())
-            {
-              double val = inParameters[t][s];
-              if (val == ParamValueMissing)
-              {
-                value = ParamValueMissing;
-                t = len;
-              }
-              else
-              {
-                // If the divisor is zero then we ignore the division. Should we return ParamValueMissing instead?
-                if (val != 0)
-                  value = value / val;
-              }
-            }
-            else
-            {
-              value = ParamValueMissing;
-              t = len;
-            }
-          }
-        }
-        if (b == ParamValueMissing)
-          value = ParamValueMissing;
-
-        if (b != 1  &&  b != 0  &&  value != ParamValueMissing)
-          value = value / b;
-      }
-      outParameters.emplace_back(value);
-    }
+    executeDiv(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {

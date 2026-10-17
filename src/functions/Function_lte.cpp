@@ -130,55 +130,7 @@ void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    uint sz = columns*rows;
-    outParameters.reserve(sz);
-
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
-    {
-      float val2 = extParameters[0];
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if (val1 <= val2)
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
-    if (inParameters.size() == 2)
-    {
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if (val1 <= val2)
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
-    }
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 <= val2; },outParameters);
   }
   catch (...)
   {
@@ -196,55 +148,7 @@ void Function_lte::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 {
   try
   {
-    uint sz = columns*rows;
-    outParameters.reserve(sz);
-
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
-    {
-      float val2 = extParameters[0];
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if (val1 <= val2)
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
-    if (inParameters.size() == 2)
-    {
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if (val1 <= val2)
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
-    }
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 <= val2; },outParameters);
   }
   catch (...)
   {
