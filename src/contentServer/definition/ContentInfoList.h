@@ -200,20 +200,7 @@ class ContentInfoList
         return 0;
 
       if (comparisonMethod != mComparisonMethod)
-      {
-        for (uint t=0; t<mLength; t++)
-        {
-          if (mArray[t] != nullptr)
-          {
-            int res = mArray[t]->compare(comparisonMethod,&contentInfo);
-            if (res == 0)
-            {
-              return t;
-            }
-          }
-        }
-        return 0;
-      }
+        return getFirstEqualIndexNoLock(comparisonMethod,contentInfo);
 
       int low = 0;
       int high = C_INT(mLength) - 1;
@@ -243,21 +230,46 @@ class ContentInfoList
       }
 
       if (mid >= 0  &&  mid < C_INT(mLength))
+        return getClosestIndexAfterSearchNoLock(comparisonMethod,contentInfo,mid);
+
+      return 0;
+    }
+
+
+  protected:
+
+    /*! \brief Return the index of the first content equal to the given one in an unsorted list, or 0 if there is none. */
+
+    int getFirstEqualIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
+    {
+      for (uint t=0; t<mLength; t++)
       {
-        if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
-        {
-          while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
-            mid++;
-
-          return mid-1;
-        }
-        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
-          mid--;
-
-        return mid;
+        if (mArray[t] != nullptr  &&  mArray[t]->compare(comparisonMethod,&contentInfo) == 0)
+          return t;
       }
       return 0;
     }
+
+
+    /*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+    int getClosestIndexAfterSearchNoLock(uint comparisonMethod,ContentInfo& contentInfo,int mid)
+    {
+      if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+      {
+        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+          mid++;
+
+        return mid-1;
+      }
+      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
+        mid--;
+
+      return mid;
+    }
+
+
+  public:
 
 
     ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
