@@ -2,6 +2,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AdditionalParameters.h>
 #include <grid-files/common/ShowFunction.h>
+#include <macgyver/TimeParser.h>
 #include <ctime>
 
 
@@ -16,6 +17,25 @@ namespace QueryServer
 
 namespace
 {
+
+/*! \brief Return the timestep in seconds. ISO 8601 durations ("PT30M") are accepted in addition to the
+           "30m", "1h" and plain minute forms, and a timestep which is not positive is an error. */
+
+int parseTimestep(const char *timestepStr)
+{
+  int timestep = 0;
+  if (*timestepStr == 'P' || *timestepStr == 'p')
+    timestep = static_cast<int>(Fmi::TimeParser::parse_iso_duration(timestepStr).total_seconds());
+  else
+    timestep = timePeriodToSeconds(timestepStr);
+
+  if (timestep <= 0)
+    throw Fmi::Exception(BCP,"The timestep must be positive!").addParameter("timestep",timestepStr);
+
+  return timestep;
+}
+
+
 
 /*! \brief Return the local time in the given time zone (or in the default one if the zone is null) as UTC time. */
 
@@ -383,7 +403,7 @@ void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attri
         query.mFlags |= Query::Flags::TimeStepIsData;
       }
       else
-        timestep = timePeriodToSeconds(timestepStr);
+        timestep = parseTimestep(timestepStr);
     }
 
     if (timezoneStr != nullptr)
