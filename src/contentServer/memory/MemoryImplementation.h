@@ -199,7 +199,12 @@ class MemoryImplementation : public ServiceInterface
      void           deleteUnsyncedGenerations();
      virtual bool   syncGeometryList();
      virtual bool   syncFileList();
+     bool           syncFileCsvLine(char *st,T::EventId startEventId,uint maxLen);
+     bool           deleteUnsyncedFiles(T::EventId startEventId,uint maxLen);
      virtual bool   syncContentList();
+     bool           syncContentCsvLine(char *st,T::ContentInfoList& contentToAdd,T::EventId startEventId,uint maxLen);
+     bool           deleteUnsyncedContents(T::EventId startEventId,uint maxLen);
+     bool           prepareFileOfContent(T::FileAndContent& ff,uint requestFlags,T::FileInfoList& tmpFileList);
 
      bool                   mReloadActivated;    //!< True when a full data reload has been requested.
      bool                   mShutdownRequested;  //!< True after shutdown() has been called.

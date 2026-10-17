@@ -45,6 +45,41 @@ void* MemoryImplementation_syncProcessingThread(void *arg)
     std::_Exit(-1);
   }
 }
+
+
+
+/*! \brief Make the contents of a file and content pair match the file and collect them, with CONTENT_ADDED events
+           when contents are added to an existing file without replacing its old contents. */
+
+void collectFileContents(T::FileAndContent& ff,bool existingFile,uint requestFlags,T::ContentInfoList& tmpContentList,T::EventInfoList& tmpEventList)
+{
+  uint len = ff.mContentInfoList.getLength();
+  //printf("-- contentList %u\n",len);
+  for (uint t=0; t<len; t++)
+  {
+    T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
+    if (info != nullptr)
+    {
+      //T::ContentInfo *cInfo = info->duplicate();
+      // ### Making sure that content data matches the file data.
+
+      info->mFileId = ff.mFileInfo.mFileId;
+      if (info->mFileType == 0)
+        info->mFileType = ff.mFileInfo.mFileType;
+
+      info->mProducerId = ff.mFileInfo.mProducerId;
+      info->mGenerationId = ff.mFileInfo.mGenerationId;
+      info->mFlags = info->mFlags;
+
+
+      //mContentInfoList[0].addContentInfo(cInfo);
+      tmpContentList.addContentInfo(info);
+
+      if (existingFile  &&  (requestFlags & 0x00000001) == 0)
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
+    }
+  }
+}
 }  // namespace
 
 
@@ -2464,6 +2499,60 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
 
 
 
+/*! \brief Memory backend: set the file id of a file and content pair to the id of an existing file with the same
+           name (marking its old contents deleted if requested), or to a new id adding the file to tmpFileList.
+           Returns true for an existing file. */
+
+bool MemoryImplementation::prepareFileOfContent(T::FileAndContent& ff,uint requestFlags,T::FileInfoList& tmpFileList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // ### Checking if the filename already exists in the database.
+
+    T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff.mFileInfo.mName);
+    const bool existingFile = (info != nullptr);
+    if (info != nullptr)
+    {
+      //printf("** File exists %s\n",fileInfo.mName.c_str());
+      // ### File with the same name already exists. Let's return
+      // ### the current file-id.
+
+      ff.mFileInfo.mFileId = info->mFileId;
+
+      // ### Deleting old content information.
+
+      if (requestFlags & 0x00000001)
+        mContentInfoList[0].markDeletedByFileId(ff.mFileInfo.mFileId);
+    }
+    else
+    {
+      // ### Generating a new file-id.
+      //printf("** File added %s\n",fileInfo.mName.c_str());
+
+      mMaxFileId++;
+
+      ff.mFileInfo.mFileId = mMaxFileId;
+
+      info = ff.mFileInfo.duplicate();
+
+      tmpFileList.addFileInfo(info);
+      //mFileInfoList.addFileInfo(info);
+      //mFileInfoListByName.addFileInfo(info);
+    }
+
+    return existingFile;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Memory backend: bulk register a batch of files together with their content lists. */
 
 int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
@@ -2500,68 +2589,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       }
 
 
-      // ### Checking if the filename already exists in the database.
-
-      T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff.mFileInfo.mName);
-      const bool existingFile = (info != nullptr);
-      if (info != nullptr)
-      {
-        //printf("** File exists %s\n",fileInfo.mName.c_str());
-        // ### File with the same name already exists. Let's return
-        // ### the current file-id.
-
-        ff.mFileInfo.mFileId = info->mFileId;
-
-        // ### Deleting old content information.
-
-        if (requestFlags & 0x00000001)
-          mContentInfoList[0].markDeletedByFileId(ff.mFileInfo.mFileId);
-      }
-      else
-      {
-        // ### Generating a new file-id.
-        //printf("** File added %s\n",fileInfo.mName.c_str());
-
-        mMaxFileId++;
-
-        ff.mFileInfo.mFileId = mMaxFileId;
-
-        info = ff.mFileInfo.duplicate();
-
-        tmpFileList.addFileInfo(info);
-        //mFileInfoList.addFileInfo(info);
-        //mFileInfoListByName.addFileInfo(info);
-      }
+      const bool existingFile = prepareFileOfContent(ff,requestFlags,tmpFileList);
 
 
       // ### Adding the content information into the database.
 
       uint len = ff.mContentInfoList.getLength();
-      //printf("-- contentList %u\n",len);
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
-        if (info != nullptr)
-        {
-          //T::ContentInfo *cInfo = info->duplicate();
-          // ### Making sure that content data matches the file data.
-
-          info->mFileId = ff.mFileInfo.mFileId;
-          if (info->mFileType == 0)
-            info->mFileType = ff.mFileInfo.mFileType;
-
-          info->mProducerId = ff.mFileInfo.mProducerId;
-          info->mGenerationId = ff.mFileInfo.mGenerationId;
-          info->mFlags = info->mFlags;
-
-
-          //mContentInfoList[0].addContentInfo(cInfo);
-          tmpContentList.addContentInfo(info);
-
-          if (existingFile  &&  (requestFlags & 0x00000001) == 0)
-            tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
-        }
-      }
+      collectFileContents(ff,existingFile,requestFlags,tmpContentList,tmpEventList);
 
       // ### Adding an event to the event list.
 
@@ -6147,6 +6181,114 @@ bool MemoryImplementation::syncGeometryList()
 
 
 
+/*! \brief Memory backend: add or mark the file of one line of the files csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::syncFileCsvLine(char *st,T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::FileInfo();
+    rec->setCsv(st);
+
+    mMaxFileId = std::max(rec->mFileId, mMaxFileId);
+
+    T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+      return true;
+    }
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+    if (gInfo == nullptr)
+    {
+      // Invalid generation
+
+      delete rec;
+      return true;
+    }
+
+    rec->mFlags = rec->mFlags | 0x80000000;
+    mFileInfoList.addFileInfo(rec);
+    mFileInfoListByName.addFileInfo(rec);
+    addEvent(EventType::FILE_ADDED,rec->mFileId,rec->mFileType,0,0);
+
+    return (mMaxEventId - startEventId) <= maxLen;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the files that were not marked as found in the csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::deleteUnsyncedFiles(T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<T::FileId> idList;
+    std::vector<std::string> nameList;
+    uint len = mFileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The file is not in the csv-file anymore. We should delete it.
+        idList.emplace_back(info->mFileId);
+        nameList.emplace_back(info->mName);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    for (auto& name : nameList)
+      mFileInfoListByName.deleteFileInfoByName(name);
+
+    int count = 0;
+    bool complete = true;
+    for (unsigned long & it : idList)
+    {
+      mFileInfoList.deleteFileInfoById(it);
+      count += mContentInfoList[0].markDeletedByFileId(it);
+      addEvent(EventType::FILE_DELETED,it,0,0,0);
+      if ((mMaxEventId - startEventId) > maxLen)
+      {
+        complete = false;
+        break;
+      }
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+    return complete;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Memory backend: reconcile the in-memory file list with the persisted storage. */
 
 bool MemoryImplementation::syncFileList()
@@ -6181,93 +6323,110 @@ bool MemoryImplementation::syncFileList()
 
     while (fgets(st,1000,file) != nullptr)
     {
-      if (st[0] != '#')
+      if (st[0] != '#'  &&  !syncFileCsvLine(st,startEventId,maxLen))
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        auto *rec = new T::FileInfo();
-        rec->setCsv(st);
-
-        mMaxFileId = std::max(rec->mFileId, mMaxFileId);
-
-        T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
-          if (gInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            mFileInfoList.addFileInfo(rec);
-            mFileInfoListByName.addFileInfo(rec);
-            addEvent(EventType::FILE_ADDED,rec->mFileId,rec->mFileType,0,0);
-
-            if ((mMaxEventId - startEventId) > maxLen)
-              return false;
-          }
-          else
-          {
-            // Invalid generation
-
-            delete rec;
-          }
-        }
+        (void)fclose(file);
+        return false;
       }
     }
     (void)fclose(file);
 
-    std::vector<T::FileId> idList;
-    std::vector<std::string> nameList;
-    len = mFileInfoList.getLength();
-    for (uint t=0; t<len; t++)
+    if (!deleteUnsyncedFiles(startEventId,maxLen))
+      return false;
+
+    mFileStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: add or mark the content of one line of the content csv-file. Added contents are also
+           collected to contentToAdd. Returns false when too many events were added. */
+
+bool MemoryImplementation::syncContentCsvLine(char *st,T::ContentInfoList& contentToAdd,T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::ContentInfo();
+    rec->setCsv(st);
+
+    T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);
+    if (info != nullptr)
     {
-      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0)
-      {
-        // The file is not in the csv-file anymore. We should delete it.
-        idList.emplace_back(info->mFileId);
-        nameList.emplace_back(info->mName);
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+      return true;
     }
 
-    for (auto& name : nameList)
-      mFileInfoListByName.deleteFileInfoByName(name);
-
-    int count = 0;
-    for (unsigned long & it : idList)
+    T::FileInfo *fInfo = mFileInfoList.getFileInfoById(rec->mFileId);
+    if (fInfo == nullptr)
     {
-      mFileInfoList.deleteFileInfoById(it);
-      count += mContentInfoList[0].markDeletedByFileId(it);
-      addEvent(EventType::FILE_DELETED,it,0,0,0);
-      if ((mMaxEventId - startEventId) > maxLen)
+      // Invalid file
+      delete rec;
+      return true;
+    }
+
+    rec->mFlags = rec->mFlags | 0x80000000;
+    contentToAdd.addContentInfo(rec);
+    mContentInfoList[0].addContentInfo(rec);
+    addEvent(EventType::CONTENT_ADDED,rec->mFileId,rec->mMessageIndex,0,0);
+    return (mMaxEventId - startEventId) <= maxLen;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the contents that were not marked as found in the csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::deleteUnsyncedContents(T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint len = mContentInfoList[0].getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
       {
-        if (count > 0)
+        // The generation is not in the csv-file anymore. We should delete it.
+        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+        addEvent(EventType::CONTENT_DELETED,info->mFileId,info->mMessageIndex,0,0);
+        if ((mMaxEventId - startEventId) > maxLen)
         {
+          info->mFlags = info->mFlags & 0x7FFFFFFF;
           for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
           {
             mContentInfoList[t].deleteMarkedContent();
           }
+          return false;
         }
-        return false;
       }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    if (count > 0)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
     {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
+      mContentInfoList[t].deleteMarkedContent();
     }
-
-    mFileStorage_modificationTime = getFileModificationTime(filename);
     return true;
   }
   catch (...)
@@ -6317,39 +6476,10 @@ bool MemoryImplementation::syncContentList()
 
     while (fgets(st,1000,file) != nullptr)
     {
-      if (st[0] != '#')
+      if (st[0] != '#'  &&  !syncContentCsvLine(st,contentToAdd,startEventId,maxLen))
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        auto *rec = new T::ContentInfo();
-        rec->setCsv(st);
-
-        T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::FileInfo *fInfo = mFileInfoList.getFileInfoById(rec->mFileId);
-          if (fInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            contentToAdd.addContentInfo(rec);
-            mContentInfoList[0].addContentInfo(rec);
-            addEvent(EventType::CONTENT_ADDED,rec->mFileId,rec->mMessageIndex,0,0);
-            if ((mMaxEventId - startEventId) > maxLen)
-              return false;
-          }
-          else
-          {
-            // Invalid file
-            delete rec;
-          }
-        }
+        (void)fclose(file);
+        return false;
       }
     }
     (void)fclose(file);
@@ -6359,33 +6489,9 @@ bool MemoryImplementation::syncContentList()
       mContentInfoList[t].addContentInfoList(contentToAdd);
     }
 
-    std::vector<uint> idList;
-    mContentInfoList[0].getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0)
-      {
-        // The generation is not in the csv-file anymore. We should delete it.
-        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
-        addEvent(EventType::CONTENT_DELETED,info->mFileId,info->mMessageIndex,0,0);
-        if ((mMaxEventId - startEventId) > maxLen)
-        {
-          info->mFlags = info->mFlags & 0x7FFFFFFF;
-          for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-          {
-            mContentInfoList[t].deleteMarkedContent();
-          }
-          return false;
-        }
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
-    }
+    if (!deleteUnsyncedContents(startEventId,maxLen))
+      return false;
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      mContentInfoList[t].deleteMarkedContent();
-    }
     mContentStorage_modificationTime = getFileModificationTime(filename);
     return true;
   }
