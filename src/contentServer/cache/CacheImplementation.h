@@ -230,6 +230,11 @@ class CacheImplementation : public ServiceInterface
     void                 addCachedContent(T::ContentInfo *contentInfo);
     void                 addEventFileAndContents(const std::string& eventData);
     void                 addStoredFileAndContents(T::EventInfo& eventInfo);
+    bool                 processEventInfoList(T::EventInfoList& eventInfoList,uint& ecnt);
+    void                 removeUnknownGenerationTimes();
+    void                 updateContentIfRequired();
+    bool                 reloadAfterRestart(const T::EventInfo& eventInfo);
+    bool                 processNextEvents(uint& len,uint& ecnt);
 
     virtual bool    isSessionValid(T::SessionId sessionId);
 

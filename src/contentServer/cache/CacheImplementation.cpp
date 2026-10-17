@@ -8147,6 +8147,169 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
 
 
 
+/*! \brief Process the events of the list (logging failures) and append them to the event list. Returns false if a shutdown was requested. */
+
+bool CacheImplementation::processEventInfoList(T::EventInfoList& eventInfoList,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo *it = eventInfoList.getFirstEvent();
+    while (it != nullptr)
+    {
+      try
+      {
+        processEvent(*it);
+        ecnt++;
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+        exception.printError();
+      }
+
+
+      T::EventInfo *event = it->duplicate();
+      //event->mServerTime = mContentStorageStartTime;
+      mEventInfoList.addEventInfo(event);
+      mLastProcessedEventId = it->mEventId;
+
+      it = it->nextItem;
+
+      if (mShutdownRequested)
+        return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Remove the cached forecast times of the generations that are not in the active search structure. */
+
+void CacheImplementation::removeUnknownGenerationTimes()
+{
+  try
+  {
+    auto ssp = activeSearchStructure();
+    if (!ssp)
+      return;
+
+    AutoReadLock lock(&mContentTimeCache_modificationLock);
+
+    for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); )
+    {
+      if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+      {
+        if (mShutdownRequested)
+          return;
+
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        it = mContentTimeCache.erase(it);
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the content when the update interval has changed or an update was requested, but not more often than every 30 seconds. */
+
+void CacheImplementation::updateContentIfRequired()
+{
+  try
+  {
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Reload the data if the content storage has restarted after the last known start (according to the last event). Returns true after a reload. */
+
+bool CacheImplementation::reloadAfterRestart(const T::EventInfo& eventInfo)
+{
+  try
+  {
+    if (mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();Content server restart detected, reload required");
+      mEventInfoList.clear();
+      reloadData();
+      mContentUpdateRequired = true;
+      mContentStorageStartTime = eventInfo.mServerTime;
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Fetch and process the events after the last processed event. Sets len to the number of fetched events.
+           Returns false if the events cannot be fetched or a shutdown was requested. */
+
+bool CacheImplementation::processNextEvents(uint& len,uint& ecnt)
+{
+  try
+  {
+    T::EventInfoList eventInfoList;
+    int result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
+    if (result != 0)
+    {
+      return false;
+    }
+
+    len = eventInfoList.getLength();
+
+    return processEventInfoList(eventInfoList,ecnt);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Pulls new events from the upstream source and applies them to the cache. */
 
 void CacheImplementation::processEvents(bool eventThread)
@@ -8166,15 +8329,7 @@ void CacheImplementation::processEvents(bool eventThread)
       return;
     }
 
-    time_t t1 = time(nullptr) / mContentUpdateInterval;
-    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
-
-    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
-    {
-      mContentUpdateRequired = false;
-      mContentUpdateTime = 0;
-      updateContent();
-    }
+    updateContentIfRequired();
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
@@ -8188,18 +8343,8 @@ void CacheImplementation::processEvents(bool eventThread)
       len = 0;
       T::EventInfo eventInfo;
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-      if (result == Result::DATA_NOT_FOUND || result == Result::OK)
-      {
-        if (eventThread  &&  mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
-        {
-          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();Content server restart detected, reload required");
-          mEventInfoList.clear();
-          reloadData();
-          mContentUpdateRequired = true;
-          mContentStorageStartTime = eventInfo.mServerTime;
-          return;
-        }
-      }
+      if ((result == Result::DATA_NOT_FOUND || result == Result::OK)  &&  eventThread  &&  reloadAfterRestart(eventInfo))
+        return;
 
       if (result != Result::OK)
         return;
@@ -8207,68 +8352,18 @@ void CacheImplementation::processEvents(bool eventThread)
       if (eventThread  &&  mContentStorageStartTime == 0)
         mContentStorageStartTime = eventInfo.mServerTime;
 
-      if (eventInfo.mEventId > mLastProcessedEventId)
-      {
+      if (eventInfo.mEventId <= mLastProcessedEventId)
+        continue;
 
-        T::EventInfoList eventInfoList;
-        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
-        if (result != 0)
-        {
-          return;
-        }
-
-        len = eventInfoList.getLength();
-
-        T::EventInfo *it = eventInfoList.getFirstEvent();
-        while (it != nullptr)
-        {
-          try
-          {
-            processEvent(*it);
-            ecnt++;
-          }
-          catch (...)
-          {
-            Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-            exception.printError();
-          }
-
-
-          T::EventInfo *event = it->duplicate();
-          //event->mServerTime = mContentStorageStartTime;
-          mEventInfoList.addEventInfo(event);
-          mLastProcessedEventId = it->mEventId;
-
-          it = it->nextItem;
-
-          if (mShutdownRequested)
-            return;
-        }
-      }
+      if (!processNextEvents(len,ecnt))
+        return;
     }
 
     if (ecnt > 0)
     {
       PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();%u",ecnt);
 
-      auto ssp = activeSearchStructure();
-      if (ssp)
-      {
-        AutoReadLock lock(&mContentTimeCache_modificationLock);
-
-        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
-        {
-          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-          {
-            if (mShutdownRequested)
-              return;
-
-            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-            mContentTimeCache.erase(it->first);
-            mContentTimeCache_modificationLock.writeUnlock();
-          }
-        }
-      }
+      removeUnknownGenerationTimes();
     }
   }
   catch (...)
