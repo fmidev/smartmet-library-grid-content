@@ -98,6 +98,25 @@ class HeightRec
 
 using HeightRec_vec = std::vector<HeightRec>;                                                 //!< Ordered list of HeightRec records.
 
+
+
+// ====================================================================================
+/*! \brief Search criteria of the height parameter contents used in the height to level conversions. */
+// ====================================================================================
+class HeightQuery
+{
+  public:
+    T::ProducerId   heightProducerId = 0;       //!< Producer of the height parameter.
+    std::string     heightParameter;            //!< Name of the height parameter.
+    T::GenerationId heightGenerationId = 0;     //!< Generation of the height producer.
+    int             geometryId = 0;             //!< Geometry of the contents.
+    T::ParamLevelId paramLevelId = 0;           //!< Level type of the contents.
+    int             forecastType = 0;           //!< Forecast type of the contents.
+    int             forecastNumber = 0;         //!< Forecast number of the contents.
+    uint            firstLevel = 0xFFFFFFFF;    //!< First level of the height parameter.
+    uint            lastLevel = 0xFFFFFFFF;     //!< Last level of the height parameter.
+};
+
 using HeightCache = Fmi::Cache::Cache<std::size_t,HeightRec>;                                 //!< LRU cache from query hash to HeightRec.
 using LevelCache = Fmi::Cache::Cache<std::size_t,std::size_t>;                                //!< LRU cache from query hash to resolved level index.
 using HeightVecCache = Fmi::Cache::Cache<std::size_t,std::shared_ptr<T::ParamValue_vec>>;     //!< LRU cache from query hash to height value vector.
@@ -621,6 +640,15 @@ class ServiceImplementation : public ServiceInterface
                        float& height1,
                        int& level2,
                        float& height2);
+
+     bool           findHeightConversion(std::size_t hash,double& mul,T::ProducerId& heightProducerId,std::string& heightParameter);
+     bool           getHeightGenerationId(T::ProducerId producerId,T::GenerationId generationId,HeightQuery& q);
+     bool           getHeightLevelRange(HeightQuery& q);
+     void           getHeightContentList(const HeightQuery& q,time_t forecastTime,uint requestFlags,T::ContentInfoList& contentInfoList);
+     ContentCacheEntry_sptr getHeightContentEntry(std::size_t levelContentHash,const HeightQuery& q,time_t forecastTime);
+     bool           getHeightTimeNeighbours(const HeightQuery& q,time_t forecastTime,time_t& time1,time_t& time2);
+     bool           getHeightContentListPair(const HeightQuery& q,time_t time1,time_t time2,T::ContentInfoList& contentInfoList1,T::ContentInfoList& contentInfoList2);
+     bool           getHeightValueVector(const T::ContentInfo& info,uchar coordinateType,std::vector<T::Coordinate>& coordinates,std::size_t coordinateHash,std::shared_ptr<T::ParamValue_vec>& valueVec);
 
      T::ParamValue  getAdditionalValue(
                        const std::string& parameterName,

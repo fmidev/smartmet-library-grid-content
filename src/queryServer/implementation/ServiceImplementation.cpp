@@ -11419,6 +11419,305 @@ T::ParamValue ServiceImplementation::getAdditionalValue(
 
 
 
+namespace
+{
+
+/*! \brief Bisection bracket of the level search: the contents and the heights at both ends. */
+
+struct LevelBracket
+{
+  T::ContentInfo *first = nullptr;
+  T::ContentInfo *last = nullptr;
+  int firstIndex = 0;
+  int lastIndex = 0;
+  T::ParamValue firstValue = 0;
+  T::ParamValue lastValue = 0;
+};
+
+
+
+/*! \brief Narrow the bracket with the height of the middle content. Returns true when the levels (and their heights)
+           closest to the requested height are found: the middle content itself or the two contents of a minimal bracket. */
+
+bool bisectLevelBracket(LevelBracket& b,T::ContentInfo *mid,int middleIndex,T::ParamValue middleValue,int height,bool reverse,int& level1,float& height1,int& level2,float& height2)
+{
+  if (height == middleValue)
+  {
+    level1 = mid->mParameterLevel;
+    level2 = mid->mParameterLevel;
+    height1 = middleValue;
+    height2 = middleValue;
+    return true;
+  }
+
+  bool aboveMiddle = (reverse ? height < middleValue : height > middleValue);
+  if (aboveMiddle)
+  {
+    b.first = mid;
+    b.firstIndex = middleIndex;
+    b.firstValue = middleValue;
+  }
+  else
+  {
+    b.last = mid;
+    b.lastIndex = middleIndex;
+    b.lastValue = middleValue;
+  }
+
+  if ((b.firstIndex+1) != b.lastIndex)
+    return false;
+
+  if (reverse)
+  {
+    level1 = b.first->mParameterLevel;
+    level2 = b.last->mParameterLevel;
+    height1 = b.firstValue;
+    height2 = b.lastValue;
+  }
+  else
+  {
+    level1 = b.last->mParameterLevel;
+    level2 = b.first->mParameterLevel;
+    height1 = b.lastValue;
+    height2 = b.firstValue;
+  }
+  return true;
+}
+
+
+
+/*! \brief Scale the heights of the record with the multiplier of the height conversion. */
+
+void scaleHeights(HeightRec& rec,double mul)
+{
+  if (mul != 1.0)
+  {
+    rec.height1_1 = rec.height1_1 * mul;
+    rec.height1_2 = rec.height1_2 * mul;
+    rec.height2_1 = rec.height2_1 * mul;
+    rec.height2_2 = rec.height2_2 * mul;
+  }
+}
+
+}  // namespace
+
+
+
+
+
+/*! \brief Query Server: Find the height conversion (multiplier, height producer and height parameter) of the producer and level id hash. */
+
+bool ServiceImplementation::findHeightConversion(std::size_t hash,double& mul,T::ProducerId& heightProducerId,std::string& heightParameter)
+{
+  try
+  {
+    AutoReadLock lock(&mHeightConversions_modificationLock);
+    auto conv = mHeightConversions.find(hash);
+    if (conv == mHeightConversions.end())
+      return false; // No conversion defined for the current producer and level id
+
+    mul = conv->second.multiplier;
+    heightProducerId = conv->second.heightProducerId;
+    heightParameter = conv->second.heightParameter;
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the generation of the height producer. Returns false if the height producer is not the
+           requested producer and it has no generation with the same analysis time. */
+
+bool ServiceImplementation::getHeightGenerationId(T::ProducerId producerId,T::GenerationId generationId,HeightQuery& q)
+{
+  try
+  {
+    q.heightGenerationId = generationId;
+    if (producerId == q.heightProducerId)
+      return true;
+
+    // Height producer is different than the requested producer. If we want to
+    // use it then the producer should have a generation with the same analysis time.
+
+    T::GenerationInfo gInfo1;
+    if (!mGenerationInfoList->getGenerationInfoById(generationId,gInfo1))
+      return false;
+
+    T::GenerationInfo gInfo2;
+    if (!mGenerationInfoList->getGenerationInfoByProducerIdAndAnalysisTime(q.heightProducerId,gInfo1.mAnalysisTime,gInfo2))
+      return false;
+
+    q.heightGenerationId = gInfo2.mGenerationId;
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the first and the last level of the height parameter (cached). Returns false if there are no levels. */
+
+bool ServiceImplementation::getHeightLevelRange(HeightQuery& q)
+{
+  try
+  {
+    std::size_t levelHash = 0;
+    Fmi::hash_merge(levelHash,q.heightGenerationId);
+    Fmi::hash_merge(levelHash,q.geometryId);
+    Fmi::hash_merge(levelHash,q.paramLevelId);
+    Fmi::hash_merge(levelHash,q.heightProducerId);
+
+    q.firstLevel = 0xFFFFFFFF;
+    q.lastLevel = 0xFFFFFFFF;
+
+    auto itm = mLevelRangeCache.find(levelHash);
+    if (itm)
+    {
+      q.firstLevel = (*itm >> 32) & 0xFFFFFFFF;
+      q.lastLevel = (*itm) & 0xFFFFFFFF;
+    }
+
+    if (q.firstLevel != 0xFFFFFFFF  &&  q.lastLevel != 0xFFFFFFFF)
+      return true;
+
+    std::set<T::ParamLevel> levels;
+    int result = mContentServerPtr->getContentLevelListByGenerationGeometryAndLevelId(0,q.heightGenerationId,q.geometryId,q.paramLevelId,levels);
+    if (result != 0 || levels.empty())
+      return false;
+
+    q.firstLevel = *levels.begin();
+    q.lastLevel = *levels.rbegin();
+
+    std::size_t lev = ((std::size_t)q.firstLevel << 32) + (std::size_t)q.lastLevel;
+    mLevelRangeCache.insert(levelHash,lev);
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the height parameter contents of the time between the first and the last level. */
+
+void ServiceImplementation::getHeightContentList(const HeightQuery& q,time_t forecastTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+{
+  try
+  {
+    T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
+    mContentServerPtr->getContentListByParameterAndGenerationId(0,q.heightGenerationId,paramKeyType,q.heightParameter,q.paramLevelId,q.firstLevel,q.lastLevel,q.forecastType,q.forecastNumber,q.geometryId,forecastTime,forecastTime,requestFlags,contentInfoList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the height parameter contents of the forecast time from the level content cache or from the content server. */
+
+ContentCacheEntry_sptr ServiceImplementation::getHeightContentEntry(std::size_t levelContentHash,const HeightQuery& q,time_t forecastTime)
+{
+  try
+  {
+    auto cc = mLevelContentCache.find(levelContentHash);
+    if (cc)
+    {
+      // The required content information was found from the cache
+      return *cc;
+    }
+
+    auto entry = std::make_shared<ContentCacheEntry>();
+    getHeightContentList(q,forecastTime,0,entry->contentInfoList);
+    entry->generationId = q.heightGenerationId;
+    entry->producerHash = q.heightProducerId;
+
+    mLevelContentCache.insert(levelContentHash,entry);
+    return entry;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the closest times before and after the forecast time that have height parameter contents. Returns false if there are no such times. */
+
+bool ServiceImplementation::getHeightTimeNeighbours(const HeightQuery& q,time_t forecastTime,time_t& time1,time_t& time2)
+{
+  try
+  {
+    T::ContentInfoList tmpContentList;
+    getHeightContentList(q,forecastTime,ContentServer::RequestFlags::INCLUDE_TIME_BEFORE | ContentServer::RequestFlags::INCLUDE_TIME_AFTER,tmpContentList);
+
+    if (tmpContentList.getLength() != 2)
+      return false;
+
+    T::ContentInfo *prev = tmpContentList.getContentInfoByIndex(0);
+    T::ContentInfo *next = tmpContentList.getContentInfoByIndex(1);
+
+    time1 = prev->mForecastTimeUTC;
+    time2 = next->mForecastTimeUTC;
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the height parameter contents of the two times. Returns false if a content list is empty or the lists are of different lengths. */
+
+bool ServiceImplementation::getHeightContentListPair(const HeightQuery& q,time_t time1,time_t time2,T::ContentInfoList& contentInfoList1,T::ContentInfoList& contentInfoList2)
+{
+  try
+  {
+    getHeightContentList(q,time1,0,contentInfoList1);
+    if (contentInfoList1.getLength() == 0)
+      return false;
+
+    getHeightContentList(q,time2,0,contentInfoList2);
+    if (contentInfoList2.getLength() == 0)
+      return false;
+
+    return contentInfoList1.getLength() == contentInfoList2.getLength();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get closest levels by height. */
 
 bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T::GenerationId generationId,int geometryId,T::ParamLevelId paramLevelId,int forecastType,int forecastNumber,time_t forecastTime,uchar coordinateType,double x,double y,int height,HeightRec& rec)
@@ -11429,25 +11728,15 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
-    T::ProducerId heightProducerId = 0;
-    std::string heightParameter;
+    HeightQuery q;
 
     std::size_t hash = 0;
     Fmi::hash_merge(hash,producerId);
     Fmi::hash_merge(hash,paramLevelId);
     //std::size_t hashConversion = hash;
-    T::GenerationId heightGenerationId = generationId;
 
-    {
-      AutoReadLock lock(&mHeightConversions_modificationLock);
-      auto conv = mHeightConversions.find(hash);
-      if (conv == mHeightConversions.end())
-        return false; // No conversion defined for the current producer and level id
-
-      mul = conv->second.multiplier;
-      heightProducerId = conv->second.heightProducerId;
-      heightParameter = conv->second.heightParameter;
-    }
+    if (!findHeightConversion(hash,mul,q.heightProducerId,q.heightParameter))
+      return false; // No conversion defined for the current producer and level id
 
 
     Fmi::hash_merge(hash,generationId);
@@ -11462,8 +11751,6 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     Fmi::hash_merge(hash,x);
     Fmi::hash_merge(hash,y);
 
-    T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
-
     auto it = mPointHeightCache.find(hash);
     if (it)
     {
@@ -11472,72 +11759,15 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
       return true;
     }
 
-    if (producerId != heightProducerId)
-    {
-      // Height producer is different than the requested producer. If we want to
-      // use it then the producer should have a generation with the same analysis time.
+    q.geometryId = geometryId;
+    q.paramLevelId = paramLevelId;
+    q.forecastType = forecastType;
+    q.forecastNumber = forecastNumber;
 
-      T::GenerationInfo gInfo1;
-      if (!mGenerationInfoList->getGenerationInfoById(generationId,gInfo1))
-        return false;
+    if (!getHeightGenerationId(producerId,generationId,q)  ||  !getHeightLevelRange(q))
+      return false;
 
-      T::GenerationInfo gInfo2;
-      if (!mGenerationInfoList->getGenerationInfoByProducerIdAndAnalysisTime(heightProducerId,gInfo1.mAnalysisTime,gInfo2))
-        return false;
-
-      heightGenerationId = gInfo2.mGenerationId;
-    }
-
-    std::size_t levelHash = 0;
-    Fmi::hash_merge(levelHash,heightGenerationId);
-    Fmi::hash_merge(levelHash,geometryId);
-    Fmi::hash_merge(levelHash,paramLevelId);
-    Fmi::hash_merge(levelHash,heightProducerId);
-
-
-    uint firstLevel = 0xFFFFFFFF;
-    uint lastLevel = 0xFFFFFFFF;
-
-    auto itm = mLevelRangeCache.find(levelHash);
-    if (itm)
-    {
-      firstLevel = (*itm >> 32) & 0xFFFFFFFF;
-      lastLevel = (*itm) & 0xFFFFFFFF;
-    }
-
-    if (firstLevel == 0xFFFFFFFF ||  lastLevel == 0xFFFFFFFF)
-    {
-      std::set<T::ParamLevel> levels;
-      int result = mContentServerPtr->getContentLevelListByGenerationGeometryAndLevelId(0,heightGenerationId,geometryId,paramLevelId,levels);
-      if (result != 0 || levels.empty())
-      {
-        return false;
-      }
-
-      firstLevel = *levels.begin();
-      lastLevel = *levels.rbegin();
-
-      std::size_t lev = ((std::size_t)firstLevel << 32) + (std::size_t)lastLevel;
-      mLevelRangeCache.insert(levelHash,lev);
-    }
-
-    ContentCacheEntry_sptr entry;
-    auto cc = mLevelContentCache.find(levelContentHash);
-    if (cc)
-    {
-      // The required content information was found from the cache
-      entry = *cc;
-    }
-    else
-    {
-      entry = std::make_shared<ContentCacheEntry>();
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,0,entry->contentInfoList);
-      entry->generationId = heightGenerationId;
-      entry->producerHash = heightProducerId;
-
-
-      mLevelContentCache.insert(levelContentHash,entry);
-    }
+    ContentCacheEntry_sptr entry = getHeightContentEntry(levelContentHash,q,forecastTime);
 
     int len = entry->contentInfoList.getLength();
 
@@ -11548,14 +11778,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     {
       if (getClosestLevelsByHeight(entry->contentInfoList,coordinateType,x,y,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2))
       {
-        if (mul != 1.0)
-        {
-          rec.height1_1 = rec.height1_1 * mul;
-          rec.height1_2 = rec.height1_2 * mul;
-          rec.height2_1 = rec.height2_1 * mul;
-          rec.height2_2 = rec.height2_2 * mul;
-        }
-
+        scaleHeights(rec,mul);
         mPointHeightCache.insert(hash,rec);
         return true;
       }
@@ -11563,44 +11786,22 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     }
 
 
-    T::ContentInfoList tmpContentList;
-    mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,ContentServer::RequestFlags::INCLUDE_TIME_BEFORE | ContentServer::RequestFlags::INCLUDE_TIME_AFTER,tmpContentList);
+    time_t time1 = 0;
+    time_t time2 = 0;
+    T::ContentInfoList contentInfoList1;
+    T::ContentInfoList contentInfoList2;
+    if (!getHeightTimeNeighbours(q,forecastTime,time1,time2)  ||  !getHeightContentListPair(q,time1,time2,contentInfoList1,contentInfoList2))
+      return false;
 
-    if (tmpContentList.getLength() == 2)
+    rec.time1 = time1;
+    rec.time2 = time2;
+
+    if (getClosestLevelsByHeight(contentInfoList1,coordinateType,x,y,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) &&
+        getClosestLevelsByHeight(contentInfoList2,coordinateType,x,y,height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
     {
-      T::ContentInfo *prev = tmpContentList.getContentInfoByIndex(0);
-      T::ContentInfo *next = tmpContentList.getContentInfoByIndex(1);
-
-      T::ContentInfoList contentInfoList1;
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,prev->mForecastTimeUTC,prev->mForecastTimeUTC,0,contentInfoList1);
-      if (contentInfoList1.getLength() == 0)
-        return false;
-
-      T::ContentInfoList contentInfoList2;
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,next->mForecastTimeUTC,next->mForecastTimeUTC,0,contentInfoList2);
-      if (contentInfoList2.getLength() == 0)
-        return false;
-
-      if (contentInfoList1.getLength() != contentInfoList2.getLength())
-        return false;
-
-      rec.time1 = prev->mForecastTimeUTC;
-      rec.time2 = next->mForecastTimeUTC;
-
-      if (getClosestLevelsByHeight(contentInfoList1,coordinateType,x,y,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) &&
-          getClosestLevelsByHeight(contentInfoList2,coordinateType,x,y,height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
-      {
-        if (mul != 1.0)
-        {
-          rec.height1_1 = rec.height1_1 * mul;
-          rec.height1_2 = rec.height1_2 * mul;
-          rec.height2_1 = rec.height2_1 * mul;
-          rec.height2_2 = rec.height2_2 * mul;
-        }
-
-        mPointHeightCache.insert(hash,rec);
-        return true;
-      }
+      scaleHeights(rec,mul);
+      mPointHeightCache.insert(hash,rec);
+      return true;
     }
     return false;
   }
@@ -11627,100 +11828,88 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
     if (len == 0)
       return false;
 
-    int firstIndex = 0;
-    int lastIndex = len-1;
+    LevelBracket b;
+    b.firstIndex = 0;
+    b.lastIndex = len-1;
 
-    T::ContentInfo *first = contentInfoList.getContentInfoByIndex(firstIndex);
-    T::ContentInfo *last = contentInfoList.getContentInfoByIndex(lastIndex);
+    b.first = contentInfoList.getContentInfoByIndex(b.firstIndex);
+    b.last = contentInfoList.getContentInfoByIndex(b.lastIndex);
 
     double_vec modificationParameters;
-    T::ParamValue firstValue = 0;
-    T::ParamValue lastValue = 0;
     T::ParamValue middleValue = 0;
-    int res1 = mDataServerPtr->getGridValueByPoint(0,first->mFileId,first->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,firstValue);
-    if (res1 == 0)
+    int res1 = mDataServerPtr->getGridValueByPoint(0,b.first->mFileId,b.first->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,b.firstValue);
+    if (res1 != 0)
+      return false;
+
+    int res2 = mDataServerPtr->getGridValueByPoint(0,b.last->mFileId,b.last->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,b.lastValue);
+    if (res2 != 0)
+      return false;
+
+    bool reverse = false;
+    if (b.firstValue > b.lastValue)
+      reverse = true;
+
+
+    while (b.firstIndex < b.lastIndex)
     {
-      int res2 = mDataServerPtr->getGridValueByPoint(0,last->mFileId,last->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,lastValue);
-      if (res2 == 0)
-      {
-        bool reverse = false;
-        if (firstValue > lastValue)
-          reverse = true;
+      int middleIndex = (b.firstIndex + b.lastIndex) / 2;
+      T::ContentInfo *mid = contentInfoList.getContentInfoByIndex(middleIndex);
+      if (mid == nullptr)
+        return false;
 
+      int res3 = mDataServerPtr->getGridValueByPoint(0,mid->mFileId,mid->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,middleValue);
+      if (res3 != 0)
+        continue;
 
-        while (firstIndex < lastIndex)
-        {
-          int middleIndex = (firstIndex + lastIndex) / 2;
-          T::ContentInfo *mid = contentInfoList.getContentInfoByIndex(middleIndex);
-          if (mid == nullptr)
-            return false;
-
-          int res3 = mDataServerPtr->getGridValueByPoint(0,mid->mFileId,mid->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,middleValue);
-          if (res3 == 0)
-          {
-            if (height == middleValue)
-            {
-              level1 = mid->mParameterLevel;
-              level2 = mid->mParameterLevel;
-              height1 = middleValue;
-              height2 = middleValue;
-              return true;
-            }
-
-            if (reverse)
-            {
-              if (height < middleValue)
-              {
-                first = mid;
-                firstIndex = middleIndex;
-                firstValue = middleValue;
-              }
-              else
-              {
-                last = mid;
-                lastIndex = middleIndex;
-                lastValue = middleValue;
-              }
-            }
-            else
-            {
-              if (height > middleValue)
-              {
-                first = mid;
-                firstIndex = middleIndex;
-                firstValue = middleValue;
-              }
-              else
-              {
-                last = mid;
-                lastIndex = middleIndex;
-                lastValue = middleValue;
-              }
-            }
-
-            if ((firstIndex+1) == lastIndex)
-            {
-              if (reverse)
-              {
-                level1 = first->mParameterLevel;
-                level2 = last->mParameterLevel;
-                height1 = firstValue;
-                height2 = lastValue;
-              }
-              else
-              {
-                level1 = last->mParameterLevel;
-                level2 = first->mParameterLevel;
-                height1 = lastValue;
-                height2 = firstValue;
-              }
-              return true;
-            }
-          }
-        }
-      }
+      if (bisectLevelBracket(b,mid,middleIndex,middleValue,height,reverse,level1,height1,level2,height2))
+        return true;
     }
     return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the height values of the content at the coordinates from the height vector cache or from the data server. Errors are logged and return false. */
+
+bool ServiceImplementation::getHeightValueVector(const T::ContentInfo& info,uchar coordinateType,std::vector<T::Coordinate>& coordinates,std::size_t coordinateHash,std::shared_ptr<T::ParamValue_vec>& valueVec)
+{
+  try
+  {
+    short areaInterpolationMethod = T::AreaInterpolationMethod::Linear;
+    double_vec modificationParameters;
+
+    std::size_t key = ((std::size_t)info.mFileId << 24) + info.mMessageIndex + coordinateHash;
+
+    auto it = mHeightVecCache.find(key);
+    if (it)
+    {
+      valueVec = *it;
+      return true;
+    }
+
+    valueVec = std::make_shared<T::ParamValue_vec>();
+    int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,info.mFileId,info.mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*valueVec);
+    if (result1 != 0)
+    {
+      Fmi::Exception exception(BCP, "DataServer returns an error!");
+      exception.addParameter("Service", "getGridValueVectorByCoordinateList");
+      exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
+      exception.addParameter("FileId", std::to_string(info.mFileId));
+      exception.addParameter("MessageIndex", std::to_string(info.mMessageIndex));
+      std::string errorMsg = exception.getStackTrace();
+      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+      return false;
+    }
+
+    mHeightVecCache.insert(key,valueVec);
+    return true;
   }
   catch (...)
   {
@@ -11741,180 +11930,51 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
   {
     PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
-    short areaInterpolationMethod = T::AreaInterpolationMethod::Linear;
-
     int len = contentInfoList.getLength();
     if (len == 0)
       return false;
 
-    int firstIndex = 0;
-    int lastIndex = len-1;
+    LevelBracket b;
+    b.firstIndex = 0;
+    b.lastIndex = len-1;
 
-    T::ContentInfo *first = contentInfoList.getContentInfoByIndex(firstIndex);
-    T::ContentInfo *last = contentInfoList.getContentInfoByIndex(lastIndex);
+    b.first = contentInfoList.getContentInfoByIndex(b.firstIndex);
+    b.last = contentInfoList.getContentInfoByIndex(b.lastIndex);
 
-    double_vec modificationParameters;
-    T::ParamValue firstValue = 0;
-    T::ParamValue lastValue = 0;
     T::ParamValue middleValue = 0;
-
-
-    std::size_t firstKey = ((std::size_t)first->mFileId << 24) + first->mMessageIndex + coordinateHash;
-    std::size_t lastKey = ((std::size_t)last->mFileId << 24) + last->mMessageIndex + coordinateHash;
 
     std::shared_ptr<T::ParamValue_vec> firstValueVec;
     std::shared_ptr<T::ParamValue_vec> lastValueVec;
     std::shared_ptr<T::ParamValue_vec> middleValueVec;
 
+    if (!getHeightValueVector(*b.first,coordinateType,coordinates,coordinateHash,firstValueVec))
+      return false;
 
-    auto it = mHeightVecCache.find(firstKey);
-    if (it)
-    {
-      firstValueVec = *it;
-    }
-    else
-    {
-      firstValueVec = std::make_shared<T::ParamValue_vec>();
-      int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,first->mFileId,first->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*firstValueVec);
-      if (result1 != 0)
-      {
-        Fmi::Exception exception(BCP, "DataServer returns an error!");
-        exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-        exception.addParameter("FileId", std::to_string(first->mFileId));
-        exception.addParameter("MessageIndex", std::to_string(first->mMessageIndex));
-        std::string errorMsg = exception.getStackTrace();
-        PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-        return false;
-      }
+    b.firstValue = (*firstValueVec)[coordinateIndex];
 
-      mHeightVecCache.insert(firstKey,firstValueVec);
-    }
+    if (!getHeightValueVector(*b.last,coordinateType,coordinates,coordinateHash,lastValueVec))
+      return false;
 
-    firstValue = (*firstValueVec)[coordinateIndex];
-
-
-    it = mHeightVecCache.find(lastKey);
-    if (it)
-    {
-      lastValueVec = *it;
-    }
-    else
-    {
-      lastValueVec = std::make_shared<T::ParamValue_vec>();
-      int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,last->mFileId,last->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*lastValueVec);
-      if (result1 != 0)
-      {
-        Fmi::Exception exception(BCP, "DataServer returns an error!");
-        exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-        exception.addParameter("FileId", std::to_string(last->mFileId));
-        exception.addParameter("MessageIndex", std::to_string(last->mMessageIndex));
-        std::string errorMsg = exception.getStackTrace();
-        PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-        return false;
-      }
-      mHeightVecCache.insert(lastKey,lastValueVec);
-    }
-
-    lastValue = (*lastValueVec)[coordinateIndex];
+    b.lastValue = (*lastValueVec)[coordinateIndex];
 
     bool reverse = false;
-    if (firstValue > lastValue)
+    if (b.firstValue > b.lastValue)
       reverse = true;
 
-    while (firstIndex < lastIndex)
+    while (b.firstIndex < b.lastIndex)
     {
-      int middleIndex = (firstIndex + lastIndex) / 2;
+      int middleIndex = (b.firstIndex + b.lastIndex) / 2;
       T::ContentInfo *mid = contentInfoList.getContentInfoByIndex(middleIndex);
       if (mid == nullptr)
         return false;
 
-      std::size_t middleKey = ((std::size_t)mid->mFileId << 24) + mid->mMessageIndex + coordinateHash;
-
-      auto it = mHeightVecCache.find(middleKey);
-      if (it)
-      {
-        middleValueVec = *it;
-      }
-      else
-      {
-        middleValueVec = std::make_shared<T::ParamValue_vec>();
-        int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,mid->mFileId,mid->mMessageIndex,coordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*middleValueVec);
-        if (result1 != 0)
-        {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-          exception.addParameter("FileId", std::to_string(mid->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(mid->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
-          return false;
-        }
-        mHeightVecCache.insert(middleKey,middleValueVec);
-      }
+      if (!getHeightValueVector(*mid,coordinateType,coordinates,coordinateHash,middleValueVec))
+        return false;
 
       middleValue = (*middleValueVec)[coordinateIndex];
 
-      if (height == middleValue)
-      {
-        level1 = mid->mParameterLevel;
-        level2 = mid->mParameterLevel;
-        height1 = middleValue;
-        height2 = middleValue;
+      if (bisectLevelBracket(b,mid,middleIndex,middleValue,height,reverse,level1,height1,level2,height2))
         return true;
-      }
-
-      if (reverse)
-      {
-        if (height < middleValue)
-        {
-          first = mid;
-          firstIndex = middleIndex;
-          firstValue = middleValue;
-        }
-        else
-        {
-          last = mid;
-          lastIndex = middleIndex;
-          lastValue = middleValue;
-        }
-      }
-      else
-      {
-        if (height > middleValue)
-        {
-          first = mid;
-          firstIndex = middleIndex;
-          firstValue = middleValue;
-        }
-        else
-        {
-          last = mid;
-          lastIndex = middleIndex;
-          lastValue = middleValue;
-        }
-      }
-
-      if ((firstIndex+1) == lastIndex)
-      {
-        if (reverse)
-        {
-          level1 = first->mParameterLevel;
-          level2 = last->mParameterLevel;
-          height1 = firstValue;
-          height2 = lastValue;
-        }
-        else
-        {
-          level1 = last->mParameterLevel;
-          level2 = first->mParameterLevel;
-          height1 = lastValue;
-          height2 = firstValue;
-        }
-        return true;
-      }
     }
     return false;
   }
@@ -11938,27 +11998,17 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
     //PRINT_DATA(mDebugLog,"getClosestLevelsByHeight (height = %d)\n",height);
 
     double mul = 1.0;
-    T::ProducerId heightProducerId = 0;
-    std::string heightParameter;
+    HeightQuery q;
 
     std::size_t hash = 0;
     Fmi::hash_merge(hash,producerId);
     Fmi::hash_merge(hash,paramLevelId);
     //std::size_t hashConversion = hash;
-    T::GenerationId heightGenerationId = generationId;
 
+    if (!findHeightConversion(hash,mul,q.heightProducerId,q.heightParameter))
     {
-      AutoReadLock lock(&mHeightConversions_modificationLock);
-      auto conv = mHeightConversions.find(hash);
-      if (conv == mHeightConversions.end())
-      {
-        PRINT_DATA(mDebugLog,"  ** No height conversion defined\n");
-        return false; // No conversion defined for the current producer and level id
-      }
-
-      mul = conv->second.multiplier;
-      heightProducerId = conv->second.heightProducerId;
-      heightParameter = conv->second.heightParameter;
+      PRINT_DATA(mDebugLog,"  ** No height conversion defined\n");
+      return false; // No conversion defined for the current producer and level id
     }
 
 
@@ -11981,79 +12031,22 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
       Fmi::hash_merge(coordinateHash,coordinates[t].y());
     }
 
-    T::ParamKeyType paramKeyType = T::ParamKeyTypeValue::FMI_NAME;
+    q.geometryId = geometryId;
+    q.paramLevelId = paramLevelId;
+    q.forecastType = forecastType;
+    q.forecastNumber = forecastNumber;
 
-    if (producerId != heightProducerId)
+    if (!getHeightGenerationId(producerId,generationId,q))
+      return false;
+
+    if (!getHeightLevelRange(q))
     {
-      // Height producer is different than the requested producer. If we want to
-      // use it then the producer should have a generation with the same analysis time.
-
-      T::GenerationInfo gInfo1;
-      if (!mGenerationInfoList->getGenerationInfoById(generationId,gInfo1))
-        return false;
-
-      T::GenerationInfo gInfo2;
-      if (!mGenerationInfoList->getGenerationInfoByProducerIdAndAnalysisTime(heightProducerId,gInfo1.mAnalysisTime,gInfo2))
-        return false;
-
-      heightGenerationId = gInfo2.mGenerationId;
-    }
-
-    std::size_t levelHash = 0;
-    Fmi::hash_merge(levelHash,heightGenerationId);
-    Fmi::hash_merge(levelHash,geometryId);
-    Fmi::hash_merge(levelHash,paramLevelId);
-    Fmi::hash_merge(levelHash,heightProducerId);
-
-    uint firstLevel = 0xFFFFFFFF;
-    uint lastLevel = 0xFFFFFFFF;
-
-    auto itm = mLevelRangeCache.find(levelHash);
-    if (itm)
-    {
-      firstLevel = (*itm >> 32) & 0xFFFFFFFF;
-      lastLevel = (*itm) & 0xFFFFFFFF;
-    }
-
-    if (firstLevel == 0xFFFFFFFF ||  lastLevel == 0xFFFFFFFF)
-    {
-      std::set<T::ParamLevel> levels;
-      int result = mContentServerPtr->getContentLevelListByGenerationGeometryAndLevelId(0,heightGenerationId,geometryId,paramLevelId,levels);
-      if (result != 0 || levels.empty())
-      {
-        PRINT_DATA(mDebugLog,"  ** No levels found\n");
-        return false;
-      }
-
-      firstLevel = *levels.begin();
-      lastLevel = *levels.rbegin();
-
-      //AutoWriteLock lock(&mLevelRangeCache_modificationLock);
-
-      std::size_t lev = ((std::size_t)firstLevel << 32) + (std::size_t)lastLevel;
-      mLevelRangeCache.insert(levelHash,lev);
+      PRINT_DATA(mDebugLog,"  ** No levels found\n");
+      return false;
     }
 
 
-    ContentCacheEntry_sptr entry;
-    auto cc = mLevelContentCache.find(levelContentHash);
-    if (cc)
-    {
-      // The required content information was found from the cache
-      entry = *cc;
-    }
-    else
-    {
-      //mContentCache_misses++;
-      entry = std::make_shared<ContentCacheEntry>();
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,0,entry->contentInfoList);
-      entry->generationId = heightGenerationId;
-      entry->producerHash = heightProducerId;
-
-
-      mLevelContentCache.insert(levelContentHash,entry);
-    }
-
+    ContentCacheEntry_sptr entry = getHeightContentEntry(levelContentHash,q,forecastTime);
 
     int len = entry->contentInfoList.getLength();
     if (len > 0)
@@ -12066,74 +12059,41 @@ bool ServiceImplementation::getClosestLevelsByHeight(T::ProducerId producerId,T:
         rec.time2 = forecastTime;
 
         //if (getClosestLevelsByHeight(entry->contentInfoList,coordinateType,coordinates[t].x(),coordinates[t].y(),height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2))
-        if (getClosestLevelsByHeight(entry->contentInfoList,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2))
-        {
-          if (mul != 1.0)
-          {
-            rec.height1_1 = rec.height1_1 * mul;
-            rec.height1_2 = rec.height1_2 * mul;
-            rec.height2_1 = rec.height2_1 * mul;
-            rec.height2_2 = rec.height2_2 * mul;
-          }
-          recs.push_back(rec);
-        }
-        else
-        {
+        if (!getClosestLevelsByHeight(entry->contentInfoList,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2))
           return false;
-        }
+
+        scaleHeights(rec,mul);
+        recs.push_back(rec);
       }
       return true;
     }
 
 
-    T::ContentInfoList tmpContentList;
-    mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,forecastTime,forecastTime,ContentServer::RequestFlags::INCLUDE_TIME_BEFORE | ContentServer::RequestFlags::INCLUDE_TIME_AFTER,tmpContentList);
-    //printf("tlen = %d\n",tmpContentList.getLength());
+    time_t time1 = 0;
+    time_t time2 = 0;
+    if (!getHeightTimeNeighbours(q,forecastTime,time1,time2))
+      return true;
 
-    if (tmpContentList.getLength() == 2)
+    T::ContentInfoList contentInfoList1;
+    T::ContentInfoList contentInfoList2;
+    if (!getHeightContentListPair(q,time1,time2,contentInfoList1,contentInfoList2))
+      return false;
+
+    for (uint t=0;t<clen; t++)
     {
-      T::ContentInfo *prev = tmpContentList.getContentInfoByIndex(0);
-      T::ContentInfo *next = tmpContentList.getContentInfoByIndex(1);
+      HeightRec rec;
+      rec.levelId = paramLevelId;
+      rec.time1 = time1;
+      rec.time2 = time2;
 
-      T::ContentInfoList contentInfoList1;
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,prev->mForecastTimeUTC,prev->mForecastTimeUTC,0,contentInfoList1);
-      if (contentInfoList1.getLength() == 0)
+      //if (getClosestLevelsByHeight(contentInfoList1,coordinateType,coordinates[t].x(),coordinates[t].y(),height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) &&
+      //    getClosestLevelsByHeight(contentInfoList2,coordinateType,coordinates[t].x(),coordinates[t].y(),height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
+      if (!getClosestLevelsByHeight(contentInfoList1,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) ||
+          !getClosestLevelsByHeight(contentInfoList2,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
         return false;
 
-      T::ContentInfoList contentInfoList2;
-      mContentServerPtr->getContentListByParameterAndGenerationId(0,heightGenerationId,paramKeyType,heightParameter,paramLevelId,firstLevel,lastLevel,forecastType,forecastNumber,geometryId,next->mForecastTimeUTC,next->mForecastTimeUTC,0,contentInfoList2);
-      if (contentInfoList2.getLength() == 0)
-        return false;
-
-      if (contentInfoList1.getLength() != contentInfoList2.getLength())
-        return false;
-
-      for (uint t=0;t<clen; t++)
-      {
-        HeightRec rec;
-        rec.levelId = paramLevelId;
-        rec.time1 = prev->mForecastTimeUTC;
-        rec.time2 = next->mForecastTimeUTC;
-
-        //if (getClosestLevelsByHeight(contentInfoList1,coordinateType,coordinates[t].x(),coordinates[t].y(),height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) &&
-        //    getClosestLevelsByHeight(contentInfoList2,coordinateType,coordinates[t].x(),coordinates[t].y(),height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
-        if (getClosestLevelsByHeight(contentInfoList1,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level1_1,rec.height1_1,rec.level1_2,rec.height1_2) &&
-            getClosestLevelsByHeight(contentInfoList2,coordinateType,coordinates,t,coordinateHash,height/mul,rec.level2_1,rec.height2_1,rec.level2_2,rec.height2_2))
-        {
-          if (mul != 1.0)
-          {
-            rec.height1_1 = rec.height1_1 * mul;
-            rec.height1_2 = rec.height1_2 * mul;
-            rec.height2_1 = rec.height2_1 * mul;
-            rec.height2_2 = rec.height2_2 * mul;
-          }
-          recs.push_back(rec);
-        }
-        else
-        {
-          return false;
-        }
-      }
+      scaleHeights(rec,mul);
+      recs.push_back(rec);
     }
 
     return true;
