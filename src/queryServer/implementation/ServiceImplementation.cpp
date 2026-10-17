@@ -4991,6 +4991,43 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
 
 
+/*! \brief Query Server: Log the error of the data server service for the contents (the parameters are numbered when there are several contents). */
+
+void ServiceImplementation::reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents)
+{
+  try
+  {
+    Fmi::Exception exception(BCP, "DataServer returns an error!");
+    exception.addParameter("Service", service);
+    exception.addParameter("ErrorMessage", DataServer::getResultString(result));
+    if (contents.size() == 1)
+    {
+      exception.addParameter("FileId", std::to_string(contents[0]->mFileId));
+      exception.addParameter("MessageIndex", std::to_string(contents[0]->mMessageIndex));
+    }
+    else
+    {
+      for (std::size_t t = 0; t < contents.size(); t++)
+      {
+        std::string fileIdName = "FileId" + std::to_string(t+1);
+        std::string messageIndexName = "MessageIndex" + std::to_string(t+1);
+        exception.addParameter(fileIdName.c_str(), std::to_string(contents[t]->mFileId));
+        exception.addParameter(messageIndexName.c_str(), std::to_string(contents[t]->mMessageIndex));
+      }
+    }
+    std::string errorMsg = exception.getStackTrace();
+    PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Print the content list into the debug log (if it is enabled). */
 
 void ServiceImplementation::printContentList(T::ContentInfoList& contentList)
@@ -5052,13 +5089,7 @@ bool ServiceImplementation::getPointValueVector(const T::ContentInfo& contentInf
     int result = mDataServerPtr->getGridValueVectorByPoint(0, contentInfo.mFileId, contentInfo.mMessageIndex, coordinateType, x, y, areaInterpolationMethod,modificationOperation,modificationParameters, valueVector);
     if (result != 0)
     {
-      Fmi::Exception exception(BCP, "DataServer returns an error!");
-      exception.addParameter("Service", "getGridValueVectorByPoint");
-      exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-      exception.addParameter("FileId", std::to_string(contentInfo.mFileId));
-      exception.addParameter("MessageIndex", std::to_string(contentInfo.mMessageIndex));
-      std::string errorMsg = exception.getStackTrace();
-      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+      reportDataServerError("getGridValueVectorByPoint",result,{&contentInfo});
       return false;
     }
     return true;
@@ -5400,21 +5431,8 @@ bool ServiceImplementation::getValueVectors(
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
     T::ParamValue_vec valueVector;
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -5523,13 +5541,7 @@ bool ServiceImplementation::getValueVectors(
 
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueVector");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueVector",result,{contentInfo1});
             return false;
           }
 
@@ -5539,8 +5551,7 @@ bool ServiceImplementation::getValueVectors(
             valueList.mValueVector = valueVector;
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
           coordinates.clear();
@@ -5632,13 +5643,7 @@ bool ServiceImplementation::getValueVectors(
 
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueVectorByTimeAndGeometry");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueVectorByTimeAndGeometry",result,{contentInfo1});
             return false;
           }
 
@@ -5648,8 +5653,7 @@ bool ServiceImplementation::getValueVectors(
             valueList.mValueVector = valueVector;
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
           coordinates.clear();
@@ -5730,8 +5734,7 @@ bool ServiceImplementation::getValueVectors(
             valueList.mValueVector = valueVector;
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
           coordinates.clear();
@@ -5816,8 +5819,7 @@ bool ServiceImplementation::getValueVectors(
             valueList.mValueVector = valueVector;
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         if ((qParam.mFlags & QueryServer::QueryParameter::Flags::ReturnCoordinates) == 0)
           coordinates.clear();
@@ -5935,13 +5937,7 @@ bool ServiceImplementation::getGridFiles(
     result = mDataServerPtr->getGridProperties(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,properties);
     if (result != 0)
     {
-      Fmi::Exception exception(BCP, "DataServer returns an error!");
-      exception.addParameter("Service", "getGridProperties");
-      exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-      exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-      exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-      std::string errorMsg = exception.getStackTrace();
-      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+      reportDataServerError("getGridProperties",result,{contentInfo1});
       return false;
     }
 
@@ -6475,13 +6471,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (result != 0)
         {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          reportDataServerError("getGridValueVectorByCoordinateList",result,{contentInfo1});
           return false;
         }
 
@@ -6497,8 +6487,7 @@ bool ServiceImplementation::getGridFiles(
 
         // newMessage->print(std::cout,0,0);
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
@@ -6538,13 +6527,7 @@ bool ServiceImplementation::getGridFiles(
 
         if (result != 0)
         {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByTimeAndCoordinateList");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          reportDataServerError("getGridValueVectorByTimeAndCoordinateList",result,{contentInfo1});
           return false;
         }
 
@@ -6558,8 +6541,7 @@ bool ServiceImplementation::getGridFiles(
           newMessage->setGridValues(valueVector);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
@@ -6587,13 +6569,7 @@ bool ServiceImplementation::getGridFiles(
         int result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
         if (result != 0)
         {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByLevelAndCoordinateList");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          reportDataServerError("getGridValueVectorByLevelAndCoordinateList",result,{contentInfo1});
           return false;
         }
 
@@ -6609,8 +6585,7 @@ bool ServiceImplementation::getGridFiles(
           newMessage->setGridValues(valueVector);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
@@ -6639,13 +6614,7 @@ bool ServiceImplementation::getGridFiles(
         int result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
         if (result != 0)
         {
-          Fmi::Exception exception(BCP, "DataServer returns an error!");
-          exception.addParameter("Service", "getGridValueVectorByTimeLevelAndCoordinateList");
-          exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-          exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-          exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-          std::string errorMsg = exception.getStackTrace();
-          PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+          reportDataServerError("getGridValueVectorByTimeLevelAndCoordinateList",result,{contentInfo1});
           return false;
         }
 
@@ -6661,8 +6630,7 @@ bool ServiceImplementation::getGridFiles(
           newMessage->setGridValues(valueVector);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         auto *data = new uchar[sz];
         MemoryWriter memoryWriter(data,sz,true);
@@ -6843,21 +6811,8 @@ bool ServiceImplementation::getPointValuesByHeight(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     HeightRec_vec recs;
     if (getClosestLevelsByHeight(producerInfo.mProducerId,generationId,producerGeometryId,qParam.mParameterLevelId,qParam.mForecastType,qParam.mForecastNumber,forecastTime,coordinateType,coordinates,paramLevel,recs))
@@ -6977,13 +6932,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result1 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_1->mFileId, contentInfo1_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1);
                 if (result1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1,{contentInfo1_1});
                   return false;
                 }
 
@@ -6991,13 +6940,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result2 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_1->mFileId, contentInfo2_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2);
                 if (result2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2,{contentInfo2_1});
                   return false;
                 }
 
@@ -7038,13 +6981,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result1_1 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_1->mFileId, contentInfo1_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1_1);
                 if (result1_1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_1));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1_1,{contentInfo1_1});
                   return false;
                 }
 
@@ -7052,13 +6989,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result1_2 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_2->mFileId, contentInfo1_2->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1_2);
                 if (result1_2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_2));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_2->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_2->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1_2,{contentInfo1_2});
                   return false;
                 }
 
@@ -7066,13 +6997,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result2_1 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_1->mFileId, contentInfo2_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2_1);
                 if (result2_1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_1));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2_1,{contentInfo2_1});
                   return false;
                 }
 
@@ -7080,13 +7005,7 @@ bool ServiceImplementation::getPointValuesByHeight(
                 int result2_2 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_2->mFileId, contentInfo2_2->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2_2);
                 if (result2_2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_2));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_2->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_2->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2_2,{contentInfo2_2});
                   return false;
                 }
 
@@ -7106,8 +7025,7 @@ bool ServiceImplementation::getPointValuesByHeight(
     if (conversionByFunction)
       executeConversion(function, functionParams, forecastTime, valueList.mValueList);
 
-    if (qParam.mPrecision < 0)
-      qParam.mPrecision = pInfo.mDefaultPrecision;
+    setDefaultPrecision(qParam,pInfo);
 
     return true;
   }
@@ -7237,13 +7155,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
       int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
       if (result1 != 0)
       {
-        Fmi::Exception exception(BCP, "DataServer returns an error!");
-        exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-        exception.addParameter("FileId", std::to_string(contentInfo->mFileId));
-        exception.addParameter("MessageIndex", std::to_string(contentInfo->mMessageIndex));
-        std::string errorMsg = exception.getStackTrace();
-        PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+        reportDataServerError("getGridValueVectorByCoordinateList",result1,{contentInfo});
         return false;
       }
 
@@ -7264,8 +7176,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
       else
         valueList.mValueVector = valueVector;
 
-      if (qParam.mPrecision < 0)
-        qParam.mPrecision = pInfo.mDefaultPrecision;
+      setDefaultPrecision(qParam,pInfo);
 
       return true;
     }
@@ -7321,13 +7232,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
       int result1 = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo->mFileId,contentInfo->mMessageIndex,query.mCoordinateType,coordinates,areaInterpolationMethod,0,modificationParameters,*values);
       if (result1 != 0)
       {
-        Fmi::Exception exception(BCP, "DataServer returns an error!");
-        exception.addParameter("Service", "getGridValueVectorByCoordinateList");
-        exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-        exception.addParameter("FileId", std::to_string(contentInfo->mFileId));
-        exception.addParameter("MessageIndex", std::to_string(contentInfo->mMessageIndex));
-        std::string errorMsg = exception.getStackTrace();
-        PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+        reportDataServerError("getGridValueVectorByCoordinateList",result1,{contentInfo});
         return false;
       }
 
@@ -7349,8 +7254,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
     else
       valueList.mValueVector = valueVector;
 
-    if (qParam.mPrecision < 0)
-      qParam.mPrecision = pInfo.mDefaultPrecision;
+    setDefaultPrecision(qParam,pInfo);
 
     return true;
   }
@@ -7552,13 +7456,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result1 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_1->mFileId, contentInfo1_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1);
                 if (result1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1,{contentInfo1_1});
                   return false;
                 }
 
@@ -7566,13 +7464,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result2 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_1->mFileId, contentInfo2_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2);
                 if (result2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2,{contentInfo2_1});
                   return false;
                 }
 
@@ -7612,13 +7504,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result1_1 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_1->mFileId, contentInfo1_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1_1);
                 if (result1_1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_1));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1_1,{contentInfo1_1});
                   return false;
                 }
 
@@ -7626,13 +7512,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result1_2 = mDataServerPtr->getGridValueByPoint(0, contentInfo1_2->mFileId, contentInfo1_2->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value1_2);
                 if (result1_2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result1_2));
-                  exception.addParameter("FileId", std::to_string(contentInfo1_2->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo1_2->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result1_2,{contentInfo1_2});
                   return false;
                 }
 
@@ -7640,13 +7520,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result2_1 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_1->mFileId, contentInfo2_1->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2_1);
                 if (result2_1 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_1));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_1->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_1->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2_1,{contentInfo2_1});
                   return false;
                 }
 
@@ -7654,13 +7528,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
                 int result2_2 = mDataServerPtr->getGridValueByPoint(0, contentInfo2_2->mFileId, contentInfo2_2->mMessageIndex,query.mCoordinateType,coordinates[r].x(),coordinates[r].y(),areaInterpolationMethod,modificationOperation,modificationParameters,value2_2);
                 if (result2_2 != 0)
                 {
-                  Fmi::Exception exception(BCP, "DataServer returns an error!");
-                  exception.addParameter("Service", "getGridValueByPoint");
-                  exception.addParameter("ErrorMessage", DataServer::getResultString(result2_2));
-                  exception.addParameter("FileId", std::to_string(contentInfo2_2->mFileId));
-                  exception.addParameter("MessageIndex", std::to_string(contentInfo2_2->mMessageIndex));
-                  std::string errorMsg = exception.getStackTrace();
-                  PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+                  reportDataServerError("getGridValueByPoint",result2_2,{contentInfo2_2});
                   return false;
                 }
 
@@ -7687,8 +7555,7 @@ bool ServiceImplementation::getValueVectorsByHeight(
     else
       valueList.mValueVector = valueVector;
 
-    if (qParam.mPrecision < 0)
-      qParam.mPrecision = pInfo.mDefaultPrecision;
+    setDefaultPrecision(qParam,pInfo);
 
     return true;
   }
@@ -7792,21 +7659,8 @@ bool ServiceImplementation::getPointValues(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -7858,13 +7712,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByPointList");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByPointList",result,{contentInfo1});
             return false;
           }
 
@@ -7872,8 +7720,7 @@ bool ServiceImplementation::getPointValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -7911,15 +7758,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByLevelAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByLevelAndPointList");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByLevelAndPointList",result,{contentInfo1,contentInfo2});
             return false;
           }
 
@@ -7927,8 +7766,7 @@ bool ServiceImplementation::getPointValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -7947,15 +7785,7 @@ bool ServiceImplementation::getPointValues(
           int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByTimeAndPointList");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByTimeAndPointList",result,{contentInfo1,contentInfo2});
             return false;
           }
 
@@ -7963,8 +7793,7 @@ bool ServiceImplementation::getPointValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -7995,19 +7824,7 @@ bool ServiceImplementation::getPointValues(
 
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByLevelAndPointList");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
-            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByLevelAndPointList",result,{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
             return false;
           }
 
@@ -8015,8 +7832,7 @@ bool ServiceImplementation::getPointValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8073,21 +7889,8 @@ bool ServiceImplementation::getCircleValues(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -8140,13 +7943,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByCircle(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, coordinateType, x, y, radius,modificationOperation,modificationParameters, valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByCircle");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByCircle",result,{contentInfo1});
             // throw exception;
           }
 
@@ -8154,8 +7951,7 @@ bool ServiceImplementation::getCircleValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8193,13 +7989,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByTimeAndCircle(0,contentInfo1->mFileId,contentInfo1->mMessageIndex,contentInfo2->mFileId,contentInfo2->mMessageIndex,fTime,coordinateType,x,y,radius,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByTimeAndCircle");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByTimeAndCircle",result,{contentInfo1});
             return false;
           }
 
@@ -8207,8 +7997,7 @@ bool ServiceImplementation::getCircleValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8228,15 +8017,7 @@ bool ServiceImplementation::getCircleValues(
           int result = mDataServerPtr->getGridValueListByLevelAndCircle(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,coordinateType,x,y,radius,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByLevelAndCircle");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByLevelAndCircle",result,{contentInfo1,contentInfo2});
             return false;
           }
 
@@ -8244,8 +8025,7 @@ bool ServiceImplementation::getCircleValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8296,8 +8076,7 @@ bool ServiceImplementation::getCircleValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8462,21 +8241,8 @@ bool ServiceImplementation::getPolygonValues(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
@@ -8531,13 +8297,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByPolygonPath(0, contentInfo1->mFileId, contentInfo1->mMessageIndex, query.mCoordinateType, query.mAreaCoordinates,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByPolygonPath");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByPolygonPath",result,{contentInfo1});
             // throw exception;
           }
 
@@ -8545,8 +8305,7 @@ bool ServiceImplementation::getPolygonValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8582,15 +8341,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByTimeAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates,timeInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByTimeAndPolygonPath");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByTimeAndPolygonPath",result,{contentInfo1,contentInfo2});
             return false;
           }
 
@@ -8598,8 +8349,7 @@ bool ServiceImplementation::getPolygonValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8620,15 +8370,7 @@ bool ServiceImplementation::getPolygonValues(
           int result = mDataServerPtr->getGridValueListByLevelAndPolygonPath(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,query.mAreaCoordinates,levelInterpolationMethod,modificationOperation,modificationParameters,valueList.mValueList);
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByLevelAndPolygonPath");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByLevelAndPolygonPath",result,{contentInfo1,contentInfo2});
             return false;
           }
 
@@ -8636,8 +8378,7 @@ bool ServiceImplementation::getPolygonValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8668,19 +8409,7 @@ bool ServiceImplementation::getPolygonValues(
 
           if (result != 0)
           {
-            Fmi::Exception exception(BCP, "DataServer returns an error!");
-            exception.addParameter("Service", "getGridValueListByTimeLevelAndPolygonPath");
-            exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-            exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-            exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-            exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-            exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-            exception.addParameter("FileId3", std::to_string(contentInfo3->mFileId));
-            exception.addParameter("MessageIndex3", std::to_string(contentInfo3->mMessageIndex));
-            exception.addParameter("FileId4", std::to_string(contentInfo4->mFileId));
-            exception.addParameter("MessageIndex4", std::to_string(contentInfo4->mMessageIndex));
-            std::string errorMsg = exception.getStackTrace();
-            PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+            reportDataServerError("getGridValueListByTimeLevelAndPolygonPath",result,{contentInfo1,contentInfo2,contentInfo3,contentInfo4});
             return false;
           }
 
@@ -8688,8 +8417,7 @@ bool ServiceImplementation::getPolygonValues(
             executeConversion(function, functionParams, forecastTime, valueList.mValueList);
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8838,8 +8566,7 @@ bool ServiceImplementation::getStreamlineValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8904,8 +8631,7 @@ bool ServiceImplementation::getStreamlineValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -8957,8 +8683,7 @@ bool ServiceImplementation::getStreamlineValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9019,8 +8744,7 @@ bool ServiceImplementation::getStreamlineValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9187,8 +8911,7 @@ bool ServiceImplementation::getIsolineValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9256,8 +8979,7 @@ bool ServiceImplementation::getIsolineValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9309,8 +9031,7 @@ bool ServiceImplementation::getIsolineValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9371,8 +9092,7 @@ bool ServiceImplementation::getIsolineValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9543,8 +9263,7 @@ bool ServiceImplementation::getIsobandValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9612,8 +9331,7 @@ bool ServiceImplementation::getIsobandValues(
           }
         }
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9666,8 +9384,7 @@ bool ServiceImplementation::getIsobandValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9728,8 +9445,7 @@ bool ServiceImplementation::getIsobandValues(
 
         valueList.mParameterLevel = paramLevel;
 
-        if (qParam.mPrecision < 0)
-          qParam.mPrecision = pInfo.mDefaultPrecision;
+        setDefaultPrecision(qParam,pInfo);
 
         return true;
       }
@@ -9785,21 +9501,8 @@ bool ServiceImplementation::getVerticalValueVectors(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
 
-    if (conversionByFunction && mDataServerMethodsEnabled)
-    {
-      std::string f = toUpperString(function);
-      auto p = mOperationNames.find(f);
-      if (p != mOperationNames.end())
-      {
-        modificationOperation = p->second;
-        for (auto& functionParam : functionParams)
-        {
-          if (functionParam != "$")
-            modificationParameters.push_back(toDouble(functionParam.c_str()));
-        }
-        conversionByFunction = false;
-      }
-    }
+    if (conversionByFunction && mDataServerMethodsEnabled  &&  getModificationOperation(function,functionParams,modificationOperation,modificationParameters))
+      conversionByFunction = false;
 
 
     if (parameterLevels.empty())
@@ -9882,13 +9585,7 @@ bool ServiceImplementation::getVerticalValueVectors(
             int result = mDataServerPtr->getGridValueListByPointList(0, contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,modificationOperation,modificationParameters,valList);
             if (result != 0)
             {
-              Fmi::Exception exception(BCP, "DataServer returns an error!");
-              exception.addParameter("Service", "getGridValueListByPointList");
-              exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-              exception.addParameter("FileId", std::to_string(contentInfo1->mFileId));
-              exception.addParameter("MessageIndex", std::to_string(contentInfo1->mMessageIndex));
-              std::string errorMsg = exception.getStackTrace();
-              PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+              reportDataServerError("getGridValueListByPointList",result,{contentInfo1});
               return false;
             }
 
@@ -9910,8 +9607,7 @@ bool ServiceImplementation::getVerticalValueVectors(
             }
           }
 
-          if (qParam.mPrecision < 0)
-            qParam.mPrecision = pInfo.mDefaultPrecision;
+          setDefaultPrecision(qParam,pInfo);
 
           //return true;
         }
@@ -9952,15 +9648,7 @@ bool ServiceImplementation::getVerticalValueVectors(
             int result = mDataServerPtr->getGridValueListByTimeAndPointList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,fTime,query.mCoordinateType,query.mAreaCoordinates[0],areaInterpolationMethod,timeInterpolationMethod,modificationOperation,modificationParameters,valList);
             if (result != 0)
             {
-              Fmi::Exception exception(BCP, "DataServer returns an error!");
-              exception.addParameter("Service", "getGridValueListByTimeAndPointList");
-              exception.addParameter("ErrorMessage", DataServer::getResultString(result));
-              exception.addParameter("FileId1", std::to_string(contentInfo1->mFileId));
-              exception.addParameter("MessageIndex1", std::to_string(contentInfo1->mMessageIndex));
-              exception.addParameter("FileId2", std::to_string(contentInfo2->mFileId));
-              exception.addParameter("MessageIndex2", std::to_string(contentInfo2->mMessageIndex));
-              std::string errorMsg = exception.getStackTrace();
-              PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+              reportDataServerError("getGridValueListByTimeAndPointList",result,{contentInfo1,contentInfo2});
               return false;
             }
 
@@ -9978,8 +9666,7 @@ bool ServiceImplementation::getVerticalValueVectors(
               valueList.mValueVector.push_back(ParamValueMissing);
           }
 
-          if (qParam.mPrecision < 0)
-            qParam.mPrecision = pInfo.mDefaultPrecision;
+          setDefaultPrecision(qParam,pInfo);
 
           //return true;
         }
