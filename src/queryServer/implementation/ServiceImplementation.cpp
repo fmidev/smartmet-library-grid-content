@@ -120,29 +120,176 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Contour attributes of the query. */
+
+struct ContourAttributes
+{
+  int gridWidth = 0;
+  int gridHeight = 0;
+  short interpolationType = 0;
+  size_t smoothSize = 0;
+  size_t smoothDegree = 0;
+  int contourSubdivide = 0;
+  int contourThreads = 1;
+  Trax::SmoothOptions smoothOptions;
+};
+
+
+
+/*! \brief Return the contour attributes of the query attributes. */
+
+ContourAttributes getContourAttributes(const T::AttributeList& attributeList)
+{
+  ContourAttributes ca;
+
+  const char *gridWidthStr = attributeList.getAttributeValue("grid.width");
+  if (gridWidthStr != nullptr)
+    ca.gridWidth = toInt32(gridWidthStr);
+
+  const char *gridHeightStr = attributeList.getAttributeValue("grid.height");
+  if (gridHeightStr != nullptr)
+    ca.gridHeight = toInt32(gridHeightStr);
+
+  const char *interpolationTypeStr = attributeList.getAttributeValue("contour.interpolation.type");
+  if (interpolationTypeStr != nullptr)
+    ca.interpolationType = toInt16(interpolationTypeStr);
+
+  const char *smoothSizeStr = attributeList.getAttributeValue("contour.smooth.size");
+  if (smoothSizeStr != nullptr)
+    ca.smoothSize = toSize_t(smoothSizeStr);
+
+  const char *smoothDegreeStr = attributeList.getAttributeValue("contour.smooth.degree");
+  if (smoothDegreeStr != nullptr)
+    ca.smoothDegree = toSize_t(smoothDegreeStr);
+
+  const char *contourSubdivideStr = attributeList.getAttributeValue("contour.subdivide");
+  if (contourSubdivideStr != nullptr)
+    ca.contourSubdivide = toInt32(contourSubdivideStr);
+
+  const char *contourThreadsStr = attributeList.getAttributeValue("contour.threads");
+  if (contourThreadsStr != nullptr)
+    ca.contourThreads = toInt32(contourThreadsStr);
+
+  // Opt-in Trax grid smoother (box / median / morphology). Active only when a
+  // method is given; otherwise an inactive option is a no-op in grid-files.
+  // The legacy contour.smooth.size/degree above remain unused (Savitzky-Golay
+  // is not implemented on the grid path).
+  const char *smoothMethodStr = attributeList.getAttributeValue("contour.smooth.method");
+  if (smoothMethodStr != nullptr)
+  {
+    ca.smoothOptions.method = Trax::to_smooth_method(smoothMethodStr);
+    const char *str = nullptr;
+    if ((str = attributeList.getAttributeValue("contour.smooth.radius")) != nullptr)
+      ca.smoothOptions.radius = toInt32(str);
+    if ((str = attributeList.getAttributeValue("contour.smooth.passes")) != nullptr)
+      ca.smoothOptions.passes = toInt32(str);
+    if ((str = attributeList.getAttributeValue("contour.smooth.boundary")) != nullptr)
+      ca.smoothOptions.boundary = Trax::to_smooth_boundary(str);
+    if ((str = attributeList.getAttributeValue("contour.smooth.morphology")) != nullptr)
+      ca.smoothOptions.morphology = Trax::to_morphology_op(str);
+    if ((str = attributeList.getAttributeValue("contour.smooth.preserve_missing")) != nullptr)
+      ca.smoothOptions.preserve_missing = (toInt32(str) != 0);
+  }
+
+  return ca;
+}
+
+
+
+/*! \brief Calculate the isolines or isobands of the values of a function or metric level parameter. */
+
+void contourParameterValues(QueryParameter& qParam,const ContourAttributes& ca)
+{
+  auto sz = qParam.mCoordinates.size();
+  if ((!qParam.mFunction.empty() || (qParam.mFlags & QueryServer::QueryParameter::Flags::MetricLevels))  &&  !qParam.mCoordinates.empty())
+  {
+    switch (qParam.mType)
+    {
+      case QueryParameter::Type::Isoline:
+      {
+        for (auto pValue = qParam.mValueList.begin(); pValue != qParam.mValueList.end(); ++pValue)
+        {
+          if ((*pValue)->mValueVector.size() == sz)
+          {
+            getIsolines(
+                (*pValue)->mValueVector,
+                &qParam.mCoordinates,
+                ca.gridWidth,
+                ca.gridHeight,
+                qParam.mContourLowValues,
+                ca.interpolationType,
+                ca.smoothSize,
+                ca.smoothDegree,
+                (*pValue)->mValueData,
+                ca.contourSubdivide,
+                ca.contourThreads,
+                ca.smoothOptions);
+          }
+        }
+      }
+      break;
+
+      case QueryParameter::Type::Isoband:
+      {
+        for (auto pValue = qParam.mValueList.begin(); pValue != qParam.mValueList.end(); ++pValue)
+        {
+          if ((*pValue)->mValueVector.size() == sz)
+          {
+            getIsobands(
+                (*pValue)->mValueVector,
+                &qParam.mCoordinates,
+                ca.gridWidth,
+                ca.gridHeight,
+                qParam.mContourLowValues,
+                qParam.mContourHighValues,
+                ca.interpolationType,
+                ca.smoothSize,
+                ca.smoothDegree,
+                (*pValue)->mValueData,
+                ca.contourSubdivide,
+                ca.contourThreads,
+                ca.smoothOptions);
+          }
+        }
+      }
+      break;
+
+      case QueryParameter::Type::StreamLine:
+      {
+
+      }
+      break;
+      default:
+        break;
+    }
+  }
+}
+
+
+
 /*! \brief Set the time step attributes of an internal aggregation function ("/..."): the parameters 2-4 are the steps before, the steps after and the step size in minutes. */
 
 void setAggregationParameters(QueryParameter& queryParam,const FunctionParam_vec& functionParams)
 {
-    int s1 = 0;
-    int s2 = 0;
-    queryParam.mTimestepSizeInMinutes = 60;
-    queryParam.mFlags |= QueryParameter::Flags::InternalAggregationParameter;
+  int s1 = 0;
+  int s2 = 0;
+  queryParam.mTimestepSizeInMinutes = 60;
+  queryParam.mFlags |= QueryParameter::Flags::InternalAggregationParameter;
 
-    if (functionParams.size() > 1)
-      s1 = toInt32(functionParams[1].second);
+  if (functionParams.size() > 1)
+    s1 = toInt32(functionParams[1].second);
 
-    if (functionParams.size() > 2)
-      s2 = toInt32(functionParams[2].second);
+  if (functionParams.size() > 2)
+    s2 = toInt32(functionParams[2].second);
 
-    if (functionParams.size() > 3)
-      queryParam.mTimestepSizeInMinutes = toInt32(functionParams[3].second);
+  if (functionParams.size() > 3)
+    queryParam.mTimestepSizeInMinutes = toInt32(functionParams[3].second);
 
-    if (s1 < 0)
-      queryParam.mTimestepsBefore = -s1;
+  if (s1 < 0)
+    queryParam.mTimestepsBefore = -s1;
 
-    if (s2 > 0)
-      queryParam.mTimestepsAfter = s2;
+  if (s2 > 0)
+    queryParam.mTimestepsAfter = s2;
 }
 
 
@@ -2292,6 +2439,73 @@ void ServiceImplementation::getProducers(const std::string& producerName, Produc
 
 
 
+/*! \brief Query Server: Update the query parameter: inherit its level information, replace an alias by its definition and parse its function.
+           Returns true if an alias was replaced (its definition may contain other aliases). */
+
+bool ServiceImplementation::updateQueryParameter(Query& query,QueryParameter& qParam,std::vector<QueryParameter>& additionalParameterList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    bool updateRequired = false;
+
+    // The parameter can contain some level information even if the parameter is an alias
+    // or a function. In this case this level information should be inherited to the alias
+    // definition or to the function parameters.
+
+    PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam.mSymbolicName.c_str());
+
+    getParameterStringInfo(qParam.mParam, ':', qParam.mParameterKey, qParam.mGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, qParam.mForecastType, qParam.mForecastNumber, qParam.mProducerName,
+        qParam.mProducerId, qParam.mGenerationFlags, qParam.mAreaInterpolationMethod, qParam.mTimeInterpolationMethod, qParam.mLevelInterpolationMethod, qParam.mFlags);
+
+    if (qParam.mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
+    {
+      Identification::NewbaseParameterDef paramDef;
+      if (Identification::gridDef.getNewbaseParameterDefById(toUInt32(qParam.mParameterKey), paramDef))
+      {
+        PRINT_DATA(mDebugLog, "   + Newbase name: %s\n", paramDef.mParameterName.c_str());
+        qParam.mParam = paramDef.mParameterName;
+      }
+    }
+
+    // If the parameter is a symbolic name (defined in the configuration file) then
+    // we should use its definition.
+
+    std::string alias;
+    if (getAlias(qParam.mParameterKey, alias))
+    {
+      PRINT_DATA(mDebugLog, "   + Alias: %s\n", alias.c_str());
+
+      qParam.mParam = alias;
+
+      // When an alias is replaced by its definition, it is possible that this definition
+      // contains other aliases. That's why we need to repeat this "updateQueryParameters"
+      // loop. The 'updateCounter' variable is used in order to ensure that the loop
+      // will end if the aliases are referencing to each other (=> eternal loop).
+
+      updateRequired = true;
+    }
+
+    // If the parameter contains a function then we should parse it and make sure that
+    // we fetch the required parameter values for it.
+
+    if (qParam.mFunction.empty())
+    {
+      parseFunction(query,qParam, qParam.mParam, qParam.mFunction, qParam.mFunctionParams, 0, additionalParameterList);
+    }
+
+    return updateRequired;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Update query parameters. */
 
 void ServiceImplementation::updateQueryParameters(Query& query)
@@ -2315,50 +2529,8 @@ void ServiceImplementation::updateQueryParameters(Query& query)
 
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
-        // The parameter can contain some level information even if the parameter is an alias
-        // or a function. In this case this level information should be inherited to the alias
-        // definition or to the function parameters.
-
-        PRINT_DATA(mDebugLog, " * PARAMETER: %s\n", qParam->mSymbolicName.c_str());
-
-        getParameterStringInfo(qParam->mParam, ':', qParam->mParameterKey, qParam->mGeometryId, qParam->mParameterLevelId, qParam->mParameterLevel, qParam->mForecastType, qParam->mForecastNumber, qParam->mProducerName,
-            qParam->mProducerId, qParam->mGenerationFlags, qParam->mAreaInterpolationMethod, qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod, qParam->mFlags);
-
-        if (qParam->mParameterKeyType == T::ParamKeyTypeValue::NEWBASE_ID)
-        {
-          Identification::NewbaseParameterDef paramDef;
-          if (Identification::gridDef.getNewbaseParameterDefById(toUInt32(qParam->mParameterKey), paramDef))
-          {
-            PRINT_DATA(mDebugLog, "   + Newbase name: %s\n", paramDef.mParameterName.c_str());
-            qParam->mParam = paramDef.mParameterName;
-          }
-        }
-
-        // If the parameter is a symbolic name (defined in the configuration file) then
-        // we should use its definition.
-
-        std::string alias;
-        if (getAlias(qParam->mParameterKey, alias))
-        {
-          PRINT_DATA(mDebugLog, "   + Alias: %s\n", alias.c_str());
-
-          qParam->mParam = alias;
-
-          // When an alias is replaced by its definition, it is possible that this definition
-          // contains other aliases. That's why we need to repeat this "updateQueryParameters"
-          // loop. The 'updateCounter' variable is used in order to ensure that the loop
-          // will end if the aliases are referencing to each other (=> eternal loop).
-
+        if (updateQueryParameter(query,*qParam,additionalParameterList))
           updateRequired = true;
-        }
-
-        // If the parameter contains a function then we should parse it and make sure that
-        // we fetch the required parameter values for it.
-
-        if (qParam->mFunction.empty())
-        {
-          parseFunction(query,*qParam, qParam->mParam, qParam->mFunction, qParam->mFunctionParams, 0, additionalParameterList);
-        }
       }
 
       // Adding parameters that are required by functions into the query.
@@ -2385,129 +2557,10 @@ void ServiceImplementation::postProcessQuery(Query& query)
   FUNCTION_TRACE
   try
   {
-    int gridWidth = 0;
-    const char *gridWidthStr = query.mAttributeList.getAttributeValue("grid.width");
-    if (gridWidthStr != nullptr)
-      gridWidth = toInt32(gridWidthStr);
-
-    int gridHeight = 0;
-    const char *gridHeightStr = query.mAttributeList.getAttributeValue("grid.height");
-    if (gridHeightStr != nullptr)
-      gridHeight = toInt32(gridHeightStr);
-
-    short interpolationType = 0;
-    const char *interpolationTypeStr = query.mAttributeList.getAttributeValue("contour.interpolation.type");
-    if (interpolationTypeStr != nullptr)
-      interpolationType = toInt16(interpolationTypeStr);
-
-    size_t smoothSize = 0;
-    const char *smoothSizeStr = query.mAttributeList.getAttributeValue("contour.smooth.size");
-    if (smoothSizeStr != nullptr)
-      smoothSize = toSize_t(smoothSizeStr);
-
-    size_t smoothDegree = 0;
-    const char *smoothDegreeStr = query.mAttributeList.getAttributeValue("contour.smooth.degree");
-    if (smoothDegreeStr != nullptr)
-      smoothDegree = toSize_t(smoothDegreeStr);
-
-    int contourSubdivide = 0;
-    const char *contourSubdivideStr = query.mAttributeList.getAttributeValue("contour.subdivide");
-    if (contourSubdivideStr != nullptr)
-      contourSubdivide = toInt32(contourSubdivideStr);
-
-    int contourThreads = 1;
-    const char *contourThreadsStr = query.mAttributeList.getAttributeValue("contour.threads");
-    if (contourThreadsStr != nullptr)
-      contourThreads = toInt32(contourThreadsStr);
-
-    // Opt-in Trax grid smoother (box / median / morphology). Active only when a
-    // method is given; otherwise an inactive option is a no-op in grid-files.
-    // The legacy contour.smooth.size/degree above remain unused (Savitzky-Golay
-    // is not implemented on the grid path).
-    Trax::SmoothOptions smoothOptions;
-    const char *smoothMethodStr = query.mAttributeList.getAttributeValue("contour.smooth.method");
-    if (smoothMethodStr != nullptr)
-    {
-      smoothOptions.method = Trax::to_smooth_method(smoothMethodStr);
-      const char *str = nullptr;
-      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.radius")) != nullptr)
-        smoothOptions.radius = toInt32(str);
-      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.passes")) != nullptr)
-        smoothOptions.passes = toInt32(str);
-      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.boundary")) != nullptr)
-        smoothOptions.boundary = Trax::to_smooth_boundary(str);
-      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.morphology")) != nullptr)
-        smoothOptions.morphology = Trax::to_morphology_op(str);
-      if ((str = query.mAttributeList.getAttributeValue("contour.smooth.preserve_missing")) != nullptr)
-        smoothOptions.preserve_missing = (toInt32(str) != 0);
-    }
+    ContourAttributes ca = getContourAttributes(query.mAttributeList);
 
     for (auto& qParam : query.mQueryParameterList)
-    {
-      auto sz = qParam.mCoordinates.size();
-      if ((!qParam.mFunction.empty() || (qParam.mFlags & QueryServer::QueryParameter::Flags::MetricLevels))  &&  !qParam.mCoordinates.empty())
-      {
-        switch (qParam.mType)
-        {
-          case QueryParameter::Type::Isoline:
-          {
-            for (auto pValue = qParam.mValueList.begin(); pValue != qParam.mValueList.end(); ++pValue)
-            {
-              if ((*pValue)->mValueVector.size() == sz)
-              {
-                getIsolines(
-                    (*pValue)->mValueVector,
-                    &qParam.mCoordinates,
-                    gridWidth,
-                    gridHeight,
-                    qParam.mContourLowValues,
-                    interpolationType,
-                    smoothSize,
-                    smoothDegree,
-                    (*pValue)->mValueData,
-                    contourSubdivide,
-                    contourThreads,
-                    smoothOptions);
-              }
-            }
-          }
-          break;
-
-          case QueryParameter::Type::Isoband:
-          {
-            for (auto pValue = qParam.mValueList.begin(); pValue != qParam.mValueList.end(); ++pValue)
-            {
-              if ((*pValue)->mValueVector.size() == sz)
-              {
-                getIsobands(
-                    (*pValue)->mValueVector,
-                    &qParam.mCoordinates,
-                    gridWidth,
-                    gridHeight,
-                    qParam.mContourLowValues,
-                    qParam.mContourHighValues,
-                    interpolationType,
-                    smoothSize,
-                    smoothDegree,
-                    (*pValue)->mValueData,
-                    contourSubdivide,
-                    contourThreads,
-                    smoothOptions);
-              }
-            }
-          }
-          break;
-
-          case QueryParameter::Type::StreamLine:
-          {
-
-          }
-          break;
-          default:
-            break;
-        }
-      }
-    }
+      contourParameterValues(qParam,ca);
   }
   catch (...)
   {
