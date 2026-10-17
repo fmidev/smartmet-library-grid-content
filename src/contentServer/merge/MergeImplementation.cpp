@@ -6093,7 +6093,13 @@ void MergeImplementation::addStoredFileAndContents(uint contentStorageIndex,T::F
     fInfo->mFileId = newFileId;
     fInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
     fInfo->mStorageId = contentStorageIndex;
-    mFileInfoList.addFileInfo(fInfo);
+    T::SourceId newSourceId = fInfo->mSourceId;
+
+    // As in the event data path, a file that is already in the list is not added twice
+    if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
+      mFileInfoList.addFileInfo(fInfo);
+    else
+      delete fInfo;
 
     if (eventInfo.mId3 == 0)
       return;
@@ -6106,28 +6112,20 @@ void MergeImplementation::addStoredFileAndContents(uint contentStorageIndex,T::F
     for (uint c=0; c<len; c++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-      if (info == nullptr)
+
+      // The lookup does not return deleted contents. A content marked deleted (old content of a file that was
+      // registered again) is replaced by the new content in addOrReplaceContent.
+      if (info == nullptr  ||  mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex) != nullptr)
         continue;
 
-      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex);
-      if (oInfo == nullptr  ||  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-      {
-        if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-        {
-          // We should remove the old content before the addition
-        }
-        else
-        {
-          T::ContentInfo *cInfo = info->duplicate();
-          cInfo->mFileId = newFileId;
-          cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
-          cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
-          cInfo->mSourceId = fInfo->mSourceId;
-          cInfo->mStorageId = contentStorageIndex;
+      T::ContentInfo *cInfo = info->duplicate();
+      cInfo->mFileId = newFileId;
+      cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
+      cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
+      cInfo->mSourceId = newSourceId;
+      cInfo->mStorageId = contentStorageIndex;
 
-          addMergedContent(cInfo);
-        }
-      }
+      addMergedContent(cInfo);
     }
   }
   catch (...)
@@ -6237,25 +6235,21 @@ void MergeImplementation::event_fileUpdated(uint contentStorageIndex,T::EventInf
         for (uint c=0; c<len; c++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-          T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-          if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-          {
-            if (info != nullptr && (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-            {
-              // We should remove the old content before the addition
-            }
-            else
-            {
-              T::ContentInfo *cInfo = info->duplicate();
-              cInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
-              cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
-              cInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
-              cInfo->mStorageId = contentStorageIndex;
-              cInfo->mFileId = newFileId;
 
-              addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
-            }
-          }
+          // The old contents of the file were marked deleted above (by the merged file id, which is also the id of
+          // the lookup). The lookup does not return deleted contents, and addOrReplaceContent replaces a deleted
+          // content by the new content.
+          if (info == nullptr  ||  mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex) != nullptr)
+            continue;
+
+          T::ContentInfo *cInfo = info->duplicate();
+          cInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
+          cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
+          cInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
+          cInfo->mStorageId = contentStorageIndex;
+          cInfo->mFileId = newFileId;
+
+          addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
         }
       }
       addEvent(eventInfo.mType,newFileId,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);

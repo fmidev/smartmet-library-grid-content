@@ -7471,8 +7471,9 @@ void CacheImplementation::addStoredFileAndContents(T::EventInfo& eventInfo)
     if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) != Result::OK)
       return;
 
-    T::FileInfo *fInfo = fileInfo.duplicate();
-    mFileInfoList.addFileInfo(fInfo);
+    // As in the event data path, a file that is already in the list is not added twice
+    if (mFileInfoList.getFileInfoById(fileInfo.mFileId) == nullptr)
+      mFileInfoList.addFileInfo(fileInfo.duplicate());
 
     if (eventInfo.mId3 == 0)
       return;
@@ -7485,21 +7486,11 @@ void CacheImplementation::addStoredFileAndContents(T::EventInfo& eventInfo)
     for (uint c=0; c<len; c++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-      if (info == nullptr)
-        continue;
 
-      T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-      if (oInfo == nullptr  ||  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-      {
-        if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-        {
-          // We should remove the old content before the addition
-        }
-        else
-        {
-          addCachedContent(info->duplicate());
-        }
-      }
+      // The lookup does not return deleted contents. A content marked deleted (old content of a file that was
+      // registered again) is replaced by the new content in addOrReplaceContent.
+      if (info != nullptr  &&  mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) == nullptr)
+        addCachedContent(info->duplicate());
     }
   }
   catch (...)
@@ -7602,20 +7593,11 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         for (uint c=0; c<len; c++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-          T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-          if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-          {
-            if (info != nullptr && (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-            {
-              // We should remove the old content before the addition
-            }
-            else
-            {
-              T::ContentInfo *cInfo = info->duplicate();
 
-              addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
-            }
-          }
+          // The old contents of the file were marked deleted above. The lookup does not return deleted contents,
+          // and addOrReplaceContent replaces a deleted content by the new content.
+          if (info != nullptr  &&  mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) == nullptr)
+            addOrReplaceContent(mContentInfoList,info->duplicate(),mContentDeleteCounter);
         }
       }
     }
