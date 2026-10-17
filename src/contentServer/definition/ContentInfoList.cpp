@@ -845,6 +845,67 @@ bool addContentUntilFull(ContentInfoList& contentInfoList,ContentInfo *info,uint
   return contentInfoList.getLength() >= max;
 }
 
+
+/*! \brief Add the live contents accepted by the predicate from the given index forwards (or backwards with a negative maxRecords) until the list has abs(maxRecords) contents. */
+
+template <class Accept>
+void addContentPageByIndex(ContentInfoPtr *array,uint length,T::FileId startIndex,int maxRecords,Accept accept,ContentInfoList& contentInfoList)
+{
+  uint max = (uint)abs(maxRecords);
+  if (maxRecords >= 0)
+  {
+    for (uint t=startIndex; t<length; t++)
+    {
+      ContentInfo *info = array[t];
+      if (isLiveContent(info)  &&  accept(info)  &&  addContentUntilFull(contentInfoList,info,max))
+        return;
+    }
+  }
+  else
+  {
+    for (int t=startIndex; t>=0; t--)
+    {
+      ContentInfo *info = array[t];
+      if (isLiveContent(info)  &&  accept(info)  &&  addContentUntilFull(contentInfoList,info,max))
+        return;
+    }
+  }
+}
+
+
+
+/*! \brief Add the live contents accepted by the predicate from an array sorted by file and message, starting at the given file and message
+           forwards (or backwards with a negative maxRecords) until the list has abs(maxRecords) contents. startIdx is the closest index. */
+
+template <class Accept>
+void addContentPageByFileMessage(ContentInfoPtr *array,uint length,int startIdx,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,Accept accept,ContentInfoList& contentInfoList)
+{
+  uint max = (uint)abs(maxRecords);
+  if (maxRecords >= 0)
+  {
+    startIdx = std::max(startIdx, 0);
+
+    for (uint t=startIdx; t<length; t++)
+    {
+      ContentInfo *info = array[t];
+      if (isLiveContent(info)  &&  accept(info)  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
+        return;
+    }
+  }
+  else
+  {
+    if (startIdx < 0)
+      startIdx = length-1;
+
+    for (int t=startIdx; t>=0; t--)
+    {
+      ContentInfo *info = array[t];
+      if (isLiveContent(info)  &&  accept(info)  &&  (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
+        return;
+    }
+  }
+}
+
 }  // namespace
 
 
@@ -2738,42 +2799,6 @@ void ContentInfoList::getContentInfoList(T::FileId startFileId,T::MessageIndex s
 
 
 
-/*! \brief Append a paginated slice of the list starting from the given index (forwards or, with a negative maxRecords, backwards). */
-
-void ContentInfoList::getContentInfoListByIndexNoClear(T::FileId startIndex,int maxRecords,ContentInfoList& contentInfoList)
-{
-  try
-  {
-    uint max = (uint)abs(maxRecords);
-    if (maxRecords >= 0)
-    {
-      for (uint t=startIndex; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  addContentUntilFull(contentInfoList,info,max))
-          return;
-      }
-    }
-    else
-    {
-      for (int t=startIndex; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  addContentUntilFull(contentInfoList,info,max))
-          return;
-      }
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
 /*! \brief Append a paginated slice of the list starting from the given file id and message index. */
 
 void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList)
@@ -2784,13 +2809,14 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    uint max = (uint)abs(maxRecords);
+    auto accept = [](const ContentInfo * /*info*/) { return true; };
+
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      getContentInfoListByIndexNoClear(startFileId,maxRecords,contentInfoList);
+      addContentPageByIndex(mArray,mLength,startFileId,maxRecords,accept,contentInfoList);
       return;
     }
 
@@ -2800,31 +2826,7 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
-          return;
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex))  &&  addContentUntilFull(contentInfoList,info,max))
-          return;
-      }
-    }
-
+    addContentPageByFileMessage(mArray,mLength,startIdx,startFileId,startMessageIndex,maxRecords,accept,contentInfoList);
   }
   catch (...)
   {
@@ -4933,41 +4935,14 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    uint max = (uint)abs(maxRecords);
+    auto accept = [&](const ContentInfo *info) { return info->mProducerId == producerId; };
+
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      if (maxRecords >= 0)
-      {
-        for (uint t=startFileId; t<mLength; t++)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mProducerId == producerId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-      else
-      {
-        for (int t=startFileId; t>=0; t--)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mProducerId == producerId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-
+      addContentPageByIndex(mArray,mLength,startFileId,maxRecords,accept,contentInfoList);
       return;
     }
 
@@ -4977,40 +4952,7 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mProducerId == producerId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mProducerId == producerId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
+    addContentPageByFileMessage(mArray,mLength,startIdx,startFileId,startMessageIndex,maxRecords,accept,contentInfoList);
   }
   catch (...)
   {
@@ -5096,41 +5038,14 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    uint max = (uint)abs(maxRecords);
+    auto accept = [&](const ContentInfo *info) { return info->mGenerationId == generationId; };
 
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      if (maxRecords >= 0)
-      {
-        for (uint t=startFileId; t<mLength; t++)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mGenerationId == generationId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-      else
-      {
-        for (int t=startFileId; t>=0; t--)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mGenerationId == generationId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
+      addContentPageByIndex(mArray,mLength,startFileId,maxRecords,accept,contentInfoList);
       return;
     }
 
@@ -5140,40 +5055,7 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mGenerationId == generationId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mGenerationId == generationId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
+    addContentPageByFileMessage(mArray,mLength,startIdx,startFileId,startMessageIndex,maxRecords,accept,contentInfoList);
   }
   catch (...)
   {
@@ -5295,40 +5177,14 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    uint max = (uint)abs(maxRecords);
+    auto accept = [&](const ContentInfo *info) { return info->mGenerationId == generationId  &&  info->mGeometryId == geometryId; };
+
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      if (maxRecords >= 0)
-      {
-        for (uint t=startFileId; t<mLength; t++)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-      else
-      {
-        for (int t=startFileId; t>=0; t--)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
+      addContentPageByIndex(mArray,mLength,startFileId,maxRecords,accept,contentInfoList);
       return;
     }
 
@@ -5338,40 +5194,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mGenerationId == generationId  &&  info->mGeometryId == geometryId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
+    addContentPageByFileMessage(mArray,mLength,startIdx,startFileId,startMessageIndex,maxRecords,accept,contentInfoList);
   }
   catch (...)
   {
@@ -5468,43 +5291,16 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
     if (mArray == nullptr ||  mLength == 0)
       return;
 
-    uint max = (uint)abs(maxRecords);
+    auto accept = [&](const ContentInfo *info) { return info->mSourceId == sourceId; };
+
     if (mComparisonMethod != ContentInfo::ComparisonMethod::file_message)
     {
       // If the records are not sorted according to fileId and messageIndex then the startFileId parameter
       // is used as the start index in the list.
 
-      if (maxRecords >= 0)
-      {
-        for (uint t=startFileId; t<mLength; t++)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mSourceId == sourceId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
-      else
-      {
-        for (int t=startFileId; t>=0; t--)
-        {
-          ContentInfo *info = mArray[t];
-          if (isLiveContent(info)  &&  info->mSourceId == sourceId)
-          {
-            addContent(contentInfoList,info);
-
-            if (contentInfoList.getLength() >= max)
-              return;
-          }
-        }
-      }
+      addContentPageByIndex(mArray,mLength,startFileId,maxRecords,accept,contentInfoList);
       return;
     }
-
 
     AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
@@ -5512,40 +5308,7 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
     contentInfo.mMessageIndex = startMessageIndex;
 
     int startIdx = getClosestIndexNoLock(ContentInfo::ComparisonMethod::file_message,contentInfo);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mSourceId == sourceId && (info->mFileId > startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex >= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        ContentInfo *info = mArray[t];
-        if (isLiveContent(info)  &&  info->mSourceId == sourceId && (info->mFileId < startFileId  || (info->mFileId == startFileId  &&  info->mMessageIndex <= startMessageIndex)))
-        {
-          addContent(contentInfoList,info);
-
-          if (contentInfoList.getLength() >= max)
-            return;
-        }
-      }
-    }
+    addContentPageByFileMessage(mArray,mLength,startIdx,startFileId,startMessageIndex,maxRecords,accept,contentInfoList);
   }
   catch (...)
   {
