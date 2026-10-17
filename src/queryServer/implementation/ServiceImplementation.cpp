@@ -120,6 +120,58 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Split the function parameters at the ';' separators that are not inside functions. Returns true if the parameters contain a function. */
+
+bool splitFunctionParams(const std::string& functionParamsStr,std::vector<std::string>& pnames)
+{
+  bool containsFunction = false;
+  char buf[10000];
+  char tmp[10000];
+  uint c = 0;
+  strcpy(buf, functionParamsStr.c_str());
+
+  char* p = buf;
+  uint level = 0;
+  while (*p != '\0')
+  {
+    if (*p == '{')
+    {
+      containsFunction = true;
+      level++;
+    }
+
+    if (*p == '}')
+      level--;
+
+    if (*p == ';' && level == 0)
+    {
+      tmp[c] = '\0';
+      //mFunctionParamId++;
+      //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
+      pnames.emplace_back(tmp);
+      c = 0;
+    }
+    else
+    {
+      tmp[c] = *p;
+      c++;
+    }
+    p++;
+  }
+
+  if (c > 0)
+  {
+    tmp[c] = '\0';
+    //mFunctionParamId++;
+    //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
+    pnames.emplace_back(tmp);
+  }
+
+  return containsFunction;
+}
+
+
+
 /*! \brief Split the producer file line into ';'-separated fields that end at a '#' comment (separators within quotes are ignored). Returns the number of fields. */
 
 uint splitProducerFields(char* st,char** field)
@@ -1468,6 +1520,79 @@ bool ServiceImplementation::getParameterFunctionInfo(const std::string& paramStr
 
 
 
+/*! \brief Query Server: Add the function parameter, or one parameter for each of its levels and forecast numbers. */
+
+void ServiceImplementation::addFunctionParam(const std::string& pname,FunctionParam_vec& functionParams)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::string key;
+    T::GeometryId geometryId = 0;
+    T::ParamLevelId paramLevelId = 0;
+    T::ParamLevel paramLevel = 0;
+    T::ForecastType forecastType = 1;
+    std::vector<T::ParamLevel> paramLevelVec;
+    std::vector<T::ForecastNumber> forecastNumberVec;
+    std::string producerName;
+    T::ProducerId producerId = 0;
+    UInt64 generationFlags = 0;
+    short areaInterpolationMethod = 0;
+    short timeInterpolationMethod = 0;
+    short levelInterpolationMethod = 0;
+    uint flags = 0;
+
+    getParameterStringInfo(pname,':',key,geometryId,paramLevelId,paramLevelVec,forecastType,forecastNumberVec,
+        producerName,producerId,generationFlags,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,flags);
+
+    size_t lsz = paramLevelVec.size();
+    size_t fsz = forecastNumberVec.size();
+    if (lsz < 2  &&  fsz < 2)
+    {
+      mFunctionParamId++;
+      functionParams.emplace_back(mFunctionParamId,pname);
+    }
+    else
+    {
+      if (lsz < 1)
+        paramLevelVec.push_back(paramLevel);
+
+      if (fsz < 1)
+        forecastNumberVec.push_back(-1);
+
+      char paramLevelUnit = 0;
+      if (flags & QueryServer::QueryParameter::Flags::MetricLevels)
+        paramLevelUnit = 'm';
+
+      for (int & lIt : paramLevelVec)
+      {
+        paramLevel = lIt;
+        for (short & fIt : forecastNumberVec)
+        {
+          char buf[200];
+          if (paramLevelUnit)
+            sprintf(buf, "%s:%s:%d:%d:%c%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevelUnit,
+                paramLevel,forecastType,fIt,generationFlags);
+          else
+            sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
+                forecastType,fIt,generationFlags);
+
+          mFunctionParamId++;
+          functionParams.emplace_back(mFunctionParamId, std::string(buf));
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get function params. */
 
 bool ServiceImplementation::getFunctionParams(const std::string& functionParamsStr, FunctionParam_vec& functionParams)
@@ -1475,109 +1600,11 @@ bool ServiceImplementation::getFunctionParams(const std::string& functionParamsS
   FUNCTION_TRACE
   try
   {
-    bool containsFunction = false;
-    char buf[10000];
-    char tmp[10000];
-    uint c = 0;
-    strcpy(buf, functionParamsStr.c_str());
-
     std::vector<std::string> pnames;
-
-    char* p = buf;
-    uint level = 0;
-    while (*p != '\0')
-    {
-      if (*p == '{')
-      {
-        containsFunction = true;
-        level++;
-      }
-
-      if (*p == '}')
-        level--;
-
-      if (*p == ';' && level == 0)
-      {
-        tmp[c] = '\0';
-        //mFunctionParamId++;
-        //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
-        pnames.emplace_back(tmp);
-        c = 0;
-      }
-      else
-      {
-        tmp[c] = *p;
-        c++;
-      }
-      p++;
-    }
-
-    if (c > 0)
-    {
-      tmp[c] = '\0';
-      //mFunctionParamId++;
-      //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
-      pnames.emplace_back(tmp);
-    }
+    bool containsFunction = splitFunctionParams(functionParamsStr,pnames);
 
     for (auto& pname : pnames)
-    {
-      std::string key;
-      T::GeometryId geometryId = 0;
-      T::ParamLevelId paramLevelId = 0;
-      T::ParamLevel paramLevel = 0;
-      T::ForecastType forecastType = 1;
-      std::vector<T::ParamLevel> paramLevelVec;
-      std::vector<T::ForecastNumber> forecastNumberVec;
-      std::string producerName;
-      T::ProducerId producerId = 0;
-      UInt64 generationFlags = 0;
-      short areaInterpolationMethod = 0;
-      short timeInterpolationMethod = 0;
-      short levelInterpolationMethod = 0;
-      uint flags = 0;
-
-      getParameterStringInfo(pname,':',key,geometryId,paramLevelId,paramLevelVec,forecastType,forecastNumberVec,
-          producerName,producerId,generationFlags,areaInterpolationMethod,timeInterpolationMethod,levelInterpolationMethod,flags);
-
-      size_t lsz = paramLevelVec.size();
-      size_t fsz = forecastNumberVec.size();
-      if (lsz < 2  &&  fsz < 2)
-      {
-        mFunctionParamId++;
-        functionParams.emplace_back(mFunctionParamId,pname);
-      }
-      else
-      {
-        if (lsz < 1)
-          paramLevelVec.push_back(paramLevel);
-
-        if (fsz < 1)
-          forecastNumberVec.push_back(-1);
-
-        char paramLevelUnit = 0;
-        if (flags & QueryServer::QueryParameter::Flags::MetricLevels)
-          paramLevelUnit = 'm';
-
-        for (int & lIt : paramLevelVec)
-        {
-          paramLevel = lIt;
-          for (short & fIt : forecastNumberVec)
-          {
-            char buf[200];
-            if (paramLevelUnit)
-              sprintf(buf, "%s:%s:%d:%d:%c%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevelUnit,
-                  paramLevel,forecastType,fIt,generationFlags);
-            else
-              sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
-                  forecastType,fIt,generationFlags);
-
-            mFunctionParamId++;
-            functionParams.emplace_back(mFunctionParamId, std::string(buf));
-          }
-        }
-      }
-    }
+      addFunctionParam(pname,functionParams);
 
     if (mFunctionParamId > 4000000000)
       mFunctionParamId = 1000;
