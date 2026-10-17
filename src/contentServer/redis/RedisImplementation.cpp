@@ -77,6 +77,141 @@ bool allocateFileId(redisContext *context,const std::string& tablePrefix,T::File
   exception.addParameter("Attempts",std::to_string(maxAttempts));
   throw exception;
 }
+
+
+
+/*! \brief Add the files of a ZRANGEBYSCORE reply that are at or after startFileId and whose CSV field is accepted,
+           advancing startFileId past each scanned file. Returns true when the list has reached max files. */
+
+template <class Accept>
+bool addFilesFromReply(redisReply *reply,uint fieldIndex,Accept accept,T::FileId& startFileId,uint max,T::FileInfoList& fileInfoList)
+{
+  for (uint t = 0; t < reply->elements; t++)
+  {
+    T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
+    if (fileId < startFileId)
+      continue;
+
+    startFileId = fileId + 1;
+
+    if (accept(getCsvInt64Field(reply->element[t]->str,fieldIndex)))
+    {
+      auto *fileInfo = new T::FileInfo();
+      fileInfo->setCsv(reply->element[t]->str);
+      fileInfoList.addFileInfo(fileInfo);
+
+      if (fileInfoList.getLength() == max)
+        return true;
+    }
+  }
+  return false;
+}
+
+
+
+/*! \brief Add the contents of a ZRANGEBYSCORE reply that are at or after the start file and message and whose CSV
+           field is accepted, advancing the start position past each scanned content. Returns true when the list has reached max contents. */
+
+template <class Accept>
+bool addContentFromReply(redisReply *reply,uint fieldIndex,Accept accept,T::FileId& startFileId,T::MessageIndex& startMessageIndex,uint max,T::ContentInfoList& contentInfoList)
+{
+  for (uint t = 0; t < reply->elements; t++)
+  {
+    T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
+    T::MessageIndex messageIndex = getCsvInt64Field(reply->element[t]->str,1);
+
+    if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
+    {
+      startFileId = fileId;
+      startMessageIndex = messageIndex + 1;
+
+      if (accept(getCsvInt64Field(reply->element[t]->str,fieldIndex)))
+      {
+        auto *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(reply->element[t]->str);
+
+        contentInfoList.addContentInfo(contentInfo);
+
+        if (contentInfoList.getLength() == max)
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+
+/*! \brief Map the parameter key of the given key type to an FMI parameter id (0 if not found). Returns false for an unknown key type. */
+
+bool getFmiParameterIdByKeyType(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::FmiParamId& fmiId)
+{
+  switch (parameterKeyType)
+  {
+    case T::ParamKeyTypeValue::FMI_ID:
+      fmiId = toUInt32(parameterKey);
+      break;
+
+    case T::ParamKeyTypeValue::FMI_NAME:
+      fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
+      break;
+
+    case T::ParamKeyTypeValue::GRIB_ID:
+      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
+      break;
+
+    case T::ParamKeyTypeValue::NEWBASE_ID:
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
+      break;
+
+    case T::ParamKeyTypeValue::NEWBASE_NAME:
+      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
+      break;
+
+    case T::ParamKeyTypeValue::NETCDF_NAME:
+      fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
+      break;
+
+    case T::ParamKeyTypeValue::BUILD_IN:
+      break;
+
+    default:
+      return false;
+  }
+  return true;
+}
+
+
+
+/*! \brief Map a parameter key with an "FMI-", "NB-" or "GRIB-" prefix to an FMI parameter id. Returns false if the key has none of the prefixes. */
+
+bool getFmiParameterIdByKeyPrefix(const std::string& parameterKey,T::FmiParamId& fmiId)
+{
+  if (strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
+    fmiId = toUInt32(parameterKey.c_str()+4);
+  else if (strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
+  else if (strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
+  else
+    return false;
+
+  return true;
+}
+
+
+
+/*! \brief Return true if the content matches the parameter, level, forecast type/number, geometry and time range of the query (negative filters match anything). */
+
+bool matchesParameterQuery(const T::ContentInfo *info,T::FmiParamId fmiId,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t startTime,time_t endTime)
+{
+  return (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))  &&
+         (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))  &&
+         (geometryId < 0  ||  info->mGeometryId == geometryId)  &&
+         (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)  &&
+         (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId);
+}
+
 }  // namespace
 
 
@@ -7379,26 +7514,10 @@ int RedisImplementation::getFileListByGenerationId(T::GenerationId generationId,
           return Result::OK;
         }
 
-        for (uint t = 0; t < reply->elements; t++)
+        if (addFilesFromReply(reply,4,[&](T::GenerationId genId) { return genId == generationId; },startFileId,max,fileInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          if (fileId >= startFileId)
-          {
-            startFileId = fileId + 1;
-            T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,4);
-            if (genId == generationId)
-            {
-              auto *fileInfo = new T::FileInfo();
-              fileInfo->setCsv(reply->element[t]->str);
-              fileInfoList.addFileInfo(fileInfo);
-
-              if (fileInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -7454,26 +7573,10 @@ int RedisImplementation::getFileListByGenerationIdList(std::set<T::GenerationId>
           return Result::OK;
         }
 
-        for (uint t = 0; t < reply->elements; t++)
+        if (addFilesFromReply(reply,4,[&](T::GenerationId genId) { return generationIdList.find(genId) != generationIdList.end(); },startFileId,max,fileInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          if (fileId >= startFileId)
-          {
-            startFileId = fileId + 1;
-
-            T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,4);
-            if (generationIdList.find(genId) != generationIdList.end())
-            {
-              auto *fileInfo = new T::FileInfo();
-              fileInfo->setCsv(reply->element[t]->str);
-              fileInfoList.addFileInfo(fileInfo);
-              if (fileInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -7603,27 +7706,10 @@ int RedisImplementation::getFileListByProducerId(T::ProducerId producerId,T::Fil
           return Result::OK;
         }
 
-        for (uint t = 0; t < reply->elements; t++)
+        if (addFilesFromReply(reply,3,[&](T::ProducerId prodId) { return prodId == producerId; },startFileId,max,fileInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          if (fileId >= startFileId)
-          {
-            startFileId = fileId + 1;
-
-            T::ProducerId prodId = getCsvInt64Field(reply->element[t]->str,3);
-            if (prodId == producerId)
-            {
-              auto *fileInfo = new T::FileInfo();
-              fileInfo->setCsv(reply->element[t]->str);
-              fileInfoList.addFileInfo(fileInfo);
-
-              if (fileInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -7679,27 +7765,10 @@ int RedisImplementation::getFileListBySourceId(T::SourceId sourceId,T::FileId st
           return Result::OK;
         }
 
-        for (uint t = 0; t < reply->elements; t++)
+        if (addFilesFromReply(reply,7,[&](T::SourceId sId) { return sId == sourceId; },startFileId,max,fileInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          if (fileId >= startFileId)
-          {
-            startFileId = fileId + 1;
-
-            T::SourceId sId = getCsvInt64Field(reply->element[t]->str,7);
-            if (sId == sourceId)
-            {
-              auto *fileInfo = new T::FileInfo();
-              fileInfo->setCsv(reply->element[t]->str);
-              fileInfoList.addFileInfo(fileInfo);
-
-              if (fileInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -8652,32 +8721,10 @@ int RedisImplementation::getContentByGenerationId(T::GenerationId generationId,T
 
       if (reply->type == REDIS_REPLY_ARRAY)
       {
-        for (uint t = 0; t < reply->elements; t++)
+        if (addContentFromReply(reply,6,[&](T::GenerationId genId) { return genId == generationId; },startFileId,startMessageIndex,max,contentInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          T::MessageIndex messageIndex = getCsvInt64Field(reply->element[t]->str,1);
-
-          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
-          {
-            startFileId = fileId;
-            startMessageIndex = messageIndex + 1;
-
-            T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,6);
-
-            if (genId == generationId)
-            {
-              auto *contentInfo = new T::ContentInfo();
-              contentInfo->setCsv(reply->element[t]->str);
-
-              contentInfoList.addContentInfo(contentInfo);
-
-              if (contentInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -8735,32 +8782,10 @@ int RedisImplementation::getContentByGenerationIdList(std::set<T::GenerationId>&
 
       if (reply->type == REDIS_REPLY_ARRAY)
       {
-        for (uint t = 0; t < reply->elements; t++)
+        if (addContentFromReply(reply,6,[&](T::GenerationId genId) { return generationIdList.find(genId) != generationIdList.end(); },startFileId,startMessageIndex,max,contentInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          T::MessageIndex messageIndex = getCsvInt64Field(reply->element[t]->str,1);
-
-          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
-          {
-            startFileId = fileId;
-            startMessageIndex = messageIndex + 1;
-
-            T::GenerationId genId = getCsvInt64Field(reply->element[t]->str,6);
-
-            if (generationIdList.find(genId) != generationIdList.end())
-            {
-              auto *contentInfo = new T::ContentInfo();
-              contentInfo->setCsv(reply->element[t]->str);
-
-              contentInfoList.addContentInfo(contentInfo);
-
-              if (contentInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -8794,46 +8819,10 @@ int RedisImplementation::getContentByParameterId(T::ParamKeyType parameterKeyTyp
 
     T::FmiParamId fmiId = 0;
 
-    switch (parameterKeyType)
-    {
-      case T::ParamKeyTypeValue::FMI_ID:
-        fmiId = toUInt32(parameterKey);
-        break;
+    if (!getFmiParameterIdByKeyType(parameterKeyType,parameterKey,fmiId))
+      return Result::UNKNOWN_PARAMETER_KEY_TYPE;
 
-      case T::ParamKeyTypeValue::FMI_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::GRIB_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::NETCDF_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::BUILD_IN:
-        break;
-
-      default:
-        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
-    }
-
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-      fmiId = toUInt32(parameterKey.c_str()+4);
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else if (fmiId == 0)
+    if (fmiId == 0  &&  !getFmiParameterIdByKeyPrefix(parameterKey,fmiId))
       return Result::OK;
 
     if (!isConnectionValid())
@@ -8884,46 +8873,10 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
 
     T::FmiParamId fmiId = 0;
 
-    switch (parameterKeyType)
-    {
-      case T::ParamKeyTypeValue::FMI_ID:
-        fmiId = toUInt32(parameterKey);
-        break;
+    if (!getFmiParameterIdByKeyType(parameterKeyType,parameterKey,fmiId))
+      return Result::UNKNOWN_PARAMETER_KEY_TYPE;
 
-      case T::ParamKeyTypeValue::FMI_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::GRIB_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::NETCDF_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::BUILD_IN:
-        break;
-
-      default:
-        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
-    }
-
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-      fmiId = toUInt32(parameterKey.c_str()+4);
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else if (fmiId == 0)
+    if (fmiId == 0  &&  !getFmiParameterIdByKeyPrefix(parameterKey,fmiId))
       return Result::OK;
 
     if (!isConnectionValid())
@@ -8943,19 +8896,10 @@ int RedisImplementation::getContentByParameterIdAndTimeRange(T::ParamKeyType par
         auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
+        if (matchesParameterQuery(info,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,-1,startTime,endTime))
         {
-          if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
-          {
-            if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
-            {
-              if (parameterLevelId < 0 ||  info->mFmiParameterLevelId == parameterLevelId)
-              {
-                contentInfoList.addContentInfo(info);
-                info = nullptr;
-              }
-            }
-          }
+          contentInfoList.addContentInfo(info);
+          info = nullptr;
         }
 
         delete info;
@@ -8986,46 +8930,10 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
 
     T::FmiParamId fmiId = 0;
 
-    switch (parameterKeyType)
-    {
-      case T::ParamKeyTypeValue::FMI_ID:
-        fmiId = toUInt32(parameterKey);
-        break;
+    if (!getFmiParameterIdByKeyType(parameterKeyType,parameterKey,fmiId))
+      return Result::UNKNOWN_PARAMETER_KEY_TYPE;
 
-      case T::ParamKeyTypeValue::FMI_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::GRIB_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::NETCDF_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::BUILD_IN:
-        break;
-
-      default:
-        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
-    }
-
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-      fmiId = toUInt32(parameterKey.c_str()+4);
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else if (fmiId == 0)
+    if (fmiId == 0  &&  !getFmiParameterIdByKeyPrefix(parameterKey,fmiId))
       return Result::OK;
 
     if (!isConnectionValid())
@@ -9045,25 +8953,10 @@ int RedisImplementation::getContentByParameterIdAndGeneration(T::GenerationId ge
         auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if (info->mGenerationId == generationId)
+        if (info->mGenerationId == generationId  &&  matchesParameterQuery(info,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime))
         {
-          if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-          {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
-            {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
-              {
-                if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    contentInfoList.addContentInfo(info);
-                    info = nullptr;
-                  }
-                }
-              }
-            }
-          }
+          contentInfoList.addContentInfo(info);
+          info = nullptr;
         }
 
         delete info;
@@ -9093,46 +8986,10 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
 
     T::FmiParamId fmiId = 0;
 
-    switch (parameterKeyType)
-    {
-      case T::ParamKeyTypeValue::FMI_ID:
-        fmiId = toUInt32(parameterKey);
-        break;
+    if (!getFmiParameterIdByKeyType(parameterKeyType,parameterKey,fmiId))
+      return Result::UNKNOWN_PARAMETER_KEY_TYPE;
 
-      case T::ParamKeyTypeValue::FMI_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByFmiName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::GRIB_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_ID:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey));
-        break;
-
-      case T::ParamKeyTypeValue::NEWBASE_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNewbaseName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::NETCDF_NAME:
-        fmiId = Identification::gridDef.getFmiParameterIdByNetCdfName(parameterKey);
-        break;
-
-      case T::ParamKeyTypeValue::BUILD_IN:
-        break;
-
-      default:
-        return Result::UNKNOWN_PARAMETER_KEY_TYPE;
-    }
-
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
-      fmiId = toUInt32(parameterKey.c_str()+4);
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
-      fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else if (fmiId == 0)
+    if (fmiId == 0  &&  !getFmiParameterIdByKeyPrefix(parameterKey,fmiId))
       return Result::OK;
 
     if (!isConnectionValid())
@@ -9152,25 +9009,10 @@ int RedisImplementation::getContentByParameterIdAndProducer(T::ProducerId produc
         auto *info = new T::ContentInfo();
         info->setCsv(reply->element[t]->str);
 
-        if (info->mProducerId == producerId)
+        if (info->mProducerId == producerId  &&  matchesParameterQuery(info,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime))
         {
-          if (parameterLevelId < 0 || (info->mParameterLevel >= minLevel  &&  info->mParameterLevel <= maxLevel))
-          {
-            if (forecastType < 0 || (info->mForecastType == forecastType  &&  info->mForecastNumber == forecastNumber))
-            {
-              if (geometryId < 0  ||  info->mGeometryId == geometryId)
-              {
-                if (info->mFmiParameterId == fmiId &&  info->mForecastTimeUTC >= startTime  &&  info->mForecastTimeUTC <= endTime)
-                {
-                  if (parameterLevelId < 0 || info->mFmiParameterLevelId == parameterLevelId)
-                  {
-                    contentInfoList.addContentInfo(info);
-                    info = nullptr;
-                  }
-                }
-              }
-            }
-          }
+          contentInfoList.addContentInfo(info);
+          info = nullptr;
         }
 
         delete info;
@@ -9329,32 +9171,10 @@ int RedisImplementation::getContentByProducerId(T::ProducerId producerId,T::File
 
       if (reply->type == REDIS_REPLY_ARRAY)
       {
-        for (uint t = 0; t < reply->elements; t++)
+        if (addContentFromReply(reply,5,[&](T::ProducerId prodId) { return producerId == prodId; },startFileId,startMessageIndex,max,contentInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          T::MessageIndex messageIndex = getCsvInt64Field(reply->element[t]->str,1);
-
-          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
-          {
-            startFileId = fileId;
-            startMessageIndex = messageIndex + 1;
-
-            T::ProducerId prodId = getCsvInt64Field(reply->element[t]->str,5);
-
-            if (producerId == prodId)
-            {
-              auto *contentInfo = new T::ContentInfo();
-              contentInfo->setCsv(reply->element[t]->str);
-
-              contentInfoList.addContentInfo(contentInfo);
-
-              if (contentInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
@@ -9412,30 +9232,10 @@ int RedisImplementation::getContentBySourceId(T::SourceId sourceId,T::FileId sta
 
       if (reply->type == REDIS_REPLY_ARRAY)
       {
-        for (uint t = 0; t < reply->elements; t++)
+        if (addContentFromReply(reply,26,[&](T::SourceId sId) { return sId == sourceId; },startFileId,startMessageIndex,max,contentInfoList))
         {
-          T::FileId fileId = getCsvInt64Field(reply->element[t]->str,0);
-          T::MessageIndex messageIndex = getCsvInt64Field(reply->element[t]->str,1);
-
-          if (fileId > startFileId  ||  (fileId == startFileId   &&  messageIndex >= startMessageIndex))
-          {
-            startFileId = fileId;
-            startMessageIndex = messageIndex + 1;
-
-            T::SourceId sId = getCsvInt64Field(reply->element[t]->str,26);
-            if (sId == sourceId)
-            {
-              auto *contentInfo = new T::ContentInfo();
-              contentInfo->setCsv(reply->element[t]->str);
-              contentInfoList.addContentInfo(contentInfo);
-
-              if (contentInfoList.getLength() == max)
-              {
-                freeReplyObject(reply);
-                return Result::OK;
-              }
-            }
-          }
+          freeReplyObject(reply);
+          return Result::OK;
         }
         freeReplyObject(reply);
       }
