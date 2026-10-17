@@ -11826,6 +11826,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
 
     b.first = contentInfoList.getContentInfoByIndex(b.firstIndex);
     b.last = contentInfoList.getContentInfoByIndex(b.lastIndex);
+    if (b.first == nullptr  ||  b.last == nullptr)
+      return false;
 
     double_vec modificationParameters;
     T::ParamValue middleValue = 0;
@@ -11851,7 +11853,7 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
 
       int res3 = mDataServerPtr->getGridValueByPoint(0,mid->mFileId,mid->mMessageIndex,coordinateType,x,y,1,0,modificationParameters,middleValue);
       if (res3 != 0)
-        continue;
+        return false;
 
       if (bisectLevelBracket(b,mid,middleIndex,middleValue,height,reverse,level1,height1,level2,height2))
         return true;
@@ -11932,6 +11934,8 @@ bool ServiceImplementation::getClosestLevelsByHeight(const T::ContentInfoList& c
 
     b.first = contentInfoList.getContentInfoByIndex(b.firstIndex);
     b.last = contentInfoList.getContentInfoByIndex(b.lastIndex);
+    if (b.first == nullptr  ||  b.last == nullptr)
+      return false;
 
     T::ParamValue middleValue = 0;
 
