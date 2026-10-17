@@ -863,7 +863,11 @@ void addContentPageByIndex(ContentInfoPtr *array,uint length,T::FileId startInde
   }
   else
   {
-    for (int t=startIndex; t>=0; t--)
+    if (length == 0)
+      return;
+
+    int startIdx = startIndex < length ? (int)startIndex : (int)length-1;
+    for (int t=startIdx; t>=0; t--)
     {
       ContentInfo *info = array[t];
       if (isLiveContent(info)  &&  accept(info)  &&  addContentUntilFull(contentInfoList,info,max))
@@ -2806,6 +2810,7 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
   FUNCTION_TRACE
   try
   {
+    AutoReadLock lock(mModificationLockPtr);
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -2820,7 +2825,6 @@ void ContentInfoList::getContentInfoListNoClear(T::FileId startFileId,T::Message
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -4932,6 +4936,7 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
   {
     contentInfoList.clear();
 
+    AutoReadLock lock(mModificationLockPtr);
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -4946,7 +4951,6 @@ void ContentInfoList::getContentInfoListByProducerId(T::ProducerId producerId,T:
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5035,6 +5039,7 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
   {
     contentInfoList.clear();
 
+    AutoReadLock lock(mModificationLockPtr);
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5049,7 +5054,6 @@ void ContentInfoList::getContentInfoListByGenerationId(T::ProducerId /*producerI
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5174,6 +5178,7 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
   {
     contentInfoList.clear();
 
+    AutoReadLock lock(mModificationLockPtr);
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5188,7 +5193,6 @@ void ContentInfoList::getContentInfoListByGenerationAndGeometryId(T::ProducerId 
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
@@ -5288,6 +5292,7 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
   {
     contentInfoList.clear();
 
+    AutoReadLock lock(mModificationLockPtr);
     if (mArray == nullptr ||  mLength == 0)
       return;
 
@@ -5302,7 +5307,6 @@ void ContentInfoList::getContentInfoListBySourceId(T::SourceId sourceId,T::FileI
       return;
     }
 
-    AutoReadLock lock(mModificationLockPtr);
     ContentInfo contentInfo;
     contentInfo.mFileId = startFileId;
     contentInfo.mMessageIndex = startMessageIndex;
