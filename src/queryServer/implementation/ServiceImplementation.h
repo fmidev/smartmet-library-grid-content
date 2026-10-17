@@ -984,8 +984,8 @@ class ServiceImplementation : public ServiceInterface
      std::size_t                mContentCache_maxRecords;
      std::size_t                mContentCache_maxRecordsPerThread;
      uint                       mContentCache_clearInterval;
-     time_t                     mContentCache_globalClearRequiredTime;
-     time_t                     mContentSearchCache_globalClearRequiredTime;
+     std::atomic<UInt64>        mContentCache_globalGeneration{0};        //!< Incremented to clear the per-thread content caches.
+     std::atomic<UInt64>        mContentSearchCache_globalGeneration{0};  //!< Incremented to clear the per-thread content search caches.
      std::size_t                mContentSearchCache_maxRecords;
      std::size_t                mContentSearchCache_maxRecordsPerThread;
      uint                       mContentSearchCache_clearInterval;
@@ -1002,7 +1002,7 @@ class ServiceImplementation : public ServiceInterface
      bool                       mUpdateProcessingActive;
      bool                       mCheckGeometryStatus;
      bool                       mDataServerMethodsEnabled;
-     time_t                     mProducerGenerationListCache_clearRequired;
+     std::atomic<UInt64>        mProducerGenerationListCache_generation{0};  //!< Incremented to clear the per-thread producer generation list caches.
 
      mutable Fmi::Cache::CacheStats mContentCache_stats;
      std::atomic<Int64 >            mContentCache_size;

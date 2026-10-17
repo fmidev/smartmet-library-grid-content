@@ -2100,6 +2100,14 @@ thread_local std::size_t mContentSearchCache_records;
 thread_local time_t mContentSearchCache_clearRequiredTime;
 thread_local time_t mContentSearchCache_clearTime;
 
+// The global clear requests of the per-thread caches (content server restart, new generation list) are atomic
+// generation counters of the ServiceImplementation, incremented by the update thread. Each thread clears its cache
+// when the generation differs from the generation it saw when it cleared the cache the last time.
+
+thread_local UInt64 mContentCache_seenGlobalGeneration = 0;
+thread_local UInt64 mContentSearchCache_seenGlobalGeneration = 0;
+thread_local UInt64 mProducerGenerationListCache_seenGeneration = 0;
+
 
 
 // The parameter mapping cache is per thread, so the cache itself needs no locking. The update thread only
@@ -2121,7 +2129,6 @@ std::set<T::GeometryId> mUnregisteredGeometryWarnings;
 ModificationLock mUnregisteredGeometryWarnings_modificationLock;
 
 thread_local ProducerGenarationListCache mProducerGenerationListCache;
-thread_local time_t mProducerGenerationListCache_clearTime;
 
 
 
@@ -2183,8 +2190,6 @@ ServiceImplementation::ServiceImplementation()
     mContentSearchCache_stats.size = 0;
     mContentSearchCache_stats.starttime = Fmi::SecondClock::universal_time();
     mCheckGeometryStatus = false;
-    mProducerGenerationListCache_clearTime  = time(nullptr);
-    mProducerGenerationListCache_clearRequired = 0;
     mUpdateProcessingActive = false;
     mDataServerMethodsEnabled = false;
     mContentCache_stats.maxsize = 0;
@@ -2200,11 +2205,9 @@ ServiceImplementation::ServiceImplementation()
     mContentSearchCache_inserts = 0;
     mContentSearchCache_clearInterval = 3600 * 24;
 
-    mContentSearchCache_globalClearRequiredTime = 0;
     mContentSearchCache_clearRequiredTime = 0;
     mContentSearchCache_clearTime = 0;
 
-    mContentCache_globalClearRequiredTime = 0;
     mContentCache_clearRequiredTime = 0;
     mContentCache_clearTime = 0;
 
@@ -2649,10 +2652,11 @@ CacheEntry_sptr ServiceImplementation::getGenerationInfoListByProducerId(T::Prod
   FUNCTION_TRACE
   try
   {
-    if (mProducerGenerationListCache_clearRequired > mProducerGenerationListCache_clearTime)
+    UInt64 generation = mProducerGenerationListCache_generation.load();
+    if (mProducerGenerationListCache_seenGeneration != generation)
     {
       mProducerGenerationListCache.clear();
-      mProducerGenerationListCache_clearTime = time(nullptr);
+      mProducerGenerationListCache_seenGeneration = generation;
     }
 
     T::ProducerId key = producerId;
@@ -6319,10 +6323,12 @@ void ServiceImplementation::storeContentSearchResult(std::size_t hash2,const std
 {
   try
   {
+    UInt64 globalGeneration = mContentSearchCache_globalGeneration.load();
     if (mContentSearchCache_clearTime < mContentSearchCache_clearRequiredTime ||
-        mContentSearchCache_clearTime <  mContentSearchCache_globalClearRequiredTime ||
+        mContentSearchCache_seenGlobalGeneration != globalGeneration ||
         mContentSearchCache_records >= mContentSearchCache_maxRecordsPerThread)
     {
+      mContentSearchCache_seenGlobalGeneration = globalGeneration;
       //printf("CLEAR CONTENT SEARCH CACHE %ld %ld %ld\n",mContentSearchCache_records,mContentSearchCache_maxRecords,(std::size_t)mContentSearchCache_size);
       mContentSearchCache_size -= mContentSearchCache_records;
       mContentSearchCache.clear();
@@ -6380,10 +6386,12 @@ void ServiceImplementation::storeContentCacheEntry(std::size_t hash,const Conten
 {
   try
   {
+    UInt64 globalGeneration = mContentCache_globalGeneration.load();
     if (mContentCache_clearTime < mContentCache_clearRequiredTime ||
-        mContentCache_clearTime < mContentCache_globalClearRequiredTime ||
+        mContentCache_seenGlobalGeneration != globalGeneration ||
         mContentCache_records > mContentCache_maxRecordsPerThread)
     {
+      mContentCache_seenGlobalGeneration = globalGeneration;
       //printf("CLEAR CONTENT CACHE %ld %ld %ld\n",mContentCache_records,mContentCache_maxRecordsPerThread,(std::size_t)mContentCache_size);
       mContentCache_size -= mContentCache_records;
       mContentCache.clear();
@@ -12352,7 +12360,7 @@ void ServiceImplementation::checkGenerationUpdates()
       }
       mGenerationInfoList_checkTime = time(nullptr);
 
-      mProducerGenerationListCache_clearRequired = time(nullptr);
+      mProducerGenerationListCache_generation++;
     }
     else
     {
@@ -12446,9 +12454,9 @@ void ServiceImplementation::checkContentServerRestart()
 
           PRINT_DATA(mDebugLog, "#### Content server restart detected, clearing cached information #######\n");
 
-          mProducerGenerationListCache_clearRequired = time(nullptr);
-          mContentSearchCache_globalClearRequiredTime = time(nullptr);
-          mContentCache_globalClearRequiredTime = time(nullptr);
+          mProducerGenerationListCache_generation++;
+          mContentSearchCache_globalGeneration++;
+          mContentCache_globalGeneration++;
 
           mPointHeightCache.clear();
           mLevelRangeCache.clear();
