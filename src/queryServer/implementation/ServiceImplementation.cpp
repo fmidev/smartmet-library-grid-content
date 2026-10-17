@@ -120,6 +120,53 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Return the polygon path in the grid coordinates of the grid definition. The path is in lat/lon or (with original) in the original coordinates. */
+
+T::AreaCoordinates toGridPolygonPath(GRIB2::GridDefinition& def,const T::AreaCoordinates& polygonPath,bool original)
+{
+  T::AreaCoordinates newPolygonPath;
+  for (const auto& mAreaCoordinate : polygonPath)
+  {
+    std::vector<T::Coordinate> newPolygonPoints;
+    for (auto it = mAreaCoordinate.begin(); it != mAreaCoordinate.end(); ++it)
+    {
+      double grid_i = 0;
+      double grid_j = 0;
+      if (original)
+        def.getGridPointByOriginalCoordinates(it->x(),it->y(),grid_i,grid_j);
+      else
+        def.getGridPointByLatLonCoordinates(it->y(),it->x(),grid_i,grid_j);
+      newPolygonPoints.emplace_back(grid_i,grid_j);
+    }
+    newPolygonPath.emplace_back(newPolygonPoints);
+  }
+  return newPolygonPath;
+}
+
+
+
+/*! \brief Return the lat/lon coordinates of the grid points inside the polygon path given in the grid coordinates. */
+
+T::Coordinate_vec getGridPointCoordinatesInside(GRIB2::GridDefinition& def,uint cols,uint rows,T::AreaCoordinates& gridPolygonPath)
+{
+  std::vector<T::Point> gridPoints;
+  getPointsInsidePolygonPath(cols,rows,gridPolygonPath,gridPoints);
+
+  T::Coordinate_vec coordinates;
+  for (auto& gridPoint : gridPoints)
+  {
+    double lat = 0;
+    double lon = 0;
+    if (def.getGridLatLonCoordinatesByGridPoint(gridPoint.x(),gridPoint.y(),lat,lon))
+    {
+      coordinates.emplace_back(lon,lat);
+    }
+  }
+  return coordinates;
+}
+
+
+
 /*! \brief Return true if the levels of the query parameter are heights and level interpolation is allowed. */
 
 bool isMetricLevelQuery(const QueryParameter& qParam)
@@ -8001,6 +8048,69 @@ bool ServiceImplementation::getCircleValues(
 
 
 
+/*! \brief Query Server: Get the height level values of the grid points inside the polygon path. */
+
+bool ServiceImplementation::getPolygonValuesByHeight(
+    Query& query,
+    QueryParameter& qParam,
+    const T::ProducerInfo& producerInfo,
+    T::GeometryId producerGeometryId,
+    T::GenerationId generationId,
+    const std::string& analysisTime,
+    UInt64 generationFlags,
+    ParameterMapping& pInfo,
+    time_t forecastTime,
+    T::ParamLevelId paramLevelId,
+    T::ParamLevel paramLevel,
+    T::ProducerId& newProducerId,
+    ParameterValues& valueList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(producerGeometryId);
+    if (!def)
+      return false;
+
+    T::Dimensions d = def->getGridDimensions();
+    uint cols = d.nx();
+    uint rows = d.ny();
+
+    T::AreaCoordinates gridPolygonPath;
+    switch (query.mCoordinateType)
+    {
+      case T::CoordinateTypeValue::UNKNOWN:
+      case T::CoordinateTypeValue::LATLON_COORDINATES:
+        gridPolygonPath = toGridPolygonPath(*def,query.mAreaCoordinates,false);
+        break;
+
+      case T::CoordinateTypeValue::GRID_COORDINATES:
+        gridPolygonPath = query.mAreaCoordinates;
+        break;
+
+      case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
+        gridPolygonPath = toGridPolygonPath(*def,query.mAreaCoordinates,true);
+        break;
+
+      default:
+        return true;
+    }
+
+    T::Coordinate_vec coordinates = getGridPointCoordinatesInside(*def,cols,rows,gridPolygonPath);
+
+    return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
+       paramLevelId,paramLevel,newProducerId,valueList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get polygon values. */
 
 bool ServiceImplementation::getPolygonValues(
@@ -8024,116 +8134,7 @@ bool ServiceImplementation::getPolygonValues(
     PRINT_DATA(mDebugLog, "getPolygonValues()\n");
 
     if (isMetricLevelQuery(qParam))
-    {
-      GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(producerGeometryId);
-      if (!def)
-        return false;
-
-      T::Dimensions d = def->getGridDimensions();
-      uint cols = d.nx();
-      uint rows = d.ny();
-
-      switch (query.mCoordinateType)
-      {
-        case T::CoordinateTypeValue::UNKNOWN:
-        case T::CoordinateTypeValue::LATLON_COORDINATES:
-        {
-          std::vector<std::vector<T::Coordinate>> newPolygonPath;
-
-          for (auto& mAreaCoordinate : query.mAreaCoordinates)
-          {
-            std::vector<T::Coordinate> newPolygonPoints;
-
-            for (auto it = mAreaCoordinate.begin(); it != mAreaCoordinate.end(); ++it)
-            {
-              double grid_i = 0;
-              double grid_j = 0;
-              def->getGridPointByLatLonCoordinates(it->y(),it->x(),grid_i,grid_j);
-              newPolygonPoints.emplace_back(grid_i,grid_j);
-            }
-            newPolygonPath.emplace_back(newPolygonPoints);
-          }
-
-          std::vector<T::Point> gridPoints;
-          getPointsInsidePolygonPath(cols,rows,newPolygonPath,gridPoints);
-
-          T::Coordinate_vec coordinates;
-          for (auto& gridPoint : gridPoints)
-          {
-            double lat = 0;
-            double lon = 0;
-            if (def->getGridLatLonCoordinatesByGridPoint(gridPoint.x(),gridPoint.y(),lat,lon))
-            {
-              coordinates.emplace_back(lon,lat);
-            }
-          }
-          return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
-             paramLevelId,paramLevel,newProducerId,valueList);
-        }
-
-
-        case T::CoordinateTypeValue::GRID_COORDINATES:
-        {
-          std::vector<T::Point> gridPoints;
-          getPointsInsidePolygonPath(cols,rows,query.mAreaCoordinates,gridPoints);
-
-          T::Coordinate_vec coordinates;
-          for (auto& gridPoint : gridPoints)
-          {
-            double lat = 0;
-            double lon = 0;
-            if (def->getGridLatLonCoordinatesByGridPoint(gridPoint.x(),gridPoint.y(),lat,lon))
-            {
-              coordinates.emplace_back(lon,lat);
-            }
-          }
-          return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
-             paramLevelId,paramLevel,newProducerId,valueList);
-        }
-
-
-        case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-        {
-          std::vector<std::vector<T::Coordinate>> newPolygonPath;
-
-          for (auto& mAreaCoordinate : query.mAreaCoordinates)
-          {
-            std::vector<T::Coordinate> newPolygonPoints;
-
-            for (auto it = mAreaCoordinate.begin(); it != mAreaCoordinate.end(); ++it)
-            {
-              double grid_i = 0;
-              double grid_j = 0;
-              def->getGridPointByOriginalCoordinates(it->x(),it->y(),grid_i,grid_j);
-              newPolygonPoints.emplace_back(grid_i,grid_j);
-            }
-            newPolygonPath.emplace_back(newPolygonPoints);
-          }
-
-          std::vector<T::Point> gridPoints;
-          getPointsInsidePolygonPath(cols,rows,newPolygonPath,gridPoints);
-
-          T::Coordinate_vec coordinates;
-          for (auto& gridPoint : gridPoints)
-          {
-            double lat = 0;
-            double lon = 0;
-            if (def->getGridLatLonCoordinatesByGridPoint(gridPoint.x(),gridPoint.y(),lat,lon))
-            {
-              coordinates.emplace_back(lon,lat);
-            }
-          }
-          return getPointValuesByHeight(query,query.mCoordinateType,coordinates,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,
-             paramLevelId,paramLevel,newProducerId,valueList);
-        }
-        default:
-          break;
-      }
-
-      return true;
-    }
-
-
+      return getPolygonValuesByHeight(query,qParam,producerInfo,producerGeometryId,generationId,analysisTime,generationFlags,pInfo,forecastTime,paramLevelId,paramLevel,newProducerId,valueList);
 
     short timeInterpolationMethod = getTimeInterpolationMethod(qParam,pInfo);
 

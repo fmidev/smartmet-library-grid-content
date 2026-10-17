@@ -416,6 +416,21 @@ class ServiceImplementation : public ServiceInterface
                        T::ParamValue_vec& valueList,
                        T::ParamValue_vec& newValueList);
 
+     bool           getPolygonValuesByHeight(
+                       Query& query,
+                       QueryParameter& qParam,
+                       const T::ProducerInfo& producerInfo,
+                       T::GeometryId producerGeometryId,
+                       T::GenerationId generationId,
+                       const std::string& analysisTime,
+                       UInt64 generationFlags,
+                       ParameterMapping& pInfo,
+                       time_t forecastTime,
+                       T::ParamLevelId paramLevelId,
+                       T::ParamLevel paramLevel,
+                       T::ProducerId& newProducerId,
+                       ParameterValues& valueList);
+
      bool           getPolygonValues(
                        Query& query,
                        QueryParameter& qParam,
