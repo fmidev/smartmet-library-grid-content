@@ -18,6 +18,12 @@
 
 namespace SmartMet
 {
+namespace GRID
+{
+class GridFile;
+class Message;
+}
+
 namespace QueryServer
 {
 
@@ -416,6 +422,9 @@ class ServiceImplementation : public ServiceInterface
      void           executeTimeStepFunction(Query& query,QueryParameter& qParam,const std::string& function,uint valueCount,bool onlyAvailableParams,int tCount,time_t forecastTime);
      void           executeRowRangeFunction(Query& query,QueryParameter& qParam);
      void           executeRowRangeValueFunction(const Query& query,Functions::FunctionPtr functionPtr,uint type,const std::string& luaFunction,std::vector<T::ParamValue>& values,const T::GridValue& rec,T::GridValueList& list);
+     bool           getGridFileProperties(const T::ContentInfo& contentInfo1,std::map<uint,Int64 >& oldProperties);
+     GRID::Message* newGridFileMessage(const Query& query,uint version,time_t forecastTime,T::ParamLevel paramLevel,const T::ContentInfo& contentInfo1,const std::map<uint,Int64 >& oldProperties,GRID::GridFile& newGridFile);
+     bool           addGridFileData(int result,const char *service,const T::ContentInfo& contentInfo1,bool levelInterpolated,T::ParamLevel paramLevel,QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,GRID::GridFile& newGridFile,GRID::Message& newMessage,UInt64 sz,ParameterValues& valueList);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);

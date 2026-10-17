@@ -684,6 +684,566 @@ void collectTimeStepForecastTimes(Query& query,bool containsInternalAggregation,
 
 
 
+/*! \brief Size, bounding box and grid steps of the area of the grid file. */
+
+struct GridFileArea
+{
+  Int64  gridWidth = 0;
+  Int64  gridHeight = 0;
+
+  double lon1 = 0;
+  double lat1 = 0;
+  double lon2 = 0;
+  double lat2 = 0;
+  double xStepMetric = 0;
+  double yStepMetric = 0;
+  double xStepDegrees = 0;
+  double yStepDegrees = 0;
+};
+
+
+
+/*! \brief Projection parameters of the crs of the grid file (missing values if not defined). */
+
+struct ProjectionParameters
+{
+  std::string projectionStr;
+  //float lat_0 = ParamValueMissing;
+  float lat_1 = ParamValueMissing;
+  float lat_2 = ParamValueMissing;
+  float laD = ParamValueMissing;
+  float lon_0 = ParamValueMissing;
+  //float x_0 = ParamValueMissing;
+  //float y_0 = ParamValueMissing;
+};
+
+
+
+/*! \brief Return the GRIB version of the grid properties (0 if not found). */
+
+uint getGribVersion(const std::map<uint,Int64 >& oldProperties)
+{
+  uint version = 0;
+  const int id = GRIB1::Property::IndicatorSection::EditionNumber;
+  auto v1 = oldProperties.find(id);
+  if (v1 != oldProperties.end())
+    version = 1;
+
+  if (version == 0)
+  {
+    const int id = GRIB1::Property::IndicatorSection::EditionNumber;
+    auto v2 = oldProperties.find(id);
+    if (v2 != oldProperties.end())
+      version = 2;
+  }
+
+  return version;
+}
+
+
+
+/*! \brief Set the message properties: the new properties, and the old properties outside the grid section. */
+
+void setMessageProperties(GRID::Message& newMessage,T::PropertyVec& props,uint firstGridProperty,uint lastGridProperty,const std::map<uint,Int64 >& newProperties,const std::map<uint,Int64 >& oldProperties)
+{
+  for (auto& prop : props)
+  {
+    auto np = newProperties.find(prop.second);
+
+    if (np != newProperties.end())
+    {
+      // printf("REPLACE %s (%u) %lld\n",it->first.c_str(),it->second,np->second);
+      newMessage.setProperty(prop.second,np->second);
+    }
+    else
+    {
+      if (prop.second < firstGridProperty || prop.second > lastGridProperty)
+      {
+        auto op = oldProperties.find(prop.second);
+        if (op != oldProperties.end())
+        {
+          // printf("SET %s (%u) %lld\n",it->first.c_str(),it->second,op->second);
+          newMessage.setProperty(prop.second,op->second);
+        }
+      }
+    }
+  }
+}
+
+
+
+/*! \brief Get the size, the bounding box and the grid steps of the grid file area from the query attributes. */
+
+void getGridFileArea(const Query& query,const char *gridSizeStr,const char *bboxStr,GridFileArea& a)
+{
+  if (gridSizeStr)
+  {
+    std::vector<double> v;
+    splitString(gridSizeStr,',',v);
+    if (v.size() == 2)
+    {
+      a.gridWidth = (Int64 )v[0];
+      a.gridHeight = (Int64 )v[1];
+    }
+  }
+
+
+  if (query.mAreaCoordinates[0].size() == 1)
+  {
+    const char *gridMetricDistanceStr = query.mAttributeList.getAttributeValue("grid.metricDistance");
+    const char *gridMetricSizeStr = query.mAttributeList.getAttributeValue("grid.metricSize");
+
+    std::vector<double> v;
+    if (gridMetricDistanceStr)
+    {
+      splitString(gridMetricDistanceStr,',',v);
+      if (v.size() == 4)
+      {
+        latLon_bboxByCenter(query.mAreaCoordinates[0][0].x(),query.mAreaCoordinates[0][0].y(),1000*v[0],1000*v[1],1000*v[2],1000*v[3],a.lon1,a.lat1,a.lon2,a.lat2);
+
+        a.xStepMetric = (double)1000*(v[0]+v[2]) / (double)a.gridWidth;
+        a.yStepMetric = (double)1000*(v[1]+v[3]) / (double)a.gridHeight;
+      }
+    }
+    else
+    if (gridMetricSizeStr)
+    {
+      splitString(gridMetricSizeStr,',',v);
+      if (v.size() == 2)
+      {
+        latLon_bboxByCenter(query.mAreaCoordinates[0][0].x(),query.mAreaCoordinates[0][0].y(),1000*v[0],1000*v[1],a.lon1,a.lat1,a.lon2,a.lat2);
+
+        a.xStepMetric = (double)1000*(v[0]) / (double)a.gridWidth;
+        a.yStepMetric = (double)1000*(v[1]) / (double)a.gridHeight;
+      }
+    }
+  }
+
+
+  std::vector<double> aa;
+  if (bboxStr)
+  {
+    splitString(bboxStr,',',aa);
+    if (aa.size() == 4)
+    {
+      a.lon1 = aa[0];
+      a.lat1 = aa[1];
+      a.lon2 = aa[2];
+      a.lat2 = aa[3];
+    }
+  }
+
+  //printf("COORDINATES %f,%f,%f,%f\n",a.lon1,a.lat1,a.lon2,a.lat2);
+  double xDegrees = a.lon2-a.lon1;
+  double yDegrees = a.lat2-a.lat1;
+
+  a.xStepDegrees = xDegrees / (double)a.gridWidth;
+  a.yStepDegrees = yDegrees / (double)a.gridHeight;
+}
+
+
+
+/*! \brief Parse the projection parameters from the PROJ.4 string of the crs. Throws an exception for an invalid crs. */
+
+void getProjectionParameters(const char *crsStr,ProjectionParameters& pp)
+{
+  OGRSpatialReference sr;
+
+  if (sr.SetFromUserInput(crsStr) != OGRERR_NONE)
+    throw Fmi::Exception(BCP, "Invalid crs '" + std::string(crsStr) + "'!");
+
+  // sr.dumpReadable();
+
+  std::vector<std::string> partList;
+
+  char *out = nullptr;
+  sr.exportToProj4(&out);
+  //printf("%s\n",out);
+  splitString(out,' ',partList);
+  CPLFree(out);
+
+  for (auto& it : partList)
+  {
+    std::vector<std::string> attr;
+    splitString(it.c_str(),'=',attr);
+    if (attr.size() == 2)
+    {
+      // printf("[%s][%s]\n",attr[0].c_str(),attr[1].c_str());
+      if (attr[0] == "+proj")
+        pp.projectionStr = attr[1];
+
+      //if (attr[0] == "+lat_0")
+      //  lat_0 = toDouble(attr[1]);
+
+      if (attr[0] == "+lat_1")
+        pp.lat_1 = toDouble(attr[1]);
+
+      if (attr[0] == "+lat_2")
+        pp.lat_2 = toDouble(attr[1]);
+
+      if (attr[0] == "+lat_ts")
+        pp.laD = toDouble(attr[1]);
+
+      if (attr[0] == "+lon_0")
+        pp.lon_0 = toDouble(attr[1]);
+
+      //if (attr[0] == "+x_0")
+      //  x_0 = toDouble(attr[1]);
+
+      //if (attr[0] == "+y_0")
+      //  y_0 = toDouble(attr[1]);
+    }
+  }
+}
+
+
+
+/*! \brief Add the GRIB1 latlon grid properties of the grid file area. */
+
+void addGrib1LatLonProperties(const GridFileArea& a,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,0LL));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Ni,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Nj,a.gridHeight));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(a.xStepDegrees*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(a.yStepDegrees*1000)));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfLastGridPoint,(Int64 )(a.lat2*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfLastGridPoint,(Int64 )(a.lon2*1000)));
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
+}
+
+
+
+/*! \brief Add the GRIB1 polar stereographic grid properties of the grid file area. */
+
+void addGrib1PolarStereographicProperties(const GridFileArea& a,const ProjectionParameters& pp,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,5LL));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Nx,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Ny,a.gridHeight));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000)));
+
+  if (pp.lon_0 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(pp.lon_0*1000)));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DxInMetres,(Int64 )a.xStepMetric));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DyInMetres,(Int64 )a.yStepMetric));
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
+}
+
+
+
+/*! \brief Add the GRIB1 lambert conformal grid properties of the grid file area. */
+
+void addGrib1LambertConformalProperties(const GridFileArea& a,const ProjectionParameters& pp,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,3LL));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Nx,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Ny,a.gridHeight));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000)));
+
+  if (pp.lon_0 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LoV,(Int64 )(pp.lon_0*1000)));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DxInMetres,(Int64 )a.xStepMetric));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DyInMetres,(Int64 )a.yStepMetric));
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::ProjectionCentreFlag:
+
+  if (pp.lat_1 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin1,(Int64 )(pp.lat_1*1000)));
+
+  if (pp.lat_2 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin2,(Int64 )(pp.lat_2*1000)));
+
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
+
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
+}
+
+
+
+/*! \brief Add the GRIB2 latlon grid properties of the grid file area. */
+
+void addGrib2LatLonProperties(const GridFileArea& a,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LatLon));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,a.gridWidth*a.gridHeight));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Ni,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Nj,a.gridHeight));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfLastGridPoint,(Int64 )(a.lat2*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfLastGridPoint,(Int64 )(a.lon2*1000000)));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(a.xStepDegrees*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(a.yStepDegrees*1000000)));
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x0));
+}
+
+
+
+/*! \brief Add the GRIB2 polar stereographic grid properties of the grid file area. */
+
+void addGrib2PolarStereographicProperties(const GridFileArea& a,const ProjectionParameters& pp,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::PolarStereographic));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,a.gridWidth*a.gridHeight));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Nx,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Ny,a.gridHeight));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ResolutionAndComponentFlags,48));
+  if (pp.laD != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,(Int64 )(pp.laD*1000000)));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,60000000));
+
+  if (pp.lon_0 != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(pp.lon_0*1000000)));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(Int64 )a.xStepMetric*1000));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(Int64 )a.yStepMetric*1000));
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x0));
+}
+
+
+
+/*! \brief Add the GRIB2 lambert conformal grid properties of the grid file area. */
+
+void addGrib2LambertConformalProperties(const GridFileArea& a,const ProjectionParameters& pp,std::map<uint,Int64>& newProperties)
+{
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LambertConformal));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,a.gridWidth*a.gridHeight));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Nx,a.gridWidth));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Ny,a.gridHeight));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(a.lat1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(a.lon1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ResolutionAndComponentFlags,48));
+
+  if (pp.laD != ParamValueMissing)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,(Int64 )(pp.laD*1000000)));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(pp.lon_0*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )a.xStepMetric*1000));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )a.yStepMetric*1000));
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(pp.lat_1*1000000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(pp.lat_2*1000000)));
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
+  //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
+
+  if (a.lat1 < a.lat2)
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x40));
+  else
+    newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x0));
+}
+
+
+
+/*! \brief Add the grid properties of the projection (of the GRIB version) for the grid file area. */
+
+void addProjectionProperties(const Query& query,uint version,const ProjectionParameters& pp,const GridFileArea& a,std::map<uint,Int64>& newProperties)
+{
+  bool hasArea = !query.mAreaCoordinates.empty()  && !query.mAreaCoordinates[0].empty();
+
+  if (version == 1)
+  {
+    if (pp.projectionStr == "longlat")
+      addGrib1LatLonProperties(a,newProperties);
+
+    if (pp.projectionStr == "stere"  &&  hasArea)
+      addGrib1PolarStereographicProperties(a,pp,newProperties);
+
+    if (pp.projectionStr == "lcc"  &&  hasArea)
+      addGrib1LambertConformalProperties(a,pp,newProperties);
+  }
+
+  if (version == 2)
+  {
+    if (pp.projectionStr == "longlat")
+      addGrib2LatLonProperties(a,newProperties);
+
+    if (pp.projectionStr == "stere"  &&  hasArea)
+      addGrib2PolarStereographicProperties(a,pp,newProperties);
+
+    if (pp.projectionStr == "lcc"  &&  hasArea)
+      addGrib2LambertConformalProperties(a,pp,newProperties);
+  }
+}
+
+
+
+/*! \brief Create the GRIB1 message of the grid file (the geometry properties, the time and level properties, and the
+           other properties from the original message). */
+
+GRID::Message* newGrib1Message(GRID::GridFile& newGridFile,const char *geometryIdStr,time_t forecastTime,T::ParamLevel paramLevel,const T::ContentInfo& contentInfo1,const std::map<uint,Int64 >& oldProperties,std::map<uint,Int64 >& newProperties)
+{
+  std::string ftime = utcTimeFromTimeT(forecastTime);
+
+  int year = 0;
+  int month = 0;
+  int day = 0;
+  int hour = 0;
+  int minute = 0;
+  int second = 0;
+  splitTimeString(ftime,year,month,day,hour,minute,second);
+
+  using namespace SmartMet::GRIB1;
+
+  if (geometryIdStr)
+  {
+    GRIB1::GridDef_sptr def = Identification::gridDef.getGrib1DefinitionByGeometryId(toInt32(geometryIdStr));
+    if (def)
+    {
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::DataRepresentationType,def->getTemplateNumber()));
+
+      T::PropertySettingVec tmpProperties;
+      def->getProperties(tmpProperties);
+
+      for (auto& tmpPropertie : tmpProperties)
+      {
+        //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
+        newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
+      }
+    }
+  }
+
+  GRID::Message *newMessage = newGridFile.newMessage(T::FileTypeValue::Grib1);
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::SectionFlags,128));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Level,paramLevel));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::YearOfCentury,year % 100));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Month,month));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Day,day));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Hour,hour));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Minute,minute));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::UnitOfTimeRange,1));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P1,0));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P2,0));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::TimeRangeIndicator,0));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::CenturyOfReferenceTimeOfData,(year/100)+1));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastType,contentInfo1.mForecastType));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastNumber,contentInfo1.mForecastNumber));
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::Flags,8));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BinaryScaleFactor,-5));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::ReferenceValue,0.0));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BitsPerValue,32));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::PackingMethod,0));
+
+  // ### Setting default values for the parameters
+
+  setMessageProperties(*newMessage,GRIB1::gribProperty.getPropertyVector(),Property::GridSection::FirstProperty,Property::GridSection::LastProperty,newProperties,oldProperties);
+
+  return newMessage;
+}
+
+
+
+/*! \brief Create the GRIB2 message of the grid file (the geometry properties, the time and level properties, and the
+           other properties from the original message). */
+
+GRID::Message* newGrib2Message(GRID::GridFile& newGridFile,const char *geometryIdStr,time_t forecastTime,T::ParamLevel paramLevel,const std::map<uint,Int64 >& oldProperties,std::map<uint,Int64 >& newProperties)
+{
+  std::string ftime = utcTimeFromTimeT(forecastTime);
+
+  int year = 0;
+  int month = 0;
+  int day = 0;
+  int hour = 0;
+  int minute = 0;
+  int second = 0;
+  splitTimeString(ftime,year,month,day,hour,minute,second);
+
+  //PRINT_DATA(mDebugLog, "-- GRIB version 2\n");
+
+  using namespace SmartMet::GRIB2;
+
+  if (geometryIdStr)
+  {
+    //Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,latLonCoordinates,width,height);
+    GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(toInt32(geometryIdStr));
+    if (def)
+    {
+      //printf("TEMPLATE %d\n",def->getTemplateNumber());
+
+      auto rows = def->getGridRowCount();
+      auto cols = def->getGridColumnCount();
+
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::NumberOfGridPoints,cols*rows));
+      newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::GridDefinitionTemplateNumber,def->getTemplateNumber()));
+
+      T::PropertySettingVec tmpProperties;
+      def->getProperties(tmpProperties);
+
+      for (auto& tmpPropertie : tmpProperties)
+      {
+        //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
+        newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
+      }
+    }
+  }
+
+  GRID::Message *newMessage = newGridFile.newMessage(T::FileTypeValue::Grib2);
+
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::SignificanceOfReferenceTime,1));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Year,year));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Month,month));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Day,day));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Hour,hour));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Minute,minute));
+  newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Second,second));
+
+  newProperties.insert(std::pair<uint,Int64 >(Property::RepresentationSection::RepresentationTemplateNumber,RepresentationSection::Template::GridDataRepresentation));
+
+  newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::ParameterSettings::ForecastTime,0));
+  newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::HorizontalSettings::ScaledValueOfFirstFixedSurface,paramLevel));
+
+  // ### Setting default values for the parameters
+
+  setMessageProperties(*newMessage,GRIB2::gribProperty.getPropertyVector(),Property::GridSection::FirstProperty,Property::GridSection::LastProperty,newProperties,oldProperties);
+
+  return newMessage;
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -6526,6 +7086,139 @@ bool ServiceImplementation::getValueVectors(
 
 
 
+/*! \brief Query Server: Get the grid properties of the content (as integers). Errors are logged and return false. */
+
+bool ServiceImplementation::getGridFileProperties(const T::ContentInfo& contentInfo1,std::map<uint,Int64 >& oldProperties)
+{
+  try
+  {
+    T::PropertySettingVec properties;
+    int result = mDataServerPtr->getGridProperties(0,contentInfo1.mFileId, contentInfo1.mMessageIndex,properties);
+    if (result != 0)
+    {
+      reportDataServerError("getGridProperties",result,{&contentInfo1});
+      return false;
+    }
+
+    for (auto& propertie : properties)
+    {
+      //std::cout << "PROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
+      oldProperties.insert(std::pair<uint,Int64 >(propertie.propertyId,toInt64(propertie.propertyValue.c_str())));
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Create the message of the new grid file by the query attributes (geometry, or crs, bounding box
+           and size) and the properties of the original message. Returns nullptr for an invalid GRIB version. */
+
+GRID::Message* ServiceImplementation::newGridFileMessage(const Query& query,uint version,time_t forecastTime,T::ParamLevel paramLevel,const T::ContentInfo& contentInfo1,const std::map<uint,Int64 >& oldProperties,GRID::GridFile& newGridFile)
+{
+  try
+  {
+    std::map<uint,Int64 > newProperties;
+
+    const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
+    const char *crsStr = query.mAttributeList.getAttributeValue("grid.crs");
+    const char *bboxStr = query.mAttributeList.getAttributeValue("grid.bbox");
+    const char *gridSizeStr = query.mAttributeList.getAttributeValue("grid.size");
+
+    GridFileArea area;
+    getGridFileArea(query,gridSizeStr,bboxStr,area);
+
+    if (!geometryIdStr  &&  crsStr  &&  gridSizeStr)
+    {
+      ProjectionParameters pp;
+      getProjectionParameters(crsStr,pp);
+      addProjectionProperties(query,version,pp,area,newProperties);
+    }
+
+    if (version == 1)
+      return newGrib1Message(newGridFile,geometryIdStr,forecastTime,paramLevel,contentInfo1,oldProperties,newProperties);
+
+    if (version == 2)
+      return newGrib2Message(newGridFile,geometryIdStr,forecastTime,paramLevel,oldProperties,newProperties);
+
+    Fmi::Exception exception(BCP, "No valid grib type and version found!");
+    std::string errorMsg = exception.getStackTrace();
+    PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Set the fetched values (converted by the function if requested) to the message and add the
+           grid file data to the value list. Data server errors are logged and return false. */
+
+bool ServiceImplementation::addGridFileData(int result,const char *service,const T::ContentInfo& contentInfo1,bool levelInterpolated,T::ParamLevel paramLevel,QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,GRID::GridFile& newGridFile,GRID::Message& newMessage,UInt64 sz,ParameterValues& valueList)
+{
+  try
+  {
+    if (result != 0)
+    {
+      reportDataServerError(service,result,{&contentInfo1});
+      return false;
+    }
+
+    if (levelInterpolated)
+      valueList.mParameterLevel = paramLevel;
+
+    if (conversionByFunction)
+    {
+       T::ParamValue_vec newValueVector;
+       executeConversion(function, functionParams, forecastTime, coordinates, valueVector, newValueVector);
+       newMessage.setGridValues(newValueVector);
+    }
+    else
+    {
+      newMessage.setGridValues(valueVector);
+    }
+
+    // newMessage->print(std::cout,0,0);
+
+    setDefaultPrecision(qParam,pInfo);
+
+    auto *data = new uchar[sz];
+    MemoryWriter memoryWriter(data,sz,true);
+    newGridFile.write(memoryWriter);
+    UInt64 fsize = memoryWriter.getMaxWritePosition();
+
+    std::vector<uchar> dataFile;
+    dataFile.reserve(fsize);
+    for (UInt64 i=0; i <fsize; i++)
+      dataFile.emplace_back(data[i]);
+
+    valueList.mValueData.emplace_back(dataFile);
+
+    //newGridFile.write("/tmp/test.grib");
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get grid files. */
 
 bool ServiceImplementation::getGridFiles(
@@ -6566,7 +7259,6 @@ bool ServiceImplementation::getGridFiles(
     std::vector<std::string> functionParams;
     bool conversionByFunction = conversionFunction(pInfo.mConversionFunction, function, functionParams);
     T::ParamValue_vec valueVector;
-    T::ParamValue_vec newValueVector;
 
     std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
     int result = getContentListByParameterGenerationIdAndForecastTime(0, producerInfo.mProducerId, producerInfo.mHash, generationId, pInfo.mParameterKeyType, pInfo.mParameterKey, pInfo.getKeyHash(),
@@ -6615,517 +7307,21 @@ bool ServiceImplementation::getGridFiles(
     valueList.mParameterLevelId = contentInfo1->mFmiParameterLevelId;
 
 
-    T::PropertySettingVec properties;
-    result = mDataServerPtr->getGridProperties(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,properties);
-    if (result != 0)
-    {
-      reportDataServerError("getGridProperties",result,{contentInfo1});
-      return false;
-    }
-
     std::map<uint,Int64 > oldProperties;
-    std::map<uint,Int64 > newProperties;
+    if (!getGridFileProperties(*contentInfo1,oldProperties))
+      return false;
 
-    for (auto& propertie : properties)
-    {
-      //std::cout << "PROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-      oldProperties.insert(std::pair<uint,Int64 >(propertie.propertyId,toInt64(propertie.propertyValue.c_str())));
-    }
-
-    uint version = 0;
-    const int id = GRIB1::Property::IndicatorSection::EditionNumber;
-    auto v1 = oldProperties.find(id);
-    if (v1 != oldProperties.end())
-      version = 1;
-
-    if (version == 0)
-    {
-      const int id = GRIB1::Property::IndicatorSection::EditionNumber;
-      auto v2 = oldProperties.find(id);
-      if (v2 != oldProperties.end())
-        version = 2;
-    }
-
+    uint version = getGribVersion(oldProperties);
     if (version == 0)
       return false;
 
-
-    std::string ftime = utcTimeFromTimeT(forecastTime);
-
-    int year = 0;
-    int month = 0;
-    int day = 0;
-    int hour = 0;
-    int minute = 0;
-    int second = 0;
-    splitTimeString(ftime,year,month,day,hour,minute,second);
 
     GRID::GridFile newGridFile;
-    GRID::Message *newMessage = nullptr;
-
-    const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
-    const char *crsStr = query.mAttributeList.getAttributeValue("grid.crs");
-    const char *bboxStr = query.mAttributeList.getAttributeValue("grid.bbox");
-    const char *gridSizeStr = query.mAttributeList.getAttributeValue("grid.size");
-
-    Int64  gridWidth = 0;
-    Int64  gridHeight = 0;
-
-    double lon1 = 0;
-    double lat1 = 0;
-    double lon2 = 0;
-    double lat2 = 0;
-    double xStepMetric = 0;
-    double yStepMetric = 0;
-
-    if (gridSizeStr)
-    {
-      std::vector<double> v;
-      splitString(gridSizeStr,',',v);
-      if (v.size() == 2)
-      {
-        gridWidth = (Int64 )v[0];
-        gridHeight = (Int64 )v[1];
-      }
-    }
-
-
-    if (query.mAreaCoordinates[0].size() == 1)
-    {
-      const char *gridMetricDistanceStr = query.mAttributeList.getAttributeValue("grid.metricDistance");
-      const char *gridMetricSizeStr = query.mAttributeList.getAttributeValue("grid.metricSize");
-
-      std::vector<double> v;
-      if (gridMetricDistanceStr)
-      {
-        splitString(gridMetricDistanceStr,',',v);
-        if (v.size() == 4)
-        {
-          latLon_bboxByCenter(query.mAreaCoordinates[0][0].x(),query.mAreaCoordinates[0][0].y(),1000*v[0],1000*v[1],1000*v[2],1000*v[3],lon1,lat1,lon2,lat2);
-
-          xStepMetric = (double)1000*(v[0]+v[2]) / (double)gridWidth;
-          yStepMetric = (double)1000*(v[1]+v[3]) / (double)gridHeight;
-        }
-      }
-      else
-      if (gridMetricSizeStr)
-      {
-        splitString(gridMetricSizeStr,',',v);
-        if (v.size() == 2)
-        {
-          latLon_bboxByCenter(query.mAreaCoordinates[0][0].x(),query.mAreaCoordinates[0][0].y(),1000*v[0],1000*v[1],lon1,lat1,lon2,lat2);
-
-          xStepMetric = (double)1000*(v[0]) / (double)gridWidth;
-          yStepMetric = (double)1000*(v[1]) / (double)gridHeight;
-        }
-      }
-    }
-
-
-    std::vector<double> aa;
-    if (bboxStr)
-    {
-      splitString(bboxStr,',',aa);
-      if (aa.size() == 4)
-      {
-        lon1 = aa[0];
-        lat1 = aa[1];
-        lon2 = aa[2];
-        lat2 = aa[3];
-      }
-    }
-
-    //printf("COORDINATES %f,%f,%f,%f\n",lon1,lat1,lon2,lat2);
-    double xDegrees = lon2-lon1;
-    double yDegrees = lat2-lat1;
-
-    double xStepDegrees = xDegrees / (double)gridWidth;
-    double yStepDegrees = yDegrees / (double)gridHeight;
-
-    //float lat_0 = ParamValueMissing;
-    float lat_1 = ParamValueMissing;
-    float lat_2 = ParamValueMissing;
-    float laD = ParamValueMissing;
-    float lon_0 = ParamValueMissing;
-    //float x_0 = ParamValueMissing;
-    //float y_0 = ParamValueMissing;
-
-
-    if (!geometryIdStr  &&  crsStr  &&  gridSizeStr)
-    {
-      OGRSpatialReference sr;
-
-      if (sr.SetFromUserInput(crsStr) != OGRERR_NONE)
-        throw Fmi::Exception(BCP, "Invalid crs '" + std::string(crsStr) + "'!");
-
-      // sr.dumpReadable();
-
-      std::vector<std::string> partList;
-
-      char *out = nullptr;
-      sr.exportToProj4(&out);
-      //printf("%s\n",out);
-      splitString(out,' ',partList);
-      CPLFree(out);
-
-      std::string projectionStr;
-
-      for (auto& it : partList)
-      {
-        std::vector<std::string> attr;
-        splitString(it.c_str(),'=',attr);
-        if (attr.size() == 2)
-        {
-          // printf("[%s][%s]\n",attr[0].c_str(),attr[1].c_str());
-          if (attr[0] == "+proj")
-            projectionStr = attr[1];
-
-          //if (attr[0] == "+lat_0")
-          //  lat_0 = toDouble(attr[1]);
-
-          if (attr[0] == "+lat_1")
-            lat_1 = toDouble(attr[1]);
-
-          if (attr[0] == "+lat_2")
-            lat_2 = toDouble(attr[1]);
-
-          if (attr[0] == "+lat_ts")
-            laD = toDouble(attr[1]);
-
-          if (attr[0] == "+lon_0")
-            lon_0 = toDouble(attr[1]);
-
-          //if (attr[0] == "+x_0")
-          //  x_0 = toDouble(attr[1]);
-
-          //if (attr[0] == "+y_0")
-          //  y_0 = toDouble(attr[1]);
-        }
-      }
-
-      if (version == 1)
-      {
-        if (projectionStr == "longlat")
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,0LL));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Ni,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::Nj,gridHeight));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(xStepDegrees*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(yStepDegrees*1000)));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LatitudeOfLastGridPoint,(Int64 )(lat2*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::GridArea::LongitudeOfLastGridPoint,(Int64 )(lon2*1000)));
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
-        }
-
-
-        if (projectionStr == "stere"  && !query.mAreaCoordinates.empty()  && !query.mAreaCoordinates[0].empty())
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,5LL));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
-
-          if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(lon_0*1000)));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DxInMetres,(Int64 )xStepMetric));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::DyInMetres,(Int64 )yStepMetric));
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
-        }
-
-
-        if (projectionStr == "lcc"  && !query.mAreaCoordinates.empty()  && !query.mAreaCoordinates[0].empty())
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::DataRepresentationType,3LL));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000)));
-
-          if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LoV,(Int64 )(lon_0*1000)));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DxInMetres,(Int64 )xStepMetric));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::DyInMetres,(Int64 )yStepMetric));
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::ProjectionCentreFlag:
-
-          if (lat_1 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin1,(Int64 )(lat_1*1000)));
-
-          if (lat_2 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::Latin2,(Int64 )(lat_2*1000)));
-
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
-
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB1::Property::GridSection::ScanningMode::ScanMode,(Int64 )0));
-        }
-      }
-
-
-      if (version == 2)
-      {
-        if (projectionStr == "longlat")
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LatLon));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Ni,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::Nj,gridHeight));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LatitudeOfLastGridPoint,(Int64 )(lat2*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::Grid::LongitudeOfLastGridPoint,(Int64 )(lon2*1000000)));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::IDirectionIncrement,(Int64 )(xStepDegrees*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::JDirectionIncrement,(Int64 )(yStepDegrees*1000000)));
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LatLon::ScanningMode,(Int64 )0x0));
-        }
-
-
-        if (projectionStr == "stere"  && !query.mAreaCoordinates.empty()  && !query.mAreaCoordinates[0].empty())
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::PolarStereographic));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ResolutionAndComponentFlags,48));
-          if (laD != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,(Int64 )(laD*1000000)));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::LaD,60000000));
-
-          if (lon_0 != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(lon_0*1000000)));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(Int64 )xStepMetric*1000));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(Int64 )yStepMetric*1000));
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ScanningMode,(Int64 )0x0));
-        }
-
-
-        if (projectionStr == "lcc"  && !query.mAreaCoordinates.empty()  && !query.mAreaCoordinates[0].empty())
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::GridDefinitionTemplateNumber,(Int64 )GRIB2::GridSection::Template::LambertConformal));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::NumberOfGridPoints,gridWidth*gridHeight));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Nx,gridWidth));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Ny,gridHeight));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfFirstGridPoint,(Int64 )(lat1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfFirstGridPoint,(Int64 )(lon1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ResolutionAndComponentFlags,48));
-
-          if (laD != ParamValueMissing)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,(Int64 )(laD*1000000)));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(lon_0*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )xStepMetric*1000));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )yStepMetric*1000));
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(lat_1*1000000)));
-          newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(lat_2*1000000)));
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LatitudeOfSouthernPole:
-          //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LongitudeOfSouthernPole:
-
-          if (lat1 < lat2)
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x40));
-          else
-            newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ScanningMode,(Int64 )0x0));
-        }
-
-      }
-    }
-
-
-    if (version == 1)
-    {
-      using namespace SmartMet::GRIB1;
-
-      if (geometryIdStr)
-      {
-        GRIB1::GridDef_sptr def = Identification::gridDef.getGrib1DefinitionByGeometryId(toInt32(geometryIdStr));
-        if (def)
-        {
-          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::DataRepresentationType,def->getTemplateNumber()));
-
-          T::PropertySettingVec tmpProperties;
-          def->getProperties(tmpProperties);
-
-          for (auto& tmpPropertie : tmpProperties)
-          {
-            //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
-          }
-        }
-      }
-
-      newMessage = newGridFile.newMessage(T::FileTypeValue::Grib1);
-
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::SectionFlags,128));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Level,paramLevel));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::YearOfCentury,year % 100));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Month,month));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Day,day));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Hour,hour));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::Minute,minute));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::UnitOfTimeRange,1));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P1,0));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::P2,0));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::TimeRangeIndicator,0));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::CenturyOfReferenceTimeOfData,(year/100)+1));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastType,contentInfo1->mForecastType));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::ProductSection::ForecastNumber,contentInfo1->mForecastNumber));
-
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::Flags,8));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BinaryScaleFactor,-5));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::ReferenceValue,0.0));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::BitsPerValue,32));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::DataSection::PackingMethod,0));
-
-      // ### Setting default values for the parameters
-
-      auto props = GRIB1::gribProperty.getPropertyVector();
-
-      for (auto& prop : props)
-      {
-        auto np = newProperties.find(prop.second);
-
-        if (np != newProperties.end())
-        {
-          // printf("REPLACE %s (%u) %lld\n",it->first.c_str(),it->second,np->second);
-          newMessage->setProperty(prop.second,np->second);
-        }
-        else
-        {
-          if (prop.second < Property::GridSection::FirstProperty || prop.second > Property::GridSection::LastProperty)
-          {
-            auto op = oldProperties.find(prop.second);
-            if (op != oldProperties.end())
-            {
-              // printf("SET %s (%u) %lld\n",it->first.c_str(),it->second,op->second);
-              newMessage->setProperty(prop.second,op->second);
-            }
-          }
-        }
-      }
-    }
-    else if (version == 2)
-    {
-      //PRINT_DATA(mDebugLog, "-- GRIB version 2\n");
-
-      using namespace SmartMet::GRIB2;
-
-      if (geometryIdStr)
-      {
-        //Identification::gridDef.getGridLatLonCoordinatesByGeometry(query.mAttributeList,latLonCoordinates,width,height);
-        GRIB2::GridDef_sptr def = Identification::gridDef.getGrib2DefinitionByGeometryId(toInt32(geometryIdStr));
-        if (def)
-        {
-          //printf("TEMPLATE %d\n",def->getTemplateNumber());
-
-          auto rows = def->getGridRowCount();
-          auto cols = def->getGridColumnCount();
-
-          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::NumberOfGridPoints,cols*rows));
-          newProperties.insert(std::pair<uint,Int64 >((uint)Property::GridSection::GridDefinitionTemplateNumber,def->getTemplateNumber()));
-
-          T::PropertySettingVec tmpProperties;
-          def->getProperties(tmpProperties);
-
-          for (auto& tmpPropertie : tmpProperties)
-          {
-            //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-            newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
-          }
-        }
-      }
-
-      newMessage = newGridFile.newMessage(T::FileTypeValue::Grib2);
-
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::SignificanceOfReferenceTime,1));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Year,year));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Month,month));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Day,day));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Hour,hour));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Minute,minute));
-      newProperties.insert(std::pair<uint,Int64 >((uint)Property::IdentificationSection::Second,second));
-
-      newProperties.insert(std::pair<uint,Int64 >(Property::RepresentationSection::RepresentationTemplateNumber,RepresentationSection::Template::GridDataRepresentation));
-
-      newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::ParameterSettings::ForecastTime,0));
-      newProperties.insert(std::pair<uint,Int64 >(Property::ProductSection::HorizontalSettings::ScaledValueOfFirstFixedSurface,paramLevel));
-
-      // ### Setting default values for the parameters
-
-      auto props = GRIB2::gribProperty.getPropertyVector();
-
-      for (auto& prop : props)
-      {
-        auto np = newProperties.find(prop.second);
-
-        if (np != newProperties.end())
-        {
-          // printf("REPLACE %s (%u) %lld\n",it->first.c_str(),it->second,np->second);
-          newMessage->setProperty(prop.second,np->second);
-        }
-        else
-        {
-          if (prop.second < Property::GridSection::FirstProperty || prop.second > Property::GridSection::LastProperty)
-          {
-            auto op = oldProperties.find(prop.second);
-            if (op != oldProperties.end())
-            {
-              // printf("SET %s (%u) %lld\n",it->first.c_str(),it->second,op->second);
-              newMessage->setProperty(prop.second,op->second);
-            }
-          }
-        }
-      }
-    }
-    else
-    {
-      Fmi::Exception exception(BCP, "No valid grib type and version found!");
-      std::string errorMsg = exception.getStackTrace();
-      PRINT_DATA(mDebugLog, "%s\n", errorMsg.c_str());
+    GRID::Message *newMessage = newGridFileMessage(query,version,forecastTime,paramLevel,*contentInfo1,oldProperties,newGridFile);
+    if (newMessage == nullptr)
       return false;
-    }
 
     newMessage->initSpatialReference();
-
 
     T::Coordinate_svec coordinates = newMessage->getGridLatLonCoordinates();
     if (coordinates->empty())
@@ -7143,50 +7339,8 @@ bool ServiceImplementation::getGridFiles(
     UInt64 sz = 2 * numOfBytes;
 
 
-    if (contentLen == 1)
+    if (contentLen == 1  &&  contentInfo1->mForecastTimeUTC != forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
     {
-      if (contentInfo1->mForecastTimeUTC == forecastTime /*|| timeInterpolationMethod == T::TimeInterpolationMethod::None || timeInterpolationMethod == T::TimeInterpolationMethod::Nearest*/)
-      {
-        // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
-
-        int result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,*coordinates,areaInterpolationMethod,modificationOperation,modificationParameters,valueVector);
-
-        if (result != 0)
-        {
-          reportDataServerError("getGridValueVectorByCoordinateList",result,{contentInfo1});
-          return false;
-        }
-
-        if (conversionByFunction)
-        {
-           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
-           newMessage->setGridValues(newValueVector);
-        }
-        else
-        {
-          newMessage->setGridValues(valueVector);
-        }
-
-        // newMessage->print(std::cout,0,0);
-
-        setDefaultPrecision(qParam,pInfo);
-
-        auto *data = new uchar[sz];
-        MemoryWriter memoryWriter(data,sz,true);
-        newGridFile.write(memoryWriter);
-        UInt64 fsize = memoryWriter.getMaxWritePosition();
-
-        std::vector<uchar> dataFile;
-        dataFile.reserve(fsize);
-        for (UInt64 i=0; i <fsize; i++)
-          dataFile.emplace_back(data[i]);
-
-        valueList.mValueData.emplace_back(dataFile);
-
-        //newGridFile.write("/tmp/test.grib");
-
-        return true;
-      }
       // There is one content record in place, but its time does not match to
       // the requested forecast time. This is used for indicating that there
       // are content records available, but not for the requested time.
@@ -7197,139 +7351,42 @@ bool ServiceImplementation::getGridFiles(
       return false;
     }
 
-    if (contentLen == 2)
+    if (contentLen == 1)
     {
-      if (contentInfo1->mForecastTimeUTC < forecastTime && contentInfo2->mForecastTimeUTC > forecastTime  &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact forecast time, but we find grids that
-        // are before and after the current forecast time. This means that we should do
-        // some time interpolation.
+      // We found a grid which forecast time is exactly the same as the requested forecast time or time interpolation enables the selection.
 
-        int result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
+      result = mDataServerPtr->getGridValueVectorByCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,query.mCoordinateType,*coordinates,areaInterpolationMethod,modificationOperation,modificationParameters,valueVector);
 
-        if (result != 0)
-        {
-          reportDataServerError("getGridValueVectorByTimeAndCoordinateList",result,{contentInfo1});
-          return false;
-        }
-
-        if (conversionByFunction)
-        {
-           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
-           newMessage->setGridValues(newValueVector);
-        }
-        else
-        {
-          newMessage->setGridValues(valueVector);
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        auto *data = new uchar[sz];
-        MemoryWriter memoryWriter(data,sz,true);
-        newGridFile.write(memoryWriter);
-        UInt64 fsize = memoryWriter.getMaxWritePosition();
-
-        std::vector<uchar> dataFile;
-        dataFile.reserve(fsize);
-        for (UInt64 i=0; i <fsize; i++)
-          dataFile.emplace_back(data[i]);
-
-        valueList.mValueData.emplace_back(dataFile);
-
-        //newGridFile.write("/tmp/test.grib");
-
-        return true;
-      }
-
-      if (contentInfo1->mForecastTimeUTC == forecastTime  &&  contentInfo2->mForecastTimeUTC == forecastTime && contentInfo1->mParameterLevel < paramLevel && contentInfo2->mParameterLevel > paramLevel  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        // We did not find a grid with the exact level but we find grids that
-        // are before and after the current level. This means that we should do
-        // some level interpolation.
-
-        int result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-        if (result != 0)
-        {
-          reportDataServerError("getGridValueVectorByLevelAndCoordinateList",result,{contentInfo1});
-          return false;
-        }
-
-        valueList.mParameterLevel = paramLevel;
-
-        if (conversionByFunction)
-        {
-           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
-           newMessage->setGridValues(newValueVector);
-        }
-        else
-        {
-          newMessage->setGridValues(valueVector);
-        }
-
-        setDefaultPrecision(qParam,pInfo);
-
-        auto *data = new uchar[sz];
-        MemoryWriter memoryWriter(data,sz,true);
-        newGridFile.write(memoryWriter);
-        UInt64 fsize = memoryWriter.getMaxWritePosition();
-
-        std::vector<uchar> dataFile;
-        dataFile.reserve(fsize);
-        for (UInt64 i=0; i <fsize; i++)
-          dataFile.emplace_back(data[i]);
-
-        valueList.mValueData.emplace_back(dataFile);
-
-        //newGridFile.write("/tmp/test.grib");
-
-        return true;
-      }
+      return addGridFileData(result,"getGridValueVectorByCoordinateList",*contentInfo1,false,paramLevel,qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,*coordinates,valueVector,newGridFile,*newMessage,sz,valueList);
     }
 
-    if (contentLen == 4)
+    if (contentLen == 2  &&  isTimeInterpolationPair(*contentInfo1,*contentInfo2,forecastTime,timeInterpolationMethod))
     {
-      if (contentInfo1->mForecastTimeUTC < forecastTime  &&  contentInfo2->mForecastTimeUTC < forecastTime  &&  contentInfo3->mForecastTimeUTC > forecastTime  &&  contentInfo4->mForecastTimeUTC > forecastTime  &&
-          contentInfo1->mParameterLevel < paramLevel  &&  contentInfo2->mParameterLevel > paramLevel  &&  contentInfo3->mParameterLevel < paramLevel  &&  contentInfo4->mParameterLevel > paramLevel
-          &&  timeInterpolationMethod != T::TimeInterpolationMethod::Forbidden  &&  levelInterpolationMethod != T::LevelInterpolationMethod::Forbidden)
-      {
-        int result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
-        if (result != 0)
-        {
-          reportDataServerError("getGridValueVectorByTimeLevelAndCoordinateList",result,{contentInfo1});
-          return false;
-        }
+      // We did not find a grid with the exact forecast time, but we find grids that
+      // are before and after the current forecast time. This means that we should do
+      // some time interpolation.
 
-        valueList.mParameterLevel = paramLevel;
+      result = mDataServerPtr->getGridValueVectorByTimeAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,forecastTime,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
 
-        if (conversionByFunction)
-        {
-           executeConversion(function, functionParams, forecastTime, *coordinates, valueVector, newValueVector);
-           newMessage->setGridValues(newValueVector);
-        }
-        else
-        {
-          newMessage->setGridValues(valueVector);
-        }
+      return addGridFileData(result,"getGridValueVectorByTimeAndCoordinateList",*contentInfo1,false,paramLevel,qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,*coordinates,valueVector,newGridFile,*newMessage,sz,valueList);
+    }
 
-        setDefaultPrecision(qParam,pInfo);
+    if (contentLen == 2  &&  isLevelInterpolationPair(*contentInfo1,*contentInfo2,forecastTime,paramLevel,levelInterpolationMethod))
+    {
+      // We did not find a grid with the exact level but we find grids that
+      // are before and after the current level. This means that we should do
+      // some level interpolation.
 
-        auto *data = new uchar[sz];
-        MemoryWriter memoryWriter(data,sz,true);
-        newGridFile.write(memoryWriter);
-        UInt64 fsize = memoryWriter.getMaxWritePosition();
+      result = mDataServerPtr->getGridValueVectorByLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
 
-        std::vector<uchar> dataFile;
-        dataFile.reserve(fsize);
-        for (UInt64 i=0; i <fsize; i++)
-          dataFile.emplace_back(data[i]);
+      return addGridFileData(result,"getGridValueVectorByLevelAndCoordinateList",*contentInfo1,true,paramLevel,qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,*coordinates,valueVector,newGridFile,*newMessage,sz,valueList);
+    }
 
-        valueList.mValueData.emplace_back(dataFile);
+    if (contentLen == 4  &&  isTimeLevelInterpolationQuad(*contentInfo1,*contentInfo2,*contentInfo3,*contentInfo4,forecastTime,paramLevel,timeInterpolationMethod,levelInterpolationMethod))
+    {
+      result = mDataServerPtr->getGridValueVectorByTimeLevelAndCoordinateList(0,contentInfo1->mFileId, contentInfo1->mMessageIndex,contentInfo2->mFileId, contentInfo2->mMessageIndex,contentInfo3->mFileId, contentInfo3->mMessageIndex,contentInfo4->mFileId, contentInfo4->mMessageIndex,forecastTime,paramLevel,query.mCoordinateType,*coordinates,query.mAttributeList,modificationOperation,modificationParameters,valueVector);
 
-        //newGridFile.write("/tmp/test.grib");
-
-        return true;
-      }
+      return addGridFileData(result,"getGridValueVectorByTimeLevelAndCoordinateList",*contentInfo1,true,paramLevel,qParam,pInfo,conversionByFunction,function,functionParams,forecastTime,*coordinates,valueVector,newGridFile,*newMessage,sz,valueList);
     }
     return false;
   }
