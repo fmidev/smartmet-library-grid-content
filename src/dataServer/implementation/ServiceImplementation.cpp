@@ -67,6 +67,77 @@ void* ServiceImplementation_cacheProcessingThread(void *arg)
     std::_Exit(-1);
   }
 }
+
+
+
+/*! \brief Return the stored grid file if it can be accessed, mapping it to memory if needed. A file with errors
+           gets a deletion time within a minute, and a file that will be deleted soon is not accessed anymore. */
+
+GRID::GridFile_sptr usableGridFile(const GRID::GridFile_sptr& gridFile)
+{
+  if (gridFile->hasMessagePositionError() || gridFile->hasMemoryMapperError())
+  {
+    time_t deletionTime = gridFile->getDeletionTime();
+    if ((time(nullptr) + 60) < deletionTime)
+    {
+      //printf("SET DELETION TIME  %s  %ld %ld\n",gridFile->getFileName().c_str(),deletionTime,time(nullptr) + 60);
+      gridFile->setDeletionTime(time(nullptr) + 60);
+    }
+
+    return nullptr;
+  }
+  time_t deletionTime = gridFile->getDeletionTime();
+  if (deletionTime == 0)
+    return gridFile;
+
+  if ((time(nullptr) + 180) > deletionTime)
+  {
+    // The grid file will be deleted soon. We should not access it anymore.
+    return nullptr;
+  }
+
+  if (!gridFile->isMemoryMapped())
+    gridFile->mapToMemory();
+
+  gridFile->setAccessTime(time(nullptr));
+  return gridFile;
+}
+
+
+
+
+/*! \brief Parse the event data of a FILE_ADDED event: the first line is the file and the rest are its contents. */
+
+void parseFileEventData(const std::string& eventData,T::FileInfo& fileInfo,T::ContentInfoList& contentList)
+{
+  std::string bufStr(eventData);
+  char *s = bufStr.data();
+
+  while (s != nullptr)
+  {
+    char *p = strstr(s,"\n");
+    if (p != nullptr)
+    {
+      *p = '\0';
+      if (s == bufStr.data())
+      {
+        fileInfo.setCsv(s);
+      }
+      else
+      {
+        auto *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(s);
+        contentList.addContentInfo(contentInfo);
+      }
+      s = p + 1;
+    }
+    else
+    {
+      s = nullptr;
+    }
+  }
+}
+
 }  // namespace
 
 
@@ -402,36 +473,7 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
   {
     GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
     if (gridFile)
-    {
-      if (gridFile->hasMessagePositionError() || gridFile->hasMemoryMapperError())
-      {
-        time_t deletionTime = gridFile->getDeletionTime();
-        if ((time(nullptr) + 60) < deletionTime)
-        {
-          //printf("SET DELETION TIME  %s  %ld %ld\n",gridFile->getFileName().c_str(),deletionTime,time(nullptr) + 60);
-          gridFile->setDeletionTime(time(nullptr) + 60);
-        }
-
-        return nullptr;
-      }
-      time_t deletionTime = gridFile->getDeletionTime();
-      if (deletionTime == 0)
-        return gridFile;
-
-      if ((time(nullptr) + 180) > deletionTime)
-      {
-        // The grid file will be deleted soon. We should not access it anymore.
-        return nullptr;
-      }
-      else
-      {
-        if (!gridFile->isMemoryMapped())
-          gridFile->mapToMemory();
-
-        gridFile->setAccessTime(time(nullptr));
-        return gridFile;
-      }
-    }
+      return usableGridFile(gridFile);
 
     // If the grid file is not found from the grid storage but it is registered
     // to the contentServer then we should try to add it to the grid storage.
@@ -475,6 +517,49 @@ GRID::GridFile_sptr ServiceImplementation::getGridFile(T::FileId fileId)
 
 
 
+/*! \brief Data Server: Set the value and the result of the value record from the grid message. An exception
+           is logged and reported as UNEXPECTED_EXCEPTION. */
+
+void ServiceImplementation::getValueRecordValue(GRID::Message& message,T::ValueRecord& rec,uint modificationOperation,double_vec& modificationParameters)
+{
+  try
+  {
+    switch (rec.mCoordinateType)
+    {
+      case T::CoordinateTypeValue::UNKNOWN:
+      case T::CoordinateTypeValue::LATLON_COORDINATES:
+        rec.mValue = message.getGridValueByLatLonCoordinate(rec.mY,rec.mX,rec.mAreaInterpolationMethod,modificationOperation,modificationParameters);
+        rec.mResult = 0;
+        break;
+
+      case T::CoordinateTypeValue::GRID_COORDINATES:
+        rec.mValue = message.getGridValueByGridPoint_byInterpolation(rec.mX,rec.mY,rec.mAreaInterpolationMethod,modificationOperation,modificationParameters);
+        rec.mResult = 0;
+        break;
+
+      case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
+        // TODO: Implementation required
+        rec.mResult = Result::NOT_IMPLEMENTED;
+        break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+    exception.addParameter("FileId",Fmi::to_string(rec.mFileId));
+    exception.addParameter("MessageIndex",Fmi::to_string(rec.mMessageIndex));
+    rec.mResult = Result::UNEXPECTED_EXCEPTION;
+    std::string st = exception.getStackTrace();
+    PRINT_DATA(mDebugLog,"%s",st.c_str());
+  }
+}
+
+
+
+
+
 /*! \brief Data Server: Protected hook: get multiple grid values. */
 
 int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint modificationOperation,double_vec& modificationParameters,T::ValueRecordList& valueRecordList)
@@ -497,38 +582,7 @@ int ServiceImplementation::_getMultipleGridValues(T::SessionId sessionId,uint mo
           GRID::Message *message = gridFile->getMessageByIndex(rec->mMessageIndex);
           if (message)
           {
-            try
-            {
-              switch (rec->mCoordinateType)
-              {
-                case T::CoordinateTypeValue::UNKNOWN:
-                case T::CoordinateTypeValue::LATLON_COORDINATES:
-                  rec->mValue = message->getGridValueByLatLonCoordinate(rec->mY,rec->mX,rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
-                  rec->mResult = 0;
-                  break;
-
-                case T::CoordinateTypeValue::GRID_COORDINATES:
-                  rec->mValue = message->getGridValueByGridPoint_byInterpolation(rec->mX,rec->mY,rec->mAreaInterpolationMethod,modificationOperation,modificationParameters);
-                  rec->mResult = 0;
-                  break;
-
-                case T::CoordinateTypeValue::ORIGINAL_COORDINATES:
-                  // TODO: Implementation required
-                  rec->mResult = Result::NOT_IMPLEMENTED;
-                  break;
-                default:
-                  break;
-              }
-            }
-            catch (...)
-            {
-              Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-              exception.addParameter("FileId",Fmi::to_string(rec->mFileId));
-              exception.addParameter("MessageIndex",Fmi::to_string(rec->mMessageIndex));
-              rec->mResult = Result::UNEXPECTED_EXCEPTION;
-              std::string st = exception.getStackTrace();
-              PRINT_DATA(mDebugLog,"%s",st.c_str());
-            }
+            getValueRecordValue(*message,*rec,modificationOperation,modificationParameters);
           }
           else
           {
@@ -5800,6 +5854,79 @@ void ServiceImplementation::addFile(T::FileInfo& fileInfo,T::ContentInfoList& co
 
 
 
+/*! \brief Data Server: Add the grid file of the full update with its contents (from the full content list, or
+           from the content server when the list is empty and the content server is a cache). */
+
+void ServiceImplementation::addFullUpdateFile(T::FileInfo& fileInfo,T::ContentInfoList& fullContentList,uint& counter)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::ContentInfoList contentList;
+    if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
+      fullContentList.getContentInfoListByFileId(fileInfo.mFileId,contentList);
+    else
+      mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
+
+    if (contentList.getLength() > 0)
+    {
+      addFile(fileInfo,contentList);
+      counter++;
+      if ((counter % 10000) == 0)
+        PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Data Server: Add the grid files of a file list of the full update, advancing startFileId past them.
+           Failures are logged. Returns false if a shutdown was requested. */
+
+bool ServiceImplementation::addFullUpdateFiles(T::FileInfoList& fileInfoList,T::ContentInfoList& fullContentList,T::FileId& startFileId,uint& counter)
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint len = fileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      try
+      {
+        T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
+        if (fileInfo->mFileId >= startFileId)
+          startFileId = fileInfo->mFileId + 1;
+
+        addFullUpdateFile(*fileInfo,fullContentList,counter);
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+        std::string st = exception.getStackTrace();
+        PRINT_DATA(mDebugLog,"%s",st.c_str());
+      }
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Data Server: Full update. */
 
 void ServiceImplementation::fullUpdate()
@@ -5847,38 +5974,8 @@ void ServiceImplementation::fullUpdate()
       }
 
       len = fileInfoList.getLength();
-      for (uint t=0; t<len; t++)
-      {
-        if (mShutdownRequested)
-          return;
-
-        try
-        {
-          T::FileInfo *fileInfo = fileInfoList.getFileInfoByIndex(t);
-          if (fileInfo->mFileId >= startFileId)
-            startFileId = fileInfo->mFileId + 1;
-
-          T::ContentInfoList contentList;
-          if (mContentServer->getImplementationType() != ContentServer::Implementation::Cache || fullContentList.getLength() > 0)
-            fullContentList.getContentInfoListByFileId(fileInfo->mFileId,contentList);
-          else
-            mContentServer->getContentListByFileId(mServerSessionId,fileInfo->mFileId,contentList);
-
-          if (contentList.getLength() > 0)
-          {
-            addFile(*fileInfo,contentList);
-            counter++;
-            if ((counter % 10000) == 0)
-              PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
-          }
-        }
-        catch (...)
-        {
-          Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-          std::string st = exception.getStackTrace();
-          PRINT_DATA(mDebugLog,"%s",st.c_str());
-        }
-      }
+      if (!addFullUpdateFiles(fileInfoList,fullContentList,startFileId,counter))
+        return;
     }
 
     PRINT_DATA(mDebugLog,"* Adding grid files : %u\n",counter);
@@ -6142,6 +6239,40 @@ void ServiceImplementation::event_generationListDeletedBySourceId(T::EventInfo& 
 
 
 
+/*! \brief Data Server: Get the file and its content list from the content server. Failures are logged and return false. */
+
+bool ServiceImplementation::getFileAndContentList(T::FileId fileId,T::FileInfo& fileInfo,T::ContentInfoList& contentList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    int result = mContentServer->getFileInfoById(mServerSessionId,fileId,fileInfo);
+    if (result != 0)
+    {
+      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%lu) from the content server\n",__FILE__,__LINE__,fileId);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+      return false;
+    }
+
+    result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
+    if (result != 0)
+    {
+      PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%lu) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
+      PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+      return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Data Server: Event file added. */
 
 void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo * /*nextEventInfo*/)
@@ -6157,52 +6288,10 @@ void ServiceImplementation::event_fileAdded(T::EventInfo& eventInfo,T::EventInfo
     T::ContentInfoList contentList;
 
     if (len > 0)
-    {
-      std::string bufStr(eventInfo.mEventData);
-      char *s = bufStr.data();
-
-      while (s != nullptr)
-      {
-        char *p = strstr(s,"\n");
-        if (p != nullptr)
-        {
-          *p = '\0';
-          if (s == bufStr.data())
-          {
-            fileInfo.setCsv(s);
-          }
-          else
-          {
-            auto *contentInfo = new T::ContentInfo();
-            contentInfo->setCsv(s);
-            contentList.addContentInfo(contentInfo);
-          }
-          s = p + 1;
-        }
-        else
-        {
-          s = nullptr;
-        }
-      }
-    }
+      parseFileEventData(eventInfo.mEventData,fileInfo,contentList);
     else
-    {
-      int result = mContentServer->getFileInfoById(mServerSessionId,eventInfo.mId1,fileInfo);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the file info (fileId=%lu) from the content server\n",__FILE__,__LINE__,eventInfo.mId1);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-
-      result = mContentServer->getContentListByFileId(mServerSessionId,fileInfo.mFileId,contentList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the content list (fileId=%lu) from the content server!\n",__FILE__,__LINE__,fileInfo.mFileId);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-    }
+    if (!getFileAndContentList(eventInfo.mId1,fileInfo,contentList))
+      return;
 
     //fileInfo.print(std::cout,0,0);
     if (contentList.getLength() == 0)
@@ -6678,17 +6767,14 @@ void ServiceImplementation::processEvent(T::EventInfo& eventInfo,T::EventInfo *n
 
 
 
-/*! \brief Data Server: Process events. */
+/*! \brief Data Server: Delete the grid files that have not been accessed for a while (checked at the configured
+           interval) and the files whose deletion time has passed (checked every 30 seconds). */
 
-void ServiceImplementation::processEvents()
+void ServiceImplementation::cleanupFiles(time_t currentTime)
 {
-  //FUNCTION_TRACE
+  FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return;
-
-    time_t currentTime = time(nullptr);
     if (mFileCleanup_checkInterval > 0  && (currentTime - mFileCleanup_time) > mFileCleanup_checkInterval)
     {
       mFileCleanup_time = currentTime;
@@ -6700,6 +6786,71 @@ void ServiceImplementation::processEvents()
       mGridFileManager.deleteFilesByDeletionTime(currentTime-60);
       mDeletedFileCleanup_time = currentTime;
     }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Data Server: Fetch and process the events after the last processed event. */
+
+void ServiceImplementation::processNewEvents()
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint len = 10000;
+    while (len > 0)
+    {
+      T::EventInfoList eventInfoList;
+      int result = mContentServer->getEventInfoList(mServerSessionId,mServerId,mLastProcessedEventId+1,10000,eventInfoList);
+      if (result != 0)
+      {
+        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the event info list from the content server!\n",__FILE__,__LINE__);
+        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
+        return;
+      }
+
+      len = eventInfoList.getLength();
+
+      T::EventInfo *it = eventInfoList.getFirstEvent();
+      while (it != nullptr)
+      {
+        processEvent(*it,it->nextItem);
+        mLastProcessedEventId = it->mEventId;
+        it = it->nextItem;
+
+        if (mShutdownRequested)
+          return;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Data Server: Process events. */
+
+void ServiceImplementation::processEvents()
+{
+  //FUNCTION_TRACE
+  try
+  {
+    if (mShutdownRequested)
+      return;
+
+    cleanupFiles(time(nullptr));
 
     if (mFullUpdateRequired)
     {
@@ -6738,31 +6889,7 @@ void ServiceImplementation::processEvents()
       return;
     }
 
-    uint len = 10000;
-    while (len > 0)
-    {
-      T::EventInfoList eventInfoList;
-      result = mContentServer->getEventInfoList(mServerSessionId,mServerId,mLastProcessedEventId+1,10000,eventInfoList);
-      if (result != 0)
-      {
-        PRINT_DATA(mDebugLog,"%s:%d: Cannot get the event info list from the content server!\n",__FILE__,__LINE__);
-        PRINT_DATA(mDebugLog,"-- %d : %s\n",result,ContentServer::getResultString(result).c_str());
-        return;
-      }
-
-      len = eventInfoList.getLength();
-
-      T::EventInfo *it = eventInfoList.getFirstEvent();
-      while (it != nullptr)
-      {
-        processEvent(*it,it->nextItem);
-        mLastProcessedEventId = it->mEventId;
-        it = it->nextItem;
-
-        if (mShutdownRequested)
-          return;
-      }
-    }
+    processNewEvents();
   }
   catch (...)
   {
@@ -6847,6 +6974,83 @@ void getFileNameHash(const char *filename,std::string& hash)
 
 
 
+/*! \brief Data Server: Copy the source file into the cache file, reporting a size mismatch after the copy. Returns the new size of the cache file. */
+
+Int64 ServiceImplementation::copyCacheFile(const char *sourceFile,Int64 source_fsize,const std::string& cacheFile,Int64 target_fsize)
+{
+  FUNCTION_TRACE
+  try
+  {
+    PRINT_DATA(mDebugLog,"Copying a file into the local cache:\n");
+    PRINT_DATA(mDebugLog,"- source : %s (size: %ld)\n",sourceFile,source_fsize);
+    PRINT_DATA(mDebugLog,"- target : %s (size: %ld bytes)\n",cacheFile.c_str(),target_fsize);
+    copyFile(sourceFile,cacheFile.c_str(),mShutdownRequested);
+    target_fsize = getFileSize(cacheFile.c_str());
+    if (source_fsize != target_fsize)
+    {
+      Fmi::Exception exception(BCP,"File copying to the local cache failed!",nullptr);
+      exception.addParameter("source-file",sourceFile);
+      exception.addParameter("source-file-size",std::to_string(source_fsize));
+      exception.addParameter("target-file",cacheFile);
+      exception.addParameter("target-file-size",std::to_string(target_fsize));
+      exception.printError();
+    }
+    return target_fsize;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Data Server: Copy the grid file into the local cache unless an equal sized copy exists, and take the
+           cache file into use when its size matches. */
+
+void ServiceImplementation::copyToLocalCache(T::FileId fileId,const std::string& filename)
+{
+  FUNCTION_TRACE
+  try
+  {
+    const char *sourceFile = filename.c_str();
+    auto source_fsize = getFileSize(sourceFile);
+
+    if (source_fsize <= 0)
+      return;
+
+    std::string hash;
+    getFileNameHash(sourceFile,hash);
+    std::string cacheFile = mFileCache_directory + "/" + hash;
+
+    auto target_fsize = getFileSize(cacheFile.c_str());
+    if (source_fsize != target_fsize)
+      target_fsize = copyCacheFile(sourceFile,source_fsize,cacheFile,target_fsize);
+
+    if (source_fsize == target_fsize)
+    {
+      GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(fileId);
+      if (gridFile)
+      {
+        PRINT_DATA(mDebugLog,"Using the local cache file:\n");
+        PRINT_DATA(mDebugLog,"- cache-file : %s (size: %ld)\n",cacheFile.c_str(),target_fsize);
+        gridFile->setFlags(gridFile->getFlags() | GRID::GridFile::Flags::LocalCacheReady);
+        gridFile->setMappingFileName(cacheFile);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Data Server: Cache files. */
 
 void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filenames)
@@ -6859,46 +7063,7 @@ void ServiceImplementation::cacheFiles(std::map<T::FileId,std::string>& filename
       if (mShutdownRequested)
         return;
 
-      const char *sourceFile = filename.second.c_str();
-      auto source_fsize = getFileSize(sourceFile);
-
-      if (source_fsize > 0)
-      {
-        std::string hash;
-        getFileNameHash(sourceFile,hash);
-        std::string cacheFile = mFileCache_directory + "/" + hash;
-
-        auto target_fsize = getFileSize(cacheFile.c_str());
-        if (source_fsize != target_fsize)
-        {
-          PRINT_DATA(mDebugLog,"Copying a file into the local cache:\n");
-          PRINT_DATA(mDebugLog,"- source : %s (size: %ld)\n",sourceFile,source_fsize);
-          PRINT_DATA(mDebugLog,"- target : %s (size: %ld bytes)\n",cacheFile.c_str(),target_fsize);
-          copyFile(sourceFile,cacheFile.c_str(),mShutdownRequested);
-          target_fsize = getFileSize(cacheFile.c_str());
-          if (source_fsize != target_fsize)
-          {
-            Fmi::Exception exception(BCP,"File copying to the local cache failed!",nullptr);
-            exception.addParameter("source-file",sourceFile);
-            exception.addParameter("source-file-size",std::to_string(source_fsize));
-            exception.addParameter("target-file",cacheFile);
-            exception.addParameter("target-file-size",std::to_string(target_fsize));
-            exception.printError();
-          }
-        }
-
-        if (source_fsize == target_fsize)
-        {
-          GRID::GridFile_sptr gridFile = mGridFileManager.getFileByIdNoMapping(filename.first);
-          if (gridFile)
-          {
-            PRINT_DATA(mDebugLog,"Using the local cache file:\n");
-            PRINT_DATA(mDebugLog,"- cache-file : %s (size: %ld)\n",cacheFile.c_str(),target_fsize);
-            gridFile->setFlags(gridFile->getFlags() | GRID::GridFile::Flags::LocalCacheReady);
-            gridFile->setMappingFileName(cacheFile);
-          }
-        }
-      }
+      copyToLocalCache(filename.first,filename.second);
     }
   }
   catch (...)

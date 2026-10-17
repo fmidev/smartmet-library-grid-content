@@ -211,6 +211,14 @@ class ServiceImplementation : public ServiceInterface
 
      ServiceInterface*    getDataServerByFileId(T::FileId fileId);  // Forwarding is not implemented: always nullptr
      GRID::GridFile_sptr  getGridFile(T::FileId fileId);
+     void                 getValueRecordValue(GRID::Message& message,T::ValueRecord& rec,uint modificationOperation,double_vec& modificationParameters);
+     void                 addFullUpdateFile(T::FileInfo& fileInfo,T::ContentInfoList& fullContentList,uint& counter);
+     bool                 addFullUpdateFiles(T::FileInfoList& fileInfoList,T::ContentInfoList& fullContentList,T::FileId& startFileId,uint& counter);
+     bool                 getFileAndContentList(T::FileId fileId,T::FileInfo& fileInfo,T::ContentInfoList& contentList);
+     void                 cleanupFiles(time_t currentTime);
+     void                 processNewEvents();
+     void                 copyToLocalCache(T::FileId fileId,const std::string& filename);
+     Int64                copyCacheFile(const char *sourceFile,Int64 source_fsize,const std::string& cacheFile,Int64 target_fsize);
 
      T::EventId           mLastProcessedEventId;        //!< Event identifier of the last ContentServer event processed.
      bool                 mShutdownRequested;            //!< True once shutdown() has been called.
