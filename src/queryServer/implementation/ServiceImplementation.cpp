@@ -1952,12 +1952,10 @@ void addLevels(const char *levelField,uint& flags,std::vector<T::ParamLevel>& pa
 bool splitFunctionParams(const std::string& functionParamsStr,std::vector<std::string>& pnames)
 {
   bool containsFunction = false;
-  char buf[10000];
-  char tmp[10000];
+  std::vector<char> tmp(functionParamsStr.size()+1);
   uint c = 0;
-  strcpy(buf, functionParamsStr.c_str());
 
-  char* p = buf;
+  const char* p = functionParamsStr.c_str();
   uint level = 0;
   while (*p != '\0')
   {
@@ -1975,7 +1973,7 @@ bool splitFunctionParams(const std::string& functionParamsStr,std::vector<std::s
       tmp[c] = '\0';
       //mFunctionParamId++;
       //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
-      pnames.emplace_back(tmp);
+      pnames.emplace_back(tmp.data());
       c = 0;
     }
     else
@@ -1991,7 +1989,7 @@ bool splitFunctionParams(const std::string& functionParamsStr,std::vector<std::s
     tmp[c] = '\0';
     //mFunctionParamId++;
     //functionParams.emplace_back(std::pair<uint, std::string>(mFunctionParamId, std::string(tmp)));
-    pnames.emplace_back(tmp);
+    pnames.emplace_back(tmp.data());
   }
 
   return containsFunction;
@@ -3297,11 +3295,11 @@ bool ServiceImplementation::getParameterFunctionInfo(const std::string& paramStr
   FUNCTION_TRACE
   try
   {
-    char buf[10000];
-    char tmp[10000];
+    std::string bufStr(paramStr);
+    char* buf = bufStr.data();
+    std::vector<char> tmp(bufStr.size()+1);
 
     uint c = 0;
-    strcpy(buf, paramStr.c_str());
     char* p = buf;
 
     while (*p != '\0' && *p != '{')
@@ -3323,7 +3321,7 @@ bool ServiceImplementation::getParameterFunctionInfo(const std::string& paramStr
           {
             tmp[c] = '\0';
             function = buf;
-            functionParams = tmp;
+            functionParams = tmp.data();
             return true;
           }
         }
@@ -3396,16 +3394,16 @@ void ServiceImplementation::addFunctionParam(const std::string& pname,FunctionPa
         paramLevel = lIt;
         for (short & fIt : forecastNumberVec)
         {
-          char buf[200];
+          std::string buf;
           if (paramLevelUnit)
-            sprintf(buf, "%s:%s:%d:%d:%c%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevelUnit,
+            buf = fmt::format("{}:{}:{}:{}:{}{}:{}:{}:{}", key,producerName,geometryId,paramLevelId,paramLevelUnit,
                 paramLevel,forecastType,fIt,generationFlags);
           else
-            sprintf(buf, "%s:%s:%d:%d:%d:%d:%d:%lu", key.c_str(),producerName.c_str(),geometryId,paramLevelId,paramLevel,
+            buf = fmt::format("{}:{}:{}:{}:{}:{}:{}:{}", key,producerName,geometryId,paramLevelId,paramLevel,
                 forecastType,fIt,generationFlags);
 
           mFunctionParamId++;
-          functionParams.emplace_back(mFunctionParamId, std::string(buf));
+          functionParams.emplace_back(mFunctionParamId, buf);
         }
       }
     }
@@ -3655,8 +3653,8 @@ void ServiceImplementation::getParameterStringInfo(
   FUNCTION_TRACE
   try
   {
-    char buf[10000];
-    strcpy(buf, param.c_str());
+    std::string bufStr(param);
+    char* buf = bufStr.data();
 
     char* field[100];
     uint c = splitParameterFields(buf,fieldSeparator,field);
@@ -6693,9 +6691,7 @@ void ServiceImplementation::addSpecialValue(const double_vec& valueVector,double
       // The first number indicates the number of the constant values
       uint sLen = valueVector[0];
 
-      char tmp[1000];
-      tmp[0] = '\0';
-      char* p = tmp;
+      std::string tmp;
 
       T::GridValueList list;
       for (uint vv = sLen + 1; vv < vSize; vv++)
@@ -6707,15 +6703,15 @@ void ServiceImplementation::addSpecialValue(const double_vec& valueVector,double
       if (conversionByFunction)
         executeConversion(function, functionParams, forecastTime, list);
 
-      for (uint vv = 0; vv <= sLen; vv++)
-        p += sprintf(p, "%f;", valueVector[vv]);
+      for (uint vv = 0; vv <= sLen && vv < vSize; vv++)
+        tmp += fmt::format("{:f};", valueVector[vv]);
 
       uint len = list.getLength();
       for (uint vv = 0; vv < len; vv++)
       {
         T::GridValue rec;
         list.getGridValueByIndex(vv,rec);
-        p += sprintf(p, "%f;", rec.mValue);
+        tmp += fmt::format("{:f};", rec.mValue);
       }
 
       T::GridValue rec(x, y, tmp);
@@ -6738,9 +6734,7 @@ void ServiceImplementation::addInterpolatedSpecialValue(const double_vec& valueV
 {
   try
   {
-    char tmp[1000];
-    tmp[0] = '\0';
-    char* p = tmp;
+    std::string tmp;
 
     uint vLen1 = valueVector1.size();
 
@@ -6763,15 +6757,15 @@ void ServiceImplementation::addInterpolatedSpecialValue(const double_vec& valueV
     if (conversionByFunction)
       executeConversion(function, functionParams, forecastTime, list);
 
-    for (uint s = 0; s <= sLen; s++)
-      p += sprintf(p, "%f;", valueVector1[s]);
+    for (uint s = 0; s <= sLen && s < vLen1; s++)
+      tmp += fmt::format("{:f};", valueVector1[s]);
 
     uint len = list.getLength();
     for (uint s = 0; s < len; s++)
     {
       T::GridValue rec;
        list.getGridValueByIndex(s,rec);
-      p += sprintf(p, "%f;", rec.mValue);
+      tmp += fmt::format("{:f};", rec.mValue);
     }
 
     T::GridValue rec(x, y, tmp);
