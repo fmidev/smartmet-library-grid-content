@@ -1079,8 +1079,8 @@ void addGrib2PolarStereographicProperties(const GridFileArea& a,const Projection
   if (pp.lon_0 != ParamValueMissing)
     newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::OrientationOfTheGrid,(Int64 )(pp.lon_0*1000000)));
 
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(Int64 )a.xStepMetric*1000));
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(Int64 )a.yStepMetric*1000));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dx,(Int64 )(a.xStepMetric*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::Dy,(Int64 )(a.yStepMetric*1000)));
   //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::PolarStereographic::ProjectionCentreFlag:
 
   if (a.lat1 < a.lat2)
@@ -1110,8 +1110,8 @@ void addGrib2LambertConformalProperties(const GridFileArea& a,const ProjectionPa
     newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LaD,60000000));
 
   newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::LoV,(Int64 )(pp.lon_0*1000000)));
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )a.xStepMetric*1000));
-  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )a.yStepMetric*1000));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dx,(Int64 )(a.xStepMetric*1000)));
+  newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Dy,(Int64 )(a.yStepMetric*1000)));
   //newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::ProjectionCentreFlag:
   newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin1,(Int64 )(pp.lat_1*1000000)));
   newProperties.insert(std::pair<uint,Int64 >((uint)GRIB2::Property::GridSection::LambertConformal::Latin2,(Int64 )(pp.lat_2*1000000)));
