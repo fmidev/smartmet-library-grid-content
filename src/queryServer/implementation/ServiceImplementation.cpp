@@ -120,6 +120,155 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Add the values of the coordinates set by the function. */
+
+template <class F>
+void addCoordinateValues(const T::Coordinate_vec& coordinates,ParameterValues& values,F setValue)
+{
+  for (const auto& coordinate : coordinates)
+  {
+    T::GridValue val;
+    val.mX = coordinate.x();
+    val.mY = coordinate.y();
+
+    setValue(val);
+    values.mValueList.addGridValue(val);
+  }
+}
+
+
+
+/*! \brief Function setting the astronomical value of the coordinate of the grid value at the given time. */
+
+using CoordinateValueFunction = void (*)(T::GridValue& val,const Fmi::LocalDateTime& utcTime);
+
+
+
+/*! \brief Return the functions of the astronomical additional parameters by their (lower case) names. */
+
+const std::map<std::string,CoordinateValueFunction>& astronomyValueFunctions()
+{
+  static const std::map<std::string,CoordinateValueFunction> functions =
+  {
+    {"dark",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.dark();
+      }},
+    {"sunelevation",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.elevation;
+      }},
+    {"sundeclination",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.declination;
+      }},
+    {"sunatzimuth",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
+        val.mValue = (double)sp.azimuth;
+      }},
+    {"moonphase",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        val.mValue = Fmi::Astronomy::moonphase(utcTime.utc_time());
+      }},
+    {"moonrise_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        auto lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(lt.moonrise.local_time());
+      }},
+    {"moonrise2_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        if (lt.moonrise2_today())
+          val.mValueString = Fmi::to_iso_string(lt.moonrise2.local_time());
+        else
+          val.mValueString = std::string("");
+      }},
+    {"moonset_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(lt.moonset.local_time());
+      }},
+    {"moonset2_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        if (lt.moonset2_today())
+          val.mValueString = Fmi::to_iso_string(lt.moonset2.local_time());
+        else
+          val.mValueString = "";
+      }},
+    {"moonrisetoday_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonrise_today());
+      }},
+    {"moonrise2today_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonrise2_today());
+      }},
+    {"moonsettoday_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonset_today());
+      }},
+    {"moonset2today_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(lt.moonset2_today());
+      }},
+    {"moonup24h",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY,true);
+        val.mValue = (double)lt.above_horizont_24h();
+      }},
+    {"moondown24h",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
+        val.mValue = (double)(!lt.moonrise_today() && !lt.moonset_today() && !lt.above_horizont_24h());
+      }},
+    {"sunrise_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.sunrise.local_time());
+      }},
+    {"sunset_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.sunset.local_time());
+      }},
+    {"noon_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_iso_string(st.noon.local_time());
+      }},
+    {"sunrisetoday_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(st.sunrise_today());
+      }},
+    {"sunsettoday_utc",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        val.mValueString = Fmi::to_string(st.sunset_today());
+      }},
+    {"daylength",[](T::GridValue& val,const Fmi::LocalDateTime& utcTime)
+      {
+        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
+        auto seconds = st.daylength().total_seconds();
+        auto minutes = Fmi::numeric_cast<long>(round(seconds / 60.0));
+        val.mValue = minutes;
+      }}
+  };
+
+  return functions;
+}
+
+
+
 /*! \brief Run the function and ignore its exceptions. */
 
 template <class F>
@@ -11183,363 +11332,22 @@ void ServiceImplementation::getAdditionalValues(
 
     if (param == "dem")
     {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        if (mDem)
-        {
-          val.mValue = mDem->elevation(val.mX, val.mY);
-          values.mValueList.addGridValue(val);
-        }
-      }
+      if (mDem)
+        addCoordinateValues(coordinates,values,[this](T::GridValue& val) { val.mValue = mDem->elevation(val.mX, val.mY); });
       return;
     }
 
     if (param == "covertype")
     {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        if (mLandCover)
-        {
-          val.mValue = mLandCover->coverType(val.mX, val.mY);
-          values.mValueList.addGridValue(val);
-        }
-      }
+      if (mLandCover)
+        addCoordinateValues(coordinates,values,[this](T::GridValue& val) { val.mValue = mLandCover->coverType(val.mX, val.mY); });
       return;
     }
 
-    if (param == "dark")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
-        val.mValue = (double)sp.dark();
-        values.mValueList.addGridValue(val);
-      }
-      return;
-
-    }
-
-    if (param == "sunelevation")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
-        val.mValue = (double)sp.elevation;
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sundeclination")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
-        val.mValue = (double)sp.declination;
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sunatzimuth")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_position_t sp = Fmi::Astronomy::solar_position(utcTime, val.mX, val.mY);
-        val.mValue = (double)sp.azimuth;
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonphase")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        val.mValue = Fmi::Astronomy::moonphase(utcTime.utc_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonrise_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        auto lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_iso_string(lt.moonrise.local_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonrise2_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-
-        if (lt.moonrise2_today())
-          val.mValueString = Fmi::to_iso_string(lt.moonrise2.local_time());
-        else
-          val.mValueString = std::string("");
-
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonset_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_iso_string(lt.moonset.local_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonset2_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-
-        if (lt.moonset2_today())
-          val.mValueString = Fmi::to_iso_string(lt.moonset2.local_time());
-        else
-          val.mValueString = "";
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonrisetoday_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(lt.moonrise_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonrise2today_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(lt.moonrise2_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonsettoday_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(lt.moonset_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonset2today_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(lt.moonset2_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moonup24h")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY,true);
-        val.mValue = (double)lt.above_horizont_24h();
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "moondown24h")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::lunar_time_t lt = Fmi::Astronomy::lunar_time(utcTime, val.mX, val.mY);
-        val.mValue = (double)(!lt.moonrise_today() && !lt.moonset_today() && !lt.above_horizont_24h());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sunrise_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_iso_string(st.sunrise.local_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sunset_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_iso_string(st.sunset.local_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "noon_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_iso_string(st.noon.local_time());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sunrisetoday_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(st.sunrise_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "sunsettoday_utc")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        val.mValueString = Fmi::to_string(st.sunset_today());
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
-
-    if (param == "daylength")
-    {
-      for (const auto& coordinate : coordinates)
-      {
-        T::GridValue val;
-        val.mX = coordinate.x();
-        val.mY = coordinate.y();
-
-        Fmi::Astronomy::solar_time_t st = Fmi::Astronomy::solar_time(utcTime, val.mX, val.mY);
-        auto seconds = st.daylength().total_seconds();
-        auto minutes = Fmi::numeric_cast<long>(round(seconds / 60.0));
-        val.mValue = minutes;
-        values.mValueList.addGridValue(val);
-      }
-      return;
-    }
+    const auto& functions = astronomyValueFunctions();
+    auto function = functions.find(param);
+    if (function != functions.end())
+      addCoordinateValues(coordinates,values,[&](T::GridValue& val) { function->second(val,utcTime); });
   }
   catch (...)
   {
