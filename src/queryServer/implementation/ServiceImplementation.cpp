@@ -120,6 +120,33 @@ uint splitFields(char* st,char** field)
 
 
 
+/*! \brief Set the time step attributes of an internal aggregation function ("/..."): the parameters 2-4 are the steps before, the steps after and the step size in minutes. */
+
+void setAggregationParameters(QueryParameter& queryParam,const FunctionParam_vec& functionParams)
+{
+    int s1 = 0;
+    int s2 = 0;
+    queryParam.mTimestepSizeInMinutes = 60;
+    queryParam.mFlags |= QueryParameter::Flags::InternalAggregationParameter;
+
+    if (functionParams.size() > 1)
+      s1 = toInt32(functionParams[1].second);
+
+    if (functionParams.size() > 2)
+      s2 = toInt32(functionParams[2].second);
+
+    if (functionParams.size() > 3)
+      queryParam.mTimestepSizeInMinutes = toInt32(functionParams[3].second);
+
+    if (s1 < 0)
+      queryParam.mTimestepsBefore = -s1;
+
+    if (s2 > 0)
+      queryParam.mTimestepsAfter = s2;
+}
+
+
+
 /*! \brief Split the parameter string into fields at the separators that are not inside functions. Returns the number of fields. */
 
 uint splitParameterFields(char* buf,char fieldSeparator,char** field)
@@ -2039,6 +2066,77 @@ bool ServiceImplementation::isGeometryReady(T::GenerationId generationId,int geo
 
 
 
+/*! \brief Query Server: Return a temporary query parameter for the function parameter, inheriting the attributes of the query parameter (and of the alias of the parameter). */
+
+QueryParameter ServiceImplementation::newFunctionParameter(const QueryParameter& queryParam,const std::string& paramStr,const FunctionParam& functionParam,int contourCoordinateType)
+{
+  FUNCTION_TRACE
+  try
+  {
+    QueryParameter newParam;
+    newParam.mId = functionParam.first;
+    newParam.mParam = functionParam.second;
+    newParam.mOrigParam = paramStr + " => " + functionParam.second;
+    newParam.mSymbolicName = functionParam.second;
+    newParam.mFlags = queryParam.mFlags;
+
+    switch (queryParam.mType)
+    {
+      case QueryParameter::Type::Isoline:
+      case QueryParameter::Type::Isoband:
+      case QueryParameter::Type::StreamLine:
+        newParam.mType = QueryParameter::Type::Vector;
+        newParam.mFlags = queryParam.mFlags | QueryParameter::Flags::ReturnCoordinates;
+        if (contourCoordinateType == 3)
+          newParam.mFlags |= QueryParameter::Flags::OriginalCoordinates;
+        break;
+
+      case QueryParameter::Type::Vector:
+      case QueryParameter::Type::PointValues:
+      case QueryParameter::Type::GridFile:
+      default:
+        newParam.mType = queryParam.mType;
+        break;
+    }
+
+    newParam.mLocationType = queryParam.mLocationType;
+    newParam.mGeometryId = queryParam.mGeometryId;
+    newParam.mParameterLevelId = queryParam.mParameterLevelId;
+    newParam.mParameterLevel = queryParam.mParameterLevel;
+    newParam.mForecastType = queryParam.mForecastType;
+    newParam.mForecastNumber = queryParam.mForecastNumber;
+    newParam.mAreaInterpolationMethod = queryParam.mAreaInterpolationMethod;
+    newParam.mProducerId = queryParam.mProducerId;
+    newParam.mGenerationFlags = queryParam.mGenerationFlags;
+    newParam.mTimestepsBefore = queryParam.mTimestepsBefore;
+    newParam.mTimestepsAfter = queryParam.mTimestepsAfter;
+    newParam.mTimestepSizeInMinutes = queryParam.mTimestepSizeInMinutes;
+    //newParam.mFlags = queryParam.mFlags;
+    newParam.mTemporary = true;
+
+    std::string alias;
+    if (getAlias(functionParam.second, alias))
+    {
+      newParam.mParam = alias;
+      newParam.mOrigParam = newParam.mOrigParam + " => " + alias;
+      std::string paramName;
+
+      getParameterStringInfo(functionParam.second, ':', paramName, newParam.mGeometryId, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
+          newParam.mProducerName,newParam.mProducerId, newParam.mGenerationFlags, newParam.mAreaInterpolationMethod, newParam.mTimeInterpolationMethod, newParam.mLevelInterpolationMethod,newParam.mFlags);
+    }
+
+    return newParam;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Parse function. */
 
 bool ServiceImplementation::parseFunction(
@@ -2079,83 +2177,13 @@ bool ServiceImplementation::parseFunction(
       getFunctionParams(functionParamsStr, functionParams);
 
       if (function.substr(0,1) == "/")
-      {
-        int s1 = 0;
-        int s2 = 0;
-        queryParam.mTimestepSizeInMinutes = 60;
-        queryParam.mFlags |= QueryParameter::Flags::InternalAggregationParameter;
-
-        if (functionParams.size() > 1)
-          s1 = toInt32(functionParams[1].second);
-
-        if (functionParams.size() > 2)
-          s2 = toInt32(functionParams[2].second);
-
-        if (functionParams.size() > 3)
-          queryParam.mTimestepSizeInMinutes = toInt32(functionParams[3].second);
-
-        if (s1 < 0)
-          queryParam.mTimestepsBefore = -s1;
-
-        if (s2 > 0)
-          queryParam.mTimestepsAfter = s2;
-      }
+        setAggregationParameters(queryParam,functionParams);
 
       for (auto& functionParam : functionParams)
       {
         if (functionParam.second != "0" && toDouble(functionParam.second.c_str()) == 0)
         {
-          QueryParameter newParam;
-          newParam.mId = functionParam.first;
-          newParam.mParam = functionParam.second;
-          newParam.mOrigParam = paramStr + " => " + functionParam.second;
-          newParam.mSymbolicName = functionParam.second;
-          newParam.mFlags = queryParam.mFlags;
-
-          switch (queryParam.mType)
-          {
-            case QueryParameter::Type::Isoline:
-            case QueryParameter::Type::Isoband:
-            case QueryParameter::Type::StreamLine:
-              newParam.mType = QueryParameter::Type::Vector;
-              newParam.mFlags = queryParam.mFlags | QueryParameter::Flags::ReturnCoordinates;
-              if (contourCoordinateType == 3)
-                newParam.mFlags |= QueryParameter::Flags::OriginalCoordinates;
-              break;
-
-            case QueryParameter::Type::Vector:
-            case QueryParameter::Type::PointValues:
-            case QueryParameter::Type::GridFile:
-            default:
-              newParam.mType = queryParam.mType;
-              break;
-          }
-
-          newParam.mLocationType = queryParam.mLocationType;
-          newParam.mGeometryId = queryParam.mGeometryId;
-          newParam.mParameterLevelId = queryParam.mParameterLevelId;
-          newParam.mParameterLevel = queryParam.mParameterLevel;
-          newParam.mForecastType = queryParam.mForecastType;
-          newParam.mForecastNumber = queryParam.mForecastNumber;
-          newParam.mAreaInterpolationMethod = queryParam.mAreaInterpolationMethod;
-          newParam.mProducerId = queryParam.mProducerId;
-          newParam.mGenerationFlags = queryParam.mGenerationFlags;
-          newParam.mTimestepsBefore = queryParam.mTimestepsBefore;
-          newParam.mTimestepsAfter = queryParam.mTimestepsAfter;
-          newParam.mTimestepSizeInMinutes = queryParam.mTimestepSizeInMinutes;
-          //newParam.mFlags = queryParam.mFlags;
-          newParam.mTemporary = true;
-
-          std::string alias;
-          if (getAlias(functionParam.second, alias))
-          {
-            newParam.mParam = alias;
-            newParam.mOrigParam = newParam.mOrigParam + " => " + alias;
-            std::string paramName;
-
-            getParameterStringInfo(functionParam.second, ':', paramName, newParam.mGeometryId, newParam.mParameterLevelId, newParam.mParameterLevel, newParam.mForecastType, newParam.mForecastNumber,
-                newParam.mProducerName,newParam.mProducerId, newParam.mGenerationFlags, newParam.mAreaInterpolationMethod, newParam.mTimeInterpolationMethod, newParam.mLevelInterpolationMethod,newParam.mFlags);
-          }
+          QueryParameter newParam = newFunctionParameter(queryParam,paramStr,functionParam,contourCoordinateType);
 
           parseFunction(query,newParam, newParam.mParam, newParam.mFunction, newParam.mFunctionParams, recursionCounter + 2, additionalParameterList);
 
@@ -2171,13 +2199,10 @@ bool ServiceImplementation::parseFunction(
         queryParam.mProducerId, queryParam.mGenerationFlags, queryParam.mAreaInterpolationMethod, queryParam.mTimeInterpolationMethod, queryParam.mLevelInterpolationMethod, queryParam.mFlags);
 
     std::string alias;
-    if (getAlias(paramName, alias))
+    if (getAlias(paramName, alias)  &&  alias != paramStr)
     {
-      if (alias != paramStr)
-      {
-        if (!parseFunction(query,queryParam, alias, function, functionParams, recursionCounter + 1, additionalParameterList))
-          queryParam.mParam = alias;
-      }
+      if (!parseFunction(query,queryParam, alias, function, functionParams, recursionCounter + 1, additionalParameterList))
+        queryParam.mParam = alias;
     }
     return false;
   }
