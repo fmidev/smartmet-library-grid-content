@@ -324,6 +324,7 @@ class ServiceImplementation : public ServiceInterface
                        std::set<T::GeometryId>& geometryIdList);
 
      void           loadProducerFile();
+     void           addProducerField(uint t,const char *field,std::string& key);
      void           loadHeightConversionFile();
      void           loadUnitConversionFile();
 

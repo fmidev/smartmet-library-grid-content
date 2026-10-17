@@ -89,6 +89,88 @@ namespace
 const Fmi::TimeZonePtr& tz_utc = (Fmi::TimeZonePtr::utc);
 
 
+
+/*! \brief Split the line into ';'-separated fields (separators within quotes are ignored). Returns the number of fields. */
+
+uint splitFields(char* st,char** field)
+{
+  bool ind = false;
+  uint c = 1;
+  field[0] = st;
+  char* p = st;
+  while (*p != '\0' && c < 100)
+  {
+    if (*p == '"')
+      ind = !ind;
+
+    if ((*p == ';' || *p == '\n') && !ind)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Split the producer file line into ';'-separated fields that end at a '#' comment (separators within quotes are ignored). Returns the number of fields. */
+
+uint splitProducerFields(char* st,char** field)
+{
+  bool ind = false;
+  uint c = 1;
+  field[0] = st;
+  char* p = st;
+  while (*p != '\0'  &&  *p != '#'  &&  c < 100)
+  {
+    if (*p == '"')
+      ind = !ind;
+
+    if ((*p == ';' || *p == '\n' || *p == '#') && !ind)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Skip the leading blanks of the field and end it at the next blank. */
+
+void trimField(char*& field)
+{
+  // The field should start from non-empty char
+  while (*field != '\0' &&  *field <= ' ')
+    field++;
+
+  // There should be no empty chars in the field
+
+  char *f = field;
+  while (*f != '\0')
+  {
+    if (*f <= ' ')
+      *f = '\0';
+    else
+      f++;
+  }
+}
+
+
 thread_local ContentCache mContentCache;
 thread_local std::size_t mContentCache_records;
 thread_local time_t mContentCache_clearRequiredTime;
@@ -838,6 +920,47 @@ int ServiceImplementation::_getProducerList(T::SessionId /*sessionId*/, string_v
 
 
 
+/*! \brief Query Server: Add the "producer:geometry" field of the producer file line: the first field is a producer
+           (and the key of the line), the next ones are the producers concatenated to it. */
+
+void ServiceImplementation::addProducerField(uint t,const char *field,std::string& key)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<std::string> parts;
+    splitString(field,':',parts);
+    if (parts.size() != 2)
+      return;
+
+    if (t == 0)
+    {
+      key = toUpperString(field);
+      mProducerList.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
+    }
+    else
+    if (t == 1)
+    {
+      Producer_vec vec;
+      vec.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
+      mProducerConcatMap.insert(std::pair<std::string,Producer_vec>(key,vec));
+    }
+    else
+    {
+      auto vec = mProducerConcatMap.find(key);
+      if (vec != mProducerConcatMap.end())
+        vec->second.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
 /*! \brief Query Server: Load producer file. */
 
 void ServiceImplementation::loadProducerFile()
@@ -870,75 +993,18 @@ void ServiceImplementation::loadProducerFile()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char* field[100];
-        uint c = 1;
-        field[0] = st;
-        char* p = st;
-        while (*p != '\0'  &&  *p != '#'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';' || *p == '\n' || *p == '#') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitProducerFields(st,field);
         c--;
 
         std::string key;
         for (uint t=0; t<c; t++)
         {
-          // The field should start from non-empty char
-          while (*field[t] != '\0' &&  *field[t] <= ' ')
-            field[t]++;
-
-          // There should be no empty chars in the field
-
-          char *f = field[t];
-          while (*f != '\0')
-          {
-            if (*f <= ' ')
-              *f = '\0';
-            else
-              f++;
-          }
+          trimField(field[t]);
 
           //printf("FIELD [%u][%s]\n",t,field[t]);
           if (field[t][0] != '\0')
-          {
-            std::vector<std::string> parts;
-            splitString(field[t],':',parts);
-            if (parts.size() == 2)
-            {
-              if (t == 0)
-              {
-                key = toUpperString(field[0]);
-                mProducerList.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
-              }
-              else
-              if (t == 1)
-              {
-                Producer_vec vec;
-                vec.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
-                mProducerConcatMap.insert(std::pair<std::string,Producer_vec>(key,vec));
-              }
-              else
-              {
-                auto vec = mProducerConcatMap.find(key);
-                if (vec != mProducerConcatMap.end())
-                  vec->second.emplace_back(toUpperString(parts[0]), toInt32(parts[1]));
-              }
-            }
-          }
+            addProducerField(t,field[t],key);
         }
       }
     }
@@ -981,28 +1047,8 @@ void ServiceImplementation::loadUnitConversionFile()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char* field[100];
-        uint c = 1;
-        field[0] = st;
-        char* p = st;
-        while (*p != '\0' && c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';' || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
         c--;
 
         if (c >= 4)
@@ -1065,28 +1111,8 @@ void ServiceImplementation::loadHeightConversionFile()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char* field[100];
-        uint c = 1;
-        field[0] = st;
-        char* p = st;
-        while (*p != '\0' && c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';' || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
         c--;
 
         if (c >= 5)
