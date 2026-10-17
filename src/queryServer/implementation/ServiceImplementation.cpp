@@ -364,19 +364,21 @@ std::set<T::ParamLevel> indexHeightLevels(HeightRec_vec& recs,T::ParamLevel Heig
     levels.insert(rec.*levelB);
   }
 
+  // The indexes are looked up from the original levels. Replacing the levels in place level by level would
+  // replace an already written index again if it equals a later level (possible with negative levels).
+
+  std::map<T::ParamLevel,T::ParamLevel> indexes;
   T::ParamLevel idx = 0;
   for (int lev : levels)
   {
-    for (auto& rec : recs)
-    {
-      if (rec.*levelA == lev)
-        rec.*levelA = idx;
-
-      if (rec.*levelB == lev)
-        rec.*levelB = idx;
-
-    }
+    indexes[lev] = idx;
     idx++;
+  }
+
+  for (auto& rec : recs)
+  {
+    rec.*levelA = indexes[rec.*levelA];
+    rec.*levelB = indexes[rec.*levelB];
   }
   return levels;
 }
