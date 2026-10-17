@@ -404,6 +404,13 @@ class ServiceImplementation : public ServiceInterface
      void           getTimeRangeProducersAndGeometries(const QueryParameter& qParam,const QueryFetchState& state,const ParameterRequest& req,Producer_vec& tmpProducers,std::set<T::GeometryId>& geomIdList);
      void           fetchTimeRangeValues(Query& query,QueryParameter& qParam,QueryFetchState& state,std::unordered_map<std::string,T::ProducerId>& parameterProducers,ParameterRequest& req);
      void           addMissingTimeRangeValues(const Query& query,QueryParameter& qParam,time_t tt,size_t timeCnt,const std::set<time_t>& originalTimeList,const QueryFetchState& state);
+     void           printQueryParameter(QueryParameter& qParam);
+     void           fetchTimeStepParameter(Query& query,QueryParameter& qParam,QueryFetchState& state);
+     void           selectTimeStepProducersAndGeometries(const QueryParameter& qParam,QueryFetchState& state,const ParameterRequest& req,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,Producer_vec*& producersPtr,std::set<T::GeometryId>*& geomIdListPtr);
+     bool           fetchConcatenatedProducerValues(Query& query,QueryParameter& qParam,QueryFetchState& state,const ParameterRequest& req,time_t forecastTime,UInt64 gflags,std::string& producerStr,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList);
+     void           fetchTimeStepValues(Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,time_t forecastTime,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList);
+     void           updateTimeStepFetchState(const Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,bool concat,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,ParameterValues& valueList);
+     void           addMissingTimeStepValues(const Query& query,QueryParameter& qParam,time_t tt,const std::unordered_set<time_t>& additionalTimeList,const QueryFetchState& state);
      bool           getValueConversion(const ParameterMapping& pInfo,std::string& function,std::vector<std::string>& functionParams,uint& modificationOperation,double_vec& modificationParameters);
      void           reportDataServerError(const char *service,int result,const std::vector<const T::ContentInfo*>& contents);
      void           reportDataServerError(const char *service,uchar locationType,int result,const std::vector<const T::ContentInfo*>& contents);

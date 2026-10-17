@@ -570,6 +570,120 @@ void collectTimeRangeForecastTimes(const Query& query,std::set<time_t>& original
 
 
 
+/*! \brief Return true if the values are not found (no values and no data available). */
+
+bool hasNoValues(const ParameterValues& valueList)
+{
+  return valueList.mValueList.getLength() == 0 && (valueList.mFlags & ParameterValues::Flags::DataAvailable) == 0;
+}
+
+
+
+/*! \brief Select the geometries of the concatenated producers: the geometry of the producer string for the area
+           location types (returns false if it is not a geometry of the producers), all geometries otherwise. */
+
+bool selectConcatGeometries(const QueryParameter& qParam,const Producer_vec& producers,int gid,std::set<T::GeometryId>& geomIdList)
+{
+  if (qParam.mLocationType == QueryParameter::LocationType::Polygon || qParam.mLocationType == QueryParameter::LocationType::Circle || qParam.mLocationType == QueryParameter::LocationType::Path)
+  {
+    for (auto gg = producers.begin(); gg != producers.end(); ++gg)
+    {
+      if (gid == gg->second)
+      {
+        geomIdList.insert(gid);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  for (auto gg = producers.begin(); gg != producers.end(); ++gg)
+    geomIdList.insert(gg->second);
+
+  return true;
+}
+
+
+
+/*! \brief Select the generations for the next time steps by the generation of the values found. */
+
+void updateTimeStepGenerationFlags(const Query& query,const QueryParameter& qParam,UInt64 generationFlags,const ParameterValues& valueList,UInt64& gflags)
+{
+  if (qParam.mTimeInterpolationMethod == T::TimeInterpolationMethod::Forbidden || (qParam.mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (query.mFlags & Query::Flags::SameAnalysisTime) != 0 )
+  {
+    // If the time interpolation is forbidden or same analysisTime is required, we should no change the generation.
+    gflags = valueList.mGenerationFlags;
+  }
+  else
+  {
+    // We should use this generation or older.
+    if (generationFlags == 0)
+      gflags = valueList.mGenerationFlags + (valueList.mGenerationFlags << 1);
+  }
+}
+
+
+
+/*! \brief Add the time steps before and after the query forecast times needed by the parameter into the forecast time
+           list (a copy of the query forecast times). New times are added to the aggregation times of the query. */
+
+void addAggregationTimeSteps(Query& query,const QueryParameter& qParam,std::set<time_t>& forecastTimeList)
+{
+  forecastTimeList = query.mForecastTimeList;
+  for (const auto &fTime : query.mForecastTimeList)
+  {
+    if (qParam.mTimestepsBefore > 0)
+    {
+      time_t ss = fTime - ((qParam.mTimestepsBefore + 1) * qParam.mTimestepSizeInMinutes * 60);
+
+      for (uint t = 0; t < qParam.mTimestepsBefore; t++)
+      {
+        ss = ss + (qParam.mTimestepSizeInMinutes * 60);
+        forecastTimeList.insert(ss);
+        if (query.mForecastTimeList.find(ss) == query.mForecastTimeList.end())
+          query.mAggregationTimes.insert(ss);
+      }
+    }
+
+    if (qParam.mTimestepsAfter > 0)
+    {
+      time_t ss = fTime;
+
+      for (uint t = 0; t < qParam.mTimestepsAfter; t++)
+      {
+        ss = ss + (qParam.mTimestepSizeInMinutes * 60);
+        forecastTimeList.insert(ss);
+        if (query.mForecastTimeList.find(ss) == query.mForecastTimeList.end())
+          query.mAggregationTimes.insert(ss);
+      }
+    }
+  }
+}
+
+
+
+/*! \brief Collect the forecast times of the parameter values. The values whose times are not query forecast times are
+           marked as aggregation values and their times collected as additional times. */
+
+void collectTimeStepForecastTimes(Query& query,bool containsInternalAggregation,std::set<time_t>& timeList,std::unordered_set<time_t>& additionalTimeList)
+{
+  for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
+  {
+    for (auto& it : qParam->mValueList)
+    {
+      timeList.insert(it->mForecastTimeUTC);
+
+      if (query.mForecastTimeList.find(it->mForecastTimeUTC) == query.mForecastTimeList.end())
+      {
+        markAggregationValue(*it,containsInternalAggregation);
+        additionalTimeList.insert(it->mForecastTimeUTC);
+      }
+    }
+  }
+}
+
+
+
 /*! \brief Add the values of the coordinates set by the function. */
 
 template <class F>
@@ -3966,7 +4080,7 @@ void ServiceImplementation::parseParameterRequest(const Query& query,QueryParame
       req.generationFlags = query.mGenerationFlags;
 
     if (req.paramName.c_str()[0] == '$')
-      req.paramName = req.paramName.c_str()+1;
+      req.paramName.erase(0,1);
   }
   catch (...)
   {
@@ -4308,6 +4422,358 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
 
 
+/*! \brief Query Server: Print the query parameter to the debug log (if enabled). */
+
+void ServiceImplementation::printQueryParameter(QueryParameter& qParam)
+{
+  try
+  {
+    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
+    {
+      std::stringstream stream;
+      qParam.print(stream, 5, 0);
+      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the time step values of the data parameter (in reverse time order). Fetch errors are
+           printed, not thrown. */
+
+void ServiceImplementation::fetchTimeStepParameter(Query& query,QueryParameter& qParam,QueryFetchState& state)
+{
+  try
+  {
+    T::ForecastType forecastType = qParam.mForecastType;
+    T::ForecastNumber forecastNumber = qParam.mForecastNumber;
+
+    ParameterRequest req;
+    parseParameterRequest(query,qParam,state,req);
+    checkAlternativeRequest(query,qParam,state,req);
+
+    std::set<time_t> *forecastTimeList = &query.mForecastTimeList;
+    std::set<time_t> forecastTimeList2;
+
+    if (qParam.mTimestepsBefore > 0 || qParam.mTimestepsAfter > 0)
+    {
+      forecastTimeList = &forecastTimeList2;
+      addAggregationTimeSteps(query,qParam,forecastTimeList2);
+    }
+
+
+    printQueryParameter(qParam);
+
+
+    // Processing time steps in reverse order. The idea is that we want to
+    // find a generation that contains the newest timestep if the generation
+    // is not defined. It is possible that the newest generation do not contain
+    // the requested timestep when the generation is still under construction.
+
+    UInt64 gflags = req.generationFlags;
+
+    int ftLen = forecastTimeList->size();
+    qParam.mValueList.reserve(ftLen);
+
+    std::vector<std::shared_ptr<ParameterValues>> tmpValueList;
+    tmpValueList.reserve(ftLen);
+
+    Producer_vec tmpProducers;
+    std::set<T::GeometryId> tmpGeomIdList;
+
+
+    for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
+    {
+      std::shared_ptr<ParameterValues> valueList = std::make_shared<ParameterValues>();
+      tmpValueList.emplace_back(valueList);
+
+      try
+      {
+        if (qParam.mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !req.useAlternative)
+          fetchTimeStepValues(query,qParam,state,req,*fTime,gflags,forecastType,forecastNumber,tmpProducers,tmpGeomIdList,*valueList);
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP, "Operation failed!", nullptr);
+        exception.printError();
+      }
+
+      if (valueList->mValueList.getLength() == 0)
+      {
+        //valueList->mForecastTime = utcTimeFromTimeT(*fTime);
+        valueList->mForecastTimeUTC = *fTime;
+      }
+
+      //if (query.mForecastTimeList.find(*fTime) == query.mForecastTimeList.end())
+      //  valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
+    }
+
+    for (auto aa = tmpValueList.rbegin(); aa != tmpValueList.rend(); aa++)
+    {
+      qParam.mValueList.emplace_back(*aa);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Select the producers and the geometries for the time step values of the parameter. The
+           temporary producer and geometry lists are kept over the time steps of the parameter. */
+
+void ServiceImplementation::selectTimeStepProducersAndGeometries(const QueryParameter& qParam,QueryFetchState& state,const ParameterRequest& req,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,Producer_vec*& producersPtr,std::set<T::GeometryId>*& geomIdListPtr)
+{
+  try
+  {
+    producersPtr = &state.producers;
+    geomIdListPtr = &state.geometryIdList;
+
+    if (req.producerName > " "  &&  tmpProducers.empty())
+    {
+      if (req.geometryId > 0)
+        tmpProducers.emplace_back(req.producerName, req.geometryId);
+      else
+        getProducers(req.producerName,tmpProducers);
+    }
+
+    if (!tmpProducers.empty())
+      producersPtr = &tmpProducers;
+
+    if (req.geometryId > 0)
+    {
+      if (tmpGeomIdList.empty())
+        tmpGeomIdList.insert(req.geometryId);
+    }
+    else if (state.globalGeometryId > 0  &&  req.producerName.empty()  &&  qParam.mProducerId == 0)
+      tmpGeomIdList.insert(state.globalGeometryId);
+
+    if (qParam.mType != QueryParameter::Type::PointValues &&  tmpGeomIdList.empty())
+    {
+      for (auto pp = tmpProducers.begin(); pp != tmpProducers.end(); ++pp)
+      {
+        tmpGeomIdList.insert(pp->second);
+      }
+    }
+
+    if (!tmpGeomIdList.empty())
+      geomIdListPtr = &tmpGeomIdList;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the time step values from the concatenated producers of the producer while no values are
+           found. Returns true if the values were fetched from a concatenated producer. */
+
+bool ServiceImplementation::fetchConcatenatedProducerValues(Query& query,QueryParameter& qParam,QueryFetchState& state,const ParameterRequest& req,time_t forecastTime,UInt64 gflags,std::string& producerStr,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList)
+{
+  try
+  {
+    bool concat = false;
+    std::string prodName = producerStr;
+
+    while (!prodName.empty() &&  hasNoValues(valueList))
+    {
+      //printf("CONCAT SEARCH %s\n",prodName.c_str());
+      auto vec = mProducerConcatMap.find(prodName);
+      if (vec == mProducerConcatMap.end()  ||  vec->second.empty())
+      {
+        prodName = "";
+        continue;
+      }
+
+      int gid = 0;
+      const char *gidStr = strstr(prodName.c_str(),":");
+      if (gidStr)
+        gid = toInt32(gidStr+1);
+
+      tmpGeomIdList.clear();
+      prodName = vec->second[0].first + ":" + std::to_string(vec->second[0].second);
+
+      bool prodOk = selectConcatGeometries(qParam,vec->second,gid,tmpGeomIdList);
+
+      if (prodOk)
+      {
+        std::string maxAnalysisTime;
+        getGridValues(query,qParam,vec->second, tmpGeomIdList, req.producerId, state.analysisTime, maxAnalysisTime, gflags, req.paramName, req.paramHash,
+            state.queryFlags, forecastTime, false, valueList, producerStr);
+
+        concat = true;
+      }
+    }
+    tmpGeomIdList.clear();
+    return concat;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Fetch the values of the parameter for the time step and update the query state accordingly. */
+
+void ServiceImplementation::fetchTimeStepValues(Query& query,QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,time_t forecastTime,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,Producer_vec& tmpProducers,std::set<T::GeometryId>& tmpGeomIdList,ParameterValues& valueList)
+{
+  try
+  {
+    Producer_vec *producersPtr = nullptr;
+    std::set<T::GeometryId> *geomIdListPtr = nullptr;
+    selectTimeStepProducersAndGeometries(qParam,state,req,tmpProducers,tmpGeomIdList,producersPtr,geomIdListPtr);
+
+    std::string producerStr;
+    std::string maxAnalysisTime;
+
+    //printf("SEARCH %s %u\n",producerStr.c_str(),producerId);
+
+    getGridValues(query,qParam,*producersPtr, *geomIdListPtr, req.producerId, state.analysisTime, maxAnalysisTime, gflags, req.paramName, req.paramHash,
+        state.queryFlags, forecastTime, false, valueList, producerStr);
+
+    //printf("SEARCH RESULT %s %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),valueList->mFlags);
+    bool concat = false;
+    if (req.producerId == 0 && hasNoValues(valueList))
+      concat = fetchConcatenatedProducerValues(query,qParam,state,req,forecastTime,gflags,producerStr,tmpGeomIdList,valueList);
+
+    if (valueList.mValueList.getLength() == 0  || ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) == 0))
+    {
+      state.alternativeRequired.insert(qParam.mAlternativeParamId);
+    }
+
+    //printf("SEARCH END %s %u %u %d\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),(int)concat);
+
+    if (valueList.mValueList.getLength() > 0  || ((qParam.mFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList.mFlags & ParameterValues::Flags::DataAvailable) != 0))
+      updateTimeStepFetchState(query,qParam,state,req,concat,gflags,forecastType,forecastNumber,valueList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Update the query state and the parameter selections (producer, geometry, analysis time,
+           generations, forecast number) by the values found for the time step. */
+
+void ServiceImplementation::updateTimeStepFetchState(const Query& query,const QueryParameter& qParam,QueryFetchState& state,ParameterRequest& req,bool concat,UInt64& gflags,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber,ParameterValues& valueList)
+{
+  try
+  {
+    if (!concat)
+    {
+
+      // We have got some values. We should not change the producer anymore.
+      if (req.producerId == 0)
+        req.producerId = valueList.mProducerId;
+
+      // If there are no geometry defined, then we should not change the first geometry we'll get
+
+      if (req.geometryId <= 0  &&  valueList.mGeometryId > 0)
+        state.globalGeometryId = valueList.mGeometryId;
+
+      updateSameAnalysisTime(query,valueList,state);
+
+      updateTimeStepGenerationFlags(query,qParam,req.generationFlags,valueList,gflags);
+    }
+
+    // We should not change the forecast number.
+    if (forecastType < 0  &&  forecastNumber < 0)
+    {
+      forecastType = valueList.mForecastType;
+      forecastNumber = valueList.mForecastNumber;
+    }
+
+    addValueCoordinates(valueList,state.coordinates);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Make sure that the parameter contains the forecast time of the time step query: add empty
+           (additional) values for a missing time. */
+
+void ServiceImplementation::addMissingTimeStepValues(const Query& query,QueryParameter& qParam,time_t tt,const std::unordered_set<time_t>& additionalTimeList,const QueryFetchState& state)
+{
+  try
+  {
+    bool found = false;
+    uint cnt = 0;
+    for (auto it = qParam.mValueList.begin(); it != qParam.mValueList.end() && !found; ++it)
+    {
+      if ((*it)->mForecastTimeUTC < tt)
+        cnt++;
+      else
+      if ((*it)->mForecastTimeUTC == tt)
+      {
+        found = true;
+        if ((*it)->mValueList.getLength() == 0)
+        {
+          getAdditionalValues(qParam.mSymbolicName,query.mCoordinateType,state.coordinates,*(*it));
+        }
+      }
+    }
+
+    if (found)
+      return;
+
+    // The forecast time was not found from the current parameter. Adding the forecast time
+    // with an empty value list.
+
+    std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
+    pValues->mForecastTimeUTC = tt;
+    //pValues->mForecastTime = utcTimeFromTimeT(tt);
+
+    if (qParam.mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
+    {
+      pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
+    }
+
+    getAdditionalValues(qParam.mSymbolicName,query.mCoordinateType,state.coordinates,*pValues);
+
+    if (additionalTimeList.find(tt) != additionalTimeList.end())
+      markAggregationValue(*pValues,state.containsInternalAggregation);
+
+    qParam.mValueList.insert(qParam.mValueList.begin() + cnt, pValues);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Execute time step query. */
 
 int ServiceImplementation::executeTimeStepQuery(Query& query)
@@ -4315,61 +4781,22 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
   FUNCTION_TRACE
   try
   {
-    Producer_vec producers;
-    getProducers(query, producers);
-    T::Coordinate_vec coordinates;
-    std::string analysisTime = query.mAnalysisTime;
-    uint queryFlags = query.mFlags;
-    int globalGeometryId = 0;
-    std::unordered_set<uint> alternativeRequired;
-    bool containsInternalAggregation = false;
+    QueryFetchState state;
+    getProducers(query, state.producers);
+    state.analysisTime = query.mAnalysisTime;
+    state.queryFlags = query.mFlags;
 
-    if (producers.empty())
+    if (state.producers.empty())
       return Result::NO_PRODUCERS_FOUND;
 
-    std::set<T::GeometryId> geometryIdList;
-
-    if (!query.mGeometryIdList.empty())
-    {
-      geometryIdList = query.mGeometryIdList;
-    }
-    else if ((query.mFlags & Query::Flags::GeometryHitNotRequired))
-    {
-      Identification::gridDef.getGeometryIdList(geometryIdList);
-    }
-    else
-    {
-      const char *geometryIdStr = query.mAttributeList.getAttributeValue("grid.geometryId");
-      if (geometryIdStr != nullptr)
-      {
-        getGeometryIdListByGeometryId(toInt32(geometryIdStr),geometryIdList);
-      }
-      else
-      {
-        const char *gridUrnStr = query.mAttributeList.getAttributeValue("grid.urn");
-        if (gridUrnStr != nullptr)
-        {
-          Identification::gridDef.getGeometryIdList(geometryIdList);
-        }
-        else
-        {
-          getGeometryIdListByCoordinates(producers,query.mAreaCoordinates, geometryIdList);
-        }
-      }
-    }
+    getQueryGeometryIdList(query,state.producers,state.geometryIdList);
 
 
     // Parsing parameters and functions in the query.
 
     updateQueryParameters(query);
 
-    if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-    {
-      std::stringstream stream;
-      query.print(stream, 0, 0);
-      PRINT_DATA(mDebugLog, "\nQuery -object after parameter update:\n");
-      PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-    }
+    printQueryObject(query,"Query -object after parameter update:");
 
     // Fetching parameter data according to the given timesteps and the coordinate list. Notice
     // that the coordinate list can be used in two ways. It can 1) contain coordinate points
@@ -4380,306 +4807,10 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
-      if ((query.mProcessingStartTime + query.mMaxProcessingTimeInSeconds) < time(nullptr))
-      {
-        Fmi::Exception exception(BCP, "Maximum processing time reached - processing halted!");
-        exception.addParameter("maxProcessingTimeInSeconds", std::to_string(query.mMaxProcessingTimeInSeconds));
-        throw exception;
-      }
+      checkMaxProcessingTime(query);
 
-      if (qParam->mFunction.empty() && ((qParam->mFlags & QueryParameter::Flags::AlternativeParameter) == 0 || alternativeRequired.find(qParam->mId) != alternativeRequired.end()))
-      {
-        std::string paramName = qParam->mParam;
-        std::string producerName = qParam->mProducerName;
-        T::ProducerId producerId = qParam->mProducerId;
-        int geometryId = qParam->mGeometryId;
-        UInt64 generationFlags = qParam->mGenerationFlags;
-        T::ForecastType forecastType = qParam->mForecastType;
-        T::ForecastNumber forecastNumber = qParam->mForecastNumber;
-
-        if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)
-          containsInternalAggregation = true;
-
-        bool useAlternative = false;
-
-        getParameterStringInfo(qParam->mParam, ':', paramName, geometryId, qParam->mParameterLevelId,
-            qParam->mParameterLevel, qParam->mForecastType, qParam->mForecastNumber, producerName,producerId,
-            generationFlags,qParam->mAreaInterpolationMethod,qParam->mTimeInterpolationMethod, qParam->mLevelInterpolationMethod, qParam->mFlags);
-
-        if (generationFlags == 0)
-          generationFlags = query.mGenerationFlags;
-
-        if (paramName.c_str()[0] == '$')
-          paramName = paramName.c_str()+1;
-
-        std::size_t paramHash = 0;
-        Fmi::hash_merge(paramHash,paramName);
-
-        if (qParam->mAlternativeParamId != 0  &&  geometryId > 0 && !isGeometryValid(geometryId,query.mAreaCoordinates))
-        {
-          useAlternative = true;
-          alternativeRequired.insert(qParam->mAlternativeParamId);
-        }
-
-        std::set<time_t> *forecastTimeList = &query.mForecastTimeList;
-        std::set<time_t> forecastTimeList2;
-
-        if (qParam->mFlags & QueryParameter::Flags::InternalAggregationParameter)
-          containsInternalAggregation = true;
-
-        if (qParam->mTimestepsBefore > 0 || qParam->mTimestepsAfter > 0)
-        {
-          forecastTimeList = &forecastTimeList2;
-          forecastTimeList2 = query.mForecastTimeList;
-          for (const auto &fTime : query.mForecastTimeList)
-          {
-            if (qParam->mTimestepsBefore > 0)
-            {
-              time_t ss = fTime - ((qParam->mTimestepsBefore + 1) * qParam->mTimestepSizeInMinutes * 60);
-
-              for (uint t = 0; t < qParam->mTimestepsBefore; t++)
-              {
-                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
-                forecastTimeList2.insert(ss);
-                if (query.mForecastTimeList.find(ss) == query.mForecastTimeList.end())
-                  query.mAggregationTimes.insert(ss);
-              }
-            }
-
-            if (qParam->mTimestepsAfter > 0)
-            {
-              time_t ss = fTime;
-
-              for (uint t = 0; t < qParam->mTimestepsAfter; t++)
-              {
-                ss = ss + (qParam->mTimestepSizeInMinutes * 60);
-                forecastTimeList2.insert(ss);
-                if (query.mForecastTimeList.find(ss) == query.mForecastTimeList.end())
-                  query.mAggregationTimes.insert(ss);
-              }
-            }
-          }
-        }
-
-
-        if (mDebugLog != nullptr &&  mDebugLog->isEnabled())
-        {
-          std::stringstream stream;
-          qParam->print(stream, 5, 0);
-          PRINT_DATA(mDebugLog, "%s\n", stream.str().c_str());
-        }
-
-
-        // Processing time steps in reverse order. The idea is that we want to
-        // find a generation that contains the newest timestep if the generation
-        // is not defined. It is possible that the newest generation do not contain
-        // the requested timestep when the generation is still under construction.
-
-        UInt64 gflags = generationFlags;
-
-        int ftLen = forecastTimeList->size();
-        qParam->mValueList.reserve(ftLen);
-
-        std::vector<std::shared_ptr<ParameterValues>> tmpValueList;
-        tmpValueList.reserve(ftLen);
-
-        Producer_vec tmpProducers;
-        std::set<T::GeometryId> tmpGeomIdList;
-
-
-        for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
-        {
-          std::shared_ptr<ParameterValues> valueList = std::make_shared<ParameterValues>();
-          tmpValueList.emplace_back(valueList);
-
-          try
-          {
-            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN  &&  !useAlternative)
-            {
-              Producer_vec *producersPtr = &producers;
-              std::set<T::GeometryId> *geomIdListPtr = &geometryIdList;
-
-              if (producerName > " ")
-              {
-                if (tmpProducers.empty())
-                {
-                  if (geometryId > 0)
-                    tmpProducers.emplace_back(producerName, geometryId);
-                  else
-                    getProducers(producerName,tmpProducers);
-                }
-              }
-
-              if (!tmpProducers.empty())
-                producersPtr = &tmpProducers;
-
-              if (geometryId > 0)
-              {
-                if (tmpGeomIdList.empty())
-                  tmpGeomIdList.insert(geometryId);
-              }
-              else if (globalGeometryId > 0  &&  producerName.empty()  &&  qParam->mProducerId == 0)
-                tmpGeomIdList.insert(globalGeometryId);
-
-              if (qParam->mType != QueryParameter::Type::PointValues &&  tmpGeomIdList.empty())
-              {
-                for (auto pp = tmpProducers.begin(); pp != tmpProducers.end(); ++pp)
-                {
-                  tmpGeomIdList.insert(pp->second);
-                }
-              }
-
-              if (!tmpGeomIdList.empty())
-                geomIdListPtr = &tmpGeomIdList;
-
-              std::string producerStr;
-              std::string maxAnalysisTime;
-
-              //printf("SEARCH %s %u\n",producerStr.c_str(),producerId);
-
-              getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                  queryFlags, *fTime, false, *valueList, producerStr);
-
-              //printf("SEARCH RESULT %s %u %u %u\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),valueList->mFlags);
-              bool concat = false;
-              if (producerId == 0 && (valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
-              {
-                std::string prodName = producerStr;
-
-                while (!prodName.empty() &&  valueList->mValueList.getLength() == 0 && (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0)
-                {
-                  //printf("CONCAT SEARCH %s\n",prodName.c_str());
-                  auto vec = mProducerConcatMap.find(prodName);
-                  if (vec != mProducerConcatMap.end()  &&  !vec->second.empty())
-                  {
-                    int gid = 0;
-                    const char *gidStr = strstr(prodName.c_str(),":");
-                    if (gidStr)
-                      gid = toInt32(gidStr+1);
-
-                    tmpGeomIdList.clear();
-                    prodName = vec->second[0].first + ":" + std::to_string(vec->second[0].second);
-
-                    bool prodOk = true;
-                    if (qParam->mLocationType == QueryParameter::LocationType::Polygon || qParam->mLocationType == QueryParameter::LocationType::Circle || qParam->mLocationType == QueryParameter::LocationType::Path)
-                    {
-                      prodOk = false;
-                      for (auto gg = vec->second.begin(); gg != vec->second.end() && !prodOk; ++gg)
-                      {
-                        if (gid == gg->second)
-                        {
-                          prodOk = true;
-                          tmpGeomIdList.insert(gid);
-                        }
-                      }
-                    }
-                    else
-                    {
-                      for (auto gg = vec->second.begin(); gg != vec->second.end(); ++gg)
-                        tmpGeomIdList.insert(gg->second);
-                    }
-
-
-                    if (prodOk)
-                    {
-                      producersPtr = &(vec->second);
-                      geomIdListPtr = &tmpGeomIdList;
-                      std::string maxAnalysisTime;
-                      getGridValues(query,*qParam,*producersPtr, *geomIdListPtr, producerId, analysisTime, maxAnalysisTime, gflags, paramName, paramHash,
-                          queryFlags, *fTime, false, *valueList, producerStr);
-
-                      concat = true;
-                    }
-                  }
-                  else
-                    prodName = "";
-                }
-                tmpGeomIdList.clear();
-              }
-
-              if (valueList->mValueList.getLength() == 0  || ((qParam->mFlags & QueryParameter::Flags::NoReturnValues) == 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) == 0))
-              {
-                alternativeRequired.insert(qParam->mAlternativeParamId);
-              }
-
-              //printf("SEARCH END %s %u %u %d\n",producerStr.c_str(),producerId,valueList->mValueList.getLength(),(int)concat);
-
-              if (valueList->mValueList.getLength() > 0  || ((qParam->mFlags & QueryParameter::Flags::NoReturnValues) != 0  &&  (valueList->mFlags & ParameterValues::Flags::DataAvailable) != 0))
-              {
-                if (!concat)
-                {
-
-                  // We have got some values. We should not change the producer anymore.
-                  if (producerId == 0)
-                    producerId = valueList->mProducerId;
-
-                  // If there are no geometry defined, then we should not change the first geometry we'll get
-
-                  if (geometryId <= 0  &&  valueList->mGeometryId > 0)
-                    globalGeometryId = valueList->mGeometryId;
-
-                  if ((query.mFlags & Query::Flags::SameAnalysisTime) != 0  &&  analysisTime != valueList->mAnalysisTime)
-                  {
-                    // The query requires that we use the same analysis time with all parameters
-                    analysisTime = valueList->mAnalysisTime;
-                    queryFlags = queryFlags | Query::Flags::AnalysisTimeMatchRequired;
-                  }
-
-                  if (qParam->mTimeInterpolationMethod == T::TimeInterpolationMethod::Forbidden || (qParam->mFlags & QueryParameter::Flags::SameAnalysisTime) != 0 || (query.mFlags & Query::Flags::SameAnalysisTime) != 0 )
-                  {
-                    // If the time interpolation is forbidden or same analysisTime is required, we should no change the generation.
-                    gflags = valueList->mGenerationFlags;
-                  }
-                  else
-                  {
-                    // We should use this generation or older.
-                    if (generationFlags == 0)
-                      gflags = valueList->mGenerationFlags + (valueList->mGenerationFlags << 1);
-                  }
-                }
-
-                // We should not change the forecast number.
-                if (forecastType < 0  &&  forecastNumber < 0)
-                {
-                  forecastType = valueList->mForecastType;
-                  forecastNumber = valueList->mForecastNumber;
-                }
-
-                uint len = valueList->mValueList.getLength();
-                if (coordinates.empty()  &&  len > 0)
-                {
-                  for (uint s = 0; s<len; s++)
-                  {
-                    T::GridValue *val = valueList->mValueList.getGridValuePtrByIndex(s);
-                    coordinates.emplace_back(val->mX,val->mY);
-                  }
-                }
-
-              }
-            }
-          }
-          catch (...)
-          {
-            Fmi::Exception exception(BCP, "Operation failed!", nullptr);
-            exception.printError();
-          }
-
-          if (valueList->mValueList.getLength() == 0)
-          {
-            //valueList->mForecastTime = utcTimeFromTimeT(*fTime);
-            valueList->mForecastTimeUTC = *fTime;
-          }
-
-          //if (query.mForecastTimeList.find(*fTime) == query.mForecastTimeList.end())
-          //  valueList->mFlags = valueList->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
-        }
-
-        for (auto aa = tmpValueList.rbegin(); aa != tmpValueList.rend(); aa++)
-        {
-          qParam->mValueList.emplace_back(*aa);
-        }
-
-      }
+      if (isRequiredDataParameter(*qParam,state.alternativeRequired))
+        fetchTimeStepParameter(query,*qParam,state);
     }
 
 
@@ -4688,24 +4819,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     std::set<time_t> timeList;
     std::unordered_set<time_t> additionalTimeList;
-
-    for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
-    {
-      for (auto& it : qParam->mValueList)
-      {
-        timeList.insert(it->mForecastTimeUTC);
-
-        if (query.mForecastTimeList.find(it->mForecastTimeUTC) == query.mForecastTimeList.end())
-        {
-          it->mFlags |= QueryServer::ParameterValues::Flags::AggregationValue;
-
-          if (containsInternalAggregation)
-            it->mFlags |= QueryServer::ParameterValues::Flags::InternalAggregationValue;
-
-          additionalTimeList.insert(it->mForecastTimeUTC);
-        }
-      }
-    }
+    collectTimeStepForecastTimes(query,state.containsInternalAggregation,timeList,additionalTimeList);
 
     // Going through all the found forecast times and making sure that each parameter contains the
     // current forecast time. If not, then the forecast time is added to the parameters's forecast
@@ -4720,50 +4834,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
       for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
       {
         if (qParam->mFunction.empty())
-        {
-          bool found = false;
-          uint cnt = 0;
-          for (auto it = qParam->mValueList.begin(); it != qParam->mValueList.end() && !found; ++it)
-          {
-            if ((*it)->mForecastTimeUTC < tt)
-              cnt++;
-            else
-            if ((*it)->mForecastTimeUTC == tt)
-            {
-              found = true;
-              if ((*it)->mValueList.getLength() == 0)
-              {
-                getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*(*it));
-              }
-            }
-          }
-
-          if (!found)
-          {
-            // The forecast time was not found from the current parameter. Adding the forecast time
-            // with an empty value list.
-
-            std::shared_ptr<ParameterValues> pValues = std::make_shared<ParameterValues>();
-            pValues->mForecastTimeUTC = tt;
-            //pValues->mForecastTime = utcTimeFromTimeT(tt);
-
-            if (qParam->mParameterKeyType != T::ParamKeyTypeValue::BUILD_IN)
-            {
-              pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AdditionalValue;
-            }
-
-            getAdditionalValues(qParam->mSymbolicName,query.mCoordinateType,coordinates,*pValues);
-
-            if (additionalTimeList.find(tt) != additionalTimeList.end())
-            {
-              pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::AggregationValue;
-              if (containsInternalAggregation)
-                pValues->mFlags = pValues->mFlags | QueryServer::ParameterValues::Flags::InternalAggregationValue;
-            }
-
-            qParam->mValueList.insert(qParam->mValueList.begin() + cnt, pValues);
-          }
-        }
+          addMissingTimeStepValues(query,*qParam,tt,additionalTimeList,state);
       }
     }
 
