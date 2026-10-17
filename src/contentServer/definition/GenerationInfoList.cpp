@@ -511,6 +511,46 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
 
 
 
+namespace
+{
+
+/*! \brief Return the index of the first entry equal to the given one in an unsorted array, or 0 if there is none. */
+
+int getFirstEqualIndex(GenerationInfoPtr *array,uint length,uint comparisonMethod,GenerationInfo& generationInfo)
+{
+  for (uint t=0; t<length; t++)
+  {
+    if (array[t] != nullptr  &&  array[t]->compare(comparisonMethod,&generationInfo) == 0)
+      return t;
+  }
+  return 0;
+}
+
+
+
+/*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+int getClosestIndexAfterSearch(GenerationInfoPtr *array,uint length,uint comparisonMethod,GenerationInfo& generationInfo,int mid)
+{
+  if (array[mid]->compare(comparisonMethod,&generationInfo) < 0)
+  {
+    while (mid < C_INT(length)  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&generationInfo) < 0)
+      mid++;
+
+    return mid-1;
+  }
+  while (mid > 0  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&generationInfo) > 0)
+    mid--;
+
+  return mid;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Return the index of the entry closest to the given GenerationInfo without locking. */
 
 int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo)
@@ -522,20 +562,7 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
-    {
-      for (uint t=0; t<mLength; t++)
-      {
-        if (mArray[t] != nullptr)
-        {
-          int res = mArray[t]->compare(comparisonMethod,&generationInfo);
-          if (res == 0)
-          {
-            return t;
-          }
-        }
-      }
-      return 0;
-    }
+      return getFirstEqualIndex(mArray,mLength,comparisonMethod,generationInfo);
 
     int low = 0;
     int high = C_INT(mLength) - 1;
@@ -561,19 +588,8 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
     }
 
     if (mid >= 0  &&  mid < C_INT(mLength))
-    {
-      if (mArray[mid]->compare(comparisonMethod,&generationInfo) < 0)
-      {
-        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&generationInfo) < 0)
-          mid++;
+      return getClosestIndexAfterSearch(mArray,mLength,comparisonMethod,generationInfo,mid);
 
-        return mid-1;
-      }
-      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&generationInfo) > 0)
-        mid--;
-
-      return mid;
-    }
     return 0;
   }
   catch (...)

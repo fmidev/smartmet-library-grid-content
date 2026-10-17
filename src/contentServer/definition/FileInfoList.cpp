@@ -52,6 +52,71 @@ int fileInfo_compare_2(const void *_val1,const void *_val2)
   }
   return 0;
 }
+
+
+
+/*! \brief Return true if the file exists and is not marked as deleted. */
+
+bool isLiveFile(const FileInfo *info)
+{
+  return info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0;
+}
+
+
+
+/*! \brief Add the file to the list, as a copy if the list owns its objects. */
+
+void addFile(FileInfoList& fileInfoList,FileInfo *info)
+{
+  if (fileInfoList.getReleaseObjects())
+    fileInfoList.addFileInfo(info->duplicate());
+  else
+    fileInfoList.addFileInfo(info);
+}
+
+
+
+/*! \brief Add the live files accepted by the predicate from an array sorted by file id, starting at the given file forwards
+           (or backwards with a negative maxRecords) until the list has abs(maxRecords) files. startIdx is the closest index. */
+
+template <class Accept>
+void addFilePage(FileInfoPtr *array,uint length,int startIdx,T::FileId startFileId,int maxRecords,Accept accept,FileInfoList& fileInfoList)
+{
+  uint max = (uint)abs(maxRecords);
+  if (maxRecords >= 0)
+  {
+    startIdx = std::max(startIdx, 0);
+
+    for (uint t=startIdx; t<length; t++)
+    {
+      FileInfo *info = array[t];
+      if (isLiveFile(info)  &&  info->mFileId >= startFileId  &&  accept(info))
+      {
+        addFile(fileInfoList,info);
+
+        if (fileInfoList.getLength() == max)
+          return;
+      }
+    }
+  }
+  else
+  {
+    if (startIdx < 0)
+      startIdx = length-1;
+
+    for (int t=startIdx; t>=0; t--)
+    {
+      FileInfo *info = array[t];
+      if (isLiveFile(info)  &&  info->mFileId <= startFileId  &&  accept(info))
+      {
+        addFile(fileInfoList,info);
+
+        if (fileInfoList.getLength() == max)
+          return;
+      }
+    }
+  }
+}
 }  // namespace
 
 
@@ -339,47 +404,28 @@ void FileInfoList::addFileInfoListNoLock(FileInfoList& fileInfoList)
       if (b < len2)
         fInfo2 = fileInfoList.getFileInfoByIndex(b);
 
-      if (fInfo1 == nullptr  &&  fInfo2 == nullptr)
-      {
-        a++;
-        b++;
-      }
-      else
-      if (fInfo1 != nullptr  &&  fInfo2 == nullptr)
+      // Take the current file when it does not sort after the new one
+      if (fInfo1 != nullptr  &&  (fInfo2 == nullptr  ||  fInfo1->compare(mComparisonMethod,fInfo2) <= 0))
       {
         newArray[c] = fInfo1;
         a++;
         c++;
       }
       else
-      if (fInfo1 == nullptr  &&  fInfo2 != nullptr)
+      if (fInfo2 != nullptr)
       {
         if (mReleaseObjects)
           newArray[c] = fInfo2->duplicate();
         else
           newArray[c] = fInfo2;
+
         b++;
         c++;
       }
       else
-      if (fInfo1 != nullptr  &&  fInfo2 != nullptr)
       {
-        if (fInfo1->compare(mComparisonMethod,fInfo2) <= 0)
-        {
-          newArray[c] = fInfo1;
-          a++;
-          c++;
-        }
-        else
-        {
-          if (mReleaseObjects)
-            newArray[c] = fInfo2->duplicate();
-          else
-            newArray[c] = fInfo2;
-
-          b++;
-          c++;
-        }
+        a++;
+        b++;
       }
     }
 
@@ -827,6 +873,46 @@ int FileInfoList::getClosestIndex(uint comparisonMethod,FileInfo& fileInfo)
 
 
 
+namespace
+{
+
+/*! \brief Return the index of the first entry equal to the given one in an unsorted array, or 0 if there is none. */
+
+int getFirstEqualIndex(FileInfoPtr *array,uint length,uint comparisonMethod,FileInfo& fileInfo)
+{
+  for (uint t=0; t<length; t++)
+  {
+    if (array[t] != nullptr  &&  array[t]->compare(comparisonMethod,&fileInfo) == 0)
+      return t;
+  }
+  return 0;
+}
+
+
+
+/*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+int getClosestIndexAfterSearch(FileInfoPtr *array,uint length,uint comparisonMethod,FileInfo& fileInfo,int mid)
+{
+  if (array[mid]->compare(comparisonMethod,&fileInfo) < 0)
+  {
+    while (mid < C_INT(length)  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&fileInfo) < 0)
+      mid++;
+
+    return mid-1;
+  }
+  while (mid > 0  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&fileInfo) > 0)
+    mid--;
+
+  return mid;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Return the index of the entry closest to the given FileInfo without locking. */
 
 int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo)
@@ -838,20 +924,7 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
-    {
-      for (uint t=0; t<mLength; t++)
-      {
-        if (mArray[t] != nullptr)
-        {
-          int res = mArray[t]->compare(comparisonMethod,&fileInfo);
-          if (res == 0)
-          {
-            return t;
-          }
-        }
-      }
-      return 0;
-    }
+      return getFirstEqualIndex(mArray,mLength,comparisonMethod,fileInfo);
 
     int low = 0;
     int high = C_INT(mLength) - 1;
@@ -877,19 +950,8 @@ int FileInfoList::getClosestIndexNoLock(uint comparisonMethod,FileInfo& fileInfo
     }
 
     if (mid >= 0  &&  mid < C_INT(mLength))
-    {
-      if (mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
-      {
-        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) < 0)
-          mid++;
+      return getClosestIndexAfterSearch(mArray,mLength,comparisonMethod,fileInfo,mid);
 
-        return mid-1;
-      }
-      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&fileInfo) > 0)
-        mid--;
-
-      return mid;
-    }
     return 0;
   }
   catch (...)
@@ -1031,12 +1093,9 @@ void FileInfoList::getFileInfoListNoClear(FileInfoList& fileInfoList)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (isLiveFile(info))
       {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+        addFile(fileInfoList,info);
       }
     }
   }
@@ -1086,50 +1145,10 @@ void FileInfoList::getFileInfoListNoClear(T::FileId startFileId,int maxRecords,F
 
     AutoReadLock lock(mModificationLockPtr);
 
-    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
     int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
+    addFilePage(mArray,mLength,startIdx,startFileId,maxRecords,[](const FileInfo * /*info*/) { return true; },fileInfoList);
   }
   catch (...)
   {
@@ -1159,12 +1178,9 @@ void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,FileInfo
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
+      if (isLiveFile(info)  &&  info->mProducerId == producerId)
       {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+        addFile(fileInfoList,info);
       }
     }
   }
@@ -1198,50 +1214,10 @@ void FileInfoList::getFileInfoListByProducerId(T::ProducerId producerId,T::FileI
 
     AutoReadLock lock(mModificationLockPtr);
 
-    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
     int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mProducerId == producerId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mProducerId == producerId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
+    addFilePage(mArray,mLength,startIdx,startFileId,maxRecords,[&](const FileInfo *info) { return info->mProducerId == producerId; },fileInfoList);
   }
   catch (...)
   {
@@ -1271,7 +1247,7 @@ std::size_t FileInfoList::getHash()
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (isLiveFile(info))
       {
         Fmi::hash_merge(hash,info->mFileId);
       }
@@ -1306,7 +1282,7 @@ std::size_t FileInfoList::getHashByProducerId(T::ProducerId producerId)
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mProducerId == producerId)
+      if (isLiveFile(info)  &&  info->mProducerId == producerId)
       {
         Fmi::hash_merge(hash,info->mFileId);
       }
@@ -1341,7 +1317,7 @@ std::size_t FileInfoList::getHashByGenerationId(T::GenerationId generationId)
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
+      if (isLiveFile(info)  &&  info->mGenerationId == generationId)
       {
         Fmi::hash_merge(hash,info->mFileId);
       }
@@ -1376,12 +1352,9 @@ void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,Fi
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mGenerationId == generationId)
+      if (isLiveFile(info)  &&  info->mGenerationId == generationId)
       {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+        addFile(fileInfoList,info);
       }
     }
   }
@@ -1415,51 +1388,10 @@ void FileInfoList::getFileInfoListByGenerationId(T::GenerationId generationId,T:
 
     AutoReadLock lock(mModificationLockPtr);
 
-    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
     int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mGenerationId == generationId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mGenerationId == generationId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
-
+    addFilePage(mArray,mLength,startIdx,startFileId,maxRecords,[&](const FileInfo *info) { return info->mGenerationId == generationId; },fileInfoList);
   }
   catch (...)
   {
@@ -1489,12 +1421,9 @@ void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,FileInfoList& 
     for (uint t=0; t<sz; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mSourceId == sourceId)
+      if (isLiveFile(info)  &&  info->mSourceId == sourceId)
       {
-        if (fileInfoList.getReleaseObjects())
-          fileInfoList.addFileInfo(info->duplicate());
-        else
-          fileInfoList.addFileInfo(info);
+        addFile(fileInfoList,info);
       }
     }
   }
@@ -1528,50 +1457,10 @@ void FileInfoList::getFileInfoListBySourceId(T::SourceId sourceId,T::FileId star
 
     AutoReadLock lock(mModificationLockPtr);
 
-    uint max = (uint)abs(maxRecords);
     FileInfo search;
     search.mFileId = startFileId;
     int startIdx = getClosestIndexNoLock(FileInfo::ComparisonMethod::fileId,search);
-
-    if (maxRecords >= 0)
-    {
-      startIdx = std::max(startIdx, 0);
-
-      for (uint t=startIdx; t<mLength; t++)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId >= startFileId  &&  info->mSourceId == sourceId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
-    else
-    {
-      if (startIdx < 0)
-        startIdx = mLength-1;
-
-      for (int t=startIdx; t>=0; t--)
-      {
-        FileInfo *info = mArray[t];
-        if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&  info->mFileId <= startFileId  &&  info->mSourceId == sourceId)
-        {
-          if (fileInfoList.getReleaseObjects())
-            fileInfoList.addFileInfo(info->duplicate());
-          else
-            fileInfoList.addFileInfo(info);
-
-          if (fileInfoList.getLength() == max)
-            return;
-        }
-      }
-    }
+    addFilePage(mArray,mLength,startIdx,startFileId,maxRecords,[&](const FileInfo *info) { return info->mSourceId == sourceId; },fileInfoList);
   }
   catch (...)
   {
@@ -1598,7 +1487,7 @@ uint FileInfoList::getFileInfoCountByProducerId(T::ProducerId producerId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (isLiveFile(info))
       {
         if (info->mProducerId == producerId)
           count++;
@@ -1631,7 +1520,7 @@ uint FileInfoList::getFileInfoCountByGenerationId(T::GenerationId generationId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (isLiveFile(info))
       {
         if (info->mGenerationId == generationId)
           count++;
@@ -1664,7 +1553,7 @@ uint FileInfoList::getFileInfoCountBySourceId(T::SourceId sourceId)
     for (uint t=0; t<mLength; t++)
     {
       FileInfo *info = mArray[t];
-      if (info != nullptr  &&  (info->mFlags & T::FileInfo::Flags::DeletedFile) == 0)
+      if (isLiveFile(info))
       {
         if (info->mSourceId == sourceId)
           count++;

@@ -511,6 +511,46 @@ int GeometryInfoList::getClosestIndex(uint comparisonMethod,GeometryInfo& geomet
 
 
 
+namespace
+{
+
+/*! \brief Return the index of the first entry equal to the given one in an unsorted array, or 0 if there is none. */
+
+int getFirstEqualIndex(GeometryInfoPtr *array,uint length,uint comparisonMethod,GeometryInfo& geometryInfo)
+{
+  for (uint t=0; t<length; t++)
+  {
+    if (array[t] != nullptr  &&  array[t]->compare(comparisonMethod,&geometryInfo) == 0)
+      return t;
+  }
+  return 0;
+}
+
+
+
+/*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+int getClosestIndexAfterSearch(GeometryInfoPtr *array,uint length,uint comparisonMethod,GeometryInfo& geometryInfo,int mid)
+{
+  if (array[mid]->compare(comparisonMethod,&geometryInfo) < 0)
+  {
+    while (mid < C_INT(length)  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&geometryInfo) < 0)
+      mid++;
+
+    return mid-1;
+  }
+  while (mid > 0  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&geometryInfo) > 0)
+    mid--;
+
+  return mid;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Return the index of the entry closest to the given GeometryInfo without locking. */
 
 int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& geometryInfo)
@@ -522,20 +562,7 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
-    {
-      for (uint t=0; t<mLength; t++)
-      {
-        if (mArray[t] != nullptr)
-        {
-          int res = mArray[t]->compare(comparisonMethod,&geometryInfo);
-          if (res == 0)
-          {
-            return t;
-          }
-        }
-      }
-      return 0;
-    }
+      return getFirstEqualIndex(mArray,mLength,comparisonMethod,geometryInfo);
 
     int low = 0;
     int high = C_INT(mLength) - 1;
@@ -561,19 +588,8 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
     }
 
     if (mid >= 0  &&  mid < C_INT(mLength))
-    {
-      if (mArray[mid]->compare(comparisonMethod,&geometryInfo) < 0)
-      {
-        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) < 0)
-          mid++;
+      return getClosestIndexAfterSearch(mArray,mLength,comparisonMethod,geometryInfo,mid);
 
-        return mid-1;
-      }
-      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) > 0)
-        mid--;
-
-      return mid;
-    }
     return 0;
   }
   catch (...)
