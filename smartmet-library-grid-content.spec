@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.17
+Version: 26.10.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -112,6 +112,12 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.19-1.fmi
+- Area queries (polygon, circle, path) no longer skip a producer whose producer file line continues it
+  with another geometry (e.g. VIRE:1110;VIRE:1125): the other geometry is just not concatenated to
+  the area. Previously all VIRE bbox and radius queries returned missing values
+- Time range queries of areas concatenate only the producers of the same geometry
+
 * Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
 - Height queries interpolated in time used the contents and levels of the first time for both times;
   each time is now interpolated in height with its own contents and levels before the time

@@ -483,7 +483,6 @@ class ServiceImplementation : public ServiceInterface
      GRID::Message* newGridFileMessage(const Query& query,uint version,time_t forecastTime,T::ParamLevel paramLevel,const T::ContentInfo& contentInfo1,const std::map<uint,Int64 >& oldProperties,GRID::GridFile& newGridFile);
      bool           addGridFileData(int result,const char *service,const T::ContentInfo& contentInfo1,bool levelInterpolated,T::ParamLevel paramLevel,QueryParameter& qParam,const ParameterMapping& pInfo,bool conversionByFunction,const std::string& function,std::vector<std::string>& functionParams,time_t forecastTime,T::Coordinate_vec& coordinates,T::ParamValue_vec& valueVector,GRID::GridFile& newGridFile,GRID::Message& newMessage,UInt64 sz,ParameterValues& valueList);
      void           printGridValueRequest(const GridValueRequest& r,const Producer_vec& producers,const std::set<T::GeometryId>& geometryIdList);
-     bool           isAreaProducerAccepted(std::size_t producerCount,const QueryParameter& qParam,const std::string& producerName,T::GeometryId producerGeometryId);
      ParameterMapping_vec_sptr getGridValueMappings(const T::ProducerInfo& producerInfo,const std::string& parameterKey,std::size_t parameterHash,T::GeometryId producerGeometryId,const QueryParameter& qParam);
      T::GenerationInfo* getRequestedGenerationInfo(const CacheEntry& cacheEntry,const std::string& analysisTime,uint queryFlags,bool acceptNotReadyGenerations);
      bool           hasClimatologicalMappings(const ParameterMapping_vec& mappings);
@@ -491,7 +490,6 @@ class ServiceImplementation : public ServiceInterface
      bool           isGenerationReady(const T::GenerationInfo& generationInfo,T::GeometryId producerGeometryId);
      void           printGeneration(const std::string& analysisTime,const std::vector<std::string>& analysisTimes,uint g,bool requestedGeneration);
      bool           getGenerationsGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const CacheEntry& cacheEntry,const std::vector<std::string>& analysisTimes,T::GenerationInfo* origGenerationInfo,ParameterMapping_vec& mappings,bool climatologicalMappings);
-     void           printInvalidProducer(const std::string& producerName,bool producerOk);
      bool           isGenerationUsable(const GridValueRequest& r,T::GenerationInfo *generationInfo,T::GeometryId producerGeometryId,bool climatologicalMappings,bool generationValid);
      bool           getProducerGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo);
      bool           getMappingGridValues(GridValueRequest& r,const std::string& producerName,T::GeometryId producerGeometryId,const T::ProducerInfo& producerInfo,const T::GenerationInfo& generationInfo,UInt64 gflags,ParameterMapping& pInfo);

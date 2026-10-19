@@ -223,6 +223,92 @@ BOOST_FIXTURE_TEST_CASE(execute_query_time_series, Fixture)
       });
 }
 
+BOOST_FIXTURE_TEST_CASE(execute_query_areas, Fixture)
+{
+  // The Query interface with the area location types the timeseries plugin uses for bbox, wkt
+  // and radius: every grid point inside the area, the values those of the GRIB file
+  withFmiErrors(
+      [&]
+      {
+        const std::string time = "20080805T060000";
+        auto run = [&](uchar locationType, const T::Coordinate_vec &coordinates, double radius)
+        {
+          T::AttributeList attributes;
+          attributes.addAttribute("starttime", time);
+          attributes.addAttribute("endtime", time);
+          attributes.addAttribute("timestep", "data");
+          attributes.addAttribute("producer", PRODUCER);
+          attributes.addAttribute("param", "Temperature");
+          attributes.addAttribute("areaInterpolationMethod", "1");
+
+          QueryServer::Query q;
+          QueryServer::QueryConfigurator configurator;
+          configurator.configure(q, attributes);
+          q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+          q.mAreaCoordinates.push_back(coordinates);
+          q.mRadius = radius;
+          for (auto &qp : q.mQueryParameterList)
+            qp.mLocationType = locationType;
+
+          BOOST_TEST_REQUIRE(world->queryServer.executeQuery(0, q) == 0);
+          BOOST_TEST_REQUIRE(q.mQueryParameterList.size() == 1U);
+          const auto &values = q.mQueryParameterList[0].mValueList;
+          BOOST_TEST_REQUIRE(values.size() == 1U);
+          return values[0]->mValueList;
+        };
+
+        // A box around Helsinki
+        T::Coordinate_vec box;
+        box.emplace_back(LON1 - 0.5, LAT1 - 0.25);
+        box.emplace_back(LON1 + 0.5, LAT1 - 0.25);
+        box.emplace_back(LON1 + 0.5, LAT1 + 0.25);
+        box.emplace_back(LON1 - 0.5, LAT1 + 0.25);
+        box.emplace_back(LON1 - 0.5, LAT1 - 0.25);
+
+        // A 20 km circle around Helsinki
+        T::Coordinate_vec centre;
+        centre.emplace_back(LON1, LAT1);
+
+        auto check = [&](const std::string &context)
+        {
+          for (const auto &[name, list] :
+               {std::pair{"polygon", run(QueryServer::QueryParameter::LocationType::Polygon, box, 0)},
+                std::pair{"circle", run(QueryServer::QueryParameter::LocationType::Circle, centre, 20)}})
+          {
+            BOOST_TEST_CONTEXT(context << " " << name)
+            {
+              BOOST_TEST(list.getLength() > 1U);
+              for (uint i = 0; i < list.getLength(); i++)
+              {
+                T::GridValue gv;
+                list.getGridValueByIndex(i, gv);
+                BOOST_TEST_REQUIRE(gv.mValue != ParamValueMissing);
+                const double expected = direct("Temperature", time, gv.mY, gv.mX, T::AreaInterpolationMethod::Nearest);
+                BOOST_TEST(close(gv.mValue, expected), "at " << gv.mY << "," << gv.mX << " query " << gv.mValue << ", grib " << expected);
+              }
+            }
+          }
+        };
+
+        check("producers_test.csv");
+
+        // The producer is also concatenated to a nowcast producer on an earlier line of the
+        // producer file, like VIRE is to VIRENWC in production
+        world = std::make_unique<GridWorld>();
+        world->addProducer(PRODUCER, "20080805T050000", {PAL});
+        world->start("nowcast:5900;" + PRODUCER + ":5900\n" + PRODUCER + ":5900\n");
+        check("concatenated");
+
+        // The producer is continued with another geometry which has no data (yet), like
+        // VIRE:1110;VIRE:1125. The other geometry is not concatenated to an area, but the
+        // producer itself is used.
+        world = std::make_unique<GridWorld>();
+        world->addProducer(PRODUCER, "20080805T050000", {PAL});
+        world->start(PRODUCER + ":5900;" + PRODUCER + ":5908\n" + PRODUCER + ":5908\n");
+        check("continued with another geometry");
+      });
+}
+
 BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
 {
   // VALID{nowcast;forecast} takes the first parameter which has data for the time, and its

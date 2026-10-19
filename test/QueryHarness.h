@@ -45,8 +45,12 @@ class GridWorld
   // Start the query server once the data has been registered. Like the grid engine does with
   // mapping_fmi_auto.csv, a mapping is generated for every registered parameter (the mappings
   // shipped with the test configuration were made for an older parameter identification).
-  void start()
+  // The producer search file is the one of the test configuration unless given
+  void start(const std::string &producers = "")
   {
+    if (!producers.empty())
+      producerFile = std::make_unique<TempFile>(producers, "gridproducers");
+
     std::string mappings;
     for (const auto &line : mappingLines)
       mappings += line + "\n";
@@ -72,7 +76,7 @@ class GridWorld
                      "",
                      mappingAliasFiles,
                      aliasFiles,
-                     engineFile("producers_test.csv"),
+                     producerFile ? producerFile->name() : engineFile("producers_test.csv"),
                      producerAliasFiles,
                      luaFiles,
                      false,
@@ -171,6 +175,7 @@ class GridWorld
   std::map<std::string, T::ProducerId> producerIds;
   std::set<std::string> mappingLines;
   std::unique_ptr<TempFile> mappingFile;
+  std::unique_ptr<TempFile> producerFile;
 };
 
 }  // namespace GridTest

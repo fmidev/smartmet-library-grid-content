@@ -10015,67 +10015,6 @@ void ServiceImplementation::printGridValueRequest(const GridValueRequest& r,cons
 
 
 
-/*! \brief Query Server: Print the reason why the producer is not valid to the debug log. */
-
-void ServiceImplementation::printInvalidProducer(const std::string& producerName,bool producerOk)
-{
-  try
-  {
-    if (!producerOk)
-    {
-      PRINT_DATA(mDebugLog, "  - Not a valid producer for area search '%s'!\n", producerName.c_str());
-    }
-    else
-    {
-      PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
-/*! \brief Query Server: Return false if the data is requested from an area and the concatenated producers of the
-           producer have different geometries (the data concatenation is not accepted then). */
-
-bool ServiceImplementation::isAreaProducerAccepted(std::size_t producerCount,const QueryParameter& qParam,const std::string& producerName,T::GeometryId producerGeometryId)
-{
-  try
-  {
-    if (producerCount <= 1 || (qParam.mLocationType != QueryParameter::LocationType::Polygon && qParam.mLocationType != QueryParameter::LocationType::Circle && qParam.mLocationType != QueryParameter::LocationType::Path))
-      return true;
-
-    // We do not accept data concatenation if the data is requested from an area and
-    // if geometries are different.
-
-    std::string pStr = toUpperString(producerName) + ":" + std::to_string(producerGeometryId);
-
-    auto rec = mProducerConcatMap.find(pStr);
-    if (rec == mProducerConcatMap.end()  ||  rec->second.empty())
-      return true;
-
-    for (auto gg = rec->second.begin(); gg != rec->second.end(); ++gg)
-    {
-      if (producerGeometryId != gg->second)
-        return false;
-    }
-    return true;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
-  }
-}
-
-
-
-
-
 /*! \brief Query Server: Get the parameter mappings of the parameter for the producer and the geometry (by the level of
            the query parameter if it is defined). An FMI-key parameter without mappings gets a mapping of its own. */
 
@@ -10859,19 +10798,19 @@ void ServiceImplementation::getGridValues(
         continue;
       }
 
-      bool producerOk = isAreaProducerAccepted(producers.size(),qParam,producerName,producerGeometryId);
-
       // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
+      // (A producer continued with another geometry is still used for an area: the other geometry
+      // is just not concatenated to it.)
 
       T::ProducerInfo producerInfo;
-      if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+      if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
       {
         if (getProducerGridValues(r,producerName,producerGeometryId,producerInfo))
           return;
       }
       else
       {
-        printInvalidProducer(producerName,producerOk);
+        PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
       }
     }
   }
@@ -11228,17 +11167,30 @@ void ServiceImplementation::fetchTimeRangeContentValues(TimeRangeValueRequest& r
     if (rec != mProducerConcatMap.end()  &&  !rec->second.empty())
     {
       //printf("CONCAT SEARCH %s  %s\n",producerStr.c_str(),rec->second[0].first.c_str());
+
+      // The grid points of an area must not change in the middle of the time series: an area is
+      // continued only from the concatenated producers of the same geometry.
+      bool area = (r.qParam.mLocationType == QueryParameter::LocationType::Polygon || r.qParam.mLocationType == QueryParameter::LocationType::Circle || r.qParam.mLocationType == QueryParameter::LocationType::Path);
+
+      Producer_vec concatProducers;
       std::set<T::GeometryId> tmpGeomIdList;
 
       for (auto& gg : rec->second)
       {
         //printf("  ** SEARCH %ld %d\n",rec->second.size(),gg->second);
+        if (area && gg.second != producer.second)
+          continue;
+
+        concatProducers.emplace_back(gg);
         tmpGeomIdList.insert(gg.second);
       }
 
       r.producerStr = "";
-      getGridValues(r.query,r.qParam,rec->second, tmpGeomIdList, 0, r.analysisTime, r.generationFlags, r.parameterKey, r.parameterHash,
-          r.queryFlags, a_lastTime+1,r.endTime,r.producerStr,r.valueCounter,r.recursionCounter+1);
+      if (!concatProducers.empty())
+      {
+        getGridValues(r.query,r.qParam,concatProducers, tmpGeomIdList, 0, r.analysisTime, r.generationFlags, r.parameterKey, r.parameterHash,
+            r.queryFlags, a_lastTime+1,r.endTime,r.producerStr,r.valueCounter,r.recursionCounter+1);
+      }
     }
   }
   catch (...)
@@ -11420,17 +11372,15 @@ void ServiceImplementation::getGridValues(
 
       // The current producer supports a geometry where the current query.mAreaCoordinates can be found.
 
-      bool producerOk = isAreaProducerAccepted(producers.size(),qParam,producerName,producerGeometryId);
-
       T::ProducerInfo producerInfo;
-      if (producerOk &&  getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
+      if (getProducerInfoByName(producerName, producerInfo) && (producerId == 0 || producerInfo.mProducerId == producerId))
       {
         if (getProducerTimeRangeValues(r,*it,producerInfo))
           return;
       }
       else
       {
-        printInvalidProducer(producerName,producerOk);
+        PRINT_DATA(mDebugLog, "  - Not a valid producer '%s'!\n", producerName.c_str());
       }
     }
   }
