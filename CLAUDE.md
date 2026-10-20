@@ -58,7 +58,7 @@ The `Implementation` enum at `src/contentServer/definition/ServiceInterface.h:34
 
 **ContentServer** (`src/contentServer/`) — Metadata registry. Tracks producers, generations, geometries, files, and content records. ~100+ service methods. Has the most backend implementations:
 - `cache/` — In-memory with event-driven sync from a master source (typically Redis)
-- `redis/` — Persistent storage via hiredis, supports primary/secondary instances
+- `redis/` — Persistent storage via hiredis, supports primary/secondary instances; an address starting with `/` is a Unix socket path
 - `postgresql/` — Database backend via libpq
 - `memory/` — In-memory, optionally loaded from and saved to CSV files; events optional
 - `merge/` — Combines multiple service implementations
