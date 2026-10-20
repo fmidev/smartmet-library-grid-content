@@ -142,6 +142,39 @@ bool addContentFromReply(redisReply *reply,uint fieldIndex,Accept accept,T::File
 
 
 
+/*! \brief An address starting with '/' is the path of a Unix domain socket, in which case the port is not used. */
+
+bool isUnixSocket(const std::string& address)
+{
+  return !address.empty() && address[0] == '/';
+}
+
+
+
+/*! \brief Connect to a Redis server by a Unix domain socket path or by a host and port. */
+
+redisContext *connectTo(const std::string& address,int port,const struct timeval& timeout)
+{
+  if (isUnixSocket(address))
+    return redisConnectUnixWithTimeout(address.c_str(),timeout);
+
+  return redisConnectWithTimeout(address.c_str(),port,timeout);
+}
+
+
+
+/*! \brief The Unix domain socket path, or host:port, for messages. */
+
+std::string endpointName(const std::string& address,int port)
+{
+  if (isUnixSocket(address))
+    return address;
+
+  return address + ":" + std::to_string(port);
+}
+
+
+
 /*! \brief Map the parameter key of the given key type to an FMI parameter id (0 if not found). Returns false for an unknown key type. */
 
 bool getFmiParameterIdByKeyType(T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::FmiParamId& fmiId)
@@ -685,38 +718,40 @@ int RedisImplementation::connectRedis(redisContext*& context)
   {
     struct timeval timeout = { 3, 0 }; // 3 seconds
 
-    context = redisConnectWithTimeout(mRedisAddress.c_str(), mRedisPort, timeout);
+    const std::string primary = endpointName(mRedisAddress,mRedisPort);
+    context = connectTo(mRedisAddress, mRedisPort, timeout);
     if (context != nullptr && !context->err)
     {
-      mSourceInfo = "Redis:" + mRedisAddress + ":" + std::to_string(mRedisPort);
+      mSourceInfo = "Redis:" + primary;
       return Result::OK;
     }
 
     if (context)
     {
-      printf("Redis primary connection error (%s:%d): %s\n",mRedisAddress.c_str(), mRedisPort,context->errstr);
+      printf("Redis primary connection error (%s): %s\n",primary.c_str(),context->errstr);
       redisFree(context);
       context = nullptr;
     }
 
-    if (mRedisSecondaryPort <= 0)
+    if (mRedisSecondaryPort <= 0 && !isUnixSocket(mRedisSecondaryAddress))
       return Result::OK;
 
-    context = redisConnectWithTimeout(mRedisSecondaryAddress.c_str(), mRedisSecondaryPort, timeout);
+    const std::string secondary = endpointName(mRedisSecondaryAddress,mRedisSecondaryPort);
+    context = connectTo(mRedisSecondaryAddress, mRedisSecondaryPort, timeout);
     if (context == nullptr || context->err)
     {
       if (context)
       {
-        printf("Redis secondary connection error (%s:%d): %s\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort,context->errstr);
+        printf("Redis secondary connection error (%s): %s\n",secondary.c_str(),context->errstr);
         redisFree(context);
         context = nullptr;
         return Result::PERMANENT_STORAGE_ERROR;
       }
-      printf("Redis secondary connection error (%s:%d): can't allocate redis context\n",mRedisSecondaryAddress.c_str(), mRedisSecondaryPort);
+      printf("Redis secondary connection error (%s): can't allocate redis context\n",secondary.c_str());
       return Result::PERMANENT_STORAGE_ERROR;
     }
 
-    mSourceInfo = "Redis:" + mRedisSecondaryAddress + ":" + std::to_string(mRedisSecondaryPort);
+    mSourceInfo = "Redis:" + secondary;
     return Result::OK;
   }
   catch (...)

@@ -205,7 +205,7 @@ so that each common query shape is a binary search.
 
 | Class | Storage | Events | Typical use |
 |-------|---------|--------|-------------|
-| `RedisImplementation` | Redis sorted sets (below) | yes, stored in Redis | The master registry. Ingest tools write here; servers read from it. Supports a secondary instance. |
+| `RedisImplementation` | Redis sorted sets (below) | yes, stored in Redis | The master registry. Ingest tools write here; servers read from it. Supports a secondary instance. An address starting with `/` is a Unix socket path (the port is then ignored). |
 | `PostgresqlImplementation` | PostgreSQL tables | yes, stored in an `event` table | An alternative master. All SQL string literals are escaped with `PQescapeStringConn` (`sqlText()`). Keep it that way. |
 | `MemoryImplementation` | process memory, optionally loaded from and saved to CSV files in a directory | optional | Standalone and test setups, and small local content sources. |
 | `CacheImplementation` | process memory, loaded from a master, then kept in sync from its events | re-publishes events locally | Put in front of Redis or Postgres in every server. All reads are served from memory. |
