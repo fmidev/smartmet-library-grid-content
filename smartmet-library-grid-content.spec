@@ -4,7 +4,7 @@
 Summary: grid file handling library
 Name: %{SPECNAME}
 Version: 26.10.26
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,12 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-2.fmi
+- The forecast time lists of the content servers (getContentTimeListBy..., the data times and the
+  grid engine metadata) give for each parameter only the times of the forecast that a query
+  without a forecast type selects, so an ensemble no longer lists times its control forecast
+  does not have
+
 * Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-1.fmi
 - A query without a forecast type takes all its values from one forecast of the generation: the
   deterministic forecast, then the ensemble control forecast, then the smallest type and number.

@@ -9,6 +9,8 @@
 #include <macgyver/Hash.h>
 
 #include <algorithm>
+#include <map>
+#include <tuple>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -358,6 +360,62 @@ bool isLiveContent(const ContentInfo *info)
 {
   return info != nullptr  &&  (info->mFlags & ContentInfo::Flags::DeletedContent) == 0;
 }
+
+
+
+/*! \brief Collects the forecast times of the contents so that each parameter (of a generation, geometry and level
+           type) contributes only the times of the forecast that a query without a forecast type selects (see
+           isPreferredForecast). Otherwise the members of an ensemble would add times the control forecast does
+           not have, and the times would not match the values the queries return. */
+
+class SelectedForecastTimes
+{
+  public:
+    void add(const ContentInfo& info)
+    {
+      auto key = std::make_tuple(info.mGenerationId,info.mGeometryId,info.mFmiParameterId,info.mFmiParameterLevelId);
+      auto it = mForecasts.find(key);
+      if (it == mForecasts.end())
+      {
+        it = mForecasts.emplace(key,Forecast{info.mForecastType,info.mForecastNumber,{}}).first;
+      }
+      else
+      if (info.mForecastType != it->second.forecastType  ||  info.mForecastNumber != it->second.forecastNumber)
+      {
+        if (!isPreferredForecast(info.mForecastType,info.mForecastNumber,it->second.forecastType,it->second.forecastNumber))
+          return;
+
+        it->second.forecastType = info.mForecastType;
+        it->second.forecastNumber = info.mForecastNumber;
+        it->second.times.clear();
+      }
+      it->second.times.emplace(info.mForecastTimeUTC,info.getForecastTime());
+    }
+
+    void get(std::set<std::string>& forecastTimeList) const
+    {
+      for (const auto& item : mForecasts)
+        for (const auto& time : item.second.times)
+          forecastTimeList.insert(time.second);
+    }
+
+    void get(std::set<time_t>& forecastTimeList) const
+    {
+      for (const auto& item : mForecasts)
+        for (const auto& time : item.second.times)
+          forecastTimeList.insert(time.first);
+    }
+
+  private:
+    struct Forecast
+    {
+      T::ForecastType forecastType;
+      T::ForecastNumber forecastNumber;
+      std::map<time_t,const char*> times;  // The strings are owned by the string factory
+    };
+
+    std::map<std::tuple<T::GenerationId,T::GeometryId,T::FmiParamId,T::ParamLevelId>,Forecast> mForecasts;
+};
 
 
 
@@ -5554,6 +5612,8 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5563,12 +5623,14 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
       if (info->mGenerationId != generationId)
       {
         if (sorted && t > (uint)idx)
-          return;
+          break;
         continue;
       }
 
-      forecastTimeList.insert(info->getForecastTime());
+      selected.add(*info);
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5605,6 +5667,8 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5614,12 +5678,14 @@ void ContentInfoList::getForecastTimeListByGenerationId(T::ProducerId producerId
       if (info->mGenerationId != generationId)
       {
         if (sorted && t > (uint)idx)
-          return;
+          break;
         continue;
       }
 
-      forecastTimeList.insert(info->mForecastTimeUTC);
+      selected.add(*info);
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5731,6 +5797,8 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5740,15 +5808,17 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
       if (info->mGenerationId != generationId)
       {
         if (sorted && t > (uint)idx)
-          return;
+          break;
         continue;
       }
 
       if (info->mGeometryId == geometryId)
       {
-        forecastTimeList.insert(info->getForecastTime());
+        selected.add(*info);
       }
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5760,7 +5830,9 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
 
 
 
-/*! \brief Collect distinct forecast time strings for the given generation, geometry, and level id. */
+/*! \brief Collect distinct forecast time strings for the given generation, geometry, and level id. The times of each
+           parameter are those of the forecast selected when a query does not define the forecast type (see
+           isPreferredForecast), so that ensemble members do not add times the selected forecast does not have. */
 
 void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<std::string>& forecastTimeList)
 {
@@ -5784,6 +5856,8 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5793,7 +5867,7 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
       if (info->mGenerationId != generationId)
       {
         if (sorted && t > (uint)idx)
-          return;
+          break;
         continue;
       }
 
@@ -5801,10 +5875,12 @@ void ContentInfoList::getForecastTimeListByGenerationGeometryAndLevelId(T::Produ
       {
         if (info->mFmiParameterLevelId == levelId)
         {
-          forecastTimeList.insert(info->getForecastTime());
+          selected.add(*info);
         }
       }
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5840,6 +5916,8 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5849,15 +5927,17 @@ void ContentInfoList::getForecastTimeListByGenerationAndGeometry(T::ProducerId p
       if (info->mGenerationId != generationId)
       {
         if (sorted && t > (uint)idx)
-          return;
+          break;
         continue;
       }
 
       if (info->mGeometryId == geometryId)
       {
-        forecastTimeList.insert(info->mForecastTimeUTC);
+        selected.add(*info);
       }
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5892,6 +5972,8 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5901,16 +5983,18 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
         {
           if (info->mProducerId == producerId)
           {
-            forecastTimeList.insert(info->getForecastTime());
+            selected.add(*info);
           }
           else
           {
             if (sorted && t > (uint)idx)
-              return;
+              break;
           }
         }
       }
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {
@@ -5945,6 +6029,8 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
     if (sorted)
       idx = getClosestIndexNoLock(mComparisonMethod,searchInfo);
 
+    SelectedForecastTimes selected;
+
     for (uint t=(uint)idx; t<mLength; t++)
     {
       ContentInfo *info = mArray[t];
@@ -5954,16 +6040,18 @@ void ContentInfoList::getForecastTimeListByProducerId(T::ProducerId producerId,s
         {
           if (info->mProducerId == producerId)
           {
-            forecastTimeList.insert(info->mForecastTimeUTC);
+            selected.add(*info);
           }
           else
           {
             if (sorted && t > (uint)idx)
-              return;
+              break;
           }
         }
       }
     }
+
+    selected.get(forecastTimeList);
   }
   catch (...)
   {

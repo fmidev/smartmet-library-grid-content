@@ -385,7 +385,14 @@ For each parameter, the Query Server:
    queried at all.
 5. **picks the generation** (latest ready, or the one matching `mAnalysisTime` or the
    generation flags) and finds the content records for the needed times and levels.
-   It uses the Content Server with a local content cache for these lookups.
+   It uses the Content Server with a local content cache for these lookups. Without a
+   forecast type in the parameter, one forecast of the generation is selected for all
+   the times and levels: a deterministic forecast (type 0 or 1), then the ensemble
+   control forecast (4), then the smallest type and number (`T::isPreferredForecast()`
+   in `ContentInfo.h`). The forecast time lists of the Content Server
+   (`getContentTimeListBy…`, used for the data times and the metadata of the grid
+   engine) follow the same rule for each parameter, so an ensemble lists only the times
+   of its control forecast.
 6. **fetches values** from the Data Server. If the time or level falls between stored
    fields, it uses the `…ByTime…`, `…ByLevel…` and `…ByTimeLevel…` methods with
    the interpolation methods from the mapping. Height queries (`M` levels) go through

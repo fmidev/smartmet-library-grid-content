@@ -23,7 +23,6 @@
 #include <deque>
 #include <memory>
 #include <thread>
-#include <tuple>
 #include <unordered_set>
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_acos.h"
@@ -6160,26 +6159,6 @@ void ServiceImplementation::checkThreadCacheState()
 namespace
 {
 
-/*! \brief The preference order of the forecast types when the query does not define the type: a deterministic
-           forecast first, then the control forecast of an ensemble, and then the other types. GRIB2 forecasts
-           which are not part of an ensemble have no forecast type (0). */
-
-int forecastTypeRank(T::ForecastType forecastType)
-{
-  switch (forecastType)
-  {
-    case 0:  // No forecast type
-    case 1:  // Deterministic forecast
-      return 0;
-    case 4:  // Ensemble control forecast
-      return 1;
-    default:
-      return 2;
-  }
-}
-
-
-
 /*! \brief Select the forecast of the contents when the query does not define the forecast type, so that all the
            values are taken from the same forecast instead of the forecast sorted first at each time. Only the
            forecasts of the requested forecast number are accepted if the number is defined. */
@@ -6199,9 +6178,7 @@ void selectContentForecast(T::ContentInfoList& contentList,T::ForecastNumber req
     if (requestedNumber >= 0  &&  info->mForecastNumber != requestedNumber)
       continue;
 
-    if (forecastType < 0  ||
-        std::make_tuple(forecastTypeRank(info->mForecastType),info->mForecastType,info->mForecastNumber) <
-        std::make_tuple(forecastTypeRank(forecastType),forecastType,forecastNumber))
+    if (forecastType < 0  ||  T::isPreferredForecast(info->mForecastType,info->mForecastNumber,forecastType,forecastNumber))
     {
       forecastType = info->mForecastType;
       forecastNumber = info->mForecastNumber;
