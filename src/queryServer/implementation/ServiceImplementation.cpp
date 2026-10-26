@@ -23,6 +23,7 @@
 #include <deque>
 #include <memory>
 #include <thread>
+#include <tuple>
 #include <unordered_set>
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_acos.h"
@@ -6156,6 +6157,88 @@ void ServiceImplementation::checkThreadCacheState()
 
 
 
+namespace
+{
+
+/*! \brief The preference order of the forecast types when the query does not define the type: a deterministic
+           forecast first, then the control forecast of an ensemble, and then the other types. GRIB2 forecasts
+           which are not part of an ensemble have no forecast type (0). */
+
+int forecastTypeRank(T::ForecastType forecastType)
+{
+  switch (forecastType)
+  {
+    case 0:  // No forecast type
+    case 1:  // Deterministic forecast
+      return 0;
+    case 4:  // Ensemble control forecast
+      return 1;
+    default:
+      return 2;
+  }
+}
+
+
+
+/*! \brief Select the forecast of the contents when the query does not define the forecast type, so that all the
+           values are taken from the same forecast instead of the forecast sorted first at each time. Only the
+           forecasts of the requested forecast number are accepted if the number is defined. */
+
+void selectContentForecast(T::ContentInfoList& contentList,T::ForecastNumber requestedNumber,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber)
+{
+  forecastType = -1;
+  forecastNumber = -1;
+
+  uint len = contentList.getLength();
+  for (uint t = 0; t < len; t++)
+  {
+    T::ContentInfo *info = contentList.getContentInfoByIndex(t);
+    if (info == nullptr  ||  (info->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+      continue;
+
+    if (requestedNumber >= 0  &&  info->mForecastNumber != requestedNumber)
+      continue;
+
+    if (forecastType < 0  ||
+        std::make_tuple(forecastTypeRank(info->mForecastType),info->mForecastType,info->mForecastNumber) <
+        std::make_tuple(forecastTypeRank(forecastType),forecastType,forecastNumber))
+    {
+      forecastType = info->mForecastType;
+      forecastNumber = info->mForecastNumber;
+    }
+  }
+}
+
+
+
+/*! \brief Restore the forecast type and number of the query parameter when the selection of the forecast for a
+           generation ends. */
+
+class ForecastRestorer
+{
+  public:
+    explicit ForecastRestorer(QueryParameter& qParam)
+      : mQueryParameter(qParam), mForecastType(qParam.mForecastType), mForecastNumber(qParam.mForecastNumber) {}
+    ~ForecastRestorer()
+    {
+      mQueryParameter.mForecastType = mForecastType;
+      mQueryParameter.mForecastNumber = mForecastNumber;
+    }
+    ForecastRestorer(const ForecastRestorer&) = delete;
+    ForecastRestorer& operator=(const ForecastRestorer&) = delete;
+
+  private:
+    QueryParameter& mQueryParameter;
+    T::ForecastType mForecastType;
+    T::ForecastNumber mForecastNumber;
+};
+
+}  // namespace
+
+
+
+
+
 /*! \brief Query Server: Find the content cache entry of the hash or of the level independent hash3 (then the hash is set to hash3), or return a new entry. */
 
 ContentCacheEntry_sptr ServiceImplementation::findContentCacheEntry(std::size_t& hash,std::size_t hash3,bool& newEntry)
@@ -6238,6 +6321,9 @@ void ServiceImplementation::updateContentCacheEntry(ContentCacheEntry& entry,boo
 
     entry.producerHash = producerHash;
     entry.generationId = generationId;
+
+    if (forecastType < 0)
+      selectContentForecast(entry.contentInfoList,forecastNumber,entry.forecastType,entry.forecastNumber);
 
     switch (parameterKeyType)
     {
@@ -6432,6 +6518,107 @@ void ServiceImplementation::storeContentCacheEntry(std::size_t hash,const Conten
 
 
 
+/*! \brief Query Server: Calculate the content cache hash of the parameter level (hash) and the level independent hash (hash3). */
+
+void ServiceImplementation::getContentCacheHashes(T::ProducerId producerId,T::GenerationId generationId,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t& hash3)
+{
+  try
+  {
+    hash = 0;
+    Fmi::hash_merge(hash,producerId);
+    Fmi::hash_merge(hash,generationId);
+//    Fmi::hash_merge(hash,parameterKeyType);
+    //Fmi::hash_merge(hash,parameterKey);
+    Fmi::hash_merge(hash,parameterKeyHash);
+    Fmi::hash_merge(hash,parameterLevelId);
+    Fmi::hash_merge(hash,forecastType);
+    Fmi::hash_merge(hash,forecastNumber);
+    Fmi::hash_merge(hash,geometryId);
+    hash3 = hash;
+    Fmi::hash_merge(hash,level);
+    Fmi::hash_merge(hash3,999999999);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Get the content cache entry of the parameter of the generation. The entry is fetched from the
+           content server if it is missing or old. */
+
+ContentCacheEntry_sptr ServiceImplementation::getContentCacheEntry(T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t hash,std::size_t hash3)
+{
+  try
+  {
+    bool newEntry = false;
+    ContentCacheEntry_sptr entry = findContentCacheEntry(hash,hash3,newEntry);
+
+    if (newEntry || entry->producerHash != producerHash)
+    {
+      // The content entry in the cache seems to be old or missing. That's why we should update this entry.
+      updateContentCacheEntry(*entry,newEntry,sessionId,producerHash,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,hash,hash3);
+    }
+
+    if (newEntry)
+      storeContentCacheEntry(hash,entry);
+
+    return entry;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Query Server: Select the forecast of the parameter in the generation when the query does not define the
+           forecast type: a deterministic forecast, then the control forecast of an ensemble, and then the smallest
+           forecast type and number. Otherwise the values of different times and levels could come from different
+           ensemble members. */
+
+void ServiceImplementation::selectForecast(const T::ProducerInfo& producerInfo,T::GeometryId producerGeometryId,T::GenerationId generationId,ParameterMapping& pInfo,T::ParamLevelId paramLevelId,T::ParamLevel paramLevel,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber)
+{
+  try
+  {
+    if (forecastType >= 0)
+      return;
+
+    T::ParamKeyType parameterKeyType = pInfo.mParameterKeyType;
+    if (parameterKeyType == T::ParamKeyTypeValue::FMI_NAME  &&  strncasecmp(pInfo.mParameterKey.c_str(),"FMI-",4) == 0)
+      parameterKeyType = T::ParamKeyTypeValue::FMI_ID;
+
+    checkThreadCacheState();
+
+    std::size_t hash = 0;
+    std::size_t hash3 = 0;
+    getContentCacheHashes(producerInfo.mProducerId,generationId,pInfo.getKeyHash(),paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,hash,hash3);
+
+    ContentCacheEntry_sptr entry = getContentCacheEntry(0,producerInfo.mHash,generationId,parameterKeyType,pInfo.mParameterKey,paramLevelId,paramLevel,forecastType,forecastNumber,producerGeometryId,hash,hash3);
+
+    if (entry->forecastType >= 0)
+    {
+      forecastType = entry->forecastType;
+      forecastNumber = entry->forecastNumber;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get content list by parameter generation id and forecast time. */
 
 int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(T::SessionId sessionId,T::ProducerId producerId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,std::shared_ptr<T::ContentInfoList>& contentInfoList)
@@ -6448,18 +6635,8 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     checkThreadCacheState();
 
     std::size_t hash = 0;
-    Fmi::hash_merge(hash,producerId);
-    Fmi::hash_merge(hash,generationId);
-//    Fmi::hash_merge(hash,parameterKeyType);
-    //Fmi::hash_merge(hash,parameterKey);
-    Fmi::hash_merge(hash,parameterKeyHash);
-    Fmi::hash_merge(hash,parameterLevelId);
-    Fmi::hash_merge(hash,forecastType);
-    Fmi::hash_merge(hash,forecastNumber);
-    Fmi::hash_merge(hash,geometryId);
-    std::size_t hash3 = hash;
-    Fmi::hash_merge(hash,level);
-    Fmi::hash_merge(hash3,999999999);
+    std::size_t hash3 = 0;
+    getContentCacheHashes(producerId,generationId,parameterKeyHash,parameterLevelId,level,forecastType,forecastNumber,geometryId,hash,hash3);
 
     std::size_t hash2 = hash;
     Fmi::hash_merge(hash2,forecastTime);
@@ -6491,16 +6668,15 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
 
     // ### Checking if we have already cached the required content information.
 
-    bool newEntry = false;
-    ContentCacheEntry_sptr entry = findContentCacheEntry(hash,hash3,newEntry);
+    ContentCacheEntry_sptr entry = getContentCacheEntry(sessionId,producerHash,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,hash,hash3);
 
+    // ### Without a forecast type all the times are searched from the same forecast.
 
-    if (newEntry || entry->producerHash != producerHash)
+    if (forecastType < 0  &&  entry->forecastType >= 0)
     {
-      // The content entry in the cache seems to be old or missing. That's why we should update this entry.
-      updateContentCacheEntry(*entry,newEntry,sessionId,producerHash,generationId,parameterKeyType,parameterKey,parameterLevelId,level,forecastType,forecastNumber,geometryId,hash,hash3);
+      forecastType = entry->forecastType;
+      forecastNumber = entry->forecastNumber;
     }
-
 
     // ### Now we should have the required content information ready for the search.
 
@@ -6510,9 +6686,6 @@ int ServiceImplementation::getContentListByParameterGenerationIdAndForecastTime(
     contentInfoList = cList;
 
     storeContentSearchResult(hash2,cList,producerHash,generationId);
-
-    if (newEntry)
-      storeContentCacheEntry(hash,entry);
 
     return Result::OK;
   }
@@ -10444,6 +10617,11 @@ bool ServiceImplementation::getMappingGridValues(GridValueRequest& r,const std::
     if (r.qParam.mParameterLevel > 0)
       pLevel = r.qParam.mParameterLevel;
 
+    // ### Without a forecast type all the values are taken from the same forecast of the generation
+
+    ForecastRestorer restorer(r.qParam);
+    selectForecast(producerInfo,producerGeometryId,generationInfo.mGenerationId,pInfo,pLevelId,pLevel,r.qParam.mForecastType,r.qParam.mForecastNumber);
+
 
     // ### QUERY TYPE : PointValues
 
@@ -11233,6 +11411,25 @@ bool ServiceImplementation::getMappingTimeRangeValues(TimeRangeValueRequest& r,c
 
     contentInfoList.sort(T::ContentInfo::ComparisonMethod::starttime_generationId_file_message);
     T::ContentInfo* cFirst = contentInfoList.getContentInfoByIndex(0);
+
+    // Without a forecast type the content times are the times of the forecast selected for the values
+
+    if (r.qParam.mForecastType < 0)
+    {
+      T::ForecastType forecastType = -1;
+      T::ForecastNumber forecastNumber = -1;
+      selectContentForecast(contentInfoList,r.qParam.mForecastNumber,forecastType,forecastNumber);
+
+      for (int c = 0; c < cLen; c++)
+      {
+        T::ContentInfo* cInfo = contentInfoList.getContentInfoByIndex(c);
+        if (cInfo != nullptr  &&  cInfo->mForecastType == forecastType  &&  cInfo->mForecastNumber == forecastNumber)
+        {
+          cFirst = cInfo;
+          break;
+        }
+      }
+    }
 
     // The latest generation is selected by the analysis time. Limiting the generations to the
     // one with the latest content time would reject it if an older generation extends further.

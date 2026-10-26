@@ -383,4 +383,91 @@ BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
       });
 }
 
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
+{
+  // An ensemble queried without a forecast type gives the control forecast, and all its values
+  // come from it: the control forecast has no 06 UTC step, which is not in its data times and is
+  // interpolated from it at a given time instead of taken from a perturbed member. (The perturbed
+  // members sort first, so the first content of each time used to be member 1.) The forecasts
+  // have constant values: the control forecast 4, the members their number
+  // (ensemble/make_ensemble.sh).
+  const std::vector<std::string> files = {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"};
+  for (const auto &file : files)
+    requireFixture(file);
+  withFmiErrors(
+      [&]
+      {
+        auto world = std::make_unique<GridWorld>();
+        world->addProducer(PRODUCER, "20080805T050000", files);
+        world->start();
+
+        auto run = [&](const std::string &param)
+        {
+          T::AttributeList attributes;
+          attributes.addAttribute("starttime", "20080805T050000");
+          attributes.addAttribute("endtime", "20080805T070000");
+          attributes.addAttribute("timestep", "data");
+          attributes.addAttribute("producer", PRODUCER);
+          attributes.addAttribute("param", param);
+
+          QueryServer::Query q;
+          QueryServer::QueryConfigurator configurator;
+          configurator.configure(q, attributes);
+          q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+          T::Coordinate_vec point;
+          point.emplace_back(LON1, LAT1);
+          q.mAreaCoordinates.push_back(point);
+          BOOST_TEST_REQUIRE(world->queryServer.executeQuery(0, q) == 0);
+
+          std::vector<double> values;
+          for (const auto &qp : q.mQueryParameterList)
+          {
+            if (qp.mParam != param)
+              continue;
+            for (const auto &v : qp.mValueList)
+            {
+              T::GridValue gv;
+              values.push_back(v->mValueList.getGridValueByIndex(0, gv) ? gv.mValue : ParamValueMissing);
+            }
+          }
+          return values;
+        };
+
+        auto point = [&](const std::string &param, const std::string &time)
+        {
+          T::ParamValue value = ParamValueMissing;
+          world->queryServer.getParameterValueByPointAndTime(0,
+                                                             PRODUCER,
+                                                             param,
+                                                             T::CoordinateTypeValue::LATLON_COORDINATES,
+                                                             LON1,
+                                                             LAT1,
+                                                             time,
+                                                             T::AreaInterpolationMethod::Linear,
+                                                             T::TimeInterpolationMethod::Linear,
+                                                             T::LevelInterpolationMethod::Linear,
+                                                             value);
+          return value;
+        };
+
+        const std::string param = "Temperature:" + PRODUCER;
+        const std::vector<double> control = {4, 4};
+        const std::vector<double> member1 = {1, 1, 1};
+        const std::vector<double> member2 = {2, 2, 2};
+
+        BOOST_TEST(run(param) == control, boost::test_tools::per_element());
+        for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
+          BOOST_TEST(point(param, time) == 4.0, time);
+
+        // An explicit forecast is used as such
+        BOOST_TEST(run(param + "::::4") == control, boost::test_tools::per_element());
+        BOOST_TEST(run(param + "::::3:2") == member2, boost::test_tools::per_element());
+        BOOST_TEST(point(param + "::::3:2", "20080805T060000") == 2.0);
+
+        // A perturbed forecast without a number is the first member
+        BOOST_TEST(run(param + "::::3") == member1, boost::test_tools::per_element());
+      });
+}
+
 BOOST_AUTO_TEST_SUITE_END()

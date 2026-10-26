@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.20
+Version: 26.10.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -112,6 +112,11 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-1.fmi
+- A query without a forecast type takes all its values from one forecast of the generation: the
+  deterministic forecast, then the ensemble control forecast, then the smallest type and number.
+  Previously each time step took the forecast sorted first, i.e. ensemble member 1 of MEPS
+
 * Tue Oct 20 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.10.20-1.fmi
 - Use UNIX socket with Valkey/Redis databse for tests
 

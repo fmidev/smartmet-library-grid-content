@@ -61,6 +61,8 @@ class ContentCacheEntry
     T::ContentInfoList contentInfoList;  //!< Cached content records matching the query.
     UInt64 producerHash = 0;                 //!< Producer state hash when this entry was built.
     T::GenerationId generationId = 0;        //!< Generation identifier for which the content was cached.
+    T::ForecastType forecastType = -1;       //!< Forecast type selected when the query does not define it (-1 = none).
+    T::ForecastNumber forecastNumber = -1;   //!< Forecast number selected when the query does not define the type.
 };
 
 using ContentCacheEntry_sptr = std::shared_ptr<ContentCacheEntry>;                            //!< Shared pointer to a ContentCacheEntry.
@@ -557,6 +559,9 @@ class ServiceImplementation : public ServiceInterface
      void           addSpecialValue(const double_vec& valueVector,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
      void           addInterpolatedSpecialValue(const double_vec& valueVector1,const double_vec& valueVector2,const T::ContentInfo& contentInfo1,const T::ContentInfo& contentInfo2,time_t fTime,short timeInterpolationMethod,double x,double y,bool conversionByFunction,const std::string& function,const std::vector<std::string>& functionParams,time_t forecastTime,ParameterValues& valueList);
      ContentCacheEntry_sptr findContentCacheEntry(std::size_t& hash,std::size_t hash3,bool& newEntry);
+     void           getContentCacheHashes(T::ProducerId producerId,T::GenerationId generationId,std::size_t parameterKeyHash,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t& hash3);
+     ContentCacheEntry_sptr getContentCacheEntry(T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t hash,std::size_t hash3);
+     void           selectForecast(const T::ProducerInfo& producerInfo,T::GeometryId producerGeometryId,T::GenerationId generationId,ParameterMapping& pInfo,T::ParamLevelId paramLevelId,T::ParamLevel paramLevel,T::ForecastType& forecastType,T::ForecastNumber& forecastNumber);
      void           updateContentCacheEntry(ContentCacheEntry& entry,bool newEntry,T::SessionId sessionId,UInt64 producerHash,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,std::size_t& hash,std::size_t hash3);
      void           searchContentList(T::ContentInfoList& contentList,T::ProducerId producerId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,const std::string& parameterKey,uint fmiId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTime,T::ContentInfoList& cList);
      void           storeContentSearchResult(std::size_t hash2,const std::shared_ptr<T::ContentInfoList>& cList,UInt64 producerHash,T::GenerationId generationId);
