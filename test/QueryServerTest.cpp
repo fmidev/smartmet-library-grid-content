@@ -96,6 +96,68 @@ bool close(double a, double b, double tol = 1e-3)
   return std::fabs(a - b) <= tol * std::max(1.0, std::fabs(b));
 }
 
+// The values of a timestep=data query of the parameter at the first point from 05 to 07 UTC
+std::vector<double> dataTimeValues(GridWorld &world, const std::string &param)
+{
+  T::AttributeList attributes;
+  attributes.addAttribute("starttime", "20080805T050000");
+  attributes.addAttribute("endtime", "20080805T070000");
+  attributes.addAttribute("timestep", "data");
+  attributes.addAttribute("producer", PRODUCER);
+  attributes.addAttribute("param", param);
+
+  QueryServer::Query q;
+  QueryServer::QueryConfigurator configurator;
+  configurator.configure(q, attributes);
+  q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+  T::Coordinate_vec point;
+  point.emplace_back(LON1, LAT1);
+  q.mAreaCoordinates.push_back(point);
+  BOOST_TEST_REQUIRE(world.queryServer.executeQuery(0, q) == 0);
+
+  std::vector<double> values;
+  for (const auto &qp : q.mQueryParameterList)
+  {
+    if (qp.mParam != param)
+      continue;
+    for (const auto &v : qp.mValueList)
+    {
+      T::GridValue gv;
+      values.push_back(v->mValueList.getGridValueByIndex(0, gv) ? gv.mValue : ParamValueMissing);
+    }
+  }
+  return values;
+}
+
+// The value of the parameter at the first point at the given time
+double pointValue(GridWorld &world, const std::string &param, const std::string &time)
+{
+  T::ParamValue value = ParamValueMissing;
+  world.queryServer.getParameterValueByPointAndTime(0,
+                                                    PRODUCER,
+                                                    param,
+                                                    T::CoordinateTypeValue::LATLON_COORDINATES,
+                                                    LON1,
+                                                    LAT1,
+                                                    time,
+                                                    T::AreaInterpolationMethod::Linear,
+                                                    T::TimeInterpolationMethod::Linear,
+                                                    T::LevelInterpolationMethod::Linear,
+                                                    value);
+  return value;
+}
+
+// A world of the ensemble fixtures (ensemble/make_ensemble.sh) as one generation
+std::unique_ptr<GridWorld> ensembleWorld(const std::vector<std::string> &files)
+{
+  for (const auto &file : files)
+    requireFixture(file);
+  auto world = std::make_unique<GridWorld>();
+  world->addProducer(PRODUCER, "20080805T050000", files);
+  world->start();
+  return world;
+}
+
 }  // namespace
 
 BOOST_AUTO_TEST_SUITE(query_server, *fixtures({CONFIG, PAL}))
@@ -392,81 +454,72 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
   // members sort first, so the first content of each time used to be member 1.) The forecasts
   // have constant values: the control forecast 4, the members their number
   // (ensemble/make_ensemble.sh).
-  const std::vector<std::string> files = {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"};
-  for (const auto &file : files)
-    requireFixture(file);
   withFmiErrors(
-      [&]
+      []
       {
-        auto world = std::make_unique<GridWorld>();
-        world->addProducer(PRODUCER, "20080805T050000", files);
-        world->start();
-
-        auto run = [&](const std::string &param)
-        {
-          T::AttributeList attributes;
-          attributes.addAttribute("starttime", "20080805T050000");
-          attributes.addAttribute("endtime", "20080805T070000");
-          attributes.addAttribute("timestep", "data");
-          attributes.addAttribute("producer", PRODUCER);
-          attributes.addAttribute("param", param);
-
-          QueryServer::Query q;
-          QueryServer::QueryConfigurator configurator;
-          configurator.configure(q, attributes);
-          q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
-          T::Coordinate_vec point;
-          point.emplace_back(LON1, LAT1);
-          q.mAreaCoordinates.push_back(point);
-          BOOST_TEST_REQUIRE(world->queryServer.executeQuery(0, q) == 0);
-
-          std::vector<double> values;
-          for (const auto &qp : q.mQueryParameterList)
-          {
-            if (qp.mParam != param)
-              continue;
-            for (const auto &v : qp.mValueList)
-            {
-              T::GridValue gv;
-              values.push_back(v->mValueList.getGridValueByIndex(0, gv) ? gv.mValue : ParamValueMissing);
-            }
-          }
-          return values;
-        };
-
-        auto point = [&](const std::string &param, const std::string &time)
-        {
-          T::ParamValue value = ParamValueMissing;
-          world->queryServer.getParameterValueByPointAndTime(0,
-                                                             PRODUCER,
-                                                             param,
-                                                             T::CoordinateTypeValue::LATLON_COORDINATES,
-                                                             LON1,
-                                                             LAT1,
-                                                             time,
-                                                             T::AreaInterpolationMethod::Linear,
-                                                             T::TimeInterpolationMethod::Linear,
-                                                             T::LevelInterpolationMethod::Linear,
-                                                             value);
-          return value;
-        };
+        auto world = ensembleWorld({"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"});
 
         const std::string param = "Temperature:" + PRODUCER;
         const std::vector<double> control = {4, 4};
         const std::vector<double> member1 = {1, 1, 1};
         const std::vector<double> member2 = {2, 2, 2};
 
-        BOOST_TEST(run(param) == control, boost::test_tools::per_element());
+        BOOST_TEST(dataTimeValues(*world, param) == control, boost::test_tools::per_element());
         for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
-          BOOST_TEST(point(param, time) == 4.0, time);
+          BOOST_TEST(pointValue(*world, param, time) == 4.0, time);
 
         // An explicit forecast is used as such
-        BOOST_TEST(run(param + "::::4") == control, boost::test_tools::per_element());
-        BOOST_TEST(run(param + "::::3:2") == member2, boost::test_tools::per_element());
-        BOOST_TEST(point(param + "::::3:2", "20080805T060000") == 2.0);
+        BOOST_TEST(dataTimeValues(*world, param + "::::4") == control, boost::test_tools::per_element());
+        BOOST_TEST(dataTimeValues(*world, param + "::::3:2") == member2, boost::test_tools::per_element());
+        BOOST_TEST(pointValue(*world, param + "::::3:2", "20080805T060000") == 2.0);
 
         // A perturbed forecast without a number is the first member
-        BOOST_TEST(run(param + "::::3") == member1, boost::test_tools::per_element());
+        BOOST_TEST(dataTimeValues(*world, param + "::::3") == member1, boost::test_tools::per_element());
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_deterministic_forecast)
+{
+  // A deterministic forecast (GRIB2 without an ensemble, forecast type 0) is preferred to the
+  // control forecast and the perturbed members of the same generation. Unlike the control
+  // forecast it has the 06 UTC step, so all three data times come from it.
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleWorld({"ensemble/member1.grib",
+                                    "ensemble/member2.grib",
+                                    "ensemble/control.grib",
+                                    "ensemble/deterministic.grib"});
+
+        const std::string param = "Temperature:" + PRODUCER;
+        const std::vector<double> deterministic = {9, 9, 9};
+
+        BOOST_TEST(dataTimeValues(*world, param) == deterministic, boost::test_tools::per_element());
+        for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
+          BOOST_TEST(pointValue(*world, param, time) == 9.0, time);
+
+        // The ensemble forecasts are still available explicitly
+        BOOST_TEST(dataTimeValues(*world, param + "::::4") == std::vector<double>({4, 4}),
+                   boost::test_tools::per_element());
+        BOOST_TEST(pointValue(*world, param + "::::3:2", "20080805T060000") == 2.0);
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_or_control_is_the_first_member)
+{
+  // Without a deterministic or a control forecast the smallest forecast type and number is
+  // selected, i.e. the first perturbed member, for every time
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleWorld({"ensemble/member2.grib", "ensemble/member1.grib"});
+
+        const std::string param = "Temperature:" + PRODUCER;
+        const std::vector<double> member1 = {1, 1, 1};
+
+        BOOST_TEST(dataTimeValues(*world, param) == member1, boost::test_tools::per_element());
+        for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
+          BOOST_TEST(pointValue(*world, param, time) == 1.0, time);
       });
 }
 
