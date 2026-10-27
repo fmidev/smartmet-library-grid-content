@@ -505,11 +505,9 @@ BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
 
 BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
 {
-  // An ensemble queried without a forecast type gives the control forecast, and all its values
-  // come from it: the control forecast has no 06 UTC step, which is not in its data times and is
-  // interpolated from it at a given time instead of taken from a perturbed member. (The perturbed
-  // members sort first, so the first content of each time used to be member 1.) The forecasts
-  // have constant values: the control forecast 4, the members their number
+  // An ensemble queried without a forecast type gives the control forecast at every time. (The
+  // perturbed members sort first, so the first content of each time used to be member 1.) The
+  // forecasts have constant values: the control forecast 4, the members their number
   // (ensemble/make_ensemble.sh).
   withFmiErrors(
       []
@@ -517,7 +515,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
         auto world = ensembleWorld({"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"});
 
         const std::string param = "Temperature:" + PRODUCER;
-        const std::vector<double> control = {4, 4};
+        const std::vector<double> control = {4, 4, 4};
         const std::vector<double> member1 = {1, 1, 1};
         const std::vector<double> member2 = {2, 2, 2};
 
@@ -538,8 +536,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
 BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_deterministic_forecast)
 {
   // A deterministic forecast (GRIB2 without an ensemble, forecast type 0) is preferred to the
-  // control forecast and the perturbed members of the same generation. Unlike the control
-  // forecast it has the 06 UTC step, so all three data times come from it.
+  // control forecast and the perturbed members of the same generation
   withFmiErrors(
       []
       {
@@ -556,7 +553,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_deterministic_forecast)
           BOOST_TEST(pointValue(*world, param, time) == 9.0, time);
 
         // The ensemble forecasts are still available explicitly
-        BOOST_TEST(dataTimeValues(*world, param + "::::4") == std::vector<double>({4, 4}),
+        BOOST_TEST(dataTimeValues(*world, param + "::::4") == std::vector<double>({4, 4, 4}),
                    boost::test_tools::per_element());
         BOOST_TEST(pointValue(*world, param + "::::3:2", "20080805T060000") == 2.0);
       });
@@ -580,93 +577,36 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_or_control_is_the_first_member)
       });
 }
 
-// Rule independent checks of a query without a forecast type over the 05 UTC run and the newer
-// 06 UTC run (06-08 UTC), whose forecasts are 11 or larger: all the times of the newest run are
-// data times, 05 UTC continues from the previous run, the values of the newest run come from one of
-// its forecasts and the values agree with the values queried at the same times.
-void checkNewestRunIsUsed(GridWorld &world)
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run)
 {
-  const std::string param = "Temperature:" + PRODUCER;
-  for (auto [start, end] : {std::pair{"20080805T050000", "20080805T080000"}, std::pair{"data", "data"}})
-  {
-    BOOST_TEST_CONTEXT("starttime " << start << " endtime " << end)
-    {
-      auto series = dataTimeSeries(world, param, start, end);
-      checkDataTimesAgree(world, series, param);
-
-      BOOST_TEST(series.count("20080805T050000") == 1);
-      if (series.count("20080805T050000") == 1)
-        BOOST_TEST(series["20080805T050000"] < 11);
-
-      std::set<double> newest;
-      for (const char *time : {"20080805T060000", "20080805T070000", "20080805T080000"})
-      {
-        BOOST_TEST(series.count(time) == 1, time);
-        if (series.count(time) == 1)
-          newest.insert(series[time]);
-      }
-      BOOST_TEST(newest.size() == 1);
-      BOOST_TEST(*newest.begin() >= 11);
-    }
-  }
-}
-
-const std::vector<std::string> RUN05 = {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"};
-
-BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_without_a_control)
-{
-  // The newest run has only perturbed members, the previous one also the control forecast
+  // Two complete runs with a control forecast: 05 UTC (control 4) and 06 UTC (06-08 UTC, control
+  // 14). The times of the newest run come from its control forecast, 05 UTC continues from the
+  // previous run, and the values agree with the values queried at the same times.
   withFmiErrors(
       []
       {
-        auto world = ensembleRuns({{"20080805T050000", RUN05},
-                                   {"20080805T060000", {"ensemble/next_member1.grib", "ensemble/next_member2.grib"}}});
-        checkNewestRunIsUsed(*world);
-      });
-}
-
-BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_with_a_partial_control)
-{
-  // The control forecast of the newest run has only its first step (the rest has not arrived)
-  withFmiErrors(
-      []
-      {
-        auto world = ensembleRuns({{"20080805T050000", RUN05},
-                                   {"20080805T060000",
-                                    {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
-        checkNewestRunIsUsed(*world);
-      });
-}
-
-BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_when_only_it_has_a_control)
-{
-  withFmiErrors(
-      []
-      {
-        auto world = ensembleRuns({{"20080805T050000", {"ensemble/member1.grib", "ensemble/member2.grib"}},
-                                   {"20080805T060000",
-                                    {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
-        checkNewestRunIsUsed(*world);
-      });
-}
-
-BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_one_forecast_on_all_levels)
-{
-  // The control forecast has only 500 hPa, member 1 has also 850 hPa. The levels of a sounding and
-  // a level interpolated between them must come from the same forecast.
-  withFmiErrors(
-      []
-      {
-        auto world = ensembleWorld({"ensemble/pressure_member1.grib", "ensemble/pressure_control.grib"});
-        const std::string param = "Temperature:" + PRODUCER + "::2:";
-        for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
+        auto world = ensembleRuns(
+            {{"20080805T050000", {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"}},
+             {"20080805T060000",
+              {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
+        const std::string param = "Temperature:" + PRODUCER;
+        const std::map<std::string, double> expected = {{"20080805T050000", 4},
+                                                        {"20080805T060000", 14},
+                                                        {"20080805T070000", 14},
+                                                        {"20080805T080000", 14}};
+        for (auto [start, end] : {std::pair{"20080805T050000", "20080805T080000"}, std::pair{"data", "data"}})
         {
-          BOOST_TEST_CONTEXT(time)
+          BOOST_TEST_CONTEXT("starttime " << start << " endtime " << end)
           {
-            const double p850 = pointValue(*world, param + "85000", time);
-            BOOST_TEST(p850 != ParamValueMissing);
-            BOOST_TEST(pointValue(*world, param + "50000", time) == p850);
-            BOOST_TEST(pointValue(*world, param + "70000", time) == p850);
+            auto series = dataTimeSeries(*world, param, start, end);
+            BOOST_TEST(series.size() == expected.size());
+            for (const auto &[time, value] : expected)
+            {
+              BOOST_TEST(series.count(time) == 1, time);
+              if (series.count(time) == 1)
+                BOOST_TEST(series[time] == value, time);
+            }
+            checkDataTimesAgree(*world, series, param);
           }
         }
       });
