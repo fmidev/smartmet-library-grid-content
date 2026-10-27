@@ -30,13 +30,15 @@ class ServerInterface : public POA_SmartMet::QueryServer::Corba::ServiceInterfac
 {
   public:
                   ServerInterface();
-    virtual       ~ServerInterface();
+    ~ServerInterface() override;
+    ServerInterface(const ServerInterface&) = default;
+    ServerInterface& operator=(const ServerInterface&) = default;
 
     void          init(QueryServer::ServiceInterface *service);
 
-    SmartMet::C::Result executeQuery(SmartMet::C::SessionId sessionId, SmartMet::C::Query& query);
-    SmartMet::C::Result getProducerList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out producerList);
-    SmartMet::C::Result getValuesByGridPoint(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfoList& contentInfoList, SmartMet::C::UInt8 coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 interpolationMethod, SmartMet::C::GridPointValueList_out valueList);
+    SmartMet::C::Result executeQuery(SmartMet::C::SessionId sessionId, SmartMet::C::Query& query) override;
+    SmartMet::C::Result getProducerList(SmartMet::C::SessionId sessionId, SmartMet::C::StringList_out producerList) override;
+    SmartMet::C::Result getValuesByGridPoint(SmartMet::C::SessionId sessionId, const SmartMet::C::ContentInfoList& contentInfoList, SmartMet::C::UInt8 coordinateType, SmartMet::C::Float64 x, SmartMet::C::Float64 y, SmartMet::C::Int16 interpolationMethod, SmartMet::C::GridPointValueList_out valueList) override;
 
   protected:
 

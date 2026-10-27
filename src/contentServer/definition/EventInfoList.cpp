@@ -335,7 +335,7 @@ void EventInfoList::clear()
 
 /*! \brief Return the number of events currently in the list. */
 
-uint EventInfoList::getLength()
+uint EventInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -354,7 +354,7 @@ uint EventInfoList::getLength()
 
 /*! \brief Return the maximum number of events the list will retain. */
 
-uint EventInfoList::getMaxLength()
+uint EventInfoList::getMaxLength() const
 {
   FUNCTION_TRACE
   try
@@ -531,7 +531,8 @@ void EventInfoList::writeToFile(const std::string& filename)
       it = it->nextItem;
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

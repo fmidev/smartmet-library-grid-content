@@ -30,7 +30,7 @@ AliasFileCollection::AliasFileCollection()
 
 /*! \brief Query Server: Constructor. */
 
-AliasFileCollection::AliasFileCollection(string_vec& filenames)
+AliasFileCollection::AliasFileCollection(const string_vec& filenames)
 {
   try
   {
@@ -89,19 +89,19 @@ void AliasFileCollection::init()
 {
   try
   {
-    if (mAliasFileList.size() > 0)
+    if (!mAliasFileList.empty())
       return; // Already initialized
 
     AutoWriteLock lock(&mModificationLock);
 
-    for (auto it = mFilenames.begin(); it != mFilenames.end(); ++it)
+    for (auto& mFilename : mFilenames)
     {
-      mAliasFileList.emplace_back(AliasFile(*it,mDuplicatesAllowed));
+      mAliasFileList.emplace_back(mFilename,mDuplicatesAllowed);
     }
 
-    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    for (auto& it : mAliasFileList)
     {
-      it->init();
+      it.init();
     }
   }
   catch (...)
@@ -165,9 +165,9 @@ bool AliasFileCollection::checkUpdates(bool force)
     time_t tt = time(nullptr);
     if (force ||  (tt-mLastCheck) > mCheckInterval)
     {
-      for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+      for (auto& it : mAliasFileList)
       {
-        if (it->checkUpdates())
+        if (it.checkUpdates())
           result = true;
       }
       mLastCheck = tt;
@@ -192,9 +192,9 @@ bool AliasFileCollection::getAlias(const std::string& name,std::string& alias)
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    for (auto& it : mAliasFileList)
     {
-      if (it->getAlias(name,alias))
+      if (it.getAlias(name,alias))
         return true;
     }
     return false;
@@ -217,9 +217,9 @@ void AliasFileCollection::getAliasList(const std::string& name,std::vector<std::
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    for (auto& it : mAliasFileList)
     {
-      it->getAliasList(name,aliasList);
+      it.getAliasList(name,aliasList);
     }
   }
   catch (...)
@@ -242,7 +242,7 @@ bool AliasFileCollection::replaceAlias(const std::string& name,std::string& alia
     if (p1 == std::string::npos)
       return false;
 
-    auto p2 = name.find(")",p1);
+    auto p2 = name.find(')',p1);
     if (p2 == std::string::npos)
       return false;
 
@@ -276,9 +276,9 @@ void AliasFileCollection::print(std::ostream& stream,uint level,uint optionFlags
     AutoReadLock lock(&mModificationLock);
 
     stream << space(level) << "AliasFileCollection\n";
-    for (auto it = mAliasFileList.begin(); it != mAliasFileList.end(); ++it)
+    for (auto& it : mAliasFileList)
     {
-      it->print(stream,level+1,optionFlags);
+      it.print(stream,level+1,optionFlags);
     }
   }
   catch (...)

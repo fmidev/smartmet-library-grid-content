@@ -19,12 +19,14 @@ namespace T
 
 /*! \brief Qsort comparator for GeometryInfo using comparison method 1. */
 
+namespace
+{
 int geometryInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -39,8 +41,8 @@ int geometryInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -55,8 +57,8 @@ int geometryInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(3,(*obj2));
   }
@@ -71,8 +73,8 @@ int geometryInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(4,(*obj2));
   }
@@ -88,13 +90,14 @@ int geometryInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GeometryInfoPtr *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
-    GeometryInfoPtr *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GeometryInfoPtr*>(reinterpret_cast<const GeometryInfoPtr *>(_val2));
 
     return (*obj1)->compare(5,(*obj2));
   }
   return 0;
 }
+}  // namespace
 
 
 
@@ -423,7 +426,7 @@ void GeometryInfoList::increaseSize(uint newSize)
       return;
     }
 
-    GeometryInfoPtr *newArray = new GeometryInfoPtr[newSize];
+    auto *newArray = new GeometryInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)
@@ -508,6 +511,46 @@ int GeometryInfoList::getClosestIndex(uint comparisonMethod,GeometryInfo& geomet
 
 
 
+namespace
+{
+
+/*! \brief Return the index of the first entry equal to the given one in an unsorted array, or 0 if there is none. */
+
+int getFirstEqualIndex(GeometryInfoPtr *array,uint length,uint comparisonMethod,GeometryInfo& geometryInfo)
+{
+  for (uint t=0; t<length; t++)
+  {
+    if (array[t] != nullptr  &&  array[t]->compare(comparisonMethod,&geometryInfo) == 0)
+      return t;
+  }
+  return 0;
+}
+
+
+
+/*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+int getClosestIndexAfterSearch(GeometryInfoPtr *array,uint length,uint comparisonMethod,GeometryInfo& geometryInfo,int mid)
+{
+  if (array[mid]->compare(comparisonMethod,&geometryInfo) < 0)
+  {
+    while (mid < C_INT(length)  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&geometryInfo) < 0)
+      mid++;
+
+    return mid-1;
+  }
+  while (mid > 0  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&geometryInfo) > 0)
+    mid--;
+
+  return mid;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Return the index of the entry closest to the given GeometryInfo without locking. */
 
 int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& geometryInfo)
@@ -519,20 +562,7 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
-    {
-      for (uint t=0; t<mLength; t++)
-      {
-        if (mArray[t] != nullptr)
-        {
-          int res = mArray[t]->compare(comparisonMethod,&geometryInfo);
-          if (res == 0)
-          {
-            return t;
-          }
-        }
-      }
-      return 0;
-    }
+      return getFirstEqualIndex(mArray,mLength,comparisonMethod,geometryInfo);
 
     int low = 0;
     int high = C_INT(mLength) - 1;
@@ -558,22 +588,8 @@ int GeometryInfoList::getClosestIndexNoLock(uint comparisonMethod,GeometryInfo& 
     }
 
     if (mid >= 0  &&  mid < C_INT(mLength))
-    {
-      if (mArray[mid]->compare(comparisonMethod,&geometryInfo) < 0)
-      {
-        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) < 0)
-          mid++;
+      return getClosestIndexAfterSearch(mArray,mLength,comparisonMethod,geometryInfo,mid);
 
-        return mid-1;
-      }
-      else
-      {
-        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&geometryInfo) > 0)
-          mid--;
-
-        return mid;
-      }
-    }
     return 0;
   }
   catch (...)
@@ -1626,7 +1642,7 @@ void GeometryInfoList::getGeometryInfoListBySourceId(T::SourceId sourceId,Geomet
 
 /*! \brief Return the number of entries in the list. */
 
-uint GeometryInfoList::getLength()
+uint GeometryInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -1664,7 +1680,7 @@ uint GeometryInfoList::getSize() const
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool GeometryInfoList::getReleaseObjects()
+bool GeometryInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try
@@ -1774,6 +1790,8 @@ void GeometryInfoList::sort(uint comparisonMethod)
       case 5:
         qsort(mArray,mLength,sizeof(GeometryInfoPtr),geometryInfo_compare_5);
         break;
+      default:
+        break;
     }
   }
   catch (...)
@@ -1809,7 +1827,8 @@ void GeometryInfoList::writeToFile(const std::string& filename)
       if (info != nullptr && (info->mFlags & T::GeometryInfo::Flags::DeletedGeometry) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

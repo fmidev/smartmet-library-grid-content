@@ -74,8 +74,7 @@ float Function_not::executeFunctionCall1(std::vector<float>& parameters)
       {
         if (parameters[0] == 0)
           return 1.0;
-        else
-          return 0;
+        return 0;
       }
       else
         return ParamValueMissing;
@@ -105,8 +104,7 @@ double Function_not::executeFunctionCall1(std::vector<double>& parameters)
       {
         if (parameters[0] == 0)
           return 1.0;
-        else
-          return 0;
+        return 0;
       }
       else
         return ParamValueMissing;
@@ -128,7 +126,7 @@ double Function_not::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -168,7 +166,7 @@ void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 /*! \brief Function: Execute function call9. */
 
-void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_not::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {

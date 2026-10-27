@@ -62,7 +62,7 @@ Alias::~Alias()
 
 /*! \brief Query Server: Print. */
 
-void Alias::print(std::ostream& stream,uint level,uint optionFlags)
+void Alias::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

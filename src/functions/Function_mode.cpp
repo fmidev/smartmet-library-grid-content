@@ -1,5 +1,6 @@
 #include "Function_mode.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <cmath>
 
 
 namespace SmartMet
@@ -83,7 +84,7 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        Int64  key = (Int64 )(val*mul + 0.5);
+        auto  key = (Int64)std::llround(val*mul);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
@@ -92,18 +93,18 @@ float Function_mode::executeFunctionCall1(std::vector<float>& parameters)
       }
     }
 
-    if (valueCount.size() == 0)
+    if (valueCount.empty())
       return ParamValueMissing;
 
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+    for (auto& it : valueCount)
     {
-      if (it->second > maxVal)
+      if (it.second > maxVal)
       {
-        maxVal = it->second;
-        maxKey = it->first;
+        maxVal = it.second;
+        maxKey = it.first;
       }
     }
 
@@ -140,7 +141,7 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       double val = parameters[s];
       if (val != ParamValueMissing)
       {
-        Int64  key = (Int64 )(val*mul + 0.5);
+        auto  key = (Int64)std::llround(val*mul);
         auto it = valueCount.find(key);
         if (it != valueCount.end())
           it->second++;
@@ -149,18 +150,18 @@ double Function_mode::executeFunctionCall1(std::vector<double>& parameters)
       }
     }
 
-    if (valueCount.size() == 0)
+    if (valueCount.empty())
       return ParamValueMissing;
 
     int maxVal = 0;
     Int64  maxKey = 0;
 
-    for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+    for (auto& it : valueCount)
     {
-      if (it->second > maxVal)
+      if (it.second > maxVal)
       {
-        maxVal = it->second;
-        maxKey = it->first;
+        maxVal = it.second;
+        maxKey = it.first;
       }
     }
 
@@ -203,7 +204,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          Int64  key = (Int64 )(val*mul + 0.5);
+          auto  key = (Int64)std::llround(val*mul);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;
@@ -212,7 +213,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         }
       }
 
-      if (valueCount.size() == 0)
+      if (valueCount.empty())
       {
         outParameters.emplace_back(ParamValueMissing);
       }
@@ -221,12 +222,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+        for (auto& it : valueCount)
         {
-          if (it->second > maxVal)
+          if (it.second > maxVal)
           {
-            maxVal = it->second;
-            maxKey = it->first;
+            maxVal = it.second;
+            maxKey = it.first;
           }
         }
 
@@ -272,7 +273,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         {
           val = inParameters[t][s];
 
-          Int64  key = (Int64 )(val*mul + 0.5);
+          auto  key = (Int64)std::llround(val*mul);
           auto it = valueCount.find(key);
           if (it != valueCount.end())
             it->second++;
@@ -281,7 +282,7 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         }
       }
 
-      if (valueCount.size() == 0)
+      if (valueCount.empty())
       {
         outParameters.emplace_back(ParamValueMissing);
       }
@@ -290,12 +291,12 @@ void Function_mode::executeFunctionCall9(uint columns,uint rows,std::vector<std:
         int maxVal = 0;
         Int64  maxKey = 0;
 
-        for (auto it = valueCount.begin();it != valueCount.end(); ++it)
+        for (auto& it : valueCount)
         {
-          if (it->second > maxVal)
+          if (it.second > maxVal)
           {
-            maxVal = it->second;
-            maxKey = it->first;
+            maxVal = it.second;
+            maxKey = it.first;
           }
         }
 

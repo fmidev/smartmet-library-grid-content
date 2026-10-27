@@ -24,7 +24,7 @@ class ValueRecordList
   public:
                       ValueRecordList();
                       ValueRecordList(ValueRecordList& valueRecordList);
-                      ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y);
+                      ValueRecordList(const ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y);
      virtual          ~ValueRecordList();
 
      ValueRecordList& operator=(ValueRecordList& valueRecordList);

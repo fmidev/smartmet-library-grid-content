@@ -31,9 +31,9 @@ Function_sequence::Function_sequence(const Function_sequence& function)
 {
   try
   {
-    for (auto it = function.mFunctionList.begin(); it != function.mFunctionList.end(); ++it)
+    for (auto *it : function.mFunctionList)
     {
-      mFunctionList.emplace_back((*it)->duplicate());
+      mFunctionList.emplace_back(it->duplicate());
     }
   }
   catch (...)
@@ -51,9 +51,9 @@ Function_sequence::~Function_sequence()
 {
   try
   {
-    for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
+    for (auto& it : mFunctionList)
     {
-      delete *it;
+      delete it;
     }
   }
   catch (...)
@@ -96,12 +96,12 @@ float Function_sequence::executeFunctionCall1(std::vector<float>& parameters)
 
     float val = parameters[0];
 
-    for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
+    for (auto& it : mFunctionList)
     {
       std::vector<float> params;
       params.emplace_back(val);
 
-      val = (*it)->executeFunctionCall1(params);
+      val = it->executeFunctionCall1(params);
     }
     return val;
   }
@@ -126,12 +126,12 @@ double Function_sequence::executeFunctionCall1(std::vector<double>& parameters)
 
     double val = parameters[0];
 
-    for (auto it = mFunctionList.begin(); it != mFunctionList.end(); ++it)
+    for (auto& it : mFunctionList)
     {
       std::vector<double> params;
       params.emplace_back(val);
 
-      val = (*it)->executeFunctionCall1(params);
+      val = it->executeFunctionCall1(params);
     }
     return val;
   }

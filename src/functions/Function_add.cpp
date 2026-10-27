@@ -90,8 +90,7 @@ float Function_add::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return parameters[0] + mValueToAdd;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -116,8 +115,7 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return parameters[0] + mValueToAdd;
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -134,7 +132,7 @@ double Function_add::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_add::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
 {
   try
   {
@@ -142,10 +140,10 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       return;
 
     double b = mValueToAdd;
-    if (extParameters.size() > 0)
+    if (!extParameters.empty())
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (double extParameter : extParameters)
+        b = b + extParameter;
     }
     uint len = inParameters[0].size();
     outParameters.reserve(len);
@@ -155,7 +153,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a + b);
+        auto c = (a + b);
         outParameters.emplace_back(c);
       }
       else
@@ -176,7 +174,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
 /*! \brief Function: Execute function call9. */
 
-void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_add::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
 {
   try
   {
@@ -184,10 +182,10 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
       return;
 
     double b = mValueToAdd;
-    if (extParameters.size() > 0)
+    if (!extParameters.empty())
     {
-      for (auto it=extParameters.begin(); it != extParameters.end();++it)
-        b = b + *it;
+      for (double extParameter : extParameters)
+        b = b + extParameter;
     }
     uint len = inParameters[0].size();
     outParameters.reserve(len);
@@ -197,7 +195,7 @@ void Function_add::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (a != ParamValueMissing)
       {
-        double c = (double)(a + b);
+        auto c = (a + b);
         outParameters.emplace_back(c);
       }
       else

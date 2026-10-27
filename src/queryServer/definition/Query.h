@@ -25,6 +25,8 @@ class Query
                         Query();
                         //Query(const Query& query);
     virtual             ~Query();
+    Query(const Query&) = default;
+    Query& operator=(const Query&) = default;
 
     bool                parameterInQuery(const std::string& param);
     QueryParameter*     getQueryParameterPtr(const std::string& param);
@@ -102,7 +104,7 @@ class Query
 };
 
 
-typedef std::vector<Query> Query_vec;  //!< Ordered list of Query objects.
+using Query_vec = std::vector<Query>;  //!< Ordered list of Query objects.
 
 
 }  // namespace QueryServer

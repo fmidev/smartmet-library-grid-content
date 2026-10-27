@@ -21,9 +21,11 @@ class AliasFileCollection
 {
   public:
                   AliasFileCollection();
-                  AliasFileCollection(string_vec& filenames);
+                  AliasFileCollection(const string_vec& filenames);
                   //AliasFileCollection(const AliasFileCollection& aliasFileCollection);
     virtual       ~AliasFileCollection();
+    AliasFileCollection(const AliasFileCollection&) = default;
+    AliasFileCollection& operator=(const AliasFileCollection&) = default;
 
     virtual void  init();
     virtual void  init(string_vec& filenames);
@@ -39,8 +41,8 @@ class AliasFileCollection
     AliasFile_vec     mAliasFileList;      //!< Loaded AliasFile instances, one per filename.
     string_vec        mFilenames;          //!< Paths of the alias files managed by this collection.
     ModificationLock  mModificationLock;   //!< Lock protecting the file list during updates.
-    time_t            mLastCheck;          //!< Timestamp of the last modification-check pass.
-    uint              mCheckInterval;      //!< Minimum seconds between successive modification checks.
+    time_t            mLastCheck = 0;          //!< Timestamp of the last modification-check pass.
+    uint              mCheckInterval = 0;      //!< Minimum seconds between successive modification checks.
     bool              mDuplicatesAllowed;  //!< Propagated to each AliasFile at construction time.
 };
 

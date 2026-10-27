@@ -612,7 +612,7 @@ uint RequestMessage::getLinesByKey(const char *key,std::vector<std::string>& val
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        values.emplace_back(std::string(s+len+1));
+        values.emplace_back(s+len+1);
       }
     }
 
@@ -649,7 +649,7 @@ void RequestMessage::deleteLineByIndex(uint index)
 
 /*! \brief Content Server: Print. */
 
-void RequestMessage::print(std::ostream& stream,uint level,uint optionFlags)
+void RequestMessage::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

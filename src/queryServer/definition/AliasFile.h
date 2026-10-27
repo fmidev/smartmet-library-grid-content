@@ -27,6 +27,8 @@ class AliasFile
                   AliasFile(const std::string& filename,bool duplicatesAllowed);
                   //AliasFile(const AliasFile& aliasFile);
     virtual       ~AliasFile();
+    AliasFile(const AliasFile&) = default;
+    AliasFile& operator=(const AliasFile&) = default;
 
     virtual void  init();
     virtual void  init(const std::string& filename);
@@ -40,6 +42,7 @@ class AliasFile
   protected:
 
     virtual void  loadFile();
+    void          addAliasLine(char *st,uint lineCount);
 
     std::string       mFilename;          //!< Path to the alias definition file on disk.
     time_t            mLastModified;      //!< File mtime at last load, used for change detection.
@@ -51,7 +54,7 @@ class AliasFile
 
 
 
-typedef std::vector<AliasFile> AliasFile_vec;  //!< Ordered collection of AliasFile objects.
+using AliasFile_vec = std::vector<AliasFile>;  //!< Ordered collection of AliasFile objects.
 
 
 }  // namespace QueryServer

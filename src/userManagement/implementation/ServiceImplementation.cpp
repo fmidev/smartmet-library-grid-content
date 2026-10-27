@@ -18,6 +18,90 @@ ServiceImplementation localUserManagement;
 
 
 
+namespace
+{
+
+/*! \brief Split the line into ';'-separated fields (separators within quotes are ignored). Returns the number of fields. */
+
+uint splitFields(char *st,char **field)
+{
+  bool ind = false;
+  uint c = 1;
+  field[0] = st;
+  char *p = st;
+  while (*p != '\0'  &&  c < 100)
+  {
+    if (*p == '"')
+      ind = !ind;
+
+    if ((*p == ';'  || *p == '\n') && !ind)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Add the comma separated groups and the permissions of the known groups to the user. */
+
+void addUserGroups(UserInfo& user,const char *groupList,const GroupPermissionList& groups)
+{
+  std::vector<std::string> list;
+  splitString(groupList,',',list);
+  for (auto& it : list)
+  {
+    user.addUserGroup(it.c_str());
+
+    auto group = groups.find(it);
+    if (group != groups.end())
+    {
+      for (const auto& p : group->second)
+        user.addPermission(p.c_str());
+    }
+  }
+}
+
+
+
+
+/*! \brief Return a new user of the fields of a users file line with c (more than 3) fields. */
+
+UserInfo *newUserInfo(char **field,uint c,const GroupPermissionList& groups)
+{
+  auto *user = new UserInfo();
+
+  if (field[0][0] != '\0')
+    user->setUserId(toInt32(field[0]));
+
+  if (field[1][0] != '\0')
+    user->setUsername(field[1]);
+
+  if (field[2][0] != '\0')
+    user->setPassword(field[2]);
+
+  if (field[3][0] != '\0')
+    user->setFullName(field[3]);
+
+  if (c > 4 && field[4][0] != '\0')
+    addUserGroups(*user,field[4],groups);
+
+  return user;
+}
+
+}  // namespace
+
+
+
+
 /*! \brief Constructor. */
 
 ServiceImplementation::ServiceImplementation()
@@ -40,9 +124,7 @@ ServiceImplementation::ServiceImplementation()
 
 /*! \brief Destructor. */
 
-ServiceImplementation::~ServiceImplementation()
-{
-}
+ServiceImplementation::~ServiceImplementation() = default;
 
 
 
@@ -130,28 +212,8 @@ void ServiceImplementation::updateGroups()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char *field[100];
-        uint c = 1;
-        field[0] = st;
-        char *p = st;
-        while (*p != '\0'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';'  || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
 
         if (c > 1)
         {
@@ -169,7 +231,7 @@ void ServiceImplementation::updateGroups()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
   }
   catch (...)
   {
@@ -215,70 +277,19 @@ void ServiceImplementation::updateUsers()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char *field[100];
-        uint c = 1;
-        field[0] = st;
-        char *p = st;
-        while (*p != '\0'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';'  || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitFields(st,field);
 
         if (c > 3)
         {
-          UserInfo *user = new UserInfo();
-
-          if (field[0][0] != '\0')
-            user->setUserId(atoi(field[0]));
-
-          if (field[1][0] != '\0')
-            user->setUsername(field[1]);
-
-          if (field[2][0] != '\0')
-            user->setPassword(field[2]);
-
-          if (field[3][0] != '\0')
-            user->setFullName(field[3]);
-
-          if (field[4][0] != '\0')
-          {
-            std::vector<std::string> list;
-            splitString(field[4],',',list);
-            for (auto it=list.begin(); it!=list.end();++it)
-            {
-              user->addUserGroup(it->c_str());
-
-              auto group = mGroups.find(*it);
-              if (group != mGroups.end())
-              {
-                for (auto p=group->second.begin(); p!=group->second.end();++p)
-                  user->addPermission(p->c_str());
-              }
-            }
-          }
-
-          UserInfo_sptr u(user);
+          UserInfo_sptr u(newUserInfo(field,c,mGroups));
           AutoWriteLock writeLock(&mModificationLock);
           mUsers.insert(std::pair<uint,UserInfo_sptr>(u->getUserId(),u));
           mUsernameToUserId.insert(std::pair<std::string,uint>(u->getUsername(),u->getUserId()));
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
   }
   catch (...)
   {
@@ -302,12 +313,12 @@ void ServiceImplementation::shutdown()
 
 /*! \brief Protected hook: add user. */
 
-int ServiceImplementation::_addUser(T::SessionId sessionId,UserInfo& userInfo)
+int ServiceImplementation::_addUser(T::SessionId /*sessionId*/,UserInfo& userInfo)
 {
   FUNCTION_TRACE
   try
   {
-    UserInfo *user = new UserInfo();
+    auto *user = new UserInfo();
     *user = userInfo;
 
     UserInfo_sptr u(user);
@@ -329,7 +340,7 @@ int ServiceImplementation::_addUser(T::SessionId sessionId,UserInfo& userInfo)
 
 /*! \brief Protected hook: delete user. */
 
-int ServiceImplementation::_deleteUser(T::SessionId sessionId,uint userId)
+int ServiceImplementation::_deleteUser(T::SessionId /*sessionId*/,uint userId)
 {
   FUNCTION_TRACE
   try
@@ -355,7 +366,7 @@ int ServiceImplementation::_deleteUser(T::SessionId sessionId,uint userId)
 
 /*! \brief Protected hook: update user info. */
 
-int ServiceImplementation::_updateUserInfo(T::SessionId sessionId,UserInfo& userInfo)
+int ServiceImplementation::_updateUserInfo(T::SessionId /*sessionId*/,UserInfo& userInfo)
 {
   FUNCTION_TRACE
   try
@@ -381,7 +392,7 @@ int ServiceImplementation::_updateUserInfo(T::SessionId sessionId,UserInfo& user
 
 /*! \brief Protected hook: get user attribute. */
 
-int ServiceImplementation::_getUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
+int ServiceImplementation::_getUserAttribute(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
   FUNCTION_TRACE
   try
@@ -407,7 +418,7 @@ int ServiceImplementation::_getUserAttribute(T::SessionId sessionId,uint userId,
 
 /*! \brief Protected hook: get user attributes. */
 
-int ServiceImplementation::_getUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceImplementation::_getUserAttributes(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -431,7 +442,7 @@ int ServiceImplementation::_getUserAttributes(T::SessionId sessionId,uint userId
 
 /*! \brief Protected hook: get user info. */
 
-int ServiceImplementation::_getUserInfo(T::SessionId sessionId,uint userId,UserInfo& userInfo)
+int ServiceImplementation::_getUserInfo(T::SessionId /*sessionId*/,uint /*userId*/,UserInfo& userInfo)
 {
   FUNCTION_TRACE
   try
@@ -457,7 +468,7 @@ int ServiceImplementation::_getUserInfo(T::SessionId sessionId,uint userId,UserI
 
 /*! \brief Protected hook: get user info by username. */
 
-int ServiceImplementation::_getUserInfoByUsername(T::SessionId sessionId,const char *username,UserInfo& userInfo)
+int ServiceImplementation::_getUserInfoByUsername(T::SessionId /*sessionId*/,const char *username,UserInfo& userInfo)
 {
   FUNCTION_TRACE
   try
@@ -488,7 +499,7 @@ int ServiceImplementation::_getUserInfoByUsername(T::SessionId sessionId,const c
 
 /*! \brief Protected hook: set user attribute. */
 
-int ServiceImplementation::_setUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
+int ServiceImplementation::_setUserAttribute(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   FUNCTION_TRACE
   try
@@ -512,7 +523,7 @@ int ServiceImplementation::_setUserAttribute(T::SessionId sessionId,uint userId,
 
 /*! \brief Protected hook: set user attributes. */
 
-int ServiceImplementation::_setUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceImplementation::_setUserAttributes(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -535,7 +546,7 @@ int ServiceImplementation::_setUserAttributes(T::SessionId sessionId,uint userId
 
 /*! \brief Protected hook: delete user attribute. */
 
-int ServiceImplementation::_deleteUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName)
+int ServiceImplementation::_deleteUserAttribute(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,const char *attributeName)
 {
   FUNCTION_TRACE
   try
@@ -559,7 +570,7 @@ int ServiceImplementation::_deleteUserAttribute(T::SessionId sessionId,uint user
 
 /*! \brief Protected hook: delete user attribute group. */
 
-int ServiceImplementation::_deleteUserAttributeGroup(T::SessionId sessionId,uint userId,const char *attributeGroup)
+int ServiceImplementation::_deleteUserAttributeGroup(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup)
 {
   FUNCTION_TRACE
   try
@@ -583,7 +594,7 @@ int ServiceImplementation::_deleteUserAttributeGroup(T::SessionId sessionId,uint
 
 /*! \brief Protected hook: delete user attributes. */
 
-int ServiceImplementation::_deleteUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
+int ServiceImplementation::_deleteUserAttributes(T::SessionId /*sessionId*/,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {
   FUNCTION_TRACE
   try

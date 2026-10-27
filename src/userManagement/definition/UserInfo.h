@@ -11,8 +11,8 @@ namespace SmartMet
 namespace UserManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
-typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
+using AttributeList = std::map<std::string,std::string>;           //!< Map of attribute name to value within one group.
+using AttributeGroupList = std::map<std::string,AttributeList>;    //!< Map of attribute group name to its AttributeList.
 
 // ====================================================================================
 /*! \brief Record describing a registered user with credentials, groups, permissions, and attributes.
@@ -28,13 +28,15 @@ class UserInfo
 
                         UserInfo();
     virtual             ~UserInfo();
+    UserInfo& operator=(const UserInfo&) = default;
+    UserInfo(const UserInfo&) = default;
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
-    time_t              getStartTime();
-    time_t              getEndTime();
-    uchar               getStatus();
-    uint                getUserId();
+    time_t              getStartTime() const;
+    time_t              getEndTime() const;
+    uchar               getStatus() const;
+    uint                getUserId() const;
     void                setStatus(uchar status);
     void                setUserId(uint userId);
     void                setFullName(const char *fullName);
@@ -67,10 +69,10 @@ class UserInfo
     void                setAttribute(const char *attributeGroup,const char *attributeName,uint attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,Int64  attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue);
-    void                setAttributes(const char *attributeGroup,AttributeList& attributeList);
+    void                setAttributes(const char *attributeGroup,const AttributeList& attributeList);
     void                deleteAttribute(const char *attributeGroup,const char *attributeName);
     void                deleteAttributeGroup(const char *attributeGroup);
-    void                deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList);
+    void                deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList);
     void                updateUserInfo(UserInfo& sessionInfo);
 
     void                print(std::ostream& stream,uint level,uint optionFlags);
@@ -92,8 +94,8 @@ class UserInfo
 };
 
 
-typedef std::shared_ptr<UserInfo> UserInfo_sptr;                    //!< Shared pointer to a UserInfo record.
-typedef std::map<uint,UserInfo_sptr> UserInfo_sptr_map;             //!< Map from user id to UserInfo shared pointer.
+using UserInfo_sptr = std::shared_ptr<UserInfo>;                    //!< Shared pointer to a UserInfo record.
+using UserInfo_sptr_map = std::map<uint,UserInfo_sptr>;             //!< Map from user id to UserInfo shared pointer.
 
 
 

@@ -24,14 +24,15 @@ class ForecastTime
                        ForecastTime(const ForecastTime& forecastTime);
                        ForecastTime(const char *csv);
      virtual           ~ForecastTime();
+     ForecastTime& operator=(const ForecastTime&) = default;
 
-     std::string       getCsv();
+     std::string       getCsv() const;
      void              setCsv(const char *csv);
      void              setCsv(const std::string& csv);
 
-     void              print(std::ostream& stream,uint level,uint optionFlags);
+     void              print(std::ostream& stream,uint level,uint optionFlags) const;
 
-     T::StorageId      mStorageId;        //!< Storage partition identifier.
+     T::StorageId      mStorageId = 0;        //!< Storage partition identifier.
      T::SourceId       mSourceId;         //!< Source system identifier.
      T::GenerationId   mGenerationId;     //!< Generation (model run) identifier.
      T::GeometryId     mGeometryId;       //!< Grid geometry identifier.

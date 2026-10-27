@@ -21,8 +21,10 @@ class UnitConversion
   public:
                    UnitConversion();
     virtual        ~UnitConversion();
+    UnitConversion(const UnitConversion&) = default;
+    UnitConversion& operator=(const UnitConversion&) = default;
 
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string    mSourceUnit;                 //!< Name of the source unit (e.g. "K").
     std::string    mTargetUnit;                 //!< Name of the target unit (e.g. "C").
@@ -31,7 +33,7 @@ class UnitConversion
 };
 
 
-typedef std::vector<UnitConversion> UnitConversion_vec;  //!< Ordered list of UnitConversion rules.
+using UnitConversion_vec = std::vector<UnitConversion>;  //!< Ordered list of UnitConversion rules.
 
 
 }  // namespace QueryServer

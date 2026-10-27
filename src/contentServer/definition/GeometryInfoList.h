@@ -12,7 +12,7 @@ namespace T
 {
 
 
-typedef std::vector<GeometryInfo*> GeometryInfo_pvec;  //!< Convenience vector of GeometryInfo pointers.
+using GeometryInfo_pvec = std::vector<GeometryInfo*>;  //!< Convenience vector of GeometryInfo pointers.
 
 // ====================================================================================
 /*! \brief Sorted, indexed container of GeometryInfo pointers with thread-safe access.
@@ -51,12 +51,12 @@ class GeometryInfoList
     void                getGeometryInfoListByProducerId(T::ProducerId producerId,GeometryInfoList& geometryInfoList);
     void                getGeometryInfoListByProducerIdAndStatus(T::ProducerId producerId,GeometryInfoList& geometryInfoList,uchar geometryStatus);
     void                getGeometryInfoListBySourceId(T::SourceId sourceId,GeometryInfoList& geometryInfoList);
-    uint                getLength();
+    uint                getLength() const;
     std::size_t         getHash();
     std::size_t         getHashByProducerId(T::ProducerId producerId);
     std::size_t         getHashByStorageId(T::StorageId storageId);
     ModificationLock*   getModificationLockPtr();
-    bool                getReleaseObjects();
+    bool                getReleaseObjects() const;
     uint                getSize() const;
     uint                markDeleted();
     uint                markDeletedById(T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId);
@@ -87,7 +87,7 @@ class GeometryInfoList
     uint                mComparisonMethod;  //!< Current sort order (one of GeometryInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GeometryInfoList> GeometryInfoList_sptr;  //!< Shared-ownership pointer to a GeometryInfoList.
+using GeometryInfoList_sptr = std::shared_ptr<GeometryInfoList>;  //!< Shared-ownership pointer to a GeometryInfoList.
 
 
 }

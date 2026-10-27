@@ -7,7 +7,9 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
+#include <algorithm>
 #include <boost/thread/thread.hpp>
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -23,12 +25,14 @@ namespace ContentServer
 
 /*! \brief Memory backend: thread entry point that invokes syncProcessingThread on the implementation. */
 
-static void* MemoryImplementation_syncProcessingThread(void *arg)
+namespace
+{
+void* MemoryImplementation_syncProcessingThread(void *arg)
 {
   try
   {
     Fmi::set_thread_name("cs-mem-sync");
-    MemoryImplementation *service = (MemoryImplementation*)arg;
+    auto *service = (MemoryImplementation*)arg;
     service->syncProcessingThread();
     return nullptr;
   }
@@ -36,9 +40,47 @@ static void* MemoryImplementation_syncProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
+
+
+
+/*! \brief Make the contents of a file and content pair match the file and collect them, with CONTENT_ADDED events
+           when contents are added to an existing file without replacing its old contents. */
+
+void collectFileContents(T::FileAndContent& ff,bool existingFile,uint requestFlags,T::ContentInfoList& tmpContentList,T::EventInfoList& tmpEventList)
+{
+  uint len = ff.mContentInfoList.getLength();
+  //printf("-- contentList %u\n",len);
+  for (uint t=0; t<len; t++)
+  {
+    T::ContentInfo *info = ff.mContentInfoList.getContentInfoByIndex(t);
+    if (info != nullptr)
+    {
+      //T::ContentInfo *cInfo = info->duplicate();
+      // ### Making sure that content data matches the file data.
+
+      info->mFileId = ff.mFileInfo.mFileId;
+      if (info->mFileType == 0)
+        info->mFileType = ff.mFileInfo.mFileType;
+
+      info->mProducerId = ff.mFileInfo.mProducerId;
+      info->mGenerationId = ff.mFileInfo.mGenerationId;
+      info->mFlags = info->mFlags;
+
+
+      //mContentInfoList[0].addContentInfo(cInfo);
+      tmpContentList.addContentInfo(info);
+
+      if (existingFile  &&  (requestFlags & 0x00000001) == 0)
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
+    }
+  }
+}
+}  // namespace
 
 
 
@@ -51,6 +93,7 @@ MemoryImplementation::MemoryImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mImplementationType = Implementation::Memory;
     mStartTime = time(nullptr);
 
@@ -120,7 +163,11 @@ MemoryImplementation::~MemoryImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
   }
   catch (...)
   {
@@ -214,7 +261,7 @@ void MemoryImplementation::shutdown()
 
 /*! \brief Memory backend: return true if the given session id is currently valid. */
 
-bool MemoryImplementation::isSessionValid(T::SessionId sessionId)
+bool MemoryImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -267,7 +314,7 @@ void MemoryImplementation::syncProcessingThread()
       try
       {
 
-        time_t tt = time(0) - delay;
+        time_t tt = time(nullptr) - delay;
 
         snprintf(filename,sizeof(filename),"%s/producers.csv",mContentDir.c_str());
         time_t t1 = getFileModificationTime(filename);
@@ -285,17 +332,13 @@ void MemoryImplementation::syncProcessingThread()
         time_t t5 = getFileModificationTime(filename);
 
         time_t max = t1;
-        if (t2 > max)
-          max = t2;
+        max = std::max(t2, max);
 
-        if (t3 > max)
-          max = t3;
+        max = std::max(t3, max);
 
-        if (t4 > max)
-          max = t4;
+        max = std::max(t4, max);
 
-        if (t5 > max)
-          max = t5;
+        max = std::max(t5, max);
 
         if (max < tt && (mProducerStorage_modificationTime != t1 ||
                          mGenerationStorage_modificationTime != t2 ||
@@ -599,18 +642,21 @@ int MemoryImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const
     if (info == nullptr)
       return Result::UNKNOWN_PRODUCER_NAME;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto producerId = info->mProducerId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByProducerId(info->mProducerId);
+      mContentInfoList[t].deleteContentInfoByProducerId(producerId);
 
-    mFileInfoListByName.deleteFileInfoByProducerId(info->mProducerId);
-    mFileInfoList.deleteFileInfoByProducerId(info->mProducerId);
+    mFileInfoListByName.deleteFileInfoByProducerId(producerId);
+    mFileInfoList.deleteFileInfoByProducerId(producerId);
 
-    mGeometryInfoList.deleteGeometryInfoListByProducerId(info->mProducerId);
-    mGenerationInfoList.deleteGenerationInfoListByProducerId(info->mProducerId);
+    mGeometryInfoList.deleteGeometryInfoListByProducerId(producerId);
+    mGenerationInfoList.deleteGenerationInfoListByProducerId(producerId);
 
-    mProducerInfoList.deleteProducerInfoById(info->mProducerId);
+    mProducerInfoList.deleteProducerInfoById(producerId);
 
-    addEvent(EventType::PRODUCER_DELETED,info->mProducerId,0,0,0);
+    addEvent(EventType::PRODUCER_DELETED,producerId,0,0,0);
 
     return Result::OK;
   }
@@ -815,14 +861,11 @@ int MemoryImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,0,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
@@ -983,7 +1026,7 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
     uint plen = producerList.getLength();
     for (uint t=0; t<plen; t++)
     {
-      auto prod = producerList.getProducerInfoByIndex(t);
+      auto *prod = producerList.getProducerInfoByIndex(t);
       producers.insert(std::pair<T::ProducerId,T::ProducerInfo*>(prod->mProducerId,prod));
     }
 
@@ -998,100 +1041,10 @@ int MemoryImplementation::_getProducerParameterList(T::SessionId sessionId,T::Pa
       std::string targetParamKey;
       T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
-      auto fmiId = contentInfo->mFmiParameterId;
-
-      switch (sourceParameterKeyType)
-      {
-        case T::ParamKeyTypeValue::FMI_ID:
-          sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-          break;
-
-        case T::ParamKeyTypeValue::FMI_NAME:
-          sourceParamKey = contentInfo->getFmiParameterName();
-          break;
-
-        case T::ParamKeyTypeValue::GRIB_ID:
-        {
-          Identification::FmiParameterId_grib def;
-          if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-            sourceParamKey = std::to_string(def.mGribParameterId);
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NEWBASE_ID:
-        {
-          Identification::FmiParameterId_newbase def;
-          if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-            sourceParamKey = std::to_string(def.mNewbaseParameterId);
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NEWBASE_NAME:
-        {
-          Identification::NewbaseParameterDef def;
-          if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-            sourceParamKey = def.mParameterName;
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NETCDF_NAME:
-        {
-          Identification::FmiParameterId_netCdf def;
-          if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-            sourceParamKey = def.mNetCdfParameterName;
-        }
-        break;
-
-        default:
-          break;
-      }
+      sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
 
 
-      switch (targetParameterKeyType)
-      {
-        case T::ParamKeyTypeValue::FMI_ID:
-          targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-          break;
-
-        case T::ParamKeyTypeValue::FMI_NAME:
-          targetParamKey = contentInfo->getFmiParameterName();
-          break;
-
-        case T::ParamKeyTypeValue::GRIB_ID:
-        {
-          Identification::FmiParameterId_grib def;
-          if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-            targetParamKey = std::to_string(def.mGribParameterId);
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NEWBASE_ID:
-        {
-          Identification::FmiParameterId_newbase def;
-          if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-            targetParamKey = std::to_string(def.mNewbaseParameterId);
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NEWBASE_NAME:
-        {
-          Identification::NewbaseParameterDef def;
-          if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-            targetParamKey = def.mParameterName;
-        }
-        break;
-
-        case T::ParamKeyTypeValue::NETCDF_NAME:
-        {
-          Identification::FmiParameterId_netCdf def;
-          if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-            targetParamKey = def.mNetCdfParameterName;
-        }
-        break;
-
-        default:
-          break;
-      }
+      targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
 
       if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
       {
@@ -1175,100 +1128,10 @@ int MemoryImplementation::_getProducerParameterListByProducerId(T::SessionId ses
         std::string targetParamKey;
         T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
 
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
@@ -1414,17 +1277,20 @@ int MemoryImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Ge
     if (info == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto deletedGenerationId = info->mGenerationId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(info->mGenerationId);
+      mContentInfoList[t].deleteContentInfoByGenerationId(deletedGenerationId);
 
-    mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
-    mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
+    mFileInfoListByName.deleteFileInfoByGenerationId(deletedGenerationId);
+    mFileInfoList.deleteFileInfoByGenerationId(deletedGenerationId);
 
-    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(deletedGenerationId);
 
-    mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
+    mGenerationInfoList.deleteGenerationInfoById(deletedGenerationId);
 
-    addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_DELETED,deletedGenerationId,0,0,0);
 
     return Result::OK;
   }
@@ -1454,17 +1320,20 @@ int MemoryImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,con
     if (info == nullptr)
       return Result::UNKNOWN_GENERATION_NAME;
 
+    // The record is freed below, the event needs the id afterwards
+    const auto generationId = info->mGenerationId;
+
     for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      mContentInfoList[t].deleteContentInfoByGenerationId(info->mGenerationId);
+      mContentInfoList[t].deleteContentInfoByGenerationId(generationId);
 
-    mFileInfoListByName.deleteFileInfoByGenerationId(info->mGenerationId);
-    mFileInfoList.deleteFileInfoByGenerationId(info->mGenerationId);
+    mFileInfoListByName.deleteFileInfoByGenerationId(generationId);
+    mFileInfoList.deleteFileInfoByGenerationId(generationId);
 
-    mGeometryInfoList.deleteGeometryInfoListByGenerationId(info->mGenerationId);
+    mGeometryInfoList.deleteGeometryInfoListByGenerationId(generationId);
 
-    mGenerationInfoList.deleteGenerationInfoById(info->mGenerationId);
+    mGenerationInfoList.deleteGenerationInfoById(generationId);
 
-    addEvent(EventType::GENERATION_DELETED,info->mGenerationId,0,0,0);
+    addEvent(EventType::GENERATION_DELETED,generationId,0,0,0);
 
     return Result::OK;
   }
@@ -1498,10 +1367,10 @@ int MemoryImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
 
     mGeometryInfoList.deleteGeometryInfoListByGenerationIdList(generationIdList);
 
-    for (auto it = generationIdList.begin(); it != generationIdList.end(); ++it)
+    for (unsigned long it : generationIdList)
     {
-      mGenerationInfoList.deleteGenerationInfoById(*it);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
+      mGenerationInfoList.deleteGenerationInfoById(it);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
     }
 
     return Result::OK;
@@ -1739,9 +1608,9 @@ int MemoryImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
 
     mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -2550,6 +2419,7 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
     // ### Checking if the filename already exists in the database.
 
     T::FileInfo *info = mFileInfoListByName.getFileInfoByName(fileInfo.mName);
+    const bool existingFile = (info != nullptr);
     if (info != nullptr)
     {
       // ### File with the same name already exists. Let's return
@@ -2594,26 +2464,84 @@ int MemoryImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::
         cInfo->mGenerationId = fileInfo.mGenerationId;
         cInfo->mFlags = cInfo->mFlags;
 
-        for (int t=0; t<CONTENT_LIST_COUNT; t++)
+        for (auto& t : mContentInfoList)
         {
-          mContentInfoList[t].addContentInfo(cInfo);
+          t.addContentInfo(cInfo);
         }
       }
     }
 
     // ### Adding an event to the event list.
 
-    if (fileInfo.mFileId != mMaxFileId)
+    // (Comparing the file id to mMaxFileId reported the update of the most recently added
+    // file as FILE_ADDED, which the content caches ignore for a file they already have.)
+    // The content count tells the content caches to fetch the content of the file (as in
+    // the Redis implementation)
+    if (existingFile)
     {
       //printf("-- file update event\n");
-      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_UPDATED,fileInfo.mFileId,fileInfo.mFileType,len,0);
     }
     else
     {
-      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,0,0);
+      addEvent(EventType::FILE_ADDED,fileInfo.mFileId,fileInfo.mFileType,len,0);
     }
 
     return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: set the file id of a file and content pair to the id of an existing file with the same
+           name (marking its old contents deleted if requested), or to a new id adding the file to tmpFileList.
+           Returns true for an existing file. */
+
+bool MemoryImplementation::prepareFileOfContent(T::FileAndContent& ff,uint requestFlags,T::FileInfoList& tmpFileList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    // ### Checking if the filename already exists in the database.
+
+    T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff.mFileInfo.mName);
+    const bool existingFile = (info != nullptr);
+    if (info != nullptr)
+    {
+      //printf("** File exists %s\n",fileInfo.mName.c_str());
+      // ### File with the same name already exists. Let's return
+      // ### the current file-id.
+
+      ff.mFileInfo.mFileId = info->mFileId;
+
+      // ### Deleting old content information.
+
+      if (requestFlags & 0x00000001)
+        mContentInfoList[0].markDeletedByFileId(ff.mFileInfo.mFileId);
+    }
+    else
+    {
+      // ### Generating a new file-id.
+      //printf("** File added %s\n",fileInfo.mName.c_str());
+
+      mMaxFileId++;
+
+      ff.mFileInfo.mFileId = mMaxFileId;
+
+      info = ff.mFileInfo.duplicate();
+
+      tmpFileList.addFileInfo(info);
+      //mFileInfoList.addFileInfo(info);
+      //mFileInfoListByName.addFileInfo(info);
+    }
+
+    return existingFile;
   }
   catch (...)
   {
@@ -2645,13 +2573,13 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
 
     T::EventInfoList tmpEventList;
 
-    for (auto ff = fileAndContentList.begin(); ff != fileAndContentList.end(); ++ff)
+    for (auto& ff : fileAndContentList)
     {
-      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff->mFileInfo.mProducerId);
+      T::ProducerInfo *producerInfo = mProducerInfoList.getProducerInfoById(ff.mFileInfo.mProducerId);
       if (producerInfo == nullptr)
         return Result::UNKNOWN_PRODUCER_ID;
 
-      T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(ff->mFileInfo.mGenerationId);
+      T::GenerationInfo* generationInfo = mGenerationInfoList.getGenerationInfoById(ff.mFileInfo.mGenerationId);
       if (generationInfo == nullptr)
         return Result::UNKNOWN_GENERATION_ID;
 
@@ -2661,80 +2589,28 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
       }
 
 
-      // ### Checking if the filename already exists in the database.
-
-      T::FileInfo *info = mFileInfoListByName.getFileInfoByName(ff->mFileInfo.mName);
-      if (info != nullptr)
-      {
-        //printf("** File exists %s\n",fileInfo.mName.c_str());
-        // ### File with the same name already exists. Let's return
-        // ### the current file-id.
-
-        ff->mFileInfo.mFileId = info->mFileId;
-
-        // ### Deleting old content information.
-
-        if (requestFlags & 0x00000001)
-          mContentInfoList[0].markDeletedByFileId(ff->mFileInfo.mFileId);
-      }
-      else
-      {
-        // ### Generating a new file-id.
-        //printf("** File added %s\n",fileInfo.mName.c_str());
-
-        mMaxFileId++;
-
-        ff->mFileInfo.mFileId = mMaxFileId;
-
-        info = ff->mFileInfo.duplicate();
-
-        tmpFileList.addFileInfo(info);
-        //mFileInfoList.addFileInfo(info);
-        //mFileInfoListByName.addFileInfo(info);
-      }
+      const bool existingFile = prepareFileOfContent(ff,requestFlags,tmpFileList);
 
 
       // ### Adding the content information into the database.
 
-      uint len = ff->mContentInfoList.getLength();
-      //printf("-- contentList %u\n",len);
-      for (uint t=0; t<len; t++)
-      {
-        T::ContentInfo *info = ff->mContentInfoList.getContentInfoByIndex(t);
-        if (info != nullptr)
-        {
-          //T::ContentInfo *cInfo = info->duplicate();
-          // ### Making sure that content data matches the file data.
-
-          info->mFileId = ff->mFileInfo.mFileId;
-          if (info->mFileType == 0)
-            info->mFileType = ff->mFileInfo.mFileType;
-
-          info->mProducerId = ff->mFileInfo.mProducerId;
-          info->mGenerationId = ff->mFileInfo.mGenerationId;
-          info->mFlags = info->mFlags;
-
-
-          //mContentInfoList[0].addContentInfo(cInfo);
-          tmpContentList.addContentInfo(info);
-
-          if (info->mFileId != mMaxFileId  &&  (requestFlags & 0x00000001) == 0)
-            tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::CONTENT_ADDED,info->mFileId,info->mMessageIndex,0,0,""));
-        }
-      }
+      uint len = ff.mContentInfoList.getLength();
+      collectFileContents(ff,existingFile,requestFlags,tmpContentList,tmpEventList);
 
       // ### Adding an event to the event list.
 
-      if (ff->mFileInfo.mFileId != mMaxFileId)
+      // (Comparing the file id to mMaxFileId treated all but the last new file of the batch
+      // as existing files, so they got no FILE_ADDED events.)
+      if (existingFile)
       {
         //printf("-- file update event\n");
         if (requestFlags & 0x00000001)
-          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,0,0,""));
+          tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_UPDATED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,0,0,""));
       }
       else
       {
         //printf("-- file add event\n");
-        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff->mFileInfo.mFileId,ff->mFileInfo.mFileType,len,0,""));
+        tmpEventList.addEventInfo(new T::EventInfo(0,0,EventType::FILE_ADDED,ff.mFileInfo.mFileId,ff.mFileInfo.mFileType,len,0,""));
       }
     }
 
@@ -2747,12 +2623,12 @@ int MemoryImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uin
     mFileInfoList.addFileInfoList(tmpFileList);
     mFileInfoListByName.addFileInfoList(tmpFileList);
 
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (auto& t : mContentInfoList)
     {
-      mContentInfoList[t].addContentInfoList(tmpContentList);
+      t.addContentInfoList(tmpContentList);
     }
 
-    auto it = tmpEventList.getFirstEvent();
+    auto *it = tmpEventList.getFirstEvent();
     while (it != nullptr)
     {
       addEvent(it->mType,it->mId1,it->mId2,it->mId3,it->mFlags);
@@ -2859,21 +2735,21 @@ int MemoryImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     AutoWriteLock lock(&mModificationLock);
 
 
-    for (auto fTime = forecastTimeList.begin(); fTime != forecastTimeList.end(); ++fTime)
+    for (auto& fTime : forecastTimeList)
     {
-      auto forecastTimeUTC = utcTimeToTimeT(fTime->mForecastTime);
+      auto forecastTimeUTC = utcTimeToTimeT(fTime.mForecastTime);
 
       T::ContentInfoList contentInfoList;
-      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(fTime->mGenerationId);
+      T::GenerationInfo *generationInfo = mGenerationInfoList.getGenerationInfoById(fTime.mGenerationId);
       if (generationInfo != nullptr)
       {
-        mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationInfo->mProducerId,fTime->mGenerationId,fTime->mGeometryId,0,0,1000000,contentInfoList);
+        mContentInfoList[0].getContentInfoListByGenerationAndGeometryId(generationInfo->mProducerId,fTime.mGenerationId,fTime.mGeometryId,0,0,1000000,contentInfoList);
         uint len = contentInfoList.getLength();
         for (uint t=0; t<len; t++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
-          if (info->mForecastType == fTime->mForecastType  &&
-              info->mForecastNumber == fTime->mForecastNumber &&
+          if (info->mForecastType == fTime.mForecastType  &&
+              info->mForecastNumber == fTime.mForecastNumber &&
               info->mForecastTimeUTC == forecastTimeUTC)
           {
             T::ContentInfo *cInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
@@ -3159,9 +3035,9 @@ int MemoryImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     mFileInfoListByName.deleteFileInfoByFileIdList(fileIdList);
     mFileInfoList.deleteFileInfoByFileIdList(fileIdList);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
+    for (unsigned long it : fileIdList)
     {
-      addEvent(EventType::FILE_DELETED,*it,0,0,0);
+      addEvent(EventType::FILE_DELETED,it,0,0,0);
     }
 
     return Result::OK;
@@ -3275,9 +3151,9 @@ int MemoryImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
 
     fileInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -3563,7 +3439,7 @@ int MemoryImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eve
 
 /*! \brief Memory backend: return the most recent event record visible to the requesting server. */
 
-int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -3595,7 +3471,7 @@ int MemoryImplementation::_getLastEventInfo(T::SessionId sessionId,uint requesti
 
 /*! \brief Memory backend: return a page of event records starting at the given event id. */
 
-int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3617,7 +3493,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
     T::EventInfo *event = eventList.getFirstEvent();
     while (event != nullptr)
     {
-      T::EventInfo *eventInfo = new T::EventInfo(*event);
+      auto *eventInfo = new T::EventInfo(*event);
       if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
@@ -3642,8 +3518,7 @@ int MemoryImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
           eventInfo->mEventData = output.str();
         }
       }
-      else
-      if (eventInfo->mType == EventType::CONTENT_ADDED)
+      else if (eventInfo->mType == EventType::CONTENT_ADDED)
       {
         T::ContentInfo *contentInfo = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(eventInfo->mId1,eventInfo->mId2);
 
@@ -3735,9 +3610,9 @@ int MemoryImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo&
       return Result::CONTENT_ALREADY_EXISTS;
 
     cInfo = contentInfo.duplicate();
-    for (int t=0; t<CONTENT_LIST_COUNT; t++)
+    for (auto& t : mContentInfoList)
     {
-      mContentInfoList[t].addContentInfo(cInfo);
+      t.addContentInfo(cInfo);
     }
 
     addEvent(EventType::CONTENT_ADDED,contentInfo.mFileId,contentInfo.mMessageIndex,0,0);
@@ -4245,10 +4120,10 @@ int MemoryImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
 
     contentInfoList.clear();
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -4359,7 +4234,7 @@ int MemoryImplementation::_getContentListByProducerName(T::SessionId sessionId,c
 
 /*! \brief Memory backend: return a page of content records belonging to the given generation id. */
 
-int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint requestFlags,T::ContentInfoList& contentInfoList)
+int MemoryImplementation::_getContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,uint /*requestFlags*/,T::ContentInfoList& contentInfoList)
 {
   FUNCTION_TRACE
   try
@@ -4559,14 +4434,11 @@ int MemoryImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4638,14 +4510,11 @@ int MemoryImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4717,14 +4586,11 @@ int MemoryImplementation::_getContentListByParameterAndGenerationName(T::Session
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4796,14 +4662,11 @@ int MemoryImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
 
@@ -4885,14 +4748,11 @@ int MemoryImplementation::_getContentListByParameterGenerationIdAndForecastTime(
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     T::ContentInfo *cInfo = mContentInfoList[1].getContentInfoByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
@@ -4970,14 +4830,11 @@ int MemoryImplementation::_getContentListByParameterAndProducerName(T::SessionId
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5288,17 +5145,9 @@ int MemoryImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessi
     if (generationInfo == nullptr)
       return Result::UNKNOWN_GENERATION_ID;
 
-    if (generationInfo->mContentStartTime == 0)
-    {
-      mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime,generationInfo->mContentHash);
-      generationInfo->mContentStartTime = startTime;
-      generationInfo->mContentEndTime = endTime;
-    }
-    else
-    {
-      startTime = generationInfo->mContentStartTime;
-      endTime = generationInfo->mContentEndTime;
-    }
+    // Computed every time: the range used to be cached in the generation record on the first
+    // call (under a read lock), and content added to the generation later was never included
+    mContentInfoList[1].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
     //mContentInfoList[0].getForecastTimeRangeByGenerationId(producerId,generationId,startTime,endTime);
 
@@ -5512,7 +5361,7 @@ int MemoryImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessi
     {
       T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       char st[1000];
-      snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+      snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
       std::string str = st;
 
 
@@ -5658,7 +5507,7 @@ T::EventId MemoryImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,U
     mMaxEventId++;
     T::EventId eventId = mMaxEventId;
 
-    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
+    auto *eventInfo = new T::EventInfo(mStartTime,eventId,eventType,id1,id2,id3,flags,"");
     mEventInfoList.addEventInfo(eventInfo);
 
     return eventId;
@@ -5701,17 +5550,16 @@ void MemoryImplementation::readProducerList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ProducerInfo *rec = new T::ProducerInfo();
+        auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
-        if (rec->mProducerId > mMaxProducerId)
-          mMaxProducerId = rec->mProducerId;
+        mMaxProducerId = std::max(rec->mProducerId, mMaxProducerId);
 
         mProducerInfoList.addProducerInfo(rec);
 
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mProducerStorage_modificationTime = getFileModificationTime(filename);
   }
@@ -5754,16 +5602,15 @@ void MemoryImplementation::readGenerationList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GenerationInfo *rec = new T::GenerationInfo();
+        auto *rec = new T::GenerationInfo();
         rec->setCsv(st);
 
-        if (rec->mGenerationId > mMaxGenerationId)
-          mMaxGenerationId = rec->mGenerationId;
+        mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
 
         mGenerationInfoList.addGenerationInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -5783,7 +5630,9 @@ void MemoryImplementation::readGeometryList()
   FUNCTION_TRACE
   try
   {
-    mGenerationInfoList.clear();
+    // (This used to clear mGenerationInfoList, so every load from the content directory lost
+    // all generations and a "file" content source served no data)
+    mGeometryInfoList.clear();
 
     if (!mContentLoadEnabled)
       return;
@@ -5805,13 +5654,13 @@ void MemoryImplementation::readGeometryList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GeometryInfo *rec = new T::GeometryInfo();
+        auto *rec = new T::GeometryInfo();
         rec->setCsv(st);
 
         mGeometryInfoList.addGeometryInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
     mGeometryStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
@@ -5829,6 +5678,7 @@ void MemoryImplementation::readGeometryList()
 void MemoryImplementation::readFileList()
 {
   FUNCTION_TRACE
+  FILE *file = nullptr;
   try
   {
     mFileInfoList.clear();
@@ -5839,7 +5689,7 @@ void MemoryImplementation::readFileList()
     char filename[2048];
 
     snprintf(filename,sizeof(filename),"%s/files.csv",mContentDir.c_str());
-    FILE *file = fopen(filename,"re");
+    file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
@@ -5847,26 +5697,32 @@ void MemoryImplementation::readFileList()
 
     while (fgets(st,1000,file) != nullptr)
     {
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
           *p = '\0';
 
-        T::FileInfo *rec = new T::FileInfo();
+        auto *rec = new T::FileInfo();
         rec->setCsv(st);
 
-        if (rec->mFileId > mMaxFileId)
-          mMaxFileId = rec->mFileId;
+        mMaxFileId = std::max(rec->mFileId, mMaxFileId);
 
         mFileInfoList.addFileInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
+    file = nullptr;
     mFileStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
+    if (file != nullptr)
+      fclose(file);
+
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
@@ -5880,6 +5736,7 @@ void MemoryImplementation::readFileList()
 void MemoryImplementation::readContentList()
 {
   FUNCTION_TRACE
+  FILE *file = nullptr;
   try
   {
     mContentInfoList[0].clear();
@@ -5890,7 +5747,7 @@ void MemoryImplementation::readContentList()
     char filename[2048];
 
     snprintf(filename,sizeof(filename),"%s/content.csv",mContentDir.c_str());
-    FILE *file = fopen(filename,"re");
+    file = fopen(filename,"re");
     if (file == nullptr)
       return;
 
@@ -5898,22 +5755,29 @@ void MemoryImplementation::readContentList()
 
     while (fgets(st,1000,file) != nullptr)
     {
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       if (st[0] != '#')
       {
         char *p = strstr(st,"\n");
         if (p != nullptr)
           *p = '\0';
 
-        T::ContentInfo *rec = new T::ContentInfo();
+        auto *rec = new T::ContentInfo();
         rec->setCsv(st);
         mContentInfoList[0].addContentInfo(rec);
       }
     }
-    fclose(file);
+    (void)fclose(file);
+    file = nullptr;
     mContentStorage_modificationTime = getFileModificationTime(filename);
   }
   catch (...)
   {
+    if (file != nullptr)
+      fclose(file);
+
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
@@ -6009,11 +5873,10 @@ bool MemoryImplementation::syncProducerList()
         if (p != nullptr)
           *p = '\0';
 
-        T::ProducerInfo *rec = new T::ProducerInfo();
+        auto *rec = new T::ProducerInfo();
         rec->setCsv(st);
 
-        if (rec->mProducerId > mMaxProducerId)
-          mMaxProducerId = rec->mProducerId;
+        mMaxProducerId = std::max(rec->mProducerId, mMaxProducerId);
 
         T::ProducerInfo *info = mProducerInfoList.getProducerInfoById(rec->mProducerId);
         if (info != nullptr)
@@ -6029,10 +5892,10 @@ bool MemoryImplementation::syncProducerList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::ProducerId> idList;
-    mProducerInfoList.getLength();
+    len = mProducerInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
@@ -6045,14 +5908,14 @@ bool MemoryImplementation::syncProducerList()
     }
 
     int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (unsigned int & it : idList)
     {
-      mProducerInfoList.deleteProducerInfoById(*it);
-      mGenerationInfoList.deleteGenerationInfoListByProducerId(*it);
-      mFileInfoListByName.deleteFileInfoByProducerId(*it);
-      mFileInfoList.deleteFileInfoByProducerId(*it);
-      count += mContentInfoList[0].markDeletedByProducerId(*it);
-      addEvent(EventType::PRODUCER_DELETED,*it,0,0,0);
+      mProducerInfoList.deleteProducerInfoById(it);
+      mGenerationInfoList.deleteGenerationInfoListByProducerId(it);
+      mFileInfoListByName.deleteFileInfoByProducerId(it);
+      mFileInfoList.deleteFileInfoByProducerId(it);
+      count += mContentInfoList[0].markDeletedByProducerId(it);
+      addEvent(EventType::PRODUCER_DELETED,it,0,0,0);
     }
 
     if (count > 0)
@@ -6065,6 +5928,102 @@ bool MemoryImplementation::syncProducerList()
 
     mProducerStorage_modificationTime = getFileModificationTime(filename);
     return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: add or mark the generation of one line of the generations csv-file. */
+
+void MemoryImplementation::syncGenerationCsvLine(char *st)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::GenerationInfo();
+    rec->setCsv(st);
+
+    mMaxGenerationId = std::max(rec->mGenerationId, mMaxGenerationId);
+
+    T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+    }
+    else
+    {
+      T::ProducerInfo *pInfo = mProducerInfoList.getProducerInfoById(rec->mProducerId);
+      if (pInfo != nullptr)
+      {
+        rec->mFlags = rec->mFlags | 0x80000000;
+        mGenerationInfoList.addGenerationInfo(rec);
+        addEvent(EventType::GENERATION_ADDED,rec->mGenerationId,0,0,0);
+      }
+      else
+      {
+        // Invalid producer
+        delete rec;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the generations that were not marked as found in the csv-file. */
+
+void MemoryImplementation::deleteUnsyncedGenerations()
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<T::GenerationId> idList;
+    uint len = mGenerationInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The generation is not in the csv-file anymore. We should delete it.
+        idList.emplace_back(info->mGenerationId);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    int count = 0;
+    for (unsigned long & it : idList)
+    {
+      mGenerationInfoList.deleteGenerationInfoById(it);
+      mFileInfoListByName.deleteFileInfoByGenerationId(it);
+      mFileInfoList.deleteFileInfoByGenerationId(it);
+      count += mContentInfoList[0].markDeletedByGenerationId(it);
+      addEvent(EventType::GENERATION_DELETED,it,0,0,0);
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+    }
   }
   catch (...)
   {
@@ -6107,71 +6066,12 @@ bool MemoryImplementation::syncGenerationList()
     {
       if (st[0] != '#')
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        T::GenerationInfo *rec = new T::GenerationInfo();
-        rec->setCsv(st);
-
-        if (rec->mGenerationId > mMaxGenerationId)
-          mMaxGenerationId = rec->mGenerationId;
-
-        T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::ProducerInfo *pInfo = mProducerInfoList.getProducerInfoById(rec->mProducerId);
-          if (pInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            mGenerationInfoList.addGenerationInfo(rec);
-            addEvent(EventType::GENERATION_ADDED,rec->mGenerationId,0,0,0);
-          }
-          else
-          {
-            // Invalid producer
-            delete rec;
-          }
-        }
+        syncGenerationCsvLine(st);
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
-    std::vector<T::GenerationId> idList;
-    mGenerationInfoList.getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0)
-      {
-        // The generation is not in the csv-file anymore. We should delete it.
-        idList.emplace_back(info->mGenerationId);
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
-    }
-
-    int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
-    {
-      mGenerationInfoList.deleteGenerationInfoById(*it);
-      mFileInfoListByName.deleteFileInfoByGenerationId(*it);
-      mFileInfoList.deleteFileInfoByGenerationId(*it);
-      count += mContentInfoList[0].markDeletedByGenerationId(*it);
-      addEvent(EventType::GENERATION_DELETED,*it,0,0,0);
-    }
-
-    if (count > 0)
-    {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
-    }
+    deleteUnsyncedGenerations();
 
     mGenerationStorage_modificationTime = getFileModificationTime(filename);
     return true;
@@ -6221,7 +6121,7 @@ bool MemoryImplementation::syncGeometryList()
         if (p != nullptr)
           *p = '\0';
 
-        T::GeometryInfo *rec = new T::GeometryInfo();
+        auto *rec = new T::GeometryInfo();
         rec->setCsv(st);
 
         T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoById(rec->mGenerationId,rec->mGeometryId,rec->mLevelId);
@@ -6247,10 +6147,10 @@ bool MemoryImplementation::syncGeometryList()
         }
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     std::vector<T::GeometryInfo> idList;
-    mGeometryInfoList.getLength();
+    len = mGeometryInfoList.getLength();
     for (uint t=0; t<len; t++)
     {
       T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
@@ -6262,14 +6162,122 @@ bool MemoryImplementation::syncGeometryList()
       info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    for (auto it = idList.begin(); it != idList.end(); ++it)
+    for (auto& it : idList)
     {
-      mGeometryInfoList.deleteGeometryInfoById(it->mGenerationId,it->mGeometryId,it->mLevelId);
-      addEvent(EventType::GEOMETRY_DELETED,it->mGenerationId,it->mGeometryId,it->mLevelId,0);
+      mGeometryInfoList.deleteGeometryInfoById(it.mGenerationId,it.mGeometryId,it.mLevelId);
+      addEvent(EventType::GEOMETRY_DELETED,it.mGenerationId,it.mGeometryId,it.mLevelId,0);
     }
 
     mGeometryStorage_modificationTime = getFileModificationTime(filename);
     return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: add or mark the file of one line of the files csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::syncFileCsvLine(char *st,T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::FileInfo();
+    rec->setCsv(st);
+
+    mMaxFileId = std::max(rec->mFileId, mMaxFileId);
+
+    T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+      return true;
+    }
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
+    if (gInfo == nullptr)
+    {
+      // Invalid generation
+
+      delete rec;
+      return true;
+    }
+
+    rec->mFlags = rec->mFlags | 0x80000000;
+    mFileInfoList.addFileInfo(rec);
+    mFileInfoListByName.addFileInfo(rec);
+    addEvent(EventType::FILE_ADDED,rec->mFileId,rec->mFileType,0,0);
+
+    return (mMaxEventId - startEventId) <= maxLen;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the files that were not marked as found in the csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::deleteUnsyncedFiles(T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    std::vector<T::FileId> idList;
+    std::vector<std::string> nameList;
+    uint len = mFileInfoList.getLength();
+    for (uint t=0; t<len; t++)
+    {
+      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
+      if ((info->mFlags &  0x80000000) == 0)
+      {
+        // The file is not in the csv-file anymore. We should delete it.
+        idList.emplace_back(info->mFileId);
+        nameList.emplace_back(info->mName);
+      }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
+    }
+
+    for (auto& name : nameList)
+      mFileInfoListByName.deleteFileInfoByName(name);
+
+    int count = 0;
+    bool complete = true;
+    for (unsigned long & it : idList)
+    {
+      mFileInfoList.deleteFileInfoById(it);
+      count += mContentInfoList[0].markDeletedByFileId(it);
+      addEvent(EventType::FILE_DELETED,it,0,0,0);
+      if ((mMaxEventId - startEventId) > maxLen)
+      {
+        complete = false;
+        break;
+      }
+    }
+
+    if (count > 0)
+    {
+      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
+      {
+        mContentInfoList[t].deleteMarkedContent();
+      }
+    }
+    return complete;
   }
   catch (...)
   {
@@ -6315,94 +6323,110 @@ bool MemoryImplementation::syncFileList()
 
     while (fgets(st,1000,file) != nullptr)
     {
-      if (st[0] != '#')
+      if (st[0] != '#'  &&  !syncFileCsvLine(st,startEventId,maxLen))
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        T::FileInfo *rec = new T::FileInfo();
-        rec->setCsv(st);
-
-        if (rec->mFileId > mMaxFileId)
-          mMaxFileId = rec->mFileId;
-
-        T::FileInfo *info = mFileInfoList.getFileInfoById(rec->mFileId);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(rec->mGenerationId);
-          if (gInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            mFileInfoList.addFileInfo(rec);
-            mFileInfoListByName.addFileInfo(rec);
-            addEvent(EventType::FILE_ADDED,rec->mFileId,rec->mFileType,0,0);
-
-            if ((mMaxEventId - startEventId) > maxLen)
-              return false;
-          }
-          else
-          {
-            // Invalid generation
-
-            delete rec;
-          }
-        }
+        (void)fclose(file);
+        return false;
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
-    std::vector<T::FileId> idList;
-    std::vector<std::string> nameList;
-    mFileInfoList.getLength();
+    if (!deleteUnsyncedFiles(startEventId,maxLen))
+      return false;
+
+    mFileStorage_modificationTime = getFileModificationTime(filename);
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: add or mark the content of one line of the content csv-file. Added contents are also
+           collected to contentToAdd. Returns false when too many events were added. */
+
+bool MemoryImplementation::syncContentCsvLine(char *st,T::ContentInfoList& contentToAdd,T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    char *p = strstr(st,"\n");
+    if (p != nullptr)
+      *p = '\0';
+
+    auto *rec = new T::ContentInfo();
+    rec->setCsv(st);
+
+    T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);
+    if (info != nullptr)
+    {
+      info->mFlags = info->mFlags | 0x80000000;
+      delete rec;
+      return true;
+    }
+
+    T::FileInfo *fInfo = mFileInfoList.getFileInfoById(rec->mFileId);
+    if (fInfo == nullptr)
+    {
+      // Invalid file
+      delete rec;
+      return true;
+    }
+
+    rec->mFlags = rec->mFlags | 0x80000000;
+    contentToAdd.addContentInfo(rec);
+    mContentInfoList[0].addContentInfo(rec);
+    addEvent(EventType::CONTENT_ADDED,rec->mFileId,rec->mMessageIndex,0,0);
+    return (mMaxEventId - startEventId) <= maxLen;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Memory backend: delete the contents that were not marked as found in the csv-file. Returns false when too many events were added. */
+
+bool MemoryImplementation::deleteUnsyncedContents(T::EventId startEventId,uint maxLen)
+{
+  FUNCTION_TRACE
+  try
+  {
+    uint len = mContentInfoList[0].getLength();
     for (uint t=0; t<len; t++)
     {
-      T::FileInfo *info = mFileInfoList.getFileInfoByIndex(t);
+      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
       if ((info->mFlags &  0x80000000) == 0)
       {
-        // The file is not in the csv-file anymore. We should delete it.
-        idList.emplace_back(info->mFileId);
-        nameList.emplace_back(info->mName);
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
-    }
-
-    for (auto name = nameList.begin(); name != nameList.end(); ++name)
-      mFileInfoListByName.deleteFileInfoByName(*name);
-
-    int count = 0;
-    for (auto it = idList.begin(); it != idList.end(); ++it)
-    {
-      mFileInfoList.deleteFileInfoById(*it);
-      count += mContentInfoList[0].markDeletedByFileId(*it);
-      addEvent(EventType::FILE_DELETED,*it,0,0,0);
-      if ((mMaxEventId - startEventId) > maxLen)
-      {
-        if (count > 0)
+        // The generation is not in the csv-file anymore. We should delete it.
+        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
+        addEvent(EventType::CONTENT_DELETED,info->mFileId,info->mMessageIndex,0,0);
+        if ((mMaxEventId - startEventId) > maxLen)
         {
+          info->mFlags = info->mFlags & 0x7FFFFFFF;
           for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
           {
             mContentInfoList[t].deleteMarkedContent();
           }
+          return false;
         }
-        return false;
       }
+      info->mFlags = info->mFlags & 0x7FFFFFFF;
     }
 
-    if (count > 0)
+    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
     {
-      for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-      {
-        mContentInfoList[t].deleteMarkedContent();
-      }
+      mContentInfoList[t].deleteMarkedContent();
     }
-
-    mFileStorage_modificationTime = getFileModificationTime(filename);
     return true;
   }
   catch (...)
@@ -6452,75 +6476,22 @@ bool MemoryImplementation::syncContentList()
 
     while (fgets(st,1000,file) != nullptr)
     {
-      if (st[0] != '#')
+      if (st[0] != '#'  &&  !syncContentCsvLine(st,contentToAdd,startEventId,maxLen))
       {
-        char *p = strstr(st,"\n");
-        if (p != nullptr)
-          *p = '\0';
-
-        T::ContentInfo *rec = new T::ContentInfo();
-        rec->setCsv(st);
-
-        T::ContentInfo *info = mContentInfoList[0].getContentInfoByFileIdAndMessageIndex(rec->mFileId,rec->mMessageIndex);
-        if (info != nullptr)
-        {
-          info->mFlags = info->mFlags | 0x80000000;
-          delete rec;
-        }
-        else
-        {
-          T::FileInfo *fInfo = mFileInfoList.getFileInfoById(rec->mFileId);
-          if (fInfo != nullptr)
-          {
-            rec->mFlags = rec->mFlags | 0x80000000;
-            contentToAdd.addContentInfo(rec);
-            mContentInfoList[0].addContentInfo(rec);
-            addEvent(EventType::CONTENT_ADDED,rec->mFileId,rec->mMessageIndex,0,0);
-            if ((mMaxEventId - startEventId) > maxLen)
-              return false;
-          }
-          else
-          {
-            // Invalid file
-            delete rec;
-          }
-        }
+        (void)fclose(file);
+        return false;
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     for (int t=1; t<CONTENT_LIST_COUNT; t++)
     {
       mContentInfoList[t].addContentInfoList(contentToAdd);
     }
 
-    std::vector<uint> idList;
-    mContentInfoList[0].getLength();
-    for (uint t=0; t<len; t++)
-    {
-      T::ContentInfo *info = mContentInfoList[0].getContentInfoByIndex(t);
-      if ((info->mFlags &  0x80000000) == 0)
-      {
-        // The generation is not in the csv-file anymore. We should delete it.
-        info->mFlags = info->mFlags | T::ContentInfo::Flags::DeletedContent;
-        addEvent(EventType::CONTENT_DELETED,info->mFileId,info->mMessageIndex,0,0);
-        if ((mMaxEventId - startEventId) > maxLen)
-        {
-          info->mFlags = info->mFlags & 0x7FFFFFFF;
-          for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-          {
-            mContentInfoList[t].deleteMarkedContent();
-          }
-          return false;
-        }
-      }
-      info->mFlags = info->mFlags & 0x7FFFFFFF;
-    }
+    if (!deleteUnsyncedContents(startEventId,maxLen))
+      return false;
 
-    for (int t=CONTENT_LIST_COUNT-1; t>=0; t--)
-    {
-      mContentInfoList[t].deleteMarkedContent();
-    }
     mContentStorage_modificationTime = getFileModificationTime(filename);
     return true;
   }

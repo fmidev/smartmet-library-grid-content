@@ -12,7 +12,7 @@ namespace T
 {
 
 
-typedef std::vector<GenerationInfo*> GenerationInfo_pvec;  //!< Convenience vector of GenerationInfo pointers.
+using GenerationInfo_pvec = std::vector<GenerationInfo*>;  //!< Convenience vector of GenerationInfo pointers.
 
 // ====================================================================================
 /*! \brief Sorted, indexed container of GenerationInfo pointers with thread-safe access.
@@ -68,12 +68,12 @@ class GenerationInfoList
     bool                getLastGenerationInfoByProducerIdAndStatus(T::ProducerId producerId,uchar generationStatus,T::GenerationInfo& generationInfo);
     GenerationInfo*     getLastGenerationInfoByContentTime(T::ProducerId producerId);
     GenerationInfo*     getLastGenerationInfoByContentTimeAndStatus(T::ProducerId producerId,uchar generationStatus);
-    uint                getLength();
+    uint                getLength() const;
     std::size_t         getHash();
     std::size_t         getHashByProducerId(T::ProducerId producerId);
     std::size_t         getHashByStorageId(T::StorageId storageId);
     ModificationLock*   getModificationLockPtr();
-    bool                getReleaseObjects();
+    bool                getReleaseObjects() const;
     uint                getSize() const;
     uint                markDeleted();
     uint                markDeletedById(T::GenerationId generationId);
@@ -105,7 +105,7 @@ class GenerationInfoList
     uint                mComparisonMethod;  //!< Current sort order (one of GenerationInfo::ComparisonMethod constants).
 };
 
-typedef std::shared_ptr<GenerationInfoList> GenerationInfoList_sptr;  //!< Shared-ownership pointer to a GenerationInfoList.
+using GenerationInfoList_sptr = std::shared_ptr<GenerationInfoList>;  //!< Shared-ownership pointer to a GenerationInfoList.
 
 
 }

@@ -26,6 +26,7 @@ class RequestMessage
                     RequestMessage();
                     RequestMessage(RequestMessage& requestMessage);
      virtual        ~RequestMessage();
+     RequestMessage& operator=(const RequestMessage&) = default;
 
      void           addLine(const char *line);
      void           addLine(const std::string& line);

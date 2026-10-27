@@ -25,6 +25,8 @@ class Server
   public:
                   Server(const char *address,const char *port);
     virtual       ~Server();
+    Server(const Server&) = delete;
+    Server& operator=(const Server&) = delete;
 
     virtual void  init(ContentServer::ServiceInterface *serviceInterface);
     virtual void  start();
@@ -45,7 +47,7 @@ class Server
     std::string                     mServiceIor;      //!< Stringified IOR of the registered servant.
     std::string                     mAddress;         //!< Hostname or IP address for the CORBA endpoint.
     std::string                     mPort;            //!< Port number for the CORBA endpoint.
-    pthread_t                       mThread;          //!< Handle of the thread running the ORB event loop.
+    pthread_t                       mThread = 0;          //!< Handle of the thread running the ORB event loop.
 
 };
 

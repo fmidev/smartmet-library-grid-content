@@ -225,8 +225,8 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::AttributeRec corbaObject = source[t];
-      T::Attribute *attr = new T::Attribute();
+      const C::AttributeRec& corbaObject = source[t];
+      auto *attr = new T::Attribute();
       convert(corbaObject,*attr);
       target.addAttribute(attr);
     }
@@ -328,7 +328,7 @@ void Converter::convert(const C::PropertySettingList& source,T::PropertySettingV
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::PropertySetting corbaObject = source[t];
+      const C::PropertySetting& corbaObject = source[t];
       T::PropertySetting prop;
       convert(corbaObject,prop);
       target.push_back(prop);
@@ -374,7 +374,7 @@ void Converter::convert(const T::GridCoordinates& source,C::GridCoordinates& tar
     for (uint t=0; t<len; t++)
     {
       T::Coordinate coordinate = source.mCoordinateList[t];
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       corbaObject.x = coordinate.x();
       corbaObject.y = coordinate.y();
       target.coordinateList[t] = corbaObject;
@@ -485,7 +485,7 @@ void Converter::convert(const T::ValueRecordList& source,C::ValueRecordList& tar
     for (uint t=0; t<len; t++)
     {
       T::ValueRecord *obj = source.getValueRecordByIndex(t);
-      C::ValueRecord corbaObject;
+      C::ValueRecord corbaObject{};
       convert(*obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -511,7 +511,7 @@ void Converter::convert(const C::ValueRecordList& source,T::ValueRecordList& tar
     for (uint t=0; t<len; t++)
     {
       C::ValueRecord corbaObject = source[t];
-      T::ValueRecord *obj = new T::ValueRecord();
+      auto *obj = new T::ValueRecord();
       convert(corbaObject,*obj);
       target.addValueRecord(obj);
     }
@@ -651,7 +651,7 @@ void Converter::convert(const C::GridValueList& source,T::GridValueList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::GridValue corbaObject = source[t];
+      const C::GridValue& corbaObject = source[t];
       T::GridValue obj;
       convert(corbaObject,obj);
       target.addGridValue(obj);
@@ -716,7 +716,7 @@ void Converter::convert(const std::vector<T::Coordinate>& source,C::CoordinateLi
     for (uint t=0; t<len; t++)
     {
       auto obj = source[t];
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       convert(obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -766,7 +766,7 @@ void Converter::convert(const std::vector<std::vector<T::Coordinate>>& source,Sm
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      auto obj = source[t];
+      const auto& obj = source[t];
       C::CoordinateList corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
@@ -793,7 +793,7 @@ void Converter::convert(const SmartMet::C::PolygonPath& source,std::vector<std::
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      C::CoordinateList corbaObject = source[t];
+      const C::CoordinateList& corbaObject = source[t];
       std::vector<T::Coordinate> obj;
       convert(corbaObject,obj);
       target.emplace_back(obj);
@@ -913,7 +913,7 @@ void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::By
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      auto obj = source[t];
+      const auto& obj = source[t];
       C::ByteData corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
@@ -940,7 +940,7 @@ void Converter::convert(const SmartMet::C::ByteDataSequence& source,SmartMet::T:
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      C::ByteData corbaObject = source[t];
+      const C::ByteData& corbaObject = source[t];
       T::ByteData obj;
       convert(corbaObject,obj);
       target.emplace_back(obj);
@@ -965,9 +965,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }

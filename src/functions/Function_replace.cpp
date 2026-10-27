@@ -69,7 +69,7 @@ float Function_replace::executeFunctionCall1(std::vector<float>& parameters)
   {
     // Parameters : paramValue,range_border,replaceValue,range_border,[... ,replaceValue,range_border]
 
-    if (parameters.size() < 1)
+    if (parameters.empty())
       return ParamValueMissing;
 
     double val = parameters[0];
@@ -101,7 +101,7 @@ double Function_replace::executeFunctionCall1(std::vector<double>& parameters)
   {
     // Parameters : paramValue,range_border,replaceValue,range_border,[... ,replaceValue,range_border]
 
-    if (parameters.size() < 1)
+    if (parameters.empty())
       return ParamValueMissing;
 
     double val = parameters[0];
@@ -131,7 +131,7 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
 {
   try
   {
-    if (extParameters.size() < 1)
+    if (extParameters.empty())
       return;
 
     uint esz = extParameters.size();
@@ -175,7 +175,7 @@ void Function_replace::executeFunctionCall9(uint columns,uint rows,std::vector<s
 {
   try
   {
-    if (extParameters.size() < 1)
+    if (extParameters.empty())
       return;
 
     uint esz = extParameters.size();

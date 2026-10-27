@@ -373,7 +373,7 @@ int ClientImplementation::_getProducerInfoList(T::SessionId sessionId,T::Produce
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -415,7 +415,7 @@ int ClientImplementation::_getProducerInfoListByParameter(T::SessionId sessionId
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -456,7 +456,7 @@ int ClientImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,
       uint len = response.getLinesByKey("producerInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ProducerInfo *info = new T::ProducerInfo();
+        auto *info = new T::ProducerInfo();
         info->setCsv(lines[t]);
         producerInfoList.addProducerInfo(info);
       }
@@ -759,8 +759,8 @@ int ClientImplementation::_deleteGenerationInfoListByIdList(T::SessionId session
     request.addLine("method","deleteGenerationInfoListByIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=generationIdList.begin(); it!=generationIdList.end(); ++it)
-      request.addLine("generationId",*it);
+    for (unsigned long it : generationIdList)
+      request.addLine("generationId",it);
 
 
     T::ResponseMessage response;
@@ -995,7 +995,7 @@ int ClientImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Gener
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1036,7 +1036,7 @@ int ClientImplementation::_getGenerationInfoListByGeometryId(T::SessionId sessio
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1077,7 +1077,7 @@ int ClientImplementation::_getGenerationInfoListByProducerId(T::SessionId sessio
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1118,7 +1118,7 @@ int ClientImplementation::_getGenerationInfoListByProducerName(T::SessionId sess
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1159,7 +1159,7 @@ int ClientImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionI
       uint len = response.getLinesByKey("generationInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GenerationInfo *info = new T::GenerationInfo();
+        auto *info = new T::GenerationInfo();
         info->setCsv(lines[t]);
         generationInfoList.addGenerationInfo(info);
       }
@@ -1402,7 +1402,7 @@ int ClientImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInf
 
 /*! \brief Content Server: Protected hook: delete geometry info by id. */
 
-int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
+int ClientImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId /*generationId*/,T::GeometryId geometryId,T::ParamLevelId levelId)
 {
   try
   {
@@ -1519,7 +1519,7 @@ int ClientImplementation::_deleteGeometryInfoListBySourceId(T::SessionId session
 
 /*! \brief Content Server: Protected hook: get geometry info by id. */
 
-int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
+int ClientImplementation::_getGeometryInfoById(T::SessionId sessionId,T::GenerationId /*generationId*/,T::GeometryId geometryId,T::ParamLevelId levelId,T::GeometryInfo& geometryInfo)
 {
   try
   {
@@ -1571,7 +1571,7 @@ int ClientImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometr
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1611,7 +1611,7 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1630,7 +1630,7 @@ int ClientImplementation::_getGeometryInfoListByGenerationId(T::SessionId sessio
 
 /*! \brief Content Server: Protected hook: get geometry info list by producer id. */
 
-int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId,T::GeometryInfoList& geometryInfoList)
+int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId /*producerId*/,T::GeometryInfoList& geometryInfoList)
 {
   try
   {
@@ -1651,7 +1651,7 @@ int ClientImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionI
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -1691,7 +1691,7 @@ int ClientImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,
       uint len = response.getLinesByKey("geometryInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::GeometryInfo *info = new T::GeometryInfo();
+        auto *info = new T::GeometryInfo();
         info->setCsv(lines[t]);
         geometryInfoList.addGeometryInfo(info);
       }
@@ -2011,9 +2011,9 @@ int ClientImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId ses
     request.addLine("method","deleteFileInfoListByForecastTimeList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it = forecastTimeList.begin();it != forecastTimeList.end();++it)
+    for (auto& it : forecastTimeList)
     {
-      request.addLine("forecastTime",it->getCsv());
+      request.addLine("forecastTime",it.getCsv());
     }
 
     T::ResponseMessage response;
@@ -2229,8 +2229,8 @@ int ClientImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId
     request.addLine("method","deleteFileInfoListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long it : fileIdList)
+      request.addLine("fileId",it);
 
 
     T::ResponseMessage response;
@@ -2339,7 +2339,7 @@ int ClientImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId star
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2368,8 +2368,8 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
     request.addLine("method","getFileInfoListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it=fileIdList.begin(); it!=fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long & it : fileIdList)
+      request.addLine("fileId",it);
 
     T::ResponseMessage response;
 
@@ -2382,7 +2382,7 @@ int ClientImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,st
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2423,7 +2423,7 @@ int ClientImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T:
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2466,7 +2466,7 @@ int ClientImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2509,7 +2509,7 @@ int ClientImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2552,7 +2552,7 @@ int ClientImplementation::_getFileInfoListByGenerationName(T::SessionId sessionI
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2730,7 +2730,7 @@ int ClientImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::S
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::FileInfo *info = new T::FileInfo();
+        auto *info = new T::FileInfo();
         info->setCsv(lines[t]);
         fileInfoList.addFileInfo(info);
       }
@@ -2867,7 +2867,7 @@ int ClientImplementation::_getEventInfoList(T::SessionId sessionId,uint requesti
       uint len = response.getLinesByKey("fileInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::EventInfo *info = new T::EventInfo();
+        auto *info = new T::EventInfo();
         info->setCsv(lines[t]);
         eventInfoList.addEventInfo(info);
       }
@@ -3284,7 +3284,7 @@ int ClientImplementation::_getContentList(T::SessionId sessionId,T::FileId start
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3325,7 +3325,7 @@ int ClientImplementation::_getContentListByFileId(T::SessionId sessionId,T::File
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3354,8 +3354,8 @@ int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
     request.addLine("method","getContentListByFileIdList");
     request.addLine("sessionId",sessionId);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
-      request.addLine("fileId",*it);
+    for (unsigned long & it : fileIdList)
+      request.addLine("fileId",it);
 
     T::ResponseMessage response;
 
@@ -3368,7 +3368,7 @@ int ClientImplementation::_getContentListByFileIdList(T::SessionId sessionId,std
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3409,7 +3409,7 @@ int ClientImplementation::_getContentListByFileName(T::SessionId sessionId,const
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3453,7 +3453,7 @@ int ClientImplementation::_getContentListByProducerId(T::SessionId sessionId,T::
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3497,7 +3497,7 @@ int ClientImplementation::_getContentListByProducerName(T::SessionId sessionId,c
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3542,7 +3542,7 @@ int ClientImplementation::_getContentListByGenerationId(T::SessionId sessionId,T
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3586,7 +3586,7 @@ int ClientImplementation::_getContentListByGenerationName(T::SessionId sessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3629,7 +3629,7 @@ int ClientImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3672,7 +3672,7 @@ int ClientImplementation::_getContentListByGenerationNameAndTimeRange(T::Session
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3716,7 +3716,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,T::So
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3736,7 +3736,7 @@ int ClientImplementation::_getContentListBySourceId(T::SessionId sessionId,T::So
 
 /*! \brief Content Server: Protected hook: get content list by parameter. */
 
-int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3766,7 +3766,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3786,7 +3786,7 @@ int ClientImplementation::_getContentListByParameter(T::SessionId sessionId,T::P
 
 /*! \brief Content Server: Protected hook: get content list by parameter and generation id. */
 
-int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId sessionId,T::GenerationId generationId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3817,7 +3817,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3837,7 +3837,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationId(T::SessionId
 
 /*! \brief Content Server: Protected hook: get content list by parameter and generation name. */
 
-int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndGenerationName(T::SessionId sessionId,const std::string& generationName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3868,7 +3868,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3886,7 +3886,7 @@ int ClientImplementation::_getContentListByParameterAndGenerationName(T::Session
 
 /*! \brief Content Server: Protected hook: get content list by parameter and producer id. */
 
-int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId sessionId,T::ProducerId producerId,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3917,7 +3917,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -3936,7 +3936,7 @@ int ClientImplementation::_getContentListByParameterAndProducerId(T::SessionId s
 
 /*! \brief Content Server: Protected hook: get content list by parameter and producer name. */
 
-int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
+int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId sessionId,const std::string& producerName,T::ParamKeyType parameterKeyType,std::string parameterKey,T::ParamLevelId parameterLevelId,T::ParamLevel minLevel,T::ParamLevel maxLevel,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId /*geometryId*/,const std::string& startTime,const std::string& endTime,uint requestFlags,T::ContentInfoList& contentInfoList)
 {
   try
   {
@@ -3967,7 +3967,7 @@ int ClientImplementation::_getContentListByParameterAndProducerName(T::SessionId
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -4016,7 +4016,7 @@ int ClientImplementation::_getContentListByParameterGenerationIdAndForecastTime(
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentInfoList.addContentInfo(info);
       }
@@ -4093,7 +4093,7 @@ int ClientImplementation::_getContentParamListByGenerationId(T::SessionId sessio
       uint len = response.getLinesByKey("contentInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::ContentInfo *info = new T::ContentInfo();
+        auto *info = new T::ContentInfo();
         info->setCsv(lines[t]);
         contentParamList.addContentInfo(info);
       }
@@ -4663,7 +4663,7 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
       uint len = response.getLinesByKey("levelInfo",lines);
       for (uint t=0; t<len; t++)
       {
-        T::LevelInfo *info = new T::LevelInfo();
+        auto *info = new T::LevelInfo();
         info->setCsv(lines[t]);
         levelInfoList.addLevelInfo(info);
       }
@@ -4679,11 +4679,13 @@ int ClientImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoL
 
 
 
-size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nmemb, void *userdata)
+namespace
+{
+size_t ClientImplementation_responseProcessing(const char *ptr, size_t /*size*/, size_t nmemb, void *userdata)
 {
   try
   {
-    T::ResponseMessage *response = (T::ResponseMessage*)userdata;
+    auto *response = (T::ResponseMessage*)userdata;
 
     for (size_t t=0; t<nmemb; t++)
     {
@@ -4697,6 +4699,7 @@ size_t ClientImplementation_responseProcessing(char *ptr, size_t size, size_t nm
     throw Fmi::Exception(BCP,"Operation failed!",nullptr);
   }
 }
+}  // namespace
 
 
 

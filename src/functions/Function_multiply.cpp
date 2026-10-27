@@ -72,8 +72,7 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return C_FLOAT(parameters[0] * mMultiplyer);
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -98,8 +97,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
     {
       if (parameters[0] != ParamValueMissing)
         return C_DOUBLE(parameters[0] * mMultiplyer);
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain only one value!");
@@ -265,7 +263,7 @@ void Function_multiply::executeFunctionCall3(uint columns,uint rows,std::vector<
 
 /*! \brief Function: Execute function call9. */
 
-void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_multiply::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -280,7 +278,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        float c = C_FLOAT(a * mMultiplyer);
+        auto c = C_FLOAT(a * mMultiplyer);
         outParameters.emplace_back(c);
       }
       else
@@ -301,7 +299,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
 /*! \brief Function: Execute function call9. */
 
-void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_multiply::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -316,7 +314,7 @@ void Function_multiply::executeFunctionCall9(uint columns,uint rows,std::vector<
 
       if (a != ParamValueMissing)
       {
-        double c = C_DOUBLE(a * mMultiplyer);
+        auto c = C_DOUBLE(a * mMultiplyer);
         outParameters.emplace_back(c);
       }
       else

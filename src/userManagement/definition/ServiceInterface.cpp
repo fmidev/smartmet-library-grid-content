@@ -35,9 +35,7 @@ ServiceInterface::ServiceInterface()
 
 /*! \brief Destructor. */
 
-ServiceInterface::~ServiceInterface()
-{
-}
+ServiceInterface::~ServiceInterface() = default;
 
 
 
@@ -274,7 +272,7 @@ int ServiceInterface::getUserAttributes(T::SessionId sessionId,uint userId,const
     int result = _getUserAttributes(sessionId,userId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -378,7 +376,7 @@ int ServiceInterface::setUserAttributes(T::SessionId sessionId,uint userId,const
     int result = _setUserAttributes(sessionId,userId,attributeGroup,attributeList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,Attribute[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -455,7 +453,7 @@ int ServiceInterface::deleteUserAttributes(T::SessionId sessionId,uint userId,co
     int result = _deleteUserAttributes(sessionId,userId,attributeGroup,attributeNameList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,AttributeName[%ld]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%u,%s,AttributeName[%zu]);result %d;time %f;",__FUNCTION__,sessionId,userId,attributeGroup,attributeNameList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -469,7 +467,7 @@ int ServiceInterface::deleteUserAttributes(T::SessionId sessionId,uint userId,co
 
 /*! \brief Protected hook: add user. */
 
-int ServiceInterface::_addUser(T::SessionId sessionId,UserInfo& userInfo)
+int ServiceInterface::_addUser(T::SessionId /*sessionId*/,UserInfo& /*userInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -478,7 +476,7 @@ int ServiceInterface::_addUser(T::SessionId sessionId,UserInfo& userInfo)
 
 /*! \brief Protected hook: delete user. */
 
-int ServiceInterface::_deleteUser(T::SessionId sessionId,uint userId)
+int ServiceInterface::_deleteUser(T::SessionId /*sessionId*/,uint /*userId*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -487,7 +485,7 @@ int ServiceInterface::_deleteUser(T::SessionId sessionId,uint userId)
 
 /*! \brief Protected hook: update user info. */
 
-int ServiceInterface::_updateUserInfo(T::SessionId sessionId,UserInfo& userInfo)
+int ServiceInterface::_updateUserInfo(T::SessionId /*sessionId*/,UserInfo& /*userInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -496,7 +494,7 @@ int ServiceInterface::_updateUserInfo(T::SessionId sessionId,UserInfo& userInfo)
 
 /*! \brief Protected hook: get user attribute. */
 
-int ServiceInterface::_getUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
+int ServiceInterface::_getUserAttribute(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,const char * /*attributeName*/,std::string& /*attributeValue*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -505,7 +503,7 @@ int ServiceInterface::_getUserAttribute(T::SessionId sessionId,uint userId,const
 
 /*! \brief Protected hook: get user attributes. */
 
-int ServiceInterface::_getUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceInterface::_getUserAttributes(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,AttributeList& /*attributeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -514,7 +512,7 @@ int ServiceInterface::_getUserAttributes(T::SessionId sessionId,uint userId,cons
 
 /*! \brief Protected hook: get user info. */
 
-int ServiceInterface::_getUserInfo(T::SessionId sessionId,uint userId,UserInfo& userInfo)
+int ServiceInterface::_getUserInfo(T::SessionId /*sessionId*/,uint /*userId*/,UserInfo& /*userInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -523,7 +521,7 @@ int ServiceInterface::_getUserInfo(T::SessionId sessionId,uint userId,UserInfo& 
 
 /*! \brief Protected hook: get user info by username. */
 
-int ServiceInterface::_getUserInfoByUsername(T::SessionId sessionId,const char *username,UserInfo& userInfo)
+int ServiceInterface::_getUserInfoByUsername(T::SessionId /*sessionId*/,const char * /*username*/,UserInfo& /*userInfo*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -533,7 +531,7 @@ int ServiceInterface::_getUserInfoByUsername(T::SessionId sessionId,const char *
 
 /*! \brief Protected hook: set user attribute. */
 
-int ServiceInterface::_setUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
+int ServiceInterface::_setUserAttribute(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,const char * /*attributeName*/,const char * /*attributeValue*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -542,7 +540,7 @@ int ServiceInterface::_setUserAttribute(T::SessionId sessionId,uint userId,const
 
 /*! \brief Protected hook: set user attributes. */
 
-int ServiceInterface::_setUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceInterface::_setUserAttributes(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,AttributeList& /*attributeList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -551,7 +549,7 @@ int ServiceInterface::_setUserAttributes(T::SessionId sessionId,uint userId,cons
 
 /*! \brief Protected hook: delete user attribute. */
 
-int ServiceInterface::_deleteUserAttribute(T::SessionId sessionId,uint userId,const char *attributeGroup,const char *attributeName)
+int ServiceInterface::_deleteUserAttribute(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,const char * /*attributeName*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -560,7 +558,7 @@ int ServiceInterface::_deleteUserAttribute(T::SessionId sessionId,uint userId,co
 
 /*! \brief Protected hook: delete user attribute group. */
 
-int ServiceInterface::_deleteUserAttributeGroup(T::SessionId sessionId,uint userId,const char *attributeGroup)
+int ServiceInterface::_deleteUserAttributeGroup(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -569,7 +567,7 @@ int ServiceInterface::_deleteUserAttributeGroup(T::SessionId sessionId,uint user
 
 /*! \brief Protected hook: delete user attributes. */
 
-int ServiceInterface::_deleteUserAttributes(T::SessionId sessionId,uint userId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
+int ServiceInterface::_deleteUserAttributes(T::SessionId /*sessionId*/,uint /*userId*/,const char * /*attributeGroup*/,std::vector<std::string>& /*attributeNameList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }

@@ -21,16 +21,18 @@ class Alias
                    Alias();
                    //Alias(const Alias& alias);
     virtual        ~Alias();
+    Alias(const Alias&) = default;
+    Alias& operator=(const Alias&) = default;
 
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string    mName;        //!< Alias name (must be unique within the owning AliasFile).
     std::string    mAliasString; //!< Canonical parameter name or expression the alias expands to.
 };
 
 
-typedef std::unordered_map<std::string,Alias> Alias_map;  //!< Hash map from alias name to Alias record.
-typedef std::vector<Alias> Alias_vec;                      //!< Ordered list of Alias records (supports duplicates).
+using Alias_map = std::unordered_map<std::string,Alias>;  //!< Hash map from alias name to Alias record.
+using Alias_vec = std::vector<Alias>;                      //!< Ordered list of Alias records (supports duplicates).
 
 
 }  // namespace QueryServer

@@ -44,7 +44,7 @@ UnitConversion::~UnitConversion()
 
 /*! \brief Query Server: Print. */
 
-void UnitConversion::print(std::ostream& stream,uint level,uint optionFlags)
+void UnitConversion::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

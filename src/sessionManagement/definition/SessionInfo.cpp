@@ -18,10 +18,15 @@ SessionInfo::SessionInfo()
 {
   try
   {
+    // SECURITY: the session id is the only secret of a logged-in browser session.
+    // Take all 64 bits directly from the OS random source instead of the first
+    // output of a mt19937_64 seeded with a single 32-bit value (only 2^32 possible
+    // ids). Zero means "no session" to the callers.
     std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<uint64_t> dist;
-    mSessionId = dist(gen);
+    for (bool more = true; more; more = mSessionId == 0)
+    {
+      mSessionId = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+    }
     mStartTime = time(nullptr);
     mLastAccessTime = mStartTime;
     mTimeOutInSeconds = 600;
@@ -37,9 +42,7 @@ SessionInfo::SessionInfo()
 
 /*! \brief Destructor. */
 
-SessionInfo::~SessionInfo()
-{
-}
+SessionInfo::~SessionInfo() = default;
 
 
 
@@ -51,7 +54,7 @@ AttributeList* SessionInfo::getAttributeList(const char *attributeGroup)
   {
     auto group = mAttributeGroups.find(attributeGroup);
     if (group == mAttributeGroups.end())
-      return NULL;
+      return nullptr;
 
     return &(group->second);
   }
@@ -113,16 +116,16 @@ void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
     mAddress = sessionInfo.getAddress();
     mUserInfo = sessionInfo.mUserInfo;
 
-    for (auto g = attrGroupList.begin(); g != attrGroupList.end(); ++g)
+    for (auto& g : attrGroupList)
     {
-      auto group = mAttributeGroups.find(g->first);
+      auto group = mAttributeGroups.find(g.first);
       if (group == mAttributeGroups.end())
       {
-        mAttributeGroups.insert(std::pair<std::string,AttributeList>(g->first,g->second));
+        mAttributeGroups.insert(std::pair<std::string,AttributeList>(g.first,g.second));
       }
       else
       {
-        for (auto a = g->second.begin(); a != g->second.end(); ++a)
+        for (auto a = g.second.begin(); a != g.second.end(); ++a)
         {
 
           auto attr = group->second.find(a->first);
@@ -151,7 +154,7 @@ void SessionInfo::updateSessionInfo(SessionInfo& sessionInfo)
 
 /*! \brief Get expiration time. */
 
-time_t SessionInfo::getExpirationTime()
+time_t SessionInfo::getExpirationTime() const
 {
   try
   {
@@ -168,7 +171,7 @@ time_t SessionInfo::getExpirationTime()
 
 /*! \brief Get last access time. */
 
-time_t SessionInfo::getLastAccessTime()
+time_t SessionInfo::getLastAccessTime() const
 {
   try
   {
@@ -185,7 +188,7 @@ time_t SessionInfo::getLastAccessTime()
 
 /*! \brief Get session id. */
 
-T::SessionId SessionInfo::getSessionId()
+T::SessionId SessionInfo::getSessionId() const
 {
   try
   {
@@ -288,7 +291,7 @@ void SessionInfo::setAddress(const char *address)
 
 /*! \brief Get status. */
 
-uchar SessionInfo::getStatus()
+uchar SessionInfo::getStatus() const
 {
   try
   {
@@ -305,7 +308,7 @@ uchar SessionInfo::getStatus()
 
 /*! \brief Get time out in seconds. */
 
-uint SessionInfo::getTimeOutInSeconds()
+uint SessionInfo::getTimeOutInSeconds() const
 {
   try
   {
@@ -571,17 +574,17 @@ void SessionInfo::getAttributes(const char *attributeGroup,AttributeList& attrib
     if (group == mAttributeGroups.end())
       return;
 
-    if (attributeList.size() == 0)
+    if (attributeList.empty())
     {
       attributeList = group->second;
       return;
     }
 
-    for (auto it = attributeList.begin(); it != attributeList.end(); ++it)
+    for (auto& it : attributeList)
     {
-      auto attr = group->second.find(it->first);
+      auto attr = group->second.find(it.first);
       if (attr != group->second.end())
-        it->second = attr->second;
+        it.second = attr->second;
     }
   }
   catch (...)
@@ -799,7 +802,7 @@ void SessionInfo::setAttribute(const char *attributeGroup,const char *attributeN
 
 /*! \brief Set attributes. */
 
-void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attributeList)
+void SessionInfo::setAttributes(const char *attributeGroup,const AttributeList& attributeList)
 {
   try
   {
@@ -812,13 +815,13 @@ void SessionInfo::setAttributes(const char *attributeGroup,AttributeList& attrib
       return;
     }
 
-    for (auto it = attributeList.begin(); it != attributeList.end(); ++it)
+    for (const auto& it : attributeList)
     {
-      auto attr = group->second.find(it->first);
+      auto attr = group->second.find(it.first);
       if (attr != group->second.end())
-        attr->second = it->second;
+        attr->second = it.second;
       else
-        group->second.insert(std::pair<std::string,std::string>(it->first,it->second));
+        group->second.insert(std::pair<std::string,std::string>(it.first,it.second));
     }
   }
   catch (...)
@@ -875,7 +878,7 @@ void SessionInfo::deleteAttributeGroup(const char *attributeGroup)
 
 /*! \brief Delete attributes. */
 
-void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList)
+void SessionInfo::deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList)
 {
   try
   {
@@ -885,9 +888,9 @@ void SessionInfo::deleteAttributes(const char *attributeGroup,std::vector<std::s
     if (group == mAttributeGroups.end())
       return;
 
-    for (auto it = attributeNameList.begin(); it != attributeNameList.end(); ++it)
+    for (const auto& it : attributeNameList)
     {
-      group->second.erase(*it);
+      group->second.erase(it);
     }
   }
   catch (...)
@@ -917,10 +920,10 @@ void SessionInfo::print(std::ostream& stream,uint level,uint optionFlags)
     stream << space(level) << "- mKey              = " << mKey << "\n";
     stream << space(level) << "- mAddress          = " << mAddress << "\n";
     stream << space(level) << "- mAttributeGroups  = " << mAttributeGroups.size() << " (items)\n";
-    for (auto group = mAttributeGroups.begin(); group != mAttributeGroups.end(); ++group)
+    for (auto& mAttributeGroup : mAttributeGroups)
     {
-      stream << space(level+2) << "* " << group->first << "\n";
-      for (auto it = group->second.begin(); it != group->second.end(); ++it)
+      stream << space(level+2) << "* " << mAttributeGroup.first << "\n";
+      for (auto it = mAttributeGroup.second.begin(); it != mAttributeGroup.second.end(); ++it)
         stream << space(level+4) << "- " << it->first << " = " << it->second << "\n";
     }
 

@@ -12,6 +12,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -24,12 +25,14 @@ namespace ContentServer
 
 /*! \brief Merge backend: thread entry point that invokes eventProcessingThread on the implementation. */
 
-static void* MergeImplementation_eventProcessingThread(void *arg)
+namespace
+{
+void* MergeImplementation_eventProcessingThread(void *arg)
 {
   try
   {
     Fmi::set_thread_name("cs-merge-evt");
-    MergeImplementation *service = (MergeImplementation*)arg;
+    auto *service = (MergeImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
   }
@@ -37,19 +40,15 @@ static void* MergeImplementation_eventProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
 
 
 
 /*! \brief Merge backend: combine the storage index with an id to form a globally unique 32-bit id. */
-
-inline uint getNewId(uint contentStorageIndex,uint oldId)
-{
-  uint id = (contentStorageIndex << 24) + (oldId & 0x00FFFFFF);
-  return id;
-}
 
 
 /*! \brief Merge backend: combine the storage index with a producer id to form a global producer id. */
@@ -90,6 +89,28 @@ inline T::SourceId getNewSourceId(uint contentStorageIndex,T::SourceId oldId)
 
 
 
+/*! \brief Return the producer parameter line "producer;sourceKey;targetKeyType;targetKey;geometry;;levelId;level;forecastType;forecastNumber;preload". */
+
+std::string getProducerParameterLine(const std::string& producerName,const std::string& sourceParamKey,T::ParamKeyType targetParameterKeyType,const std::string& targetParamKey,const T::ContentInfo& contentInfo)
+{
+  T::ParamLevelId paramLevelId = contentInfo.mFmiParameterLevelId;
+  char levelBuf[10];
+  snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo.mParameterLevel);
+  return producerName + ";" +
+         sourceParamKey + ";" +
+         std::to_string(targetParameterKeyType) + ";" +
+         targetParamKey + ";" +
+         std::to_string(contentInfo.mGeometryId) + ";;" +
+         std::to_string(paramLevelId) + ";" +
+         levelBuf + ";" +
+         std::to_string(contentInfo.mForecastType) + ";" +
+         std::to_string(contentInfo.mForecastNumber) + ";" +
+         ((contentInfo.mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+}
+}  // namespace
+
+
+
 /*! \brief Merge backend: default constructor initializing the merged view state. */
 
 MergeImplementation::MergeImplementation()
@@ -97,6 +118,7 @@ MergeImplementation::MergeImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mImplementationType = Implementation::Cache;
     mStartTime = 0;
     mSessionId = 0;
@@ -152,13 +174,12 @@ MergeImplementation::~MergeImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
 
-    if (mSearchStructurePtr[0])
-      delete mSearchStructurePtr[0];
-
-    if (mSearchStructurePtr[1])
-      delete mSearchStructurePtr[1];
   }
   catch (...)
   {
@@ -170,9 +191,21 @@ MergeImplementation::~MergeImplementation()
 
 
 
+
+/*! \brief Returns the active search structure (see the header). */
+
+SearchStructure_sptr MergeImplementation::activeSearchStructure() const
+{
+  std::shared_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+  return mSearchStructurePtr[mActiveSearchStructure];
+}
+
+
+
+
 /*! \brief Merge backend: collect cache statistics from the merged ContentServer instances. */
 
-void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void MergeImplementation::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -200,10 +233,10 @@ void MergeImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
     mSessionId = sessionId;
     mDataServerSessionId = dataServerSessionId;
 
-    for (auto it = contentStorages.begin(); it != contentStorages.end(); ++it)
+    for (auto& contentStorage : contentStorages)
     {
       ContentSource source;
-      source.mContentStorage = *it;
+      source.mContentStorage = contentStorage;
       mContentSources.push_back(source);
     }
 
@@ -262,10 +295,7 @@ bool MergeImplementation::isReady()
   FUNCTION_TRACE
   try
   {
-    if (mContentSwapCounter > 0)
-      return true;
-    else
-      return false;
+    return mContentSwapCounter > 0;
   }
   catch (...)
   {
@@ -303,7 +333,7 @@ void MergeImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
   FUNCTION_TRACE
   try
   {
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return;
 
@@ -413,15 +443,12 @@ void MergeImplementation::shutdown()
 
 /*! \brief Merge backend: return true if the given session id is currently valid. */
 
-bool MergeImplementation::isSessionValid(T::SessionId sessionId)
+bool MergeImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   //FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return false;
-
-    return true;
+    return !mShutdownRequested;
   }
   catch (...)
   {
@@ -435,7 +462,7 @@ bool MergeImplementation::isSessionValid(T::SessionId sessionId)
 
 /*! \brief Merge backend: not implemented; mutation methods are read-only on the merged view. */
 
-int MergeImplementation::_clear(T::SessionId sessionId)
+int MergeImplementation::_clear(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -454,7 +481,7 @@ int MergeImplementation::_clear(T::SessionId sessionId)
 
 /*! \brief Merge backend: schedule a full reload of all upstream content storages. */
 
-int MergeImplementation::_reload(T::SessionId sessionId)
+int MergeImplementation::_reload(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
@@ -570,7 +597,7 @@ int MergeImplementation::_getContentChangeTime(T::SessionId sessionId,time_t& ch
 
 /*! \brief Merge backend: not implemented; producer additions go directly to the upstream sources. */
 
-int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int MergeImplementation::_addProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -589,7 +616,7 @@ int MergeImplementation::_addProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 /*! \brief Merge backend: not implemented; producer updates go directly to the upstream sources. */
 
-int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo& producerInfo)
+int MergeImplementation::_setProducerInfo(T::SessionId /*sessionId*/,T::ProducerInfo& /*producerInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -608,7 +635,7 @@ int MergeImplementation::_setProducerInfo(T::SessionId sessionId,T::ProducerInfo
 
 /*! \brief Merge backend: not implemented; deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteProducerInfoById(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -627,7 +654,7 @@ int MergeImplementation::_deleteProducerInfoById(T::SessionId sessionId,T::Produ
 
 /*! \brief Merge backend: not implemented; deletion by name is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoByName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteProducerInfoByName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -663,7 +690,7 @@ int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -684,7 +711,7 @@ int MergeImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
 
 /*! \brief Merge backend: not implemented; producer deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteProducerInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -720,7 +747,7 @@ int MergeImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -756,7 +783,7 @@ int MergeImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -786,7 +813,7 @@ int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     producerInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -832,14 +859,11 @@ int MergeImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,-1,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
@@ -891,7 +915,7 @@ int MergeImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -926,7 +950,7 @@ int MergeImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -953,7 +977,7 @@ int MergeImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1002,7 +1026,7 @@ int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1024,150 +1048,34 @@ int MergeImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = ssp->mContentInfoList[0].getContentInfoByIndex(t);
-      if (contentInfo != nullptr)
-      {
-        std::string sourceParamKey;
-        std::string targetParamKey;
-        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+      if (contentInfo == nullptr)
+        continue;
 
-        auto fmiId = contentInfo->mFmiParameterId;
+      std::string sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
+      std::string targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
 
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
+      if (sourceParamKey.empty()  ||  targetParamKey.empty())
+        continue;
 
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            if (sourceParamKey.empty())
-              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
+      std::size_t seed = 0;
+      Fmi::hash_merge(seed,contentInfo->mProducerId);
+      Fmi::hash_merge(seed,sourceParamKey);
+      Fmi::hash_merge(seed,targetParameterKeyType);
+      Fmi::hash_merge(seed,targetParamKey);
+      Fmi::hash_merge(seed,contentInfo->mGeometryId);
+      Fmi::hash_merge(seed,contentInfo->mFmiParameterLevelId);
+      Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+      Fmi::hash_merge(seed,contentInfo->mForecastType);
+      Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
+      if (tmpList.find(seed) != tmpList.end())
+        continue;
 
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
+      tmpList.insert(seed);
 
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
-
-
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            if (targetParamKey.empty())
-              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
-
-        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
-        {
-          std::size_t seed = 0;
-          Fmi::hash_merge(seed,contentInfo->mProducerId);
-          Fmi::hash_merge(seed,sourceParamKey);
-          Fmi::hash_merge(seed,targetParameterKeyType);
-          Fmi::hash_merge(seed,targetParamKey);
-          Fmi::hash_merge(seed,contentInfo->mGeometryId);
-          Fmi::hash_merge(seed,paramLevelId);
-          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
-          Fmi::hash_merge(seed,contentInfo->mForecastType);
-          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
-
-
-          if (tmpList.find(seed) == tmpList.end())
-          {
-            tmpList.insert(seed);
-
-            auto it = producers.find(contentInfo->mProducerId);
-            if (it != producers.end())
-            {
-              char levelBuf[10];
-              snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
-              std::string tmp =
-                    it->second->mName + ";" +
-                    sourceParamKey + ";" +
-                    std::to_string(targetParameterKeyType) + ";" +
-                    targetParamKey + ";" +
-                    std::to_string(contentInfo->mGeometryId) + ";;" +
-                    std::to_string(paramLevelId) + ";" +
-                    levelBuf + ";" +
-                    std::to_string(contentInfo->mForecastType) + ";" +
-                    std::to_string(contentInfo->mForecastNumber) + ";" +
-                    ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
-              list.insert(tmp);
-            }
-          }
-        }
-      }
+      auto it = producers.find(contentInfo->mProducerId);
+      if (it != producers.end())
+        list.insert(getProducerParameterLine(it->second->mName,sourceParamKey,targetParameterKeyType,targetParamKey,*contentInfo));
     }
 
     return Result::OK;
@@ -1192,7 +1100,7 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1213,104 +1121,10 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
         std::string sourceParamKey;
         std::string targetParamKey;
         T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            if (sourceParamKey.empty())
-              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            if (targetParamKey.empty())
-              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
@@ -1363,7 +1177,7 @@ int MergeImplementation::_getProducerParameterListByProducerId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; generation additions go directly to the upstream sources. */
 
-int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int MergeImplementation::_addGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1382,7 +1196,7 @@ int MergeImplementation::_addGenerationInfo(T::SessionId sessionId,T::Generation
 
 /*! \brief Merge backend: not implemented; generation updates go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::GenerationInfo& generationInfo)
+int MergeImplementation::_setGenerationInfo(T::SessionId /*sessionId*/,T::GenerationInfo& /*generationInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1401,7 +1215,7 @@ int MergeImplementation::_setGenerationInfo(T::SessionId sessionId,T::Generation
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteGenerationInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -1420,7 +1234,7 @@ int MergeImplementation::_deleteGenerationInfoById(T::SessionId sessionId,T::Gen
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteGenerationInfoByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -1439,7 +1253,7 @@ int MergeImplementation::_deleteGenerationInfoByName(T::SessionId sessionId,cons
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionId,std::set<T::GenerationId>& generationIdList)
+int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId /*sessionId*/,std::set<T::GenerationId>& /*generationIdList*/)
 {
   FUNCTION_TRACE
   try
@@ -1458,7 +1272,7 @@ int MergeImplementation::_deleteGenerationInfoListByIdList(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -1477,7 +1291,7 @@ int MergeImplementation::_deleteGenerationInfoListByProducerId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -1496,7 +1310,7 @@ int MergeImplementation::_deleteGenerationInfoListByProducerName(T::SessionId se
 
 /*! \brief Merge backend: not implemented; generation deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteGenerationInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -1523,7 +1337,7 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1536,7 +1350,7 @@ int MergeImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
       if (info != nullptr)
       {
         char st[1000];
-        snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+        snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
         std::string str = st;
         if (list.find(str) == list.end())
           list.insert(str);
@@ -1565,7 +1379,7 @@ int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1575,9 +1389,9 @@ int MergeImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     ssp->mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -1613,7 +1427,7 @@ int MergeImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1651,7 +1465,7 @@ int MergeImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1689,7 +1503,7 @@ int MergeImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1725,7 +1539,7 @@ int MergeImplementation::_getGenerationInfoListByProducerId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1765,7 +1579,7 @@ int MergeImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1806,7 +1620,7 @@ int MergeImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1833,7 +1647,7 @@ int MergeImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1868,7 +1682,7 @@ int MergeImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1910,7 +1724,7 @@ int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1929,7 +1743,7 @@ int MergeImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
 
 /*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,uchar status)
+int MergeImplementation::_setGenerationInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -1948,7 +1762,7 @@ int MergeImplementation::_setGenerationInfoStatusById(T::SessionId sessionId,T::
 
 /*! \brief Merge backend: not implemented; status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,const std::string& generationName,uchar status)
+int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId /*sessionId*/,const std::string& /*generationName*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -1967,7 +1781,7 @@ int MergeImplementation::_setGenerationInfoStatusByName(T::SessionId sessionId,c
 
 /*! \brief Merge backend: not implemented; geometry additions go directly to the upstream sources. */
 
-int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int MergeImplementation::_addGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -1985,26 +1799,7 @@ int MergeImplementation::_addGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId)
-{
-  FUNCTION_TRACE
-  try
-  {
-    return Result::NO_PERMANENT_STORAGE_DEFINED;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
-  }
-}
-
-
-
-
-
-/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
-
-int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteGeometryInfoById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/)
 {
   FUNCTION_TRACE
   try
@@ -2023,7 +1818,7 @@ int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteGeometryInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -2042,7 +1837,26 @@ int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId sessio
 
 /*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteGeometryInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
+{
+  FUNCTION_TRACE
+  try
+  {
+    return Result::NO_PERMANENT_STORAGE_DEFINED;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Merge backend: not implemented; geometry deletion is handled by the upstream sources. */
+
+int MergeImplementation::_deleteGeometryInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -2078,7 +1892,7 @@ int MergeImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generati
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2115,7 +1929,7 @@ int MergeImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2151,7 +1965,7 @@ int MergeImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2186,7 +2000,7 @@ int MergeImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2222,7 +2036,7 @@ int MergeImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2256,7 +2070,7 @@ int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2275,7 +2089,7 @@ int MergeImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
 
 /*! \brief Merge backend: not implemented; geometry updates go directly to the upstream sources. */
 
-int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo& geometryInfo)
+int MergeImplementation::_setGeometryInfo(T::SessionId /*sessionId*/,T::GeometryInfo& /*geometryInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2294,7 +2108,7 @@ int MergeImplementation::_setGeometryInfo(T::SessionId sessionId,T::GeometryInfo
 
 /*! \brief Merge backend: not implemented; geometry status changes go directly to the upstream sources. */
 
-int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,uchar status)
+int MergeImplementation::_setGeometryInfoStatusById(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ParamLevelId /*levelId*/,uchar /*status*/)
 {
   FUNCTION_TRACE
   try
@@ -2313,7 +2127,7 @@ int MergeImplementation::_setGeometryInfoStatusById(T::SessionId sessionId,T::Ge
 
 /*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int MergeImplementation::_addFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2332,7 +2146,7 @@ int MergeImplementation::_addFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 /*! \brief Merge backend: not implemented; file updates go directly to the upstream sources. */
 
-int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileInfo)
+int MergeImplementation::_setFileInfo(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -2351,7 +2165,7 @@ int MergeImplementation::_setFileInfo(T::SessionId sessionId,T::FileInfo& fileIn
 
 /*! \brief Merge backend: not implemented; file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::FileInfo& fileInfo,T::ContentInfoList& contentInfoList)
+int MergeImplementation::_addFileInfoWithContentList(T::SessionId /*sessionId*/,T::FileInfo& /*fileInfo*/,T::ContentInfoList& /*contentInfoList*/)
 {
   FUNCTION_TRACE
   try
@@ -2370,7 +2184,7 @@ int MergeImplementation::_addFileInfoWithContentList(T::SessionId sessionId,T::F
 
 /*! \brief Merge backend: not implemented; bulk file additions go directly to the upstream sources. */
 
-int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint requestFlags,std::vector<T::FileAndContent>& fileAndContentList)
+int MergeImplementation::_addFileInfoListWithContent(T::SessionId /*sessionId*/,uint /*requestFlags*/,std::vector<T::FileAndContent>& /*fileAndContentList*/)
 {
   FUNCTION_TRACE
   try
@@ -2389,7 +2203,7 @@ int MergeImplementation::_addFileInfoListWithContent(T::SessionId sessionId,uint
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fileId)
+int MergeImplementation::_deleteFileInfoById(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   FUNCTION_TRACE
   try
@@ -2408,7 +2222,7 @@ int MergeImplementation::_deleteFileInfoById(T::SessionId sessionId,T::FileId fi
 
 /*! \brief Merge backend: not implemented; file deletion by name is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std::string& filename)
+int MergeImplementation::_deleteFileInfoByName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   FUNCTION_TRACE
   try
@@ -2427,7 +2241,7 @@ int MergeImplementation::_deleteFileInfoByName(T::SessionId sessionId,const std:
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -2446,7 +2260,7 @@ int MergeImplementation::_deleteFileInfoListByProducerId(T::SessionId sessionId,
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -2465,7 +2279,7 @@ int MergeImplementation::_deleteFileInfoListByProducerName(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -2484,7 +2298,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationId(T::SessionId sessionI
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId sessionId,T::GenerationId generationId,T::GeometryId geometryId,T::ForecastType forecastType,T::ForecastNumber forecastNumber,time_t forecastTime)
+int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/,T::GeometryId /*geometryId*/,T::ForecastType /*forecastType*/,T::ForecastNumber /*forecastNumber*/,time_t /*forecastTime*/)
 {
   FUNCTION_TRACE
   try
@@ -2503,7 +2317,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationIdAndForecastTime(T::Ses
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sessionId,std::vector<T::ForecastTime>& forecastTimeList)
+int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId /*sessionId*/,std::vector<T::ForecastTime>& /*forecastTimeList*/)
 {
   FUNCTION_TRACE
   try
@@ -2522,7 +2336,7 @@ int MergeImplementation::_deleteFileInfoListByForecastTimeList(T::SessionId sess
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -2541,7 +2355,7 @@ int MergeImplementation::_deleteFileInfoListByGenerationName(T::SessionId sessio
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -2560,7 +2374,7 @@ int MergeImplementation::_deleteFileInfoListBySourceId(T::SessionId sessionId,T:
 
 /*! \brief Merge backend: not implemented; file deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId sessionId,std::set<T::FileId>& fileIdList)
+int MergeImplementation::_deleteFileInfoListByFileIdList(T::SessionId /*sessionId*/,std::set<T::FileId>& /*fileIdList*/)
 {
   FUNCTION_TRACE
   try
@@ -2596,7 +2410,7 @@ int MergeImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2634,7 +2448,7 @@ int MergeImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2672,7 +2486,7 @@ int MergeImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId start
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2704,24 +2518,24 @@ int MergeImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
-        T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+        T::FileInfo *info = mFileInfoList.getFileInfoById(it);
         if (info != nullptr)
           fileInfoList.addFileInfo(info->duplicate());
       }
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
     AutoReadLock readLock(&mSearchModificationLock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -2754,7 +2568,7 @@ int MergeImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2800,7 +2614,7 @@ int MergeImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2842,7 +2656,7 @@ int MergeImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2882,7 +2696,7 @@ int MergeImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2922,7 +2736,7 @@ int MergeImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::So
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2956,7 +2770,7 @@ int MergeImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2990,7 +2804,7 @@ int MergeImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3023,7 +2837,7 @@ int MergeImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3057,7 +2871,7 @@ int MergeImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3083,7 +2897,7 @@ T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
   {
     mEventCounter++;
 
-    T::EventInfo *eventInfo = new T::EventInfo(mStartTime,mEventCounter,eventType,id1,id2,id3,flags,"");
+    auto *eventInfo = new T::EventInfo(mStartTime,mEventCounter,eventType,id1,id2,id3,flags,"");
     eventInfo->mServerTime = mStartTime;
     mEventInfoList.addEventInfo(eventInfo);
 
@@ -3100,7 +2914,7 @@ T::EventId MergeImplementation::addEvent(uint eventType,UInt64 id1,UInt64 id2,UI
 
 /*! \brief Merge backend: not implemented; events are produced by the upstream sources. */
 
-int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& eventInfo)
+int MergeImplementation::_addEventInfo(T::SessionId /*sessionId*/,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3119,7 +2933,7 @@ int MergeImplementation::_addEventInfo(T::SessionId sessionId,T::EventInfo& even
 
 /*! \brief Merge backend: return the most recent merged event visible to the requesting server. */
 
-int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestingServerId,T::EventInfo& eventInfo)
+int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint /*requestingServerId*/,T::EventInfo& eventInfo)
 {
   //FUNCTION_TRACE
   try
@@ -3153,7 +2967,7 @@ int MergeImplementation::_getLastEventInfo(T::SessionId sessionId,uint requestin
 
 /*! \brief Merge backend: return a page of merged event records starting at the given event id. */
 
-int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestingServerId,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
+int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint /*requestingServerId*/,T::EventId startEventId,int maxRecords,T::EventInfoList& eventInfoList)
 {
   FUNCTION_TRACE
   try
@@ -3172,7 +2986,7 @@ int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
     T::EventInfo *event = eventList.getFirstEvent();
     while (event != nullptr)
     {
-      T::EventInfo *eventInfo = new T::EventInfo(*event);
+      auto *eventInfo = new T::EventInfo(*event);
       if (eventInfo->mType == EventType::FILE_ADDED)
       {
 
@@ -3197,8 +3011,7 @@ int MergeImplementation::_getEventInfoList(T::SessionId sessionId,uint requestin
           eventInfo->mEventData = output.str();
         }
       }
-      else
-      if (eventInfo->mType == EventType::CONTENT_ADDED)
+      else if (eventInfo->mType == EventType::CONTENT_ADDED)
       {
         T::ContentInfo *contentInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(eventInfo->mId1,eventInfo->mId2);
 
@@ -3278,7 +3091,7 @@ int MergeImplementation::_getEventInfoCount(T::SessionId sessionId,uint& count)
 
 /*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
 
-int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int MergeImplementation::_addContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3297,7 +3110,7 @@ int MergeImplementation::_addContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 /*! \brief Merge backend: not implemented; content updates go directly to the upstream sources. */
 
-int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& contentInfo)
+int MergeImplementation::_setContentInfo(T::SessionId /*sessionId*/,T::ContentInfo& /*contentInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -3316,7 +3129,7 @@ int MergeImplementation::_setContentInfo(T::SessionId sessionId,T::ContentInfo& 
 
 /*! \brief Merge backend: not implemented; content additions go directly to the upstream sources. */
 
-int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoList& contentInfoList)
+int MergeImplementation::_addContentList(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/)
 {
   FUNCTION_TRACE
   try
@@ -3335,7 +3148,7 @@ int MergeImplementation::_addContentList(T::SessionId sessionId,T::ContentInfoLi
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fileId,T::MessageIndex messageIndex)
+int MergeImplementation::_deleteContentInfo(T::SessionId /*sessionId*/,T::FileId /*fileId*/,T::MessageIndex /*messageIndex*/)
 {
   FUNCTION_TRACE
   try
@@ -3354,7 +3167,7 @@ int MergeImplementation::_deleteContentInfo(T::SessionId sessionId,T::FileId fil
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::FileId fileId)
+int MergeImplementation::_deleteContentListByFileId(T::SessionId /*sessionId*/,T::FileId /*fileId*/)
 {
   FUNCTION_TRACE
   try
@@ -3373,7 +3186,7 @@ int MergeImplementation::_deleteContentListByFileId(T::SessionId sessionId,T::Fi
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,const std::string& filename)
+int MergeImplementation::_deleteContentListByFileName(T::SessionId /*sessionId*/,const std::string& /*filename*/)
 {
   FUNCTION_TRACE
   try
@@ -3392,7 +3205,7 @@ int MergeImplementation::_deleteContentListByFileName(T::SessionId sessionId,con
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T::ProducerId producerId)
+int MergeImplementation::_deleteContentListByProducerId(T::SessionId /*sessionId*/,T::ProducerId /*producerId*/)
 {
   FUNCTION_TRACE
   try
@@ -3411,7 +3224,7 @@ int MergeImplementation::_deleteContentListByProducerId(T::SessionId sessionId,T
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId,const std::string& producerName)
+int MergeImplementation::_deleteContentListByProducerName(T::SessionId /*sessionId*/,const std::string& /*producerName*/)
 {
   FUNCTION_TRACE
   try
@@ -3430,7 +3243,7 @@ int MergeImplementation::_deleteContentListByProducerName(T::SessionId sessionId
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId,T::GenerationId generationId)
+int MergeImplementation::_deleteContentListByGenerationId(T::SessionId /*sessionId*/,T::GenerationId /*generationId*/)
 {
   FUNCTION_TRACE
   try
@@ -3449,7 +3262,7 @@ int MergeImplementation::_deleteContentListByGenerationId(T::SessionId sessionId
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListByGenerationName(T::SessionId sessionId,const std::string& generationName)
+int MergeImplementation::_deleteContentListByGenerationName(T::SessionId /*sessionId*/,const std::string& /*generationName*/)
 {
   FUNCTION_TRACE
   try
@@ -3468,7 +3281,7 @@ int MergeImplementation::_deleteContentListByGenerationName(T::SessionId session
 
 /*! \brief Merge backend: not implemented; content deletion is handled by the upstream sources. */
 
-int MergeImplementation::_deleteContentListBySourceId(T::SessionId sessionId,T::SourceId sourceId)
+int MergeImplementation::_deleteContentListBySourceId(T::SessionId /*sessionId*/,T::SourceId /*sourceId*/)
 {
   FUNCTION_TRACE
   try
@@ -3507,7 +3320,7 @@ int MergeImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId
       return Result::DATA_NOT_FOUND;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3548,7 +3361,7 @@ int MergeImplementation::_getContentList(T::SessionId sessionId,T::FileId startF
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3585,7 +3398,7 @@ int MergeImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3617,23 +3430,23 @@ int MergeImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
         T::ContentInfoList contentList;
-        mContentInfoList.getContentInfoListByFileId(*it,contentList);
+        mContentInfoList.getContentInfoListByFileId(it,contentList);
         contentInfoList.addContentInfoList(contentList);
       }
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      ssp->mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      ssp->mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -3672,7 +3485,7 @@ int MergeImplementation::_getContentListByFileName(T::SessionId sessionId,const 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3712,7 +3525,7 @@ int MergeImplementation::_getContentListByProducerId(T::SessionId sessionId,T::P
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 /*
@@ -3757,7 +3570,7 @@ int MergeImplementation::_getContentListByProducerName(T::SessionId sessionId,co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3801,7 +3614,7 @@ int MergeImplementation::_getContentListByGenerationId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3849,7 +3662,7 @@ int MergeImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3893,7 +3706,7 @@ int MergeImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3937,7 +3750,7 @@ int MergeImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3977,7 +3790,7 @@ int MergeImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4004,7 +3817,7 @@ int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4047,14 +3860,11 @@ int MergeImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4081,7 +3891,7 @@ int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4129,14 +3939,11 @@ int MergeImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4163,7 +3970,7 @@ int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4210,14 +4017,11 @@ int MergeImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4243,7 +4047,7 @@ int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4293,14 +4097,11 @@ int MergeImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4326,7 +4127,7 @@ int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4373,14 +4174,11 @@ int MergeImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4407,7 +4205,7 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4462,14 +4260,11 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     T::ContentInfo *cInfo = ssp->mContentInfoList[1].getContentInfoByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
@@ -4481,6 +4276,46 @@ int MergeImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
     contentInfoList = contentList;
     return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return true (and log the error) if the file, generation or producer of the content is missing. */
+
+bool MergeImplementation::hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfo *fileInfo = ss.mFileInfoList.getFileInfoById(cInfo.mFileId);
+    if (fileInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo.mFileId);
+      return true;
+    }
+
+    T::GenerationInfo *generationInfo = ss.mGenerationInfoList.getGenerationInfoById(cInfo.mGenerationId);
+    if (generationInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo.mGenerationId);
+      return true;
+    }
+
+    T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoById(cInfo.mProducerId);
+    if (producerInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo.mProducerId);
+      return true;
+    }
+
+    return false;
   }
   catch (...)
   {
@@ -4504,7 +4339,7 @@ int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
     contentInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4512,39 +4347,8 @@ int MergeImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = nullptr;
-      if (cInfo != nullptr)
-      {
-        T::FileInfo *fileInfo = ssp->mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == nullptr)
-        {
-          PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
-          cError = cInfo;
-        }
-
-        if (cError == nullptr)
-        {
-          T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError == nullptr)
-        {
-          T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError != nullptr)
-          contentInfoList.addContentInfo(cError->duplicate());
-      }
+      if (cInfo != nullptr  &&  hasInvalidIntegrity(*ssp,*cInfo))
+        contentInfoList.addContentInfo(cInfo->duplicate());
     }
     return Result::OK;
   }
@@ -4568,7 +4372,7 @@ int MergeImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4601,7 +4405,7 @@ int MergeImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4620,8 +4424,10 @@ int MergeImplementation::_getContentParamListByGenerationId(T::SessionId session
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *info = contentInfoList.getContentInfoByIndex(t);
+      if (info == nullptr)
+        continue;
 
-      if (info != nullptr  &&  (prev == nullptr ||
+      if ((prev == nullptr ||
           info->getFmiParameterName() != prev->getFmiParameterName() ||
           info->mFmiParameterLevelId != prev->mFmiParameterLevelId ||
           info->mParameterLevel != prev->mParameterLevel ||
@@ -4661,7 +4467,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4694,7 +4500,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4727,7 +4533,7 @@ int MergeImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4760,7 +4566,7 @@ int MergeImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::S
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4793,7 +4599,7 @@ int MergeImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4825,7 +4631,7 @@ int MergeImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4877,7 +4683,7 @@ int MergeImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4918,7 +4724,7 @@ int MergeImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4959,7 +4765,7 @@ int MergeImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4993,7 +4799,7 @@ int MergeImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::Se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5027,7 +4833,7 @@ int MergeImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5063,7 +4869,7 @@ int MergeImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5109,7 +4915,7 @@ int MergeImplementation::_getHashByProducerId(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5157,7 +4963,7 @@ int MergeImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       return Result::OK;
     }
 */
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5390,6 +5196,9 @@ void MergeImplementation::readFileList(uint contentStorageIndex,ContentServer_sp
       if (mShutdownRequested)
         return;
 
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       T::FileInfoList fileInfoList;
 
       int result = contentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
@@ -5457,6 +5266,9 @@ void MergeImplementation::readContentList(uint contentStorageIndex,ContentServer
     {
       if (mShutdownRequested)
         return;
+
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
 
       T::ContentInfoList contentInfoList;
 
@@ -5527,7 +5339,7 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
     mContentInfoList.deleteContentInfoByStorageId(contentStorageIndex);
 
     // Switching the search structure
-    mContentUpdateTime = time(0) - mContentUpdateInterval;
+    mContentUpdateTime = time(nullptr) - mContentUpdateInterval;
 
     addEvent(EventType::STORAGE_CLEAR,contentStorageIndex,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
   }
@@ -5543,7 +5355,7 @@ void MergeImplementation::event_clear(uint contentStorageIndex,T::EventInfo& eve
 
 /*! \brief Merge backend: handle a content server reload event by reimporting from the given storage. */
 
-void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_contentServerReload(uint /*contentStorageIndex*/,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5562,7 +5374,7 @@ void MergeImplementation::event_contentServerReload(uint contentStorageIndex,T::
 
 /*! \brief Merge backend: handle the start of an upstream update cycle. */
 
-void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5573,7 +5385,7 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
         + mGeometryInfoList.getHashByStorageId(contentStorageIndex)
         + mContentInfoList.getHashByStorageId(contentStorageIndex);
 
-    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopStart(%u);Hash %ld",contentStorageIndex,mContentSources[contentStorageIndex].mHash);
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopStart(%u);Hash %zu",contentStorageIndex,mContentSources[contentStorageIndex].mHash);
   }
   catch (...)
   {
@@ -5588,7 +5400,7 @@ void MergeImplementation::event_updateLoopStart(uint contentStorageIndex,T::Even
 
 /*! \brief Merge backend: handle the end of an upstream update cycle. */
 
-void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -5603,12 +5415,12 @@ void MergeImplementation::event_updateLoopEnd(uint contentStorageIndex,T::EventI
 
     if (hash != mContentSources[contentStorageIndex].mHash)
     {
-      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);### Hash changed %ld ###",contentStorageIndex,hash);
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);### Hash changed %zu ###",contentStorageIndex,hash);
       mContentUpdateRequired = true;
     }
     else
     {
-      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);Hash not changed %ld",contentStorageIndex,hash);
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::event_updateLoopEnd(%u);Hash not changed %zu",contentStorageIndex,hash);
     }
 
     mContentSources[contentStorageIndex].mHash = hash;
@@ -5981,7 +5793,7 @@ void MergeImplementation::event_geometryAdded(uint contentStorageIndex,T::EventI
 
 /*! \brief Merge backend: handle a geometry-deleted event from an upstream content storage. */
 
-void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_geometryDeleted(uint /*contentStorageIndex*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -6004,7 +5816,7 @@ void MergeImplementation::event_geometryDeleted(uint contentStorageIndex,T::Even
 
 /*! \brief Merge backend: handle a geometry status change event from an upstream content storage. */
 
-void MergeImplementation::event_geometryStatusChanged(uint contentStorageIndex,T::EventInfo& eventInfo)
+void MergeImplementation::event_geometryStatusChanged(uint /*contentStorageIndex*/,T::EventInfo& eventInfo)
 {
   FUNCTION_TRACE
   try
@@ -6135,6 +5947,197 @@ void MergeImplementation::event_geometryListDeletedBySourceId(uint contentStorag
 
 
 
+/*! \brief Adds a content record to the primary content list. If the list has a record of the
+    same message that is marked deleted (old content of a file that was registered again), the
+    record is reused for the new content. Previously the new content was dropped, so a file that
+    was rewritten in place lost its messages. Takes the ownership of contentInfo.
+*/
+
+namespace
+{
+template <typename List>
+void addOrReplaceContent(List& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+{
+  T::ContentInfo *existing = list.addContentInfo(contentInfo);
+  if (existing == contentInfo)
+    return;
+
+  if (existing != nullptr  &&  (existing->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+  {
+    *existing = *contentInfo;
+    existing->mFlags &= ~T::ContentInfo::Flags::DeletedContent;
+    if (deleteCounter > 0)
+      deleteCounter--;
+  }
+  delete contentInfo;
+}
+}  // namespace
+
+
+
+
+
+/*! \brief Add the content (with the merged ids) into the content list, and its forecast time into the cached forecast times of its generation. */
+
+void MergeImplementation::addMergedContent(T::ContentInfo *contentInfo)
+{
+  try
+  {
+    AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
+    auto it = mContentTimeCache.find(contentInfo->mGenerationId);
+    if (it != mContentTimeCache.end())
+    {
+      //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
+        it->second.insert(contentInfo->getForecastTime());
+    }
+
+    addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file (first line) and the contents (other lines) of the FILE_ADDED event data of the content storage
+           that are not yet in the lists, with the merged ids. */
+
+void MergeImplementation::addEventFileAndContents(uint contentStorageIndex,T::FileId newFileId,const std::string& eventData)
+{
+  try
+  {
+    std::string bufStr(eventData);
+    char *s = bufStr.data();
+
+    while (s != nullptr)
+    {
+      char *p = strstr(s,"\n");
+      if (p == nullptr)
+        break;
+
+      *p = '\0';
+      if (s == bufStr.data())
+      {
+        auto *fileInfo = new T::FileInfo();
+        fileInfo->setCsv(s);
+
+        if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
+        {
+          fileInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo->mProducerId);
+          fileInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo->mGenerationId);
+          fileInfo->mFileId = getNewFileId(contentStorageIndex,fileInfo->mFileId);
+          fileInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo->mSourceId);
+          fileInfo->mStorageId = contentStorageIndex;
+          mFileInfoList.addFileInfo(fileInfo);
+        }
+        else
+        {
+          delete fileInfo;
+        }
+      }
+      else
+      {
+        auto *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(s);
+
+        T::FileId newContentFileId = getNewFileId(contentStorageIndex,contentInfo->mFileId);
+        T::GenerationId newGenerationId = getNewGenerationId(contentStorageIndex,contentInfo->mGenerationId);
+        T::SourceId newSourceId = getNewSourceId(contentStorageIndex,contentInfo->mSourceId);
+
+        if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(newContentFileId,contentInfo->mMessageIndex) == nullptr)
+        {
+          contentInfo->mProducerId = getNewProducerId(contentStorageIndex,contentInfo->mProducerId);
+          contentInfo->mGenerationId = newGenerationId;
+          contentInfo->mFileId = newContentFileId;
+          contentInfo->mSourceId = newSourceId;
+          contentInfo->mStorageId = contentStorageIndex;
+
+          addMergedContent(contentInfo);
+        }
+        else
+        {
+          delete contentInfo;
+        }
+      }
+      s = p + 1;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file of the FILE_ADDED event and its contents (if the event says it has some) from the content storage, with the merged ids. */
+
+void MergeImplementation::addStoredFileAndContents(uint contentStorageIndex,T::FileId newFileId,T::EventInfo& eventInfo)
+{
+  try
+  {
+    T::FileInfo fileInfo;
+
+    if (mContentSources[contentStorageIndex].mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) != Result::OK)
+      return;
+
+    T::FileInfo *fInfo = fileInfo.duplicate();
+    fInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
+    fInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
+    fInfo->mFileId = newFileId;
+    fInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
+    fInfo->mStorageId = contentStorageIndex;
+    T::SourceId newSourceId = fInfo->mSourceId;
+
+    // As in the event data path, a file that is already in the list is not added twice
+    if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
+      mFileInfoList.addFileInfo(fInfo);
+    else
+      delete fInfo;
+
+    if (eventInfo.mId3 == 0)
+      return;
+
+    T::ContentInfoList contentInfoList;
+    if (mContentSources[contentStorageIndex].mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) != Result::OK)
+      return;
+
+    uint len = contentInfoList.getLength();
+    for (uint c=0; c<len; c++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+
+      // The lookup does not return deleted contents. A content marked deleted (old content of a file that was
+      // registered again) is replaced by the new content in addOrReplaceContent.
+      if (info == nullptr  ||  mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex) != nullptr)
+        continue;
+
+      T::ContentInfo *cInfo = info->duplicate();
+      cInfo->mFileId = newFileId;
+      cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
+      cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
+      cInfo->mSourceId = newSourceId;
+      cInfo->mStorageId = contentStorageIndex;
+
+      addMergedContent(cInfo);
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: handle a file-added event from an upstream content storage. */
 
 void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo& eventInfo)
@@ -6148,145 +6151,9 @@ void MergeImplementation::event_fileAdded(uint contentStorageIndex,T::EventInfo&
     uint len = eventInfo.mEventData.length();
 
     if (len > 0)
-    {
-      std::string bufStr(eventInfo.mEventData);
-      char *s = bufStr.data();
-
-      while (s != nullptr)
-      {
-        char *p = strstr(s,"\n");
-        if (p != nullptr)
-        {
-          *p = '\0';
-          if (s == bufStr.data())
-          {
-            T::FileInfo *fileInfo = new T::FileInfo();
-            fileInfo->setCsv(s);
-
-            if (mFileInfoList.getFileInfoById(newFileId) == nullptr)
-            {
-              fileInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo->mProducerId);
-              fileInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo->mGenerationId);
-              fileInfo->mFileId = getNewFileId(contentStorageIndex,fileInfo->mFileId);
-              fileInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo->mSourceId);
-              fileInfo->mStorageId = contentStorageIndex;
-              mFileInfoList.addFileInfo(fileInfo);
-            }
-            else
-            {
-              delete fileInfo;
-            }
-          }
-          else
-          {
-            T::ContentInfo *contentInfo = new T::ContentInfo();
-            contentInfo->setCsv(s);
-
-            T::FileId newFileId = getNewFileId(contentStorageIndex,contentInfo->mFileId);
-            T::GenerationId newGenerationId = getNewGenerationId(contentStorageIndex,contentInfo->mGenerationId);
-            T::SourceId newSourceId = getNewSourceId(contentStorageIndex,contentInfo->mSourceId);
-
-            if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,contentInfo->mMessageIndex) == nullptr)
-            {
-              AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-              auto it = mContentTimeCache.find(newGenerationId);
-              if (it != mContentTimeCache.end())
-              {
-                //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
-                  it->second.insert(contentInfo->getForecastTime());
-              }
-
-              contentInfo->mProducerId = getNewProducerId(contentStorageIndex,contentInfo->mProducerId);
-              contentInfo->mGenerationId = newGenerationId;
-              contentInfo->mFileId = newFileId;
-              contentInfo->mSourceId = newSourceId;
-              contentInfo->mStorageId = contentStorageIndex;
-
-              if (mContentInfoList.addContentInfo(contentInfo) == contentInfo)
-              {
-              }
-              else
-              {
-                // Additon failed. The content probably exists
-                delete contentInfo;
-              }
-            }
-            else
-            {
-              delete contentInfo;
-            }
-          }
-          s = p + 1;
-        }
-        else
-        {
-          s = nullptr;
-        }
-      }
-    }
+      addEventFileAndContents(contentStorageIndex,newFileId,eventInfo.mEventData);
     else
-    {
-      T::FileInfo fileInfo;
-
-      if (mContentSources[contentStorageIndex].mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
-      {
-        T::FileInfo *fInfo = fileInfo.duplicate();
-        fInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
-        fInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
-        fInfo->mFileId = newFileId;
-        fInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
-        fInfo->mStorageId = contentStorageIndex;
-        mFileInfoList.addFileInfo(fInfo);
-
-        if (eventInfo.mId3 > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          if (mContentSources[contentStorageIndex].mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
-          {
-            uint len = contentInfoList.getLength();
-            for (uint c=0; c<len; c++)
-            {
-              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-              T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-              if (info != nullptr &&  (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)))
-              {
-                if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-                {
-                  // We should remove the old content before the addition
-                }
-                else
-                {
-                  T::ContentInfo *cInfo = info->duplicate();
-                  cInfo->mFileId = newFileId;
-                  cInfo->mProducerId = getNewProducerId(contentStorageIndex,info->mProducerId);
-                  cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,info->mGenerationId);
-                  cInfo->mSourceId = fInfo->mSourceId;
-                  cInfo->mStorageId = contentStorageIndex;
-
-                  AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
-                  if (it != mContentTimeCache.end())
-                  {
-                    //if (it->second.find(cInfo->mForecastTime) == it->second.end())
-                      it->second.insert(cInfo->getForecastTime());
-                  }
-
-                  if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                  {
-                  }
-                  else
-                  {
-                    // Addition failed
-                    delete cInfo;
-                  }
-                }
-              }
-            }
-          }
-
-        }
-      }
-    }
+      addStoredFileAndContents(contentStorageIndex,newFileId,eventInfo);
 
     addEvent(eventInfo.mType,newFileId,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
   }
@@ -6368,32 +6235,21 @@ void MergeImplementation::event_fileUpdated(uint contentStorageIndex,T::EventInf
         for (uint c=0; c<len; c++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-          T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex);
-          if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-          {
-            if (info != nullptr && (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-            {
-              // We should remove the old content before the addition
-            }
-            else
-            {
-              T::ContentInfo *cInfo = info->duplicate();
-              cInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
-              cInfo->mGenerationId = getNewProducerId(contentStorageIndex,fileInfo.mGenerationId);
-              cInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
-              cInfo->mStorageId = contentStorageIndex;
-              cInfo->mFileId = newFileId;
 
-              if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-              {
-              }
-              else
-              {
-                // Addtion failed
-                delete cInfo;
-              }
-            }
-          }
+          // The old contents of the file were marked deleted above (by the merged file id, which is also the id of
+          // the lookup). The lookup does not return deleted contents, and addOrReplaceContent replaces a deleted
+          // content by the new content.
+          if (info == nullptr  ||  mContentInfoList.getContentInfoByFileIdAndMessageIndex(newFileId,info->mMessageIndex) != nullptr)
+            continue;
+
+          T::ContentInfo *cInfo = info->duplicate();
+          cInfo->mProducerId = getNewProducerId(contentStorageIndex,fileInfo.mProducerId);
+          cInfo->mGenerationId = getNewGenerationId(contentStorageIndex,fileInfo.mGenerationId);
+          cInfo->mSourceId = getNewSourceId(contentStorageIndex,fileInfo.mSourceId);
+          cInfo->mStorageId = contentStorageIndex;
+          cInfo->mFileId = newFileId;
+
+          addOrReplaceContent(mContentInfoList,cInfo,mContentDeleteCounter);
         }
       }
       addEvent(eventInfo.mType,newFileId,eventInfo.mId2,eventInfo.mId3,eventInfo.mFlags);
@@ -6855,6 +6711,181 @@ void MergeImplementation::processEvent(uint contentStorageIndex,T::EventInfo& ev
       case EventType::CONTENT_UPDATED:
         event_contentUpdated(contentStorageIndex,eventInfo);
         break;
+      default:
+        break;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the content when the update interval has changed or an update was requested, but not more often than every 30 seconds. */
+
+void MergeImplementation::updateContentIfRequired()
+{
+  try
+  {
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Reload the data if the content storage has restarted after its last known start (according to the last event). Returns true after a reload. */
+
+bool MergeImplementation::reloadAfterRestart(uint s,const T::EventInfo& eventInfo)
+{
+  try
+  {
+    if (mContentSources[s].mContentStorageStartTime > 0 &&  mContentSources[s].mContentStorageStartTime < eventInfo.mServerTime)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents(%u);Content server restart detected, reload required",s);
+      mEventInfoList.clear();
+      reloadData();
+      mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
+      mContentUpdateRequired  = true;
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Process the events of the content storage (logging failures). Returns false if a shutdown was requested. */
+
+bool MergeImplementation::processEventInfoList(uint s,T::EventInfoList& eventInfoList,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo *it = eventInfoList.getFirstEvent();
+    while (it != nullptr)
+    {
+      try
+      {
+        processEvent(s,*it);
+        ecnt++;
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+        exception.printError();
+      }
+
+      mContentSources[s].mLastProcessedEventId = it->mEventId;
+      it = it->nextItem;
+      if (mShutdownRequested)
+        return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Fetch and process the new events of the content storage, adding their number to tlen. Returns false if
+           the processing should stop (reload after a restart, a fetch error or a shutdown request). */
+
+bool MergeImplementation::processSourceEvents(uint s,bool eventThread,uint& tlen,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo eventInfo;
+    eventInfo.mEventId = 0;
+    int result = mContentSources[s].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
+    if ((result == Result::DATA_NOT_FOUND || result == Result::OK)  &&  eventThread  &&  reloadAfterRestart(s,eventInfo))
+      return false;
+
+    if (result != Result::OK)
+      return true;
+
+    if (eventThread  &&  mContentSources[s].mContentStorageStartTime == 0)
+      mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
+
+    if (eventInfo.mEventId <= mContentSources[s].mLastProcessedEventId)
+      return true;
+
+    T::EventInfoList eventInfoList;
+    result = mContentSources[s].mContentStorage->getEventInfoList(mSessionId,0,mContentSources[s].mLastProcessedEventId+1,10000,eventInfoList);
+    if (result != 0)
+    {
+      return false;
+    }
+
+    uint len = eventInfoList.getLength();
+    tlen += len;
+
+    return processEventInfoList(s,eventInfoList,ecnt);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Remove the cached forecast times of the generations that are not in the active search structure. */
+
+void MergeImplementation::removeUnknownGenerationTimes()
+{
+  try
+  {
+    auto ssp = activeSearchStructure();
+    if (!ssp)
+      return;
+
+    AutoReadLock lock(&mContentTimeCache_modificationLock);
+
+    for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); )
+    {
+      if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+      {
+        if (mShutdownRequested)
+          return;
+
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        it = mContentTimeCache.erase(it);
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+      else
+      {
+        ++it;
+      }
     }
   }
   catch (...)
@@ -6874,7 +6905,7 @@ void MergeImplementation::processEvents(bool eventThread)
   // FUNCTION_TRACE
   try
   {
-    if (mContentSources.size() == 0)
+    if (mContentSources.empty())
       return;
 
     if (!eventThread  &&  mReloadActivated)
@@ -6886,15 +6917,7 @@ void MergeImplementation::processEvents(bool eventThread)
       return;
     }
 
-    time_t t1 = time(nullptr) / mContentUpdateInterval;
-    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
-
-    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
-    {
-      mContentUpdateRequired = false;
-      mContentUpdateTime = 0;
-      updateContent();
-    }
+    updateContentIfRequired();
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
@@ -6920,60 +6943,8 @@ void MergeImplementation::processEvents(bool eventThread)
         if (mShutdownRequested)
           return;
 
-        T::EventInfo eventInfo;
-        eventInfo.mEventId = 0;
-        int result = mContentSources[s].mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-        if (result == Result::DATA_NOT_FOUND || result == Result::OK)
-        {
-          if (eventThread  &&  mContentSources[s].mContentStorageStartTime > 0 &&  mContentSources[s].mContentStorageStartTime < eventInfo.mServerTime)
-          {
-            PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents(%u);Content server restart detected, reload required",s);
-            mEventInfoList.clear();
-            reloadData();
-            mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
-            mContentUpdateRequired  = true;
-            return;
-          }
-        }
-
-        if (result == Result::OK)
-        {
-          if (eventThread  &&  mContentSources[s].mContentStorageStartTime == 0)
-            mContentSources[s].mContentStorageStartTime = eventInfo.mServerTime;
-
-          if (eventInfo.mEventId > mContentSources[s].mLastProcessedEventId)
-          {
-            T::EventInfoList eventInfoList;
-            result = mContentSources[s].mContentStorage->getEventInfoList(mSessionId,0,mContentSources[s].mLastProcessedEventId+1,10000,eventInfoList);
-            if (result != 0)
-            {
-              return;
-            }
-
-            uint len = eventInfoList.getLength();
-            tlen += len;
-
-            T::EventInfo *it = eventInfoList.getFirstEvent();
-            while (it != nullptr)
-            {
-              try
-              {
-                processEvent(s,*it);
-                ecnt++;
-              }
-              catch (...)
-              {
-                Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-                exception.printError();
-              }
-
-              mContentSources[s].mLastProcessedEventId = it->mEventId;
-              it = it->nextItem;
-              if (mShutdownRequested)
-                return;
-            }
-          }
-        }
+        if (!processSourceEvents(s,eventThread,tlen,ecnt))
+          return;
       }
     }
 
@@ -6989,24 +6960,7 @@ void MergeImplementation::processEvents(bool eventThread)
 
       PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::processEvents();%s",buf);
 
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-      if (ssp)
-      {
-        AutoReadLock lock(&mContentTimeCache_modificationLock);
-
-        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
-        {
-          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-          {
-            if (mShutdownRequested)
-              return;
-
-            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-            mContentTimeCache.erase(it->first);
-            mContentTimeCache_modificationLock.writeUnlock();
-          }
-        }
-      }
+      removeUnknownGenerationTimes();
     }
   }
   catch (...)
@@ -7049,6 +7003,237 @@ void MergeImplementation::eventProcessingThread()
 
 
 
+/*! \brief Return true if no files are waited for the local cache and the hashes of the search structure lists
+           match the hashes of the current lists. The hashes are logged. */
+
+bool MergeImplementation::isSearchStructureCurrent(SearchStructure& ss)
+{
+  try
+  {
+    if (mDebugLog &&  mDebugLog->isEnabled())
+    {
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
+
+      PRINT_DATA(mDebugLog,"  ** Producers    %zu  %zu\n",ss.mProducerInfoList.getHash(),mProducerInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Generations  %zu  %zu\n",ss.mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Geometries   %zu  %zu\n",ss.mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Files        %zu  %zu\n",ss.mFileInfoList.getHash(),mFileInfoList.getHash());
+      PRINT_DATA(mDebugLog,"  ** Content      %zu  %zu\n",ss.mContentInfoList[0].getHash(),mContentInfoList.getHash());
+    }
+    return mCachedFiles_totalWaitTime == 0 &&
+           ss.mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
+           ss.mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
+           ss.mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
+           ss.mFileInfoList.getHash() == mFileInfoList.getHash() &&
+           ss.mContentInfoList[0].getHash() == mContentInfoList.getHash();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Return true if the search structure swap may still wait for the locally cached files (the maximum wait time of the first or of the later swaps is not reached). */
+
+bool MergeImplementation::isCachedFileWaitAllowed()
+{
+  return (mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
+         (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime);
+}
+
+
+
+
+/*! \brief Return true if the file should be in the local cache but is not: it is marked for caching, it is not
+           deleted soon, its generation is ready and the original file exists. */
+
+bool MergeImplementation::isMissingFromLocalCache(T::FileInfo& fInfo)
+{
+  try
+  {
+    // We are caching locally only marked files.
+
+    if ((fInfo.mFlags & T::FileInfo::Flags::LocalCacheRecommended) == 0  ||  (fInfo.mFlags & T::FileInfo::Flags::DeletedFile) != 0  ||
+        fInfo.mServerType != T::FileInfo::ServerType::Filesys)
+      return false;
+
+    // Cannot find the file from the cached file list?
+
+    if (mCachedFiles.find(fInfo.mFileId) != mCachedFiles.end())
+      return false;
+
+    // The file deletion time is not very close, so it should be in the cache
+
+    if (fInfo.mDeletionTime != 0  &&  (time(nullptr) + 180) >= fInfo.mDeletionTime)
+      return false;
+
+    // The file generation status is ready, so it should be in the cache
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo.mGenerationId);
+    if (gInfo == nullptr  ||  gInfo->mStatus != T::GenerationInfo::Status::Ready)
+      return false;
+
+    // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
+
+    auto fsize = getFileSize(fInfo.mName.c_str());
+    return fsize > 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Return the first file that should be in the local cache but is not, or null if there is none. */
+
+T::FileInfo* MergeImplementation::getFileMissingFromLocalCache()
+{
+  try
+  {
+    uint fileCount = mFileInfoList.getLength();
+    for (uint t=0; t<fileCount; t++)
+    {
+      T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
+      if (fInfo  &&  isMissingFromLocalCache(*fInfo))
+        return fInfo;
+    }
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Log the reason and postpone the search structure swap until the file may be in the local cache. */
+
+void MergeImplementation::delayContentSwap(T::FileInfo& file)
+{
+  try
+  {
+    T::FileInfo *fInfo = &file;
+    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
+    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
+    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
+    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
+    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
+    if (mContentSwapCounter == 0)
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
+    }
+
+    mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
+    mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+/*! \brief Report if the maximum wait time for the locally cached files was exceeded. */
+
+void MergeImplementation::reportExceededCachedFileWait()
+{
+  try
+  {
+    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
+        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
+    {
+      Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
+      exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
+      exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
+      exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
+      exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
+      exception.printError();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the producer hashes and the generation time ranges of the new search structure. Returns false if a shutdown was requested. */
+
+bool MergeImplementation::updateSearchStructureHashes(SearchStructure& ss)
+{
+  try
+  {
+    // ### Updating producer hash values
+
+    uint pLen = ss.mProducerInfoList.getLength();
+
+    for (uint p=0; p<pLen; p++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoByIndex(p);
+      if (producerInfo != nullptr)
+      {
+        std::size_t generationHash = ss.mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t geometryHash = ss.mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t fileHash = ss.mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t contentHash = ss.mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
+
+        std::size_t h = 0;
+        Fmi::hash_merge(h,generationHash);
+        Fmi::hash_merge(h,geometryHash);
+        Fmi::hash_merge(h,fileHash);
+        Fmi::hash_merge(h,contentHash);
+
+        producerInfo->mHash = h;
+      }
+    }
+
+    //PRINT_EVENT_LINE(mDebugLog,"** producerHash calculated");
+
+
+    // ### Updating generation time ranges
+
+    uint glen = ss.mGenerationInfoList.getLength();
+    for (uint g=0; g<glen; g++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      auto *ginfo = ss.mGenerationInfoList.getGenerationInfoByIndex(g);
+      ss.mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Merge backend: pull the latest content changes from every upstream content storage. */
 
 void MergeImplementation::updateContent()
@@ -7068,35 +7253,16 @@ void MergeImplementation::updateContent()
     if (t1 == t2)
       return;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     // We create totally new search structure and replace the the old one.
 
-    if (ssp)
+    if (ssp  &&  isSearchStructureCurrent(*ssp))
     {
-      if (mDebugLog &&  mDebugLog->isEnabled())
-      {
-        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Comparing hash values");
+      // Nothing has changed. No swapping needed.
 
-        PRINT_DATA(mDebugLog,"  ** Producers    %ld  %ld\n",ssp->mProducerInfoList.getHash(),mProducerInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Generations  %ld  %ld\n",ssp->mGenerationInfoList.getHash(),mGenerationInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Geometries   %ld  %ld\n",ssp->mGeometryInfoList.getHash(),mGeometryInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Files        %ld  %ld\n",ssp->mFileInfoList.getHash(),mFileInfoList.getHash());
-        PRINT_DATA(mDebugLog,"  ** Content      %ld  %ld\n",ssp->mContentInfoList[0].getHash(),mContentInfoList.getHash());
-      }
-
-      if (mCachedFiles_totalWaitTime == 0 &&
-          ssp->mProducerInfoList.getHash() == mProducerInfoList.getHash() &&
-          ssp->mGenerationInfoList.getHash() == mGenerationInfoList.getHash() &&
-          ssp->mGeometryInfoList.getHash() == mGeometryInfoList.getHash() &&
-          ssp->mFileInfoList.getHash() == mFileInfoList.getHash() &&
-          ssp->mContentInfoList[0].getHash() == mContentInfoList.getHash())
-      {
-         // Nothing has changed. No swapping needed.
-
-        PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();No search structure swapping required");
-        mContentUpdateTime = time(nullptr);
-        return;
-      }
+      PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();No search structure swapping required");
+      mContentUpdateTime = time(nullptr);
+      return;
     }
 
     AutoReadLock lock(&mModificationLock);
@@ -7104,92 +7270,25 @@ void MergeImplementation::updateContent()
     PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping started");
 
 
-    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
-        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime))
+    if (isCachedFileWaitAllowed())
     {
       // We can swap the search structure only if the locally cached files are ready.
 
-      uint fileCount = mFileInfoList.getLength();
-      for (uint t=0; t<fileCount; t++)
+      T::FileInfo *fInfo = getFileMissingFromLocalCache();
+      if (fInfo != nullptr)
       {
-        T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
-        if (fInfo)
-        {
-          if ((fInfo->mFlags & T::FileInfo::Flags::LocalCacheRecommended)  &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&
-              fInfo->mServerType == T::FileInfo::ServerType::Filesys)
-          {
-            // We are caching locally only marked files.
-
-            if (mCachedFiles.find(fInfo->mFileId) == mCachedFiles.end())
-            {
-              // Cannot find the file from the cached file list.
-
-              if (fInfo->mDeletionTime == 0 || (time(nullptr) + 180) < fInfo->mDeletionTime)
-              {
-                // The file deletion time is not very close, so it should be in the cache
-
-                T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo->mGenerationId);
-                if (gInfo && gInfo->mStatus == T::GenerationInfo::Status::Ready)
-                {
-                  // The file generation status is ready, so it should be in the cache
-                  auto fsize = getFileSize(fInfo->mName.c_str());
-                  if (fsize > 0)
-                  {
-                    // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
-                    PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
-                    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
-                    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
-                    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
-                    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
-                    if (mContentSwapCounter == 0)
-                    {
-                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
-                    }
-                    else
-                    {
-                      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
-                    }
-
-                    mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
-                    mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
-                    return;
-                  }
-                }
-              }
-            }
-          }
-        }
+        delayContentSwap(*fInfo);
+        return;
       }
     }
 
-    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
-        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
-    {
-      Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
-      exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
-      exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
-      exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
-      exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
-      exception.printError();
-    }
+    reportExceededCachedFileWait();
 
     mCachedFiles_totalWaitTime = 0;
 
-    auto nptr = new SearchStructure();
-    if (mActiveSearchStructure == 0)
-    {
-      if (mSearchStructurePtr[1])
-        delete mSearchStructurePtr[1];
-
-      mSearchStructurePtr[1] = nptr;
-    }
-    else
-    {
-      if (mSearchStructurePtr[0])
-        delete mSearchStructurePtr[0];
-
-       mSearchStructurePtr[0] = nptr;
-    }
+    // The new structure is filled first and published at the end. Readers still using the
+    // replaced structure keep it alive through their references.
+    auto nptr = std::make_shared<SearchStructure>();
 
     nptr->mProducerInfoList = mProducerInfoList;
     //PRINT_EVENT_LINE(mDebugLog,"** producerList copied");
@@ -7222,54 +7321,17 @@ void MergeImplementation::updateContent()
     nptr->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
     //PRINT_EVENT_LINE(mDebugLog,"** contentList 2 sorted");
 
-    // ### Updating producer hash values
-
-    uint pLen = nptr->mProducerInfoList.getLength();
-
-    for (uint p=0; p<pLen; p++)
-    {
-      if (mShutdownRequested)
-        return;
-
-      T::ProducerInfo *producerInfo = nptr->mProducerInfoList.getProducerInfoByIndex(p);
-      if (producerInfo != nullptr)
-      {
-        std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-        std::size_t contentHash = nptr->mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
-
-        std::size_t h = 0;
-        Fmi::hash_merge(h,generationHash);
-        Fmi::hash_merge(h,geometryHash);
-        Fmi::hash_merge(h,fileHash);
-        Fmi::hash_merge(h,contentHash);
-
-        producerInfo->mHash = h;
-      }
-    }
-
-    //PRINT_EVENT_LINE(mDebugLog,"** producerHash calculated");
-
-
-    // ### Updating generation time ranges
-
-    uint glen = nptr->mGenerationInfoList.getLength();
-    for (uint g=0; g<glen; g++)
-    {
-      if (mShutdownRequested)
-        return;
-
-      auto ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
-      nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
-    }
+    if (!updateSearchStructureHashes(*nptr))
+      return;
 
     PRINT_EVENT_LINE(mDebugLog,"MergeImplementation::updateContent();Search structure swapping ended");
 
-    if (mActiveSearchStructure == 0)
-      mActiveSearchStructure = 1;
-    else
-      mActiveSearchStructure = 0;
+    {
+      std::unique_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+      const uint inactive = (mActiveSearchStructure == 0 ? 1 : 0);
+      mSearchStructurePtr[inactive] = nptr;
+      mActiveSearchStructure = inactive;
+    }
 
     mContentChangeTime = time(nullptr);
     mContentSwapCounter++;

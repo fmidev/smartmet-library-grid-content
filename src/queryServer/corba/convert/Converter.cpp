@@ -48,7 +48,7 @@ Converter::~Converter()
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(T::GeometryId_set& source,C::GeometryIdList& target)
+void Converter::convert(const T::GeometryId_set& source,C::GeometryIdList& target)
 {
   try
   {
@@ -56,9 +56,9 @@ void Converter::convert(T::GeometryId_set& source,C::GeometryIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -103,7 +103,7 @@ void Converter::convert(const C::GeometryIdList& source,T::GeometryId_set& targe
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(std::set<time_t>& source,C::TimestampList& target)
+void Converter::convert(const std::set<time_t>& source,C::TimestampList& target)
 {
   try
   {
@@ -111,9 +111,9 @@ void Converter::convert(std::set<time_t>& source,C::TimestampList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -160,9 +160,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -209,9 +209,9 @@ void Converter::convert(std::vector<int>& source,C::LevelList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -250,16 +250,16 @@ void Converter::convert(const C::LevelList& source,std::vector<int>& target)
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(string_set& source,C::StringList& target)
+void Converter::convert(const string_set& source,C::StringList& target)
 {
   try
   {
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto& it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -297,16 +297,16 @@ void Converter::convert(C::StringList& source,string_set& target)
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(string_vec& source,C::StringList& target)
+void Converter::convert(const string_vec& source,C::StringList& target)
 {
   try
   {
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto& it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -331,7 +331,7 @@ void Converter::convert(C::StringList& source,string_vec& target)
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      target.emplace_back(std::string(source[t]));
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -418,8 +418,8 @@ void Converter::convert(const C::AttributeRecList& source,T::AttributeList& targ
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::AttributeRec corbaObject = source[t];
-      T::Attribute *attr = new T::Attribute();
+      const C::AttributeRec& corbaObject = source[t];
+      auto *attr = new T::Attribute();
       convert(corbaObject,*attr);
       target.addAttribute(attr);
     }
@@ -481,7 +481,7 @@ void Converter::convert(const C::ParameterValueList& source,T::ParamValue_vec& t
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(T::GridPointValue& source,C::GridPointValue& target)
+void Converter::convert(const T::GridPointValue& source,C::GridPointValue& target)
 {
   try
   {
@@ -505,7 +505,7 @@ void Converter::convert(T::GridPointValue& source,C::GridPointValue& target)
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(C::GridPointValue& source,T::GridPointValue& target)
+void Converter::convert(const C::GridPointValue& source,T::GridPointValue& target)
 {
   try
   {
@@ -538,7 +538,7 @@ void Converter::convert(T::GridPointValueList& source,C::GridPointValueList& tar
     for (uint t=0; t<len; t++)
     {
       T::GridPointValue *obj = source.getGridPointValueByIndex(t);
-      C::GridPointValue corbaObject;
+      C::GridPointValue corbaObject{};
       convert(*obj,corbaObject);
       target[t] = corbaObject;
     }
@@ -564,7 +564,7 @@ void Converter::convert(C::GridPointValueList& source,T::GridPointValueList& tar
     for (uint t=0; t<len; t++)
     {
       C::GridPointValue corbaObject = source[t];
-      T::GridPointValue *obj = new T::GridPointValue();
+      auto *obj = new T::GridPointValue();
       convert(corbaObject,*obj);
       target.addGridPointValue(obj);
     }
@@ -581,7 +581,7 @@ void Converter::convert(C::GridPointValueList& source,T::GridPointValueList& tar
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(T::GridValue& source,C::GridValue& target)
+void Converter::convert(const T::GridValue& source,C::GridValue& target)
 {
   try
   {
@@ -649,7 +649,7 @@ void Converter::convert(C::GridValueList& source,T::GridValueList& target)
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(T::GridValueList& source,C::GridValueList& target)
+void Converter::convert(const T::GridValueList& source,C::GridValueList& target)
 {
   try
   {
@@ -719,7 +719,7 @@ void Converter::convert(C::ParameterValues& source,QueryServer::ParameterValues&
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(QueryServer::ParameterValues& source,C::ParameterValues& target)
+void Converter::convert(const QueryServer::ParameterValues& source,C::ParameterValues& target)
 {
   try
   {
@@ -781,7 +781,7 @@ void Converter::convert(SmartMet::C::FunctionParam& source, SmartMet::QueryServe
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(SmartMet::QueryServer::FunctionParam& source,SmartMet::C::FunctionParam& target)
+void Converter::convert(const SmartMet::QueryServer::FunctionParam& source,SmartMet::C::FunctionParam& target)
 {
   try
   {
@@ -862,7 +862,7 @@ void Converter::convert(C::ParameterValuesList& source,QueryServer::ParameterVal
     for (uint t=0; t<len; t++)
     {
       C::ParameterValues corbaObject = source[t];
-      QueryServer::ParameterValues *obj = new QueryServer::ParameterValues();
+      auto *obj = new QueryServer::ParameterValues();
       convert(corbaObject,*obj);
       target.emplace_back(std::shared_ptr<QueryServer::ParameterValues>(obj));
     }
@@ -1062,7 +1062,7 @@ void Converter::convert(QueryServer::QueryParameter_vec& source,C::QueryParamete
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(T::Coordinate& source,C::Coordinate& target)
+void Converter::convert(const T::Coordinate& source,C::Coordinate& target)
 {
   try
   {
@@ -1081,7 +1081,7 @@ void Converter::convert(T::Coordinate& source,C::Coordinate& target)
 
 /*! \brief Query Server: Convert. */
 
-void Converter::convert(C::Coordinate& source,T::Coordinate& target)
+void Converter::convert(const C::Coordinate& source,T::Coordinate& target)
 {
   try
   {
@@ -1134,7 +1134,7 @@ void Converter::convert(T::Coordinate_vec& source,C::CoordinateList& target)
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      C::Coordinate corbaObject;
+      C::Coordinate corbaObject{};
       convert(source[t],corbaObject);
       target[t] = corbaObject;
     }
@@ -1333,7 +1333,7 @@ void Converter::convert(const SmartMet::T::ByteData_vec& source, SmartMet::C::By
     target.length(len);
     for (uint t=0; t<len; t++)
     {
-      auto obj = source[t];
+      const auto& obj = source[t];
       C::ByteData corbaObject;
       convert(obj,corbaObject);
       target[t] = corbaObject;
@@ -1360,7 +1360,7 @@ void Converter::convert(const SmartMet::C::ByteDataSequence& source,SmartMet::T:
     target.reserve(len);
     for (uint t=0; t<len; t++)
     {
-      C::ByteData corbaObject = source[t];
+      const C::ByteData& corbaObject = source[t];
       T::ByteData obj;
       convert(corbaObject,obj);
       target.emplace_back(obj);

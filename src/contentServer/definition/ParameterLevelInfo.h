@@ -34,7 +34,7 @@ class ParameterLevelInfo
     ParameterLevelInfo&  operator=(const ParameterLevelInfo& levelInfo);
 
     ParameterLevelInfo*  duplicate();
-    void                 print(std::ostream& stream,uint level,uint optionFlags);
+    void                 print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::ParamKeyType      mParameterKeyType;   //!< Scheme identifying how mParameterKey should be interpreted.
     T::ParamId           mParameterKey;       //!< Parameter identifier within the scheme given by mParameterKeyType.

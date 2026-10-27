@@ -13,8 +13,8 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::map<std::string,ParameterMapping_vec> MappingSearch;        //!< Map from parameter name to matching ParameterMapping records.
-typedef std::shared_ptr<MappingSearch> MappingSearch_sptr;               //!< Shared pointer to a MappingSearch map.
+using MappingSearch = std::map<std::string,ParameterMapping_vec>;        //!< Map from parameter name to matching ParameterMapping records.
+using MappingSearch_sptr = std::shared_ptr<MappingSearch>;               //!< Shared pointer to a MappingSearch map.
 
 // ====================================================================================
 /*! \brief Loads and indexes a file of ParameterMapping definitions.
@@ -31,19 +31,21 @@ class ParameterMappingFile
                           ParameterMappingFile(const std::string& filename);
                           //ParameterMappingFile(const ParameterMappingFile& mappingFile);
     virtual               ~ParameterMappingFile();
+    ParameterMappingFile(const ParameterMappingFile&) = default;
+    ParameterMappingFile& operator=(const ParameterMappingFile&) = default;
 
     virtual void          init();
     virtual bool          checkUpdates();
     virtual void          getAliasMappings(ParameterMapping_vec& mappings,UnitConversion_vec& unitConversions);
     std::string           getFilename();
-    ParameterMapping*     getMapping(ParameterMapping& mapping);
+    ParameterMapping*     getMapping(const ParameterMapping& mapping);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappings(const std::string& producerName,const std::string& parameterName,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings);
     virtual void          getMappingsByParamKey(const std::string& producerName,T::ParamKeyType parameterKeyType,const std::string& parameterKey,T::GeometryId geometryId,T::ParamLevelId levelId,T::ParamLevel level,ParameterMapping_vec& mappings);
     uint                  getNumberOfMappings();
-    void                  setParameterMappings(ParameterMapping_vec& mappings);
+    void                  setParameterMappings(const ParameterMapping_vec& mappings);
     void                  print(std::ostream& stream,uint level,uint optionFlags);
 
   protected:
@@ -59,7 +61,7 @@ class ParameterMappingFile
 };
 
 
-typedef std::vector<ParameterMappingFile> ParamMappingFile_vec;  //!< Ordered collection of ParameterMappingFile objects.
+using ParamMappingFile_vec = std::vector<ParameterMappingFile>;  //!< Ordered collection of ParameterMappingFile objects.
 
 
 }  // namespace QueryServer

@@ -9,9 +9,9 @@ namespace SmartMet
 namespace QueryServer
 {
 
-typedef std::pair<uint,std::string> FunctionParam;      //!< A single function argument: (type, value-string) pair.
-typedef std::vector<FunctionParam> FunctionParam_vec;   //!< Ordered list of function arguments.
-typedef std::vector<uint> Color_vec;                    //!< List of RGBA colour values used for isoband rendering.
+using FunctionParam = std::pair<uint,std::string>;      //!< A single function argument: (type, value-string) pair.
+using FunctionParam_vec = std::vector<FunctionParam>;   //!< Ordered list of function arguments.
+using Color_vec = std::vector<uint>;                    //!< List of RGBA colour values used for isoband rendering.
 
 // ====================================================================================
 /*! \brief Specification for a single named parameter within a Query.
@@ -28,6 +28,8 @@ class QueryParameter
                                 QueryParameter();
                                 //QueryParameter(const QueryParameter& queryParameter);
     virtual                     ~QueryParameter();
+    QueryParameter(const QueryParameter&) = default;
+    QueryParameter& operator=(const QueryParameter&) = default;
 
     std::size_t                 getHash();
     QueryParameter*             duplicate();
@@ -130,7 +132,7 @@ class QueryParameter
 };
 
 
-typedef std::vector<QueryParameter> QueryParameter_vec;  //!< Ordered list of QueryParameter specifications.
+using QueryParameter_vec = std::vector<QueryParameter>;  //!< Ordered list of QueryParameter specifications.
 
 }  // namespace QueryServer
 }  // namespace SmartMet

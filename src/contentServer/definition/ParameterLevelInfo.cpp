@@ -1,6 +1,8 @@
 #include "ParameterLevelInfo.h"
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <utility>
+
 
 namespace SmartMet
 {
@@ -59,7 +61,7 @@ ParameterLevelInfo::ParameterLevelInfo(T::ParamKeyType parameterKeyType,
   try
   {
     mParameterKeyType = parameterKeyType;
-    mParameterKey = parameterKey;
+    mParameterKey = std::move(parameterKey);
     mParameterLevelId = parameterLevelId;
     mLevel = level;
   }
@@ -136,7 +138,7 @@ ParameterLevelInfo* ParameterLevelInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ParameterLevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void ParameterLevelInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

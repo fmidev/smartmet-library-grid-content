@@ -22,18 +22,20 @@ class QueryConfigurator
   public:
                 QueryConfigurator();
     virtual     ~QueryConfigurator();
+    QueryConfigurator(const QueryConfigurator&) = default;
+    QueryConfigurator& operator=(const QueryConfigurator&) = default;
 
     void        configure(Query& query,T::AttributeList& attributeList);
 
   protected:
 
-    void        configureProducer(Query& query,T::AttributeList& attributeList);
-    void        configureGeneration(Query& query,T::AttributeList& attributeList);
-    void        configureTime(Query& query,T::AttributeList& attributeList);
-    void        configureLocation(Query& query,T::AttributeList& attributeList);
-    void        configureMisc(Query& query,T::AttributeList& attributeList);
-    void        configureParameters(Query& query,T::AttributeList& attributeList);
-    void        configureParameter(Query& query,QueryParameter& param,T::AttributeList& attributeList);
+    void        configureProducer(Query& query,const T::AttributeList& attributeList);
+    void        configureGeneration(Query& query,const T::AttributeList& attributeList);
+    void        configureTime(Query& query,const T::AttributeList& attributeList);
+    void        configureLocation(Query& query,const T::AttributeList& attributeList);
+    void        configureMisc(Query& query,const T::AttributeList& attributeList);
+    void        configureParameters(Query& query,const T::AttributeList& attributeList);
+    void        configureParameter(const Query& query,QueryParameter& param,const T::AttributeList& attributeList);
 };
 
 

@@ -18,16 +18,17 @@ class Function_sequence : public Function
   public:
                       Function_sequence();
                       Function_sequence(const Function_sequence& function);
-    virtual           ~Function_sequence();
+    ~Function_sequence() override;
+    Function_sequence& operator=(const Function_sequence&) = delete;
 
     virtual void      addFunction(Function *function);
 
     // Type 1: Takes one or several parameters, returns one value
-    virtual float     executeFunctionCall1(std::vector<float>& parameters);
-    virtual double    executeFunctionCall1(std::vector<double>& parameters);
+    float     executeFunctionCall1(std::vector<float>& parameters) override;
+    double    executeFunctionCall1(std::vector<double>& parameters) override;
 
 
-    virtual Function* duplicate();
+    Function* duplicate() override;
 
   protected:
 

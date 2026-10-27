@@ -12,6 +12,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
 #include <atomic>
+#include <cstdlib>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -22,12 +23,14 @@ namespace ContentServer
 {
 
 
-static void* CacheImplementation_eventProcessingThread(void *arg)
+namespace
+{
+void* CacheImplementation_eventProcessingThread(void *arg)
 {
   try
   {
     Fmi::set_thread_name("cs-cache-evt");
-    CacheImplementation *service = (CacheImplementation*)arg;
+    auto *service = (CacheImplementation*)arg;
     service->eventProcessingThread();
     return nullptr;
   }
@@ -35,9 +38,46 @@ static void* CacheImplementation_eventProcessingThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
+
+
+// A generation event refers to a generation which could not be read from the content storage.
+// The event is not retried, so the failure must at least be visible in the logs.
+
+void reportMissingGeneration(const char *eventName,T::GenerationId generationId,int result)
+{
+  Fmi::Exception exception(BCP,"Cannot read the generation of a content event from the content storage!");
+  exception.addParameter("Event",eventName);
+  exception.addParameter("GenerationId",std::to_string(generationId));
+  exception.addParameter("ServiceResult",getResultString(result));
+  exception.printError();
+}
+
+
+
+/*! \brief Return the producer parameter line "producer;sourceKey;targetKeyType;targetKey;geometry;;levelId;level;forecastType;forecastNumber;preload". */
+
+std::string getProducerParameterLine(const std::string& producerName,const std::string& sourceParamKey,T::ParamKeyType targetParameterKeyType,const std::string& targetParamKey,const T::ContentInfo& contentInfo)
+{
+  T::ParamLevelId paramLevelId = contentInfo.mFmiParameterLevelId;
+  char levelBuf[10];
+  snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo.mParameterLevel);
+  return producerName + ";" +
+         sourceParamKey + ";" +
+         std::to_string(targetParameterKeyType) + ";" +
+         targetParamKey + ";" +
+         std::to_string(contentInfo.mGeometryId) + ";;" +
+         std::to_string(paramLevelId) + ";" +
+         levelBuf + ";" +
+         std::to_string(contentInfo.mForecastType) + ";" +
+         std::to_string(contentInfo.mForecastNumber) + ";" +
+         ((contentInfo.mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
+}
+}  // namespace
 
 
 
@@ -50,6 +90,7 @@ CacheImplementation::CacheImplementation()
   FUNCTION_TRACE
   try
   {
+    mThread = 0;  // joined in the destructor only if the thread was started
     mImplementationType = Implementation::Cache;
     mContentStorage = nullptr;
     mContentStorageStartTime = 0;
@@ -121,13 +162,12 @@ CacheImplementation::~CacheImplementation()
   try
   {
     mShutdownRequested = true;
-    pthread_join(mThread, nullptr);
+    if (mThread != 0)
+    {
+      pthread_join(mThread, nullptr);
+      mThread = 0;
+    }
 
-    if (mSearchStructurePtr[0])
-      delete mSearchStructurePtr[0];
-
-    if (mSearchStructurePtr[1])
-      delete mSearchStructurePtr[1];
   }
   catch (...)
   {
@@ -141,7 +181,7 @@ CacheImplementation::~CacheImplementation()
 
 /*! \brief Fills in cache statistics for monitoring (no-op placeholder). */
 
-void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void CacheImplementation::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -214,6 +254,18 @@ void CacheImplementation::init(T::SessionId sessionId,T::SessionId dataServerSes
 
 
 
+/*! \brief Returns the active search structure (see the header). */
+
+SearchStructure_sptr CacheImplementation::activeSearchStructure() const
+{
+  std::shared_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+  return mSearchStructurePtr[mActiveSearchStructure];
+}
+
+
+
+
+
 /*! \brief Returns true once the cache has finished loading data from the source. */
 
 bool CacheImplementation::isReady()
@@ -223,10 +275,7 @@ bool CacheImplementation::isReady()
   {
     if (mContentSwapEnabled)
     {
-      if (mContentSwapCounter > 0)
-        return true;
-      else
-        return false;
+      return mContentSwapCounter > 0;
     }
 
     if (mStartTime > 0)
@@ -289,7 +338,7 @@ void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
   FUNCTION_TRACE
   try
   {
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return;
 
@@ -302,7 +351,7 @@ void CacheImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode> p
     records->addAttribute("Content",ssp->mContentInfoList[0].getLength());
 
     auto events = parent->addAttribute("Events");
-    events->addAttribute("Last event id",mLastProcessedEventId);
+    events->addAttribute("Last event id",std::to_string(mLastProcessedEventId));
 
     auto swap = parent->addAttribute("Content Swap");
     if (!mContentSwapEnabled)
@@ -409,15 +458,12 @@ void CacheImplementation::shutdown()
 
 /*! \brief Returns whether the supplied session id is valid for this cache. */
 
-bool CacheImplementation::isSessionValid(T::SessionId sessionId)
+bool CacheImplementation::isSessionValid(T::SessionId /*sessionId*/)
 {
   //FUNCTION_TRACE
   try
   {
-    if (mShutdownRequested)
-      return false;
-
-    return true;
+    return !mShutdownRequested;
   }
   catch (...)
   {
@@ -675,7 +721,7 @@ int CacheImplementation::_getProducerInfoById(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -751,7 +797,7 @@ int CacheImplementation::_getProducerInfoByName(T::SessionId sessionId,const std
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -801,7 +847,7 @@ int CacheImplementation::_getProducerInfoList(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -846,7 +892,7 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     producerInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -898,14 +944,11 @@ int CacheImplementation::_getProducerInfoListByParameter(T::SessionId sessionId,
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,-1,-1000000000,1000000000,-2,-2,-2,startTime,endTime,0,contentInfoList);
@@ -963,7 +1006,7 @@ int CacheImplementation::_getProducerInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1012,7 +1055,7 @@ int CacheImplementation::_getProducerInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1054,7 +1097,7 @@ int CacheImplementation::_getProducerNameAndGeometryList(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1115,7 +1158,7 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1143,150 +1186,34 @@ int CacheImplementation::_getProducerParameterList(T::SessionId sessionId,T::Par
     for (uint t=0; t<len; t++)
     {
       T::ContentInfo *contentInfo = ssp->mContentInfoList[0].getContentInfoByIndex(t);
-      if (contentInfo != nullptr)
-      {
-        std::string sourceParamKey;
-        std::string targetParamKey;
-        T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
+      if (contentInfo == nullptr)
+        continue;
 
-        auto fmiId = contentInfo->mFmiParameterId;
+      std::string sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
+      std::string targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
 
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
+      if (sourceParamKey.empty()  ||  targetParamKey.empty())
+        continue;
 
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            if (sourceParamKey.empty())
-              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
+      std::size_t seed = 0;
+      Fmi::hash_merge(seed,contentInfo->mProducerId);
+      Fmi::hash_merge(seed,sourceParamKey);
+      Fmi::hash_merge(seed,targetParameterKeyType);
+      Fmi::hash_merge(seed,targetParamKey);
+      Fmi::hash_merge(seed,contentInfo->mGeometryId);
+      Fmi::hash_merge(seed,contentInfo->mFmiParameterLevelId);
+      Fmi::hash_merge(seed,contentInfo->mParameterLevel);
+      Fmi::hash_merge(seed,contentInfo->mForecastType);
+      Fmi::hash_merge(seed,contentInfo->mForecastNumber);
 
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
+      if (tmpList.find(seed) != tmpList.end())
+        continue;
 
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
+      tmpList.insert(seed);
 
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
-
-
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            if (targetParamKey.empty())
-              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
-
-        if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
-        {
-          std::size_t seed = 0;
-          Fmi::hash_merge(seed,contentInfo->mProducerId);
-          Fmi::hash_merge(seed,sourceParamKey);
-          Fmi::hash_merge(seed,targetParameterKeyType);
-          Fmi::hash_merge(seed,targetParamKey);
-          Fmi::hash_merge(seed,contentInfo->mGeometryId);
-          Fmi::hash_merge(seed,paramLevelId);
-          Fmi::hash_merge(seed,contentInfo->mParameterLevel);
-          Fmi::hash_merge(seed,contentInfo->mForecastType);
-          Fmi::hash_merge(seed,contentInfo->mForecastNumber);
-
-
-          if (tmpList.find(seed) == tmpList.end())
-          {
-            tmpList.insert(seed);
-
-            auto it = producers.find(contentInfo->mProducerId);
-            if (it != producers.end())
-            {
-              char levelBuf[10];
-              snprintf(levelBuf,sizeof(levelBuf),"%05d",contentInfo->mParameterLevel);
-              std::string tmp =
-                    it->second->mName + ";" +
-                    sourceParamKey + ";" +
-                    std::to_string(targetParameterKeyType) + ";" +
-                    targetParamKey + ";" +
-                    std::to_string(contentInfo->mGeometryId) + ";;" +
-                    std::to_string(paramLevelId) + ";" +
-                    levelBuf + ";" +
-                    std::to_string(contentInfo->mForecastType) + ";" +
-                    std::to_string(contentInfo->mForecastNumber) + ";" +
-                    ((contentInfo->mFlags & T::ContentInfo::Flags::PreloadRequired) != 0 ? "1" : "0");
-              list.insert(tmp);
-            }
-          }
-        }
-      }
+      auto it = producers.find(contentInfo->mProducerId);
+      if (it != producers.end())
+        list.insert(getProducerParameterLine(it->second->mName,sourceParamKey,targetParameterKeyType,targetParamKey,*contentInfo));
     }
 
     return Result::OK;
@@ -1312,12 +1239,12 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
       return Result::OK;
 
     if (mUpdateInProgress)
-      return mContentStorage->getProducerParameterList(sessionId,sourceParameterKeyType,targetParameterKeyType,list);
+      return mContentStorage->getProducerParameterListByProducerId(sessionId,producerId,sourceParameterKeyType,targetParameterKeyType,list);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1344,104 +1271,10 @@ int CacheImplementation::_getProducerParameterListByProducerId(T::SessionId sess
         std::string sourceParamKey;
         std::string targetParamKey;
         T::ParamLevelId paramLevelId = contentInfo->mFmiParameterLevelId;
-        auto fmiId = contentInfo->mFmiParameterId;
-
-        switch (sourceParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            sourceParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            sourceParamKey = contentInfo->getFmiParameterName();
-            if (sourceParamKey.empty())
-              sourceParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              sourceParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              sourceParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        sourceParamKey = getParameterKeyByType(*contentInfo,sourceParameterKeyType,true);
 
 
-        switch (targetParameterKeyType)
-        {
-          case T::ParamKeyTypeValue::FMI_ID:
-            targetParamKey = std::to_string(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::FMI_NAME:
-            targetParamKey = contentInfo->getFmiParameterName();
-            if (targetParamKey.empty())
-              targetParamKey = "FMI-" + toString(contentInfo->mFmiParameterId);
-            break;
-
-          case T::ParamKeyTypeValue::GRIB_ID:
-          {
-            Identification::FmiParameterId_grib def;
-            if (Identification::gridDef.getGribParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mGribParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_ID:
-          {
-            Identification::FmiParameterId_newbase def;
-            if (Identification::gridDef.getNewbaseParameterMappingByFmiId(fmiId,def))
-              targetParamKey = std::to_string(def.mNewbaseParameterId);
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NEWBASE_NAME:
-          {
-            Identification::NewbaseParameterDef def;
-            if (Identification::gridDef.getNewbaseParameterDefByFmiId(fmiId,def))
-              targetParamKey = def.mParameterName;
-          }
-          break;
-
-          case T::ParamKeyTypeValue::NETCDF_NAME:
-          {
-            Identification::FmiParameterId_netCdf def;
-            if (Identification::gridDef.getNetCdfParameterMappingByFmiId(fmiId,def))
-              targetParamKey = def.mNetCdfParameterName;
-          }
-          break;
-
-          default:
-            break;
-        }
+        targetParamKey = getParameterKeyByType(*contentInfo,targetParameterKeyType,true);
 
         if (!sourceParamKey.empty()  &&  !targetParamKey.empty())
         {
@@ -1700,7 +1533,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1719,7 +1552,7 @@ int CacheImplementation::_getGenerationIdGeometryIdAndForecastTimeList(T::Sessio
       if (info != nullptr)
       {
         char st[1000];
-        snprintf(st,sizeof(st),"%u;%lu;%u;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
+        snprintf(st,sizeof(st),"%u;%lu;%d;%d;%d;%s;%ld;%ld;",info->mSourceId,info->mGenerationId,info->mGeometryId,info->mForecastType,info->mForecastNumber,info->getForecastTime(),info->mModificationTime,info->mDeletionTime);
         std::string str = st;
         if (list.find(str) == list.end())
           list.insert(str);
@@ -1754,7 +1587,7 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1770,9 +1603,9 @@ int CacheImplementation::_getGenerationInfoListByGeometryId(T::SessionId session
 
     ssp->mContentInfoList[0].getGenerationIdListByGeometryId(geometryId,idList);
 
-    for (auto it=idList.begin(); it!=idList.end(); ++it)
+    for (unsigned long it : idList)
     {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(*it);
+      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(it);
       if (generationInfo != nullptr)
         generationInfoList.addGenerationInfo(generationInfo->duplicate());
     }
@@ -1814,7 +1647,7 @@ int CacheImplementation::_getGenerationInfoById(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1866,7 +1699,7 @@ int CacheImplementation::_getGenerationInfoByName(T::SessionId sessionId,const s
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1918,7 +1751,7 @@ int CacheImplementation::_getGenerationInfoList(T::SessionId sessionId,T::Genera
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -1970,7 +1803,7 @@ int CacheImplementation::_getGenerationInfoListByProducerId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2025,7 +1858,7 @@ int CacheImplementation::_getGenerationInfoListByProducerName(T::SessionId sessi
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2084,7 +1917,7 @@ int CacheImplementation::_getGenerationInfoListBySourceId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2125,7 +1958,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerIdAndStatus(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2166,7 +1999,7 @@ int CacheImplementation::_getLastGenerationInfoByProducerNameAndStatus(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2214,7 +2047,7 @@ int CacheImplementation::_getGenerationInfoCount(T::SessionId sessionId,uint& co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2432,7 +2265,7 @@ int CacheImplementation::_getGeometryInfoById(T::SessionId sessionId,T::Generati
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2483,7 +2316,7 @@ int CacheImplementation::_getGeometryInfoList(T::SessionId sessionId,T::Geometry
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2534,7 +2367,7 @@ int CacheImplementation::_getGeometryInfoListByGenerationId(T::SessionId session
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2584,7 +2417,7 @@ int CacheImplementation::_getGeometryInfoListByProducerId(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2635,7 +2468,7 @@ int CacheImplementation::_getGeometryInfoListBySourceId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -2684,7 +2517,7 @@ int CacheImplementation::_getGeometryInfoCount(T::SessionId sessionId,uint& coun
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3115,7 +2948,7 @@ int CacheImplementation::_getFileInfoById(T::SessionId sessionId,T::FileId fileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3167,7 +3000,7 @@ int CacheImplementation::_getFileInfoByName(T::SessionId sessionId,const std::st
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3220,7 +3053,7 @@ int CacheImplementation::_getFileInfoList(T::SessionId sessionId,T::FileId start
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3260,24 +3093,24 @@ int CacheImplementation::_getFileInfoListByFileIdList(T::SessionId sessionId,std
     if (mContentSwapEnabled &&  sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
-        T::FileInfo *info = mFileInfoList.getFileInfoById(*it);
+        T::FileInfo *info = mFileInfoList.getFileInfoById(it);
         if (info != nullptr)
           fileInfoList.addFileInfo(info->duplicate());
       }
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
     AutoReadLock readLock(&mSearchModificationLock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
-      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(*it);
+      T::FileInfo *info = ssp->mFileInfoList.getFileInfoById(it);
       if (info != nullptr)
         fileInfoList.addFileInfo(info->duplicate());
     }
@@ -3316,7 +3149,7 @@ int CacheImplementation::_getFileInfoListByProducerId(T::SessionId sessionId,T::
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3376,7 +3209,7 @@ int CacheImplementation::_getFileInfoListByProducerName(T::SessionId sessionId,c
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3436,7 +3269,7 @@ int CacheImplementation::_getFileInfoListByGenerationId(T::SessionId sessionId,T
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3490,7 +3323,7 @@ int CacheImplementation::_getFileInfoListByGenerationName(T::SessionId sessionId
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3548,7 +3381,7 @@ int CacheImplementation::_getFileInfoListBySourceId(T::SessionId sessionId,T::So
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3596,7 +3429,7 @@ int CacheImplementation::_getFileInfoCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3644,7 +3477,7 @@ int CacheImplementation::_getFileInfoCountByProducerId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3691,7 +3524,7 @@ int CacheImplementation::_getFileInfoCountByGenerationId(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -3739,7 +3572,7 @@ int CacheImplementation::_getFileInfoCountBySourceId(T::SessionId sessionId,T::S
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4184,7 +4017,7 @@ int CacheImplementation::_getContentInfo(T::SessionId sessionId,T::FileId fileId
       return Result::DATA_NOT_FOUND;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4245,7 +4078,7 @@ int CacheImplementation::_getContentList(T::SessionId sessionId,T::FileId startF
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4296,7 +4129,7 @@ int CacheImplementation::_getContentListByFileId(T::SessionId sessionId,T::FileI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4342,16 +4175,16 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
     if (mContentSwapEnabled &&  sessionId == mDataServerSessionId)
     {
       AutoReadLock lock(&mModificationLock);
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long & it : fileIdList)
       {
         T::ContentInfoList contentList;
-        mContentInfoList.getContentInfoListByFileId(*it,contentList);
+        mContentInfoList.getContentInfoListByFileId(it,contentList);
         contentInfoList.addContentInfoList(contentList);
       }
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4361,10 +4194,10 @@ int CacheImplementation::_getContentListByFileIdList(T::SessionId sessionId,std:
 
     AutoReadLock readLock(mlock);
 
-    for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+    for (unsigned long & it : fileIdList)
     {
       T::ContentInfoList contentList;
-      ssp->mContentInfoList[0].getContentInfoListByFileId(*it,contentList);
+      ssp->mContentInfoList[0].getContentInfoListByFileId(it,contentList);
       contentInfoList.addContentInfoList(contentList);
     }
 
@@ -4409,7 +4242,7 @@ int CacheImplementation::_getContentListByFileName(T::SessionId sessionId,const 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4468,7 +4301,7 @@ int CacheImplementation::_getContentListByProducerId(T::SessionId sessionId,T::P
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 /*
@@ -4527,7 +4360,7 @@ int CacheImplementation::_getContentListByProducerName(T::SessionId sessionId,co
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4589,7 +4422,7 @@ int CacheImplementation::_getContentListByGenerationId(T::SessionId sessionId,T:
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4640,7 +4473,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::OK;
 
     if (mUpdateInProgress)
-      return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,maxRecords,startMessageIndex,contentInfoList);
+      return mContentStorage->getContentListByGenerationName(sessionId,generationName,startFileId,startMessageIndex,maxRecords,contentInfoList);
 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
@@ -4658,7 +4491,7 @@ int CacheImplementation::_getContentListByGenerationName(T::SessionId sessionId,
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4720,7 +4553,7 @@ int CacheImplementation::_getContentListByGenerationIdAndTimeRange(T::SessionId 
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4783,7 +4616,7 @@ int CacheImplementation::_getContentListByGenerationNameAndTimeRange(T::SessionI
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4842,7 +4675,7 @@ int CacheImplementation::_getContentListBySourceId(T::SessionId sessionId,T::Sou
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4884,7 +4717,7 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -4933,14 +4766,11 @@ int CacheImplementation::_getContentListByParameter(T::SessionId sessionId,T::Pa
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterId(fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -4973,7 +4803,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5027,14 +4857,11 @@ int CacheImplementation::_getContentListByParameterAndGenerationId(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5067,7 +4894,7 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5120,14 +4947,11 @@ int CacheImplementation::_getContentListByParameterAndGenerationName(T::SessionI
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5159,7 +4983,7 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5215,14 +5039,11 @@ int CacheImplementation::_getContentListByParameterAndProducerId(T::SessionId se
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5254,7 +5075,7 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5307,14 +5128,11 @@ int CacheImplementation::_getContentListByParameterAndProducerName(T::SessionId 
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndProducerId(producerInfo->mProducerId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentInfoList);
@@ -5347,7 +5165,7 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5408,14 +5226,11 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
 
     if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"FMI-",4) == 0)
       fmiId = toUInt32(parameterKey.c_str()+4);
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"NB-",3) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByNewbaseId(toUInt32(parameterKey.c_str()+3));
-    else
-    if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
+    else if (fmiId == 0  &&  strncasecmp(parameterKey.c_str(),"GRIB-",5) == 0)
       fmiId = Identification::gridDef.getFmiParameterIdByGribId(toUInt32(parameterKey.c_str()+5));
-    else
-    if (fmiId == 0)
+    else if (fmiId == 0)
       return Result::UNKNOWN_PARAMETER_NAME;
 
     T::ContentInfo *cInfo = ssp->mContentInfoList[1].getContentInfoByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,level,forecastType,forecastNumber,geometryId,forecastTime);
@@ -5427,6 +5242,46 @@ int CacheImplementation::_getContentListByParameterGenerationIdAndForecastTime(T
     ssp->mContentInfoList[1].getContentInfoListByFmiParameterIdAndGenerationId(generationInfo->mProducerId,generationInfo->mGenerationId,fmiId,parameterLevelId,minLevel,maxLevel,forecastType,forecastNumber,geometryId,startTime,endTime,requestFlags,contentList);
     contentInfoList = contentList;
     return Result::OK;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return true (and log the error) if the file, generation or producer of the content is missing. */
+
+bool CacheImplementation::hasInvalidIntegrity(SearchStructure& ss,T::ContentInfo& cInfo)
+{
+  FUNCTION_TRACE
+  try
+  {
+    T::FileInfo *fileInfo = ss.mFileInfoList.getFileInfoById(cInfo.mFileId);
+    if (fileInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo.mFileId);
+      return true;
+    }
+
+    T::GenerationInfo *generationInfo = ss.mGenerationInfoList.getGenerationInfoById(cInfo.mGenerationId);
+    if (generationInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo.mGenerationId);
+      return true;
+    }
+
+    T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoById(cInfo.mProducerId);
+    if (producerInfo == nullptr)
+    {
+      PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo.mProducerId);
+      return true;
+    }
+
+    return false;
   }
   catch (...)
   {
@@ -5450,7 +5305,7 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
 
     contentInfoList.clear();
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5464,39 +5319,8 @@ int CacheImplementation::_getContentListOfInvalidIntegrity(T::SessionId sessionI
     for (uint c=0; c<cLen; c++)
     {
       T::ContentInfo *cInfo = ssp->mContentInfoList[0].getContentInfoByIndex(c);
-      T::ContentInfo *cError = nullptr;
-      if (cInfo != nullptr)
-      {
-        T::FileInfo *fileInfo = ssp->mFileInfoList.getFileInfoById(cInfo->mFileId);
-        if (fileInfo == nullptr)
-        {
-          PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : File missing (%lu)! *****\n",cInfo->mFileId);
-          cError = cInfo;
-        }
-
-        if (cError == nullptr)
-        {
-          T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(cInfo->mGenerationId);
-          if (generationInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Generation missing (%lu)! *****\n",cInfo->mGenerationId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError == nullptr)
-        {
-          T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoById(cInfo->mProducerId);
-          if (producerInfo == nullptr)
-          {
-            PRINT_DATA(mDebugLog,"**** INTEGRITY ERROR : Producer missing (%u)! *****\n",cInfo->mProducerId);
-            cError = cInfo;
-          }
-        }
-
-        if (cError != nullptr)
-          contentInfoList.addContentInfo(cError->duplicate());
-      }
+      if (cInfo != nullptr  &&  hasInvalidIntegrity(*ssp,*cInfo))
+        contentInfoList.addContentInfo(cInfo->duplicate());
     }
     return Result::OK;
   }
@@ -5526,7 +5350,7 @@ int CacheImplementation::_getContentGeometryIdListByGenerationId(T::SessionId se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5578,7 +5402,7 @@ int CacheImplementation::_getContentParamListByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5650,7 +5474,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationId(T::SessionId sess
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5701,7 +5525,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationAndGeometryId(T::Ses
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5752,7 +5576,7 @@ int CacheImplementation::_getContentParamKeyListByGenerationGeometryAndLevelId(T
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5803,7 +5627,7 @@ int CacheImplementation::_getContentLevelListByGenerationGeometryAndLevelId(T::S
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5854,7 +5678,7 @@ int CacheImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -5888,6 +5712,44 @@ int CacheImplementation::_getContentLevelListByParameterGenerationGeometryAndLev
 
 
 
+/*! \brief Get the forecast times of the generation from the content time cache, or from the contents (caching them when the generation is ready). */
+
+void CacheImplementation::getCachedContentTimeList(SearchStructure& ss,T::GenerationInfo& generationInfo,std::set<std::string>& contentTimeList)
+{
+  FUNCTION_TRACE
+  try
+  {
+    AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
+    auto it = mContentTimeCache.find(generationInfo.mGenerationId);
+    if (it == mContentTimeCache.end())
+    {
+      ss.mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo.mProducerId,generationInfo.mGenerationId,contentTimeList);
+
+      if (generationInfo.mStatus == T::GenerationInfo::Status::Ready)
+      {
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        if (mContentTimeCache.size() > 100000)
+          mContentTimeCache.clear();
+
+        mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationInfo.mGenerationId,contentTimeList));
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+    }
+    else
+    {
+      contentTimeList = it->second;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Cache override: lists distinct forecast times for the given generation. */
 
 int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionId,T::GenerationId generationId,std::set<std::string>& contentTimeList)
@@ -5904,67 +5766,22 @@ int CacheImplementation::_getContentTimeListByGenerationId(T::SessionId sessionI
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
     contentTimeList.clear();
 
-    if (!mContentSwapEnabled)
-    {
-      AutoReadLock readLock(&mSearchModificationLock);
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
-      if (generationInfo == nullptr)
-        return Result::UNKNOWN_GENERATION_ID;
+    ModificationLock *mlock = &mSearchModificationLock;
+    if (mContentSwapEnabled)
+      mlock = nullptr;
 
-      AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
-      auto it = mContentTimeCache.find(generationId);
-      if (it == mContentTimeCache.end())
-      {
-        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
+    AutoReadLock readLock(mlock);
+    T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
+    if (generationInfo == nullptr)
+      return Result::UNKNOWN_GENERATION_ID;
 
-        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
-        {
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          if (mContentTimeCache.size() > 100000)
-            mContentTimeCache.clear();
-
-          mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationId,contentTimeList));
-          mContentTimeCache_modificationLock.writeUnlock();
-        }
-      }
-      else
-      {
-        contentTimeList = it->second;
-      }
-    }
-    else
-    {
-      T::GenerationInfo *generationInfo = ssp->mGenerationInfoList.getGenerationInfoById(generationId);
-      if (generationInfo == nullptr)
-        return Result::UNKNOWN_GENERATION_ID;
-
-      AutoReadLock cacheLock(&mContentTimeCache_modificationLock);
-      auto it = mContentTimeCache.find(generationId);
-      if (it == mContentTimeCache.end())
-      {
-        ssp->mContentInfoList[1].getForecastTimeListByGenerationId(generationInfo->mProducerId,generationId,contentTimeList);
-
-        if (generationInfo->mStatus == T::GenerationInfo::Status::Ready)
-        {
-          mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-          if (mContentTimeCache.size() > 100000)
-            mContentTimeCache.clear();
-
-          mContentTimeCache.insert(std::pair<T::GenerationId,std::set<std::string>>(generationId,contentTimeList));
-          mContentTimeCache_modificationLock.writeUnlock();
-        }
-      }
-      else
-      {
-        contentTimeList = it->second;
-      }
-    }
+    getCachedContentTimeList(*ssp,*generationInfo,contentTimeList);
     return Result::OK;
   }
   catch (...)
@@ -5993,7 +5810,7 @@ int CacheImplementation::_getContentTimeRangeByProducerAndGenerationId(T::Sessio
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6062,7 +5879,7 @@ int CacheImplementation::_getContentTimeRangeByGenerationId(T::SessionId session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6131,7 +5948,7 @@ int CacheImplementation::_getContentTimeListByGenerationAndGeometryId(T::Session
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6184,7 +6001,7 @@ int CacheImplementation::_getContentTimeListByGenerationGeometryAndLevelId(T::Se
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6237,7 +6054,7 @@ int CacheImplementation::_getContentTimeListByProducerId(T::SessionId sessionId,
     if (!isSessionValid(sessionId))
       return Result::INVALID_SESSION;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6287,7 +6104,7 @@ int CacheImplementation::_getContentCount(T::SessionId sessionId,uint& count)
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6347,7 +6164,7 @@ int CacheImplementation::_getHashByProducerId(T::SessionId sessionId,T::Producer
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6407,7 +6224,7 @@ int CacheImplementation::_getLevelInfoList(T::SessionId sessionId,T::LevelInfoLi
       return Result::OK;
     }
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (!ssp)
       return Result::DATA_NOT_FOUND;
 
@@ -6453,9 +6270,9 @@ int CacheImplementation::_updateCachedFiles(T::SessionId sessionId,std::set<T::F
           mCachedFiles.erase(*it);
       }
 
-      for (auto it = fileIdList.begin(); it != fileIdList.end(); ++it)
+      for (unsigned long it : fileIdList)
       {
-        mCachedFiles.insert(*it);
+        mCachedFiles.insert(it);
       }
     }
 
@@ -6606,6 +6423,9 @@ void CacheImplementation::readFileList()
       if (mShutdownRequested)
         return;
 
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       T::FileInfoList fileInfoList;
 
       int result = mContentStorage->getFileInfoList(mSessionId,startFileId,50000,fileInfoList);
@@ -6667,6 +6487,9 @@ void CacheImplementation::readContentList()
       if (mShutdownRequested)
         return;
 
+      // Lets the Reactor interrupt a long initial load when the server shuts down during init
+      boost::this_thread::interruption_point();
+
       T::ContentInfoList contentInfoList;
 
       int result = mContentStorage->getContentList(mSessionId,startFileId,startMessageIndex,50000,contentInfoList);
@@ -6709,7 +6532,7 @@ void CacheImplementation::readContentList()
 
 /*! \brief Handles a CLEAR event by emptying all cached lists. */
 
-void CacheImplementation::event_clear(T::EventInfo& eventInfo)
+void CacheImplementation::event_clear(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6731,7 +6554,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoWriteLock writeLock(&mSearchModificationLock);
@@ -6758,7 +6581,7 @@ void CacheImplementation::event_clear(T::EventInfo& eventInfo)
 
 /*! \brief Handles a CONTENT_SERVER_RELOAD event by triggering a full reload. */
 
-void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
+void CacheImplementation::event_contentServerReload(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6777,7 +6600,7 @@ void CacheImplementation::event_contentServerReload(T::EventInfo& eventInfo)
 
 /*! \brief Handles the start of an upstream update loop. */
 
-void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
+void CacheImplementation::event_updateLoopStart(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6788,7 +6611,7 @@ void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
         + mGeometryInfoList.getHash()
         + mContentInfoList.getHash();
 
-    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopStart();Hash %ld",mContentSourceHash);
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopStart();Hash %zu",mContentSourceHash);
   }
   catch (...)
   {
@@ -6803,7 +6626,7 @@ void CacheImplementation::event_updateLoopStart(T::EventInfo& eventInfo)
 
 /*! \brief Handles the end of an upstream update loop and may trigger a search-structure swap. */
 
-void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
+void CacheImplementation::event_updateLoopEnd(T::EventInfo& /*eventInfo*/)
 {
   FUNCTION_TRACE
   try
@@ -6816,12 +6639,12 @@ void CacheImplementation::event_updateLoopEnd(T::EventInfo& eventInfo)
 
     if (hash != mContentSourceHash)
     {
-      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();### Hash changed %ld ###",hash);
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();### Hash changed %zu ###",hash);
       mContentUpdateRequired = true;
     }
     else
     {
-      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();Hash not changed %ld",hash);
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::event_updateLoopEnd();Hash not changed %zu",hash);
     }
 
     mContentSourceHash = hash;
@@ -6852,7 +6675,7 @@ void CacheImplementation::event_producerAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6895,7 +6718,7 @@ void CacheImplementation::event_producerDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6940,7 +6763,7 @@ void CacheImplementation::event_producerUpdated(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -6980,7 +6803,7 @@ void CacheImplementation::event_producerListDeletedBySourceId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7017,7 +6840,7 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7028,10 +6851,15 @@ void CacheImplementation::event_generationAdded(T::EventInfo& eventInfo)
     }
 
     T::GenerationInfo generationInfo;
-    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) == Result::OK)
+    int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+    if (result != Result::OK)
     {
-      mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+      // Later update and status events for the generation will add it to the cache
+      reportMissingGeneration("GENERATION_ADDED",eventInfo.mId1,result);
+      return;
     }
+
+    mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
   }
   catch (...)
   {
@@ -7065,7 +6893,7 @@ void CacheImplementation::event_generationDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7094,19 +6922,28 @@ void CacheImplementation::event_generationUpdated(T::EventInfo& eventInfo)
   try
   {
     T::GenerationInfo generationInfo;
-    if (mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo) != Result::OK)
+    int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+    if (result != Result::OK)
+    {
+      reportMissingGeneration("GENERATION_UPDATED",eventInfo.mId1,result);
       return;
+    }
 
     {
       AutoWriteLock lock(&mModificationLock);
       T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
       if (info)
         *info = generationInfo;
+      else
+      {
+        // The GENERATION_ADDED event failed to read the generation, repair the cache now
+        mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+      }
     }
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7138,11 +6975,27 @@ void CacheImplementation::event_generationStatusChanged(T::EventInfo& eventInfo)
       T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoById(eventInfo.mId1);
       if (info != nullptr)
         info->mStatus = eventInfo.mId2;
+      else
+      {
+        // The GENERATION_ADDED event failed to read the generation, repair the cache now.
+        // A generation normally becomes ready only after it has been added, so this
+        // event is usually the first chance to recover.
+
+        T::GenerationInfo generationInfo;
+        int result = mContentStorage->getGenerationInfoById(mSessionId,eventInfo.mId1,generationInfo);
+        if (result == Result::OK)
+        {
+          generationInfo.mStatus = eventInfo.mId2;
+          mGenerationInfoList.addGenerationInfo(generationInfo.duplicate());
+        }
+        else
+          reportMissingGeneration("GENERATION_STATUS_CHANGED",eventInfo.mId1,result);
+      }
     }
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7181,7 +7034,7 @@ void CacheImplementation::event_generationListDeletedByProducerId(T::EventInfo& 
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7218,7 +7071,7 @@ void CacheImplementation::event_generationListDeletedBySourceId(T::EventInfo& ev
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7254,7 +7107,7 @@ void CacheImplementation::event_geometryAdded(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7294,7 +7147,7 @@ void CacheImplementation::event_geometryDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7332,7 +7185,7 @@ void CacheImplementation::event_geometryStatusChanged(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7374,7 +7227,7 @@ void CacheImplementation::event_geometryUpdated(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7408,7 +7261,7 @@ void CacheImplementation::event_geometryListDeletedByProducerId(T::EventInfo& ev
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7443,7 +7296,7 @@ void CacheImplementation::event_geometryListDeletedByGenerationId(T::EventInfo& 
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7477,7 +7330,7 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7485,6 +7338,159 @@ void CacheImplementation::event_geometryListDeletedBySourceId(T::EventInfo& even
         //mFileDeleteCounter += ssp->mFileInfoList.markDeletedByProducerId(eventInfo.mId1);
         mGeometryDeleteCounter += ssp->mGeometryInfoList.markDeletedBySourceId(eventInfo.mId1);
       }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Adds a content record to the primary content list. If the list has a record of the
+    same message that is marked deleted (old content of a file that was registered again), the
+    record is reused for the new content. Previously the new content was dropped, so a file that
+    was rewritten in place lost its messages from the cache. Takes the ownership of contentInfo.
+*/
+
+namespace
+{
+void addOrReplaceContent(T::ContentInfoList& list,T::ContentInfo *contentInfo,uint& deleteCounter)
+{
+  T::ContentInfo *existing = list.addContentInfo(contentInfo);
+  if (existing == contentInfo)
+    return;
+
+  if (existing != nullptr  &&  (existing->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
+  {
+    *existing = *contentInfo;
+    existing->mFlags &= ~T::ContentInfo::Flags::DeletedContent;
+    if (deleteCounter > 0)
+      deleteCounter--;
+  }
+  delete contentInfo;
+}
+}  // namespace
+
+
+
+
+
+/*! \brief Add the content into the content list, and its forecast time into the cached forecast times of its generation. */
+
+void CacheImplementation::addCachedContent(T::ContentInfo *contentInfo)
+{
+  try
+  {
+    AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
+    auto it = mContentTimeCache.find(contentInfo->mGenerationId);
+    if (it != mContentTimeCache.end())
+    {
+      //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
+        it->second.insert(contentInfo->getForecastTime());
+    }
+
+    addOrReplaceContent(mContentInfoList,contentInfo,mContentDeleteCounter);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file (first line) and the contents (other lines) of the FILE_ADDED event data that are not yet in the lists. */
+
+void CacheImplementation::addEventFileAndContents(const std::string& eventData)
+{
+  try
+  {
+    std::string bufStr(eventData);
+    char *s = bufStr.data();
+
+    while (s != nullptr)
+    {
+      char *p = strstr(s,"\n");
+      if (p == nullptr)
+        break;
+
+      *p = '\0';
+      if (s == bufStr.data())
+      {
+        auto *fileInfo = new T::FileInfo();
+        fileInfo->setCsv(s);
+
+        if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == nullptr)
+        {
+          mFileInfoList.addFileInfo(fileInfo);
+        }
+        else
+        {
+          delete fileInfo;
+        }
+      }
+      else
+      {
+        auto *contentInfo = new T::ContentInfo();
+        contentInfo->setCsv(s);
+        if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
+        {
+          addCachedContent(contentInfo);
+        }
+        else
+        {
+          delete contentInfo;
+        }
+      }
+      s = p + 1;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the file of the FILE_ADDED event and its contents (if the event says it has some) from the content storage. */
+
+void CacheImplementation::addStoredFileAndContents(T::EventInfo& eventInfo)
+{
+  try
+  {
+    T::FileInfo fileInfo;
+    if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) != Result::OK)
+      return;
+
+    // As in the event data path, a file that is already in the list is not added twice
+    if (mFileInfoList.getFileInfoById(fileInfo.mFileId) == nullptr)
+      mFileInfoList.addFileInfo(fileInfo.duplicate());
+
+    if (eventInfo.mId3 == 0)
+      return;
+
+    T::ContentInfoList contentInfoList;
+    if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) != Result::OK)
+      return;
+
+    uint len = contentInfoList.getLength();
+    for (uint c=0; c<len; c++)
+    {
+      T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
+
+      // The lookup does not return deleted contents. A content marked deleted (old content of a file that was
+      // registered again) is replaced by the new content in addOrReplaceContent.
+      if (info != nullptr  &&  mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) == nullptr)
+        addCachedContent(info->duplicate());
     }
   }
   catch (...)
@@ -7509,116 +7515,9 @@ void CacheImplementation::event_fileAdded(T::EventInfo& eventInfo)
     uint len = eventInfo.mEventData.length();
 
     if (len > 0)
-    {
-      std::string bufStr(eventInfo.mEventData);
-      char *s = bufStr.data();
-
-      while (s != nullptr)
-      {
-        char *p = strstr(s,"\n");
-        if (p != nullptr)
-        {
-          *p = '\0';
-          if (s == bufStr.data())
-          {
-            T::FileInfo *fileInfo = new T::FileInfo();
-            fileInfo->setCsv(s);
-
-            if (mFileInfoList.getFileInfoById(fileInfo->mFileId) == nullptr)
-            {
-              mFileInfoList.addFileInfo(fileInfo);
-            }
-            else
-            {
-              delete fileInfo;
-            }
-          }
-          else
-          {
-            T::ContentInfo *contentInfo = new T::ContentInfo();
-            contentInfo->setCsv(s);
-            if (mContentInfoList.getContentInfoByFileIdAndMessageIndex(contentInfo->mFileId,contentInfo->mMessageIndex) == nullptr)
-            {
-              AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-              auto it = mContentTimeCache.find(contentInfo->mGenerationId);
-              if (it != mContentTimeCache.end())
-              {
-                //if (it->second.find(contentInfo->mForecastTime) == it->second.end())
-                  it->second.insert(contentInfo->getForecastTime());
-              }
-
-              if (mContentInfoList.addContentInfo(contentInfo) == contentInfo)
-              {
-              }
-              else
-              {
-                // Additon failed. The content probably exists
-                delete contentInfo;
-              }
-            }
-            else
-            {
-              delete contentInfo;
-            }
-          }
-          s = p + 1;
-        }
-        else
-        {
-          s = nullptr;
-        }
-      }
-    }
+      addEventFileAndContents(eventInfo.mEventData);
     else
-    {
-      T::FileInfo fileInfo;
-      if (mContentStorage->getFileInfoById(mSessionId,eventInfo.mId1,fileInfo) == Result::OK)
-      {
-        T::FileInfo *fInfo = fileInfo.duplicate();
-        mFileInfoList.addFileInfo(fInfo);
-
-        if (eventInfo.mId3 > 0)
-        {
-          T::ContentInfoList contentInfoList;
-          if (mContentStorage->getContentListByFileId(mSessionId,fileInfo.mFileId,contentInfoList) == Result::OK)
-          {
-            uint len = contentInfoList.getLength();
-            for (uint c=0; c<len; c++)
-            {
-              T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-              T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-              if (info != nullptr &&  (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)))
-              {
-                if (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0)
-                {
-                  // We should remove the old content before the addition
-                }
-                else
-                {
-                  T::ContentInfo *cInfo = info->duplicate();
-                  AutoWriteLock cacheLock(&mContentTimeCache_modificationLock);
-                  auto it = mContentTimeCache.find(cInfo->mGenerationId);
-                  if (it != mContentTimeCache.end())
-                  {
-                    //if (it->second.find(cInfo->mForecastTime) == it->second.end())
-                      it->second.insert(cInfo->getForecastTime());
-                  }
-
-                  if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-                  {
-                  }
-                  else
-                  {
-                    // Addition failed
-                    delete cInfo;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+      addStoredFileAndContents(eventInfo);
   }
   catch (...)
   {
@@ -7644,7 +7543,7 @@ void CacheImplementation::event_fileDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7694,27 +7593,11 @@ void CacheImplementation::event_fileUpdated(T::EventInfo& eventInfo)
         for (uint c=0; c<len; c++)
         {
           T::ContentInfo *info = contentInfoList.getContentInfoByIndex(c);
-          T::ContentInfo *oInfo = mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex);
-          if (oInfo == nullptr  ||  (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-          {
-            if (info != nullptr && (oInfo != nullptr  &&  (oInfo->mFlags & T::ContentInfo::Flags::DeletedContent) != 0))
-            {
-              // We should remove the old content before the addition
-            }
-            else
-            {
-              T::ContentInfo *cInfo = info->duplicate();
 
-              if (mContentInfoList.addContentInfo(cInfo) == cInfo)
-              {
-              }
-              else
-              {
-                // Addtion failed
-                delete cInfo;
-              }
-            }
-          }
+          // The old contents of the file were marked deleted above. The lookup does not return deleted contents,
+          // and addOrReplaceContent replaces a deleted content by the new content.
+          if (info != nullptr  &&  mContentInfoList.getContentInfoByFileIdAndMessageIndex(info->mFileId,info->mMessageIndex) == nullptr)
+            addOrReplaceContent(mContentInfoList,info->duplicate(),mContentDeleteCounter);
         }
       }
     }
@@ -7743,7 +7626,7 @@ void CacheImplementation::event_fileListDeletedByProducerId(T::EventInfo& eventI
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7776,7 +7659,7 @@ void CacheImplementation::event_fileListDeletedByGenerationId(T::EventInfo& even
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7810,7 +7693,7 @@ void CacheImplementation::event_fileListDeletedBySourceId(T::EventInfo& eventInf
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7841,7 +7724,7 @@ void CacheImplementation::event_contentListDeletedByFileId(T::EventInfo& eventIn
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7871,7 +7754,7 @@ void CacheImplementation::event_contentListDeletedByProducerId(T::EventInfo& eve
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7901,7 +7784,7 @@ void CacheImplementation::event_contentListDeletedBySourceId(T::EventInfo& event
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7931,7 +7814,7 @@ void CacheImplementation::event_contentListDeletedByGenerationId(T::EventInfo& e
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -7966,7 +7849,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
 
       if (!mContentSwapEnabled)
       {
-        auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+        auto ssp = activeSearchStructure();
         if (ssp)
         {
           AutoReadLock readLock(&mSearchModificationLock);
@@ -8033,7 +7916,7 @@ void CacheImplementation::event_contentUpdated(T::EventInfo& eventInfo)
 
       if (!mContentSwapEnabled)
       {
-        auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+        auto ssp = activeSearchStructure();
         if (ssp)
         {
           AutoReadLock readLock(&mSearchModificationLock);
@@ -8067,7 +7950,7 @@ void CacheImplementation::event_contentDeleted(T::EventInfo& eventInfo)
 
     if (!mContentSwapEnabled)
     {
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+      auto ssp = activeSearchStructure();
       if (ssp)
       {
         AutoReadLock readLock(&mSearchModificationLock);
@@ -8235,7 +8118,172 @@ void CacheImplementation::processEvent(T::EventInfo& eventInfo)
       case EventType::CONTENT_UPDATED:
         event_contentUpdated(eventInfo);
         break;
+      default:
+        break;
     }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Process the events of the list (logging failures) and append them to the event list. Returns false if a shutdown was requested. */
+
+bool CacheImplementation::processEventInfoList(T::EventInfoList& eventInfoList,uint& ecnt)
+{
+  try
+  {
+    T::EventInfo *it = eventInfoList.getFirstEvent();
+    while (it != nullptr)
+    {
+      try
+      {
+        processEvent(*it);
+        ecnt++;
+      }
+      catch (...)
+      {
+        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
+        exception.printError();
+      }
+
+
+      T::EventInfo *event = it->duplicate();
+      //event->mServerTime = mContentStorageStartTime;
+      mEventInfoList.addEventInfo(event);
+      mLastProcessedEventId = it->mEventId;
+
+      it = it->nextItem;
+
+      if (mShutdownRequested)
+        return false;
+    }
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Remove the cached forecast times of the generations that are not in the active search structure. */
+
+void CacheImplementation::removeUnknownGenerationTimes()
+{
+  try
+  {
+    auto ssp = activeSearchStructure();
+    if (!ssp)
+      return;
+
+    AutoReadLock lock(&mContentTimeCache_modificationLock);
+
+    for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); )
+    {
+      if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
+      {
+        if (mShutdownRequested)
+          return;
+
+        mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
+        it = mContentTimeCache.erase(it);
+        mContentTimeCache_modificationLock.writeUnlock();
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the content when the update interval has changed or an update was requested, but not more often than every 30 seconds. */
+
+void CacheImplementation::updateContentIfRequired()
+{
+  try
+  {
+    time_t t1 = time(nullptr) / mContentUpdateInterval;
+    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
+
+    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
+    {
+      mContentUpdateRequired = false;
+      mContentUpdateTime = 0;
+      updateContent();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Reload the data if the content storage has restarted after the last known start (according to the last event). Returns true after a reload. */
+
+bool CacheImplementation::reloadAfterRestart(const T::EventInfo& eventInfo)
+{
+  try
+  {
+    if (mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
+    {
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();Content server restart detected, reload required");
+      mEventInfoList.clear();
+      reloadData();
+      mContentUpdateRequired = true;
+      mContentStorageStartTime = eventInfo.mServerTime;
+      return true;
+    }
+    return false;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Fetch and process the events after the last processed event. Sets len to the number of fetched events.
+           Returns false if the events cannot be fetched or a shutdown was requested. */
+
+bool CacheImplementation::processNextEvents(uint& len,uint& ecnt)
+{
+  try
+  {
+    T::EventInfoList eventInfoList;
+    int result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
+    if (result != 0)
+    {
+      return false;
+    }
+
+    len = eventInfoList.getLength();
+
+    return processEventInfoList(eventInfoList,ecnt);
   }
   catch (...)
   {
@@ -8266,15 +8314,7 @@ void CacheImplementation::processEvents(bool eventThread)
       return;
     }
 
-    time_t t1 = time(nullptr) / mContentUpdateInterval;
-    time_t t2 = mContentUpdateTime / mContentUpdateInterval;
-
-    if ((t1 != t2 || mContentUpdateRequired)  &&  (time(nullptr)-mContentUpdateTime) > 30)
-    {
-      mContentUpdateRequired = false;
-      mContentUpdateTime = 0;
-      updateContent();
-    }
+    updateContentIfRequired();
 
     AutoThreadLock eventLock(&mEventProcessingLock);
 
@@ -8288,18 +8328,8 @@ void CacheImplementation::processEvents(bool eventThread)
       len = 0;
       T::EventInfo eventInfo;
       int result = mContentStorage->getLastEventInfo(mSessionId,0,eventInfo);
-      if (result == Result::DATA_NOT_FOUND || result == Result::OK)
-      {
-        if (eventThread  &&  mContentStorageStartTime > 0 &&  mContentStorageStartTime < eventInfo.mServerTime)
-        {
-          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();Content server restart detected, reload required");
-          mEventInfoList.clear();
-          reloadData();
-          mContentUpdateRequired = true;
-          mContentStorageStartTime = eventInfo.mServerTime;
-          return;
-        }
-      }
+      if ((result == Result::DATA_NOT_FOUND || result == Result::OK)  &&  eventThread  &&  reloadAfterRestart(eventInfo))
+        return;
 
       if (result != Result::OK)
         return;
@@ -8307,68 +8337,18 @@ void CacheImplementation::processEvents(bool eventThread)
       if (eventThread  &&  mContentStorageStartTime == 0)
         mContentStorageStartTime = eventInfo.mServerTime;
 
-      if (eventInfo.mEventId > mLastProcessedEventId)
-      {
+      if (eventInfo.mEventId <= mLastProcessedEventId)
+        continue;
 
-        T::EventInfoList eventInfoList;
-        result = mContentStorage->getEventInfoList(mSessionId,0,mLastProcessedEventId+1,10000,eventInfoList);
-        if (result != 0)
-        {
-          return;
-        }
-
-        len = eventInfoList.getLength();
-
-        T::EventInfo *it = eventInfoList.getFirstEvent();
-        while (it != nullptr)
-        {
-          try
-          {
-            processEvent(*it);
-            ecnt++;
-          }
-          catch (...)
-          {
-            Fmi::Exception exception(BCP,"Operation failed!",nullptr);
-            exception.printError();
-          }
-
-
-          T::EventInfo *event = it->duplicate();
-          //event->mServerTime = mContentStorageStartTime;
-          mEventInfoList.addEventInfo(event);
-          mLastProcessedEventId = it->mEventId;
-
-          it = it->nextItem;
-
-          if (mShutdownRequested)
-            return;
-        }
-      }
+      if (!processNextEvents(len,ecnt))
+        return;
     }
 
     if (ecnt > 0)
     {
       PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::processEvents();%u",ecnt);
 
-      auto ssp = mSearchStructurePtr[mActiveSearchStructure];
-      if (ssp)
-      {
-        AutoReadLock lock(&mContentTimeCache_modificationLock);
-
-        for (auto it = mContentTimeCache.begin();  it != mContentTimeCache.end(); ++it)
-        {
-          if (ssp->mGenerationInfoList.getGenerationInfoById(it->first) == nullptr)
-          {
-            if (mShutdownRequested)
-              return;
-
-            mContentTimeCache_modificationLock.writeLockWhenInsideReadLock();
-            mContentTimeCache.erase(it->first);
-            mContentTimeCache_modificationLock.writeUnlock();
-          }
-        }
-      }
+      removeUnknownGenerationTimes();
     }
   }
   catch (...)
@@ -8464,6 +8444,847 @@ void CacheImplementation::saveData()
 
 
 
+/*! \brief Delete the records that are marked to be deleted from the primary lists (in the swap mode). */
+
+void CacheImplementation::deleteMarkedRecords()
+{
+  try
+  {
+    // Removing information that is marked to be deleted. In swap mode the delete
+    // events only mark records on these primary lists; the marked records are
+    // skipped when the new search structure is built below, so without this
+    // compaction they would stay allocated for the lifetime of the process.
+
+    if ((mContentDeleteCounter == 0 && mFileDeleteCounter == 0 && mGenerationDeleteCounter == 0 &&
+         mGeometryDeleteCounter == 0 && mProducerDeleteCounter == 0)  ||  mShutdownRequested)
+      return;
+
+    AutoWriteLock writeLock(&mModificationLock);
+
+    if (mContentDeleteCounter > 0)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
+      mContentInfoList.deleteMarkedContent();
+      mContentDeleteCounter = 0;
+    }
+
+    if (mFileDeleteCounter > 0)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
+      mFileInfoList.deleteMarkedFiles();
+      mFileDeleteCounter = 0;
+    }
+
+    if (mGenerationDeleteCounter > 0)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
+      mGenerationInfoList.deleteMarkedGenerations();
+      mGenerationDeleteCounter = 0;
+    }
+
+    if (mGeometryDeleteCounter > 0)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
+      mGeometryInfoList.deleteMarkedGeometries();
+      mGeometryDeleteCounter = 0;
+    }
+
+    if (mProducerDeleteCounter > 0)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
+      mProducerInfoList.deleteMarkedProducers();
+      mProducerDeleteCounter = 0;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return true if no files are waited for the local cache and the hashes of the current lists match the hashes of the
+           active search structure. The hashes are logged. */
+
+bool CacheImplementation::isSearchStructureCurrent()
+{
+  try
+  {
+    std::size_t producerHash = mProducerInfoList.getHash();
+    std::size_t generationHash = mGenerationInfoList.getHash();
+    std::size_t geometryHash = mGeometryInfoList.getHash();
+    std::size_t fileHash = mFileInfoList.getHash();
+    std::size_t contentHash = mContentInfoList.getHash();
+
+    if (mDebugLog &&  mDebugLog->isEnabled())
+    {
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Comparing hash values");
+
+
+      PRINT_DATA(mDebugLog,"  ** Producers    %zu  %zu\n",mSsProducerHash,producerHash);
+      PRINT_DATA(mDebugLog,"  ** Generations  %zu  %zu\n",mSsGenerationHash,generationHash);
+      PRINT_DATA(mDebugLog,"  ** Geometries   %zu  %zu\n",mSsGeometryHash,geometryHash);
+      PRINT_DATA(mDebugLog,"  ** Files        %zu  %zu\n",mSsFileHash,fileHash);
+      PRINT_DATA(mDebugLog,"  ** Content      %zu  %zu\n",mSsContentHash,contentHash);
+    }
+
+    return mCachedFiles_totalWaitTime == 0 &&
+           mSsProducerHash == producerHash &&
+           mSsGenerationHash == generationHash &&
+           mSsGeometryHash == geometryHash &&
+           mSsFileHash == fileHash &&
+           mSsContentHash == contentHash;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return true if the search structure swap may still wait for the locally cached files (the maximum wait time of the first or of the later swaps is not reached). */
+
+bool CacheImplementation::isCachedFileWaitAllowed()
+{
+  return (mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
+         (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime);
+}
+
+
+
+
+
+/*! \brief Return true if the file should be in the local cache but is not: it is marked for caching, it is not
+           deleted soon, its generation is ready and the original file exists. */
+
+bool CacheImplementation::isMissingFromLocalCache(T::FileInfo& fInfo)
+{
+  try
+  {
+    // We are caching locally only marked files.
+
+    if ((fInfo.mFlags & T::FileInfo::Flags::LocalCacheRecommended) == 0  ||  (fInfo.mFlags & T::FileInfo::Flags::DeletedFile) != 0  ||
+        fInfo.mServerType != T::FileInfo::ServerType::Filesys)
+      return false;
+
+    // Cannot find the file from the cached file list?
+
+    if (mCachedFiles.find(fInfo.mFileId) != mCachedFiles.end())
+      return false;
+
+    // The file deletion time is not very close, so it should be in the cache
+
+    if (fInfo.mDeletionTime != 0  &&  (time(nullptr) + 180) >= fInfo.mDeletionTime)
+      return false;
+
+    // The file generation status is ready, so it should be in the cache
+
+    T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo.mGenerationId);
+    if (gInfo == nullptr  ||  gInfo->mStatus != T::GenerationInfo::Status::Ready)
+      return false;
+
+    // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
+
+    auto fsize = getFileSize(fInfo.mName.c_str());
+    return fsize > 0;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return the first file that should be in the local cache but is not, or null if there is none. */
+
+T::FileInfo* CacheImplementation::getFileMissingFromLocalCache()
+{
+  try
+  {
+    uint fileCount = mFileInfoList.getLength();
+    for (uint t=0; t<fileCount; t++)
+    {
+      T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
+      if (fInfo  &&  isMissingFromLocalCache(*fInfo))
+        return fInfo;
+    }
+    return nullptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Log the reason and postpone the search structure swap until the file may be in the local cache. */
+
+void CacheImplementation::delayContentSwap(T::FileInfo& file)
+{
+  try
+  {
+    T::FileInfo *fInfo = &file;
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
+    PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
+    PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
+    PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
+    PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
+    if (mContentSwapCounter == 0)
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
+    }
+    else
+    {
+      PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
+    }
+
+    mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
+    mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Report if the maximum wait time for the locally cached files was exceeded. */
+
+void CacheImplementation::reportExceededCachedFileWait()
+{
+  try
+  {
+    if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
+        (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
+    {
+      Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
+      exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
+      exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
+      exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
+      exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
+      exception.printError();
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Return a new search structure with sorted copies of the current lists. */
+
+SearchStructure_sptr CacheImplementation::newSearchStructure()
+{
+  try
+  {
+    auto nptr = std::make_shared<SearchStructure>();
+
+    nptr->mProducerInfoList = mProducerInfoList;
+    nptr->mGenerationInfoList = mGenerationInfoList;
+    nptr->mGeometryInfoList = mGeometryInfoList;
+    nptr->mFileInfoList = mFileInfoList;
+    nptr->mFileInfoListByName.setReleaseObjects(false);
+    nptr->mFileInfoListByName = nptr->mFileInfoList;
+    nptr->mContentInfoList[0] = mContentInfoList;
+
+    nptr->mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
+    nptr->mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
+
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+    {
+      nptr->mContentInfoList[t].setReleaseObjects(false);
+      nptr->mContentInfoList[t] = nptr->mContentInfoList[0];
+    }
+
+    nptr->mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
+    nptr->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
+
+    return nptr;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the producer hashes of the search structure (using its content list of the given index). Returns false if a shutdown was requested. */
+
+bool CacheImplementation::updateProducerHashes(SearchStructure& ss,uint contentListIndex)
+{
+  try
+  {
+    uint pLen = ss.mProducerInfoList.getLength();
+
+
+    for (uint p=0; p<pLen; p++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      T::ProducerInfo *producerInfo = ss.mProducerInfoList.getProducerInfoByIndex(p);
+      if (producerInfo != nullptr)
+      {
+        std::size_t generationHash = ss.mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t geometryHash = ss.mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t fileHash = ss.mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
+        std::size_t contentHash = ss.mContentInfoList[contentListIndex].getHashByProducerId(producerInfo->mProducerId);
+
+        std::size_t h = 0;
+        Fmi::hash_merge(h,generationHash);
+        Fmi::hash_merge(h,geometryHash);
+        Fmi::hash_merge(h,fileHash);
+        Fmi::hash_merge(h,contentHash);
+
+        producerInfo->mHash = h;
+      }
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Update the content time ranges of the generations of the search structure. Returns false if a shutdown was requested. */
+
+bool CacheImplementation::updateGenerationTimeRanges(SearchStructure& ss)
+{
+  try
+  {
+    // ### Updating generation time ranges
+
+    uint glen = ss.mGenerationInfoList.getLength();
+    for (uint g=0; g<glen; g++)
+    {
+      if (mShutdownRequested)
+        return false;
+
+      auto *ginfo = ss.mGenerationInfoList.getGenerationInfoByIndex(g);
+      ss.mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
+    }
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Replace the active search structure with a new one built from the current lists if they have changed and the
+           required files are in the local cache. Returns false if the swap was not done. */
+
+bool CacheImplementation::swapSearchStructure(SearchStructure_sptr ssp)
+{
+  try
+  {
+    deleteMarkedRecords();
+
+    // If the swapping is enabled then we create totally new search structure
+    // and replace the the old one.
+
+    if (ssp  &&  isSearchStructureCurrent())
+    {
+      // Nothing has changed. No swapping needed.
+
+      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();No search structure swapping required");
+
+      mContentUpdateTime = time(nullptr);
+      return false;
+    }
+
+    AutoReadLock lock(&mModificationLock);
+
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping started");
+
+    if (isCachedFileWaitAllowed())
+    {
+      // We can swap the search structure only if the locally cached files are ready.
+
+      T::FileInfo *fInfo = getFileMissingFromLocalCache();
+      if (fInfo != nullptr)
+      {
+        delayContentSwap(*fInfo);
+        return false;
+      }
+    }
+
+    reportExceededCachedFileWait();
+
+    mCachedFiles_totalWaitTime = 0;
+
+    // The new structure is filled first and published at the end. Readers still using the
+    // replaced structure keep it alive through their references.
+    auto nptr = newSearchStructure();
+
+    if (!updateProducerHashes(*nptr,1)  ||  !updateGenerationTimeRanges(*nptr))
+      return false;
+
+    mSsProducerHash = nptr->mProducerInfoList.getHash();
+    mSsGenerationHash = nptr->mGenerationInfoList.getHash();
+    mSsGeometryHash = nptr->mGeometryInfoList.getHash();
+    mSsFileHash = nptr->mFileInfoList.getHash();
+    mSsContentHash = nptr->mContentInfoList[0].getHash();
+
+    PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping ended");
+
+    {
+      std::unique_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+      const uint inactive = (mActiveSearchStructure == 0 ? 1 : 0);
+      mSearchStructurePtr[inactive] = nptr;
+      mActiveSearchStructure = inactive;
+    }
+
+    mContentChangeTime = time(nullptr);
+    mContentSwapCounter++;
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Create the search structure of the non-swap mode and make it the active one. */
+
+SearchStructure_sptr CacheImplementation::createSearchStructure()
+{
+  try
+  {
+    PRINT_DATA(mDebugLog, "  -- Create search structure\n");
+    auto ssp = std::make_shared<SearchStructure>();
+
+
+    ssp->mFileInfoListByName.setReleaseObjects(false);
+
+    ssp->mContentInfoList[0].setReleaseObjects(true);
+    for (int t=1; t<CONTENT_LIST_COUNT; t++)
+      ssp->mContentInfoList[t].setReleaseObjects(false);
+
+    ssp->mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
+    ssp->mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
+    ssp->mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
+    ssp->mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::fileName);
+    ssp->mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+    ssp->mContentInfoList[1].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
+
+
+    std::unique_lock<std::shared_mutex> lock(mSearchStructurePtrLock);
+    mSearchStructurePtr[0] = ssp;
+    mActiveSearchStructure = 0;
+
+    return ssp;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Enable or disable the locking of the lists of the search structure. */
+
+void CacheImplementation::setSearchStructureLocking(SearchStructure& ss,bool enabled)
+{
+  try
+  {
+    ss.mProducerInfoList.setLockingEnabled(enabled);
+    ss.mGenerationInfoList.setLockingEnabled(enabled);
+    ss.mGeometryInfoList.setLockingEnabled(enabled);
+    ss.mFileInfoList.setLockingEnabled(enabled);
+    ss.mFileInfoListByName.setLockingEnabled(enabled);
+
+    for (auto& t : ss.mContentInfoList)
+      t.setLockingEnabled(enabled);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Delete the records that are marked to be deleted from the primary lists and from the search structure (in the non-swap mode). */
+
+void CacheImplementation::deleteMarkedSearchRecords(SearchStructure& ss)
+{
+  try
+  {
+    deleteMarkedSearchContentAndFiles(ss);
+    deleteMarkedSearchMetadata(ss);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Delete the marked contents and files from the primary lists and from the search structure. */
+
+void CacheImplementation::deleteMarkedSearchContentAndFiles(SearchStructure& ss)
+{
+  try
+  {
+    if (mContentDeleteCounter > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
+      mContentInfoList.deleteMarkedContent();
+      for (int t=CONTENT_LIST_COUNT-1; t>= 0; t--)
+        ss.mContentInfoList[t].deleteMarkedContent();
+
+      mContentDeleteCounter = 0;
+      PRINT_DATA(mDebugLog, "     => Content %u\n",ss.mContentInfoList[0].getLength());
+    }
+
+    if (mFileDeleteCounter > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
+      mFileInfoList.deleteMarkedFiles();
+      ss.mFileInfoListByName.deleteMarkedFiles();
+      ss.mFileInfoList.deleteMarkedFiles();
+      mFileDeleteCounter = 0;
+      PRINT_DATA(mDebugLog, "     => Files %u\n",ss.mFileInfoList.getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Delete the marked generations, geometries and producers from the primary lists and from the search structure. */
+
+void CacheImplementation::deleteMarkedSearchMetadata(SearchStructure& ss)
+{
+  try
+  {
+    if (mGenerationDeleteCounter > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
+      mGenerationInfoList.deleteMarkedGenerations();
+      ss.mGenerationInfoList.deleteMarkedGenerations();
+      mGenerationDeleteCounter = 0;
+      PRINT_DATA(mDebugLog, "     => Generations %u\n",ss.mGenerationInfoList.getLength());
+    }
+
+    if (mGeometryDeleteCounter > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
+      mGeometryInfoList.deleteMarkedGeometries();
+      ss.mGeometryInfoList.deleteMarkedGeometries();
+      mGeometryDeleteCounter = 0;
+      PRINT_DATA(mDebugLog, "     => Geometries %u\n",ss.mGeometryInfoList.getLength());
+    }
+
+    if (mProducerDeleteCounter > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
+      mProducerInfoList.deleteMarkedProducers();
+      ss.mProducerInfoList.deleteMarkedProducers();
+      mProducerDeleteCounter = 0;
+      PRINT_DATA(mDebugLog, "     => Producers %u\n",ss.mProducerInfoList.getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/*! \brief Move the new producers, geometries and generations into the search structure (in the non-swap mode). */
+
+void CacheImplementation::moveNewMetadata(SearchStructure& ss)
+{
+  try
+  {
+    moveNewProducers(ss);
+    moveNewGeometries(ss);
+    moveNewGenerations(ss);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Move the new producers into the search structure. */
+
+void CacheImplementation::moveNewProducers(SearchStructure& ss)
+{
+  try
+  {
+    if (mProducerInfoList.getLength() > 0  &&  !mShutdownRequested)
+    {
+      // Adding producer information into the search structure
+
+      PRINT_DATA(mDebugLog, "  -- Add producers %u\n",mProducerInfoList.getLength());
+      uint len = mProducerInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
+        if (info != nullptr)
+          ss.mProducerInfoList.addProducerInfo(info->duplicate());
+      }
+      mProducerInfoList.clear();
+      PRINT_DATA(mDebugLog, "     => Producers %u\n",ss.mProducerInfoList.getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Move the new geometries into the search structure. */
+
+void CacheImplementation::moveNewGeometries(SearchStructure& ss)
+{
+  try
+  {
+    if (mGeometryInfoList.getLength() > 0  &&  !mShutdownRequested)
+    {
+      // Adding geometry information into the search structure
+
+      PRINT_DATA(mDebugLog, "  -- Add geometries %u\n",mGeometryInfoList.getLength());
+      uint len = mGeometryInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
+        if (info != nullptr)
+          ss.mGeometryInfoList.addGeometryInfo(info->duplicate());
+      }
+      mGeometryInfoList.clear();
+      PRINT_DATA(mDebugLog, "     => Geometries %u\n",ss.mGeometryInfoList.getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Move the new generations into the search structure. */
+
+void CacheImplementation::moveNewGenerations(SearchStructure& ss)
+{
+  try
+  {
+    if (mGenerationInfoList.getLength() > 0  &&  !mShutdownRequested)
+    {
+      // Adding generation information into the search structure
+
+      PRINT_DATA(mDebugLog, "  -- Add generations %u\n",mGenerationInfoList.getLength());
+      uint len = mGenerationInfoList.getLength();
+      for (uint t=0; t<len; t++)
+      {
+        T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
+        if (info != nullptr)
+          ss.mGenerationInfoList.addGenerationInfo(info->duplicate());
+      }
+      mGenerationInfoList.clear();
+      PRINT_DATA(mDebugLog, "     => Generations %u\n",ss.mGenerationInfoList.getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/*! \brief Move the new files and contents into the search structure (in the non-swap mode). */
+
+void CacheImplementation::moveNewFilesAndContents(SearchStructure& ss)
+{
+  try
+  {
+    if (mFileInfoList.getLength() > 0  &&  !mShutdownRequested)
+    {
+      // Adding file information (= moving FileInfo -objects from mFileInfoList into the search structure)
+
+      PRINT_DATA(mDebugLog, "  -- Add files %u\n",mFileInfoList.getLength());
+      mFileInfoList.setReleaseObjects(false);
+      ss.mFileInfoList.setReleaseObjects(false);
+      ss.mFileInfoList.addFileInfoList(mFileInfoList);
+      ss.mFileInfoListByName.addFileInfoList(mFileInfoList);
+      ss.mFileInfoList.setReleaseObjects(true);
+      mFileInfoList.clear();
+      mFileInfoList.setReleaseObjects(true);
+      mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
+      PRINT_DATA(mDebugLog, "     => Files %u\n",ss.mFileInfoList.getLength());
+    }
+
+
+    if (mContentInfoList.getLength() > 0  &&  !mShutdownRequested)
+    {
+      PRINT_DATA(mDebugLog, "  -- Add content %u\n",mContentInfoList.getLength());
+      // Adding content information (= moving ContentInfo -objects from mContentInfoList into the search structure)
+
+      mContentInfoList.setReleaseObjects(false);
+      ss.mContentInfoList[0].setReleaseObjects(false);
+      for (auto& t : ss.mContentInfoList)
+      {
+        t.addContentInfoList(mContentInfoList);
+      }
+      ss.mContentInfoList[0].setReleaseObjects(true);
+      mContentInfoList.clear();
+      mContentInfoList.setReleaseObjects(true);
+      mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
+      PRINT_DATA(mDebugLog, "     => Content %u\n",ss.mContentInfoList[0].getLength());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
+/*! \brief Add the new information into the search structure (in the non-swap mode). Returns false if a shutdown was requested. */
+
+bool CacheImplementation::updateSearchStructure(SearchStructure_sptr ssp)
+{
+  try
+  {
+    // If the swapping is not enabled then we just add the new information into the search structure.
+
+    PRINT_DATA(mDebugLog, "#### Search structure update start #######\n");
+    if (!ssp)
+      ssp = createSearchStructure();
+
+    AutoWriteLock lock(&mModificationLock);
+    AutoWriteLock writeLock(&mSearchModificationLock);
+
+    // Enabled locking
+
+    setSearchStructureLocking(*ssp,true);
+
+    // Removing information that is marked to be deleted
+
+    deleteMarkedSearchRecords(*ssp);
+    moveNewMetadata(*ssp);
+    moveNewFilesAndContents(*ssp);
+
+    if (!updateProducerHashes(*ssp,0))
+      return false;
+
+
+    // ### Updating generation time ranges
+
+
+    PRINT_DATA(mDebugLog, "  -- Updating generation time ranges\n");
+    uint glen = ssp->mGenerationInfoList.getLength();
+    for (uint g=0; g<glen; g++)
+    {
+      auto *ginfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
+      ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
+    }
+
+
+    // Disabled locking
+
+    setSearchStructureLocking(*ssp,false);
+
+    mContentChangeTime = time(nullptr);
+
+    PRINT_DATA(mDebugLog, "#### Search structure update end #######\n");
+
+    return true;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP,"Operation failed!",nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Refreshes cached content from the master source and may swap search structures. */
 
 void CacheImplementation::updateContent()
@@ -8483,487 +9304,16 @@ void CacheImplementation::updateContent()
     if (t1 == t2)
       return;
 
-    auto ssp = mSearchStructurePtr[mActiveSearchStructure];
+    auto ssp = activeSearchStructure();
     if (mContentSwapEnabled)
     {
-      // Removing information that is marked to be deleted. In swap mode the delete
-      // events only mark records on these primary lists; the marked records are
-      // skipped when the new search structure is built below, so without this
-      // compaction they would stay allocated for the lifetime of the process.
-
-      if ((mContentDeleteCounter > 0 || mFileDeleteCounter > 0 || mGenerationDeleteCounter > 0 ||
-           mGeometryDeleteCounter > 0 || mProducerDeleteCounter > 0)  &&  !mShutdownRequested)
-      {
-        AutoWriteLock writeLock(&mModificationLock);
-
-        if (mContentDeleteCounter > 0)
-        {
-          PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
-          mContentInfoList.deleteMarkedContent();
-          mContentDeleteCounter = 0;
-        }
-
-        if (mFileDeleteCounter > 0)
-        {
-          PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
-          mFileInfoList.deleteMarkedFiles();
-          mFileDeleteCounter = 0;
-        }
-
-        if (mGenerationDeleteCounter > 0)
-        {
-          PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
-          mGenerationInfoList.deleteMarkedGenerations();
-          mGenerationDeleteCounter = 0;
-        }
-
-        if (mGeometryDeleteCounter > 0)
-        {
-          PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
-          mGeometryInfoList.deleteMarkedGeometries();
-          mGeometryDeleteCounter = 0;
-        }
-
-        if (mProducerDeleteCounter > 0)
-        {
-          PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
-          mProducerInfoList.deleteMarkedProducers();
-          mProducerDeleteCounter = 0;
-        }
-      }
-
-      // If the swapping is enabled then we create totally new search structure
-      // and replace the the old one.
-
-      if (ssp)
-      {
-        std::size_t producerHash = mProducerInfoList.getHash();
-        std::size_t generationHash = mGenerationInfoList.getHash();
-        std::size_t geometryHash = mGeometryInfoList.getHash();
-        std::size_t fileHash = mFileInfoList.getHash();
-        std::size_t contentHash = mContentInfoList.getHash();
-
-        if (mDebugLog &&  mDebugLog->isEnabled())
-        {
-          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Comparing hash values");
-
-
-          PRINT_DATA(mDebugLog,"  ** Producers    %ld  %ld\n",mSsProducerHash,producerHash);
-          PRINT_DATA(mDebugLog,"  ** Generations  %ld  %ld\n",mSsGenerationHash,generationHash);
-          PRINT_DATA(mDebugLog,"  ** Geometries   %ld  %ld\n",mSsGeometryHash,geometryHash);
-          PRINT_DATA(mDebugLog,"  ** Files        %ld  %ld\n",mSsFileHash,fileHash);
-          PRINT_DATA(mDebugLog,"  ** Content      %ld  %ld\n",mSsContentHash,contentHash);
-        }
-
-        if (mCachedFiles_totalWaitTime == 0 &&
-            mSsProducerHash == producerHash &&
-            mSsGenerationHash == generationHash &&
-            mSsGeometryHash == geometryHash &&
-            mSsFileHash == fileHash &&
-            mSsContentHash == contentHash)
-        {
-          // Nothing has changed. No swapping needed.
-
-          PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();No search structure swapping required");
-
-          mContentUpdateTime = time(nullptr);
-          return;
-        }
-      }
-
-      AutoReadLock lock(&mModificationLock);
-
-      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping started");
-
-      if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxFirstWaitTime) ||
-          (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime < mCachedFiles_maxWaitTime))
-      {
-        // We can swap the search structure only if the locally cached files are ready.
-
-        uint fileCount = mFileInfoList.getLength();
-        for (uint t=0; t<fileCount; t++)
-        {
-          T::FileInfo *fInfo = mFileInfoList.getFileInfoByIndex(t);
-          if (fInfo)
-          {
-            if ((fInfo->mFlags & T::FileInfo::Flags::LocalCacheRecommended)  &&  (fInfo->mFlags & T::FileInfo::Flags::DeletedFile) == 0  &&
-                fInfo->mServerType == T::FileInfo::ServerType::Filesys)
-            {
-              // We are caching locally only marked files.
-
-              if (mCachedFiles.find(fInfo->mFileId) == mCachedFiles.end())
-              {
-                // Cannot find the file from the cached file list.
-
-                if (fInfo->mDeletionTime == 0 || (time(nullptr) + 180) < fInfo->mDeletionTime)
-                {
-                  // The file deletion time is not very close, so it should be in the cache
-
-                  T::GenerationInfo *gInfo = mGenerationInfoList.getGenerationInfoById(fInfo->mGenerationId);
-                  if (gInfo && gInfo->mStatus == T::GenerationInfo::Status::Ready)
-                  {
-                    // The file generation status is ready, so it should be in the cache
-                    auto fsize = getFileSize(fInfo->mName.c_str());
-                    if (fsize > 0)
-                    {
-                      // The original file exists,so it should be in the cache. If not, we should Wait the swapping.
-                      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Delaying the search structure swap about %u seconds",mCachedFiles_waitTime);
-                      PRINT_DATA(mDebugLog, "  ** Reason      : Required file is not ready in the local cache.\n");
-                      PRINT_DATA(mDebugLog, "  ** FileId      : %lu\n",fInfo->mFileId);
-                      PRINT_DATA(mDebugLog, "  ** FileName    : %s\n",fInfo->mName.c_str());
-                      PRINT_DATA(mDebugLog, "  ** Wait time   : %u\n",mCachedFiles_totalWaitTime);
-                      if (mContentSwapCounter == 0)
-                      {
-                        PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxFirstWaitTime);
-                      }
-                      else
-                      {
-                        PRINT_DATA(mDebugLog, "  ** MaxWaitTime : %u\n",mCachedFiles_maxWaitTime);
-                      }
-
-                      mContentUpdateTime = time(nullptr) - mContentUpdateInterval + mCachedFiles_waitTime;
-                      mCachedFiles_totalWaitTime += mCachedFiles_waitTime;
-                      return;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if ((mContentSwapCounter == 0 && mCachedFiles_maxFirstWaitTime > 0 &&  mCachedFiles_totalWaitTime > mCachedFiles_maxFirstWaitTime) ||
-          (mContentSwapCounter > 0 && mCachedFiles_maxWaitTime > 0 && mCachedFiles_totalWaitTime > mCachedFiles_maxWaitTime))
-      {
-        Fmi::Exception exception(BCP,"Ignoring local file cache requirement, because max wait time was exceeded!");
-        exception.addParameter("contentSwapCounter",std::to_string(mContentSwapCounter));
-        exception.addParameter("totalWaitTime (in seconds)",std::to_string(mCachedFiles_totalWaitTime));
-        exception.addParameter("maxFirstWaitTime (in seconds)",std::to_string(mCachedFiles_maxFirstWaitTime));
-        exception.addParameter("maxWaitTime (in seconds)",std::to_string(mCachedFiles_maxWaitTime));
-        exception.printError();
-      }
-
-      mCachedFiles_totalWaitTime = 0;
-
-      auto nptr = new SearchStructure();
-      if (mActiveSearchStructure == 0)
-      {
-        if (mSearchStructurePtr[1])
-          delete mSearchStructurePtr[1];
-
-        mSearchStructurePtr[1] = nptr;
-      }
-      else
-      {
-        if (mSearchStructurePtr[0])
-          delete mSearchStructurePtr[0];
-
-        mSearchStructurePtr[0] = nptr;
-      }
-
-      nptr->mProducerInfoList = mProducerInfoList;
-      nptr->mGenerationInfoList = mGenerationInfoList;
-      nptr->mGeometryInfoList = mGeometryInfoList;
-      nptr->mFileInfoList = mFileInfoList;
-      nptr->mFileInfoListByName.setReleaseObjects(false);
-      nptr->mFileInfoListByName = nptr->mFileInfoList;
-      nptr->mContentInfoList[0] = mContentInfoList;
-
-      nptr->mFileInfoList.sort(T::FileInfo::ComparisonMethod::fileId);
-      nptr->mFileInfoListByName.sort(T::FileInfo::ComparisonMethod::fileName);
-
-      for (int t=1; t<CONTENT_LIST_COUNT; t++)
-      {
-        nptr->mContentInfoList[t].setReleaseObjects(false);
-        nptr->mContentInfoList[t] = nptr->mContentInfoList[0];
-      }
-
-      nptr->mContentInfoList[0].sort(T::ContentInfo::ComparisonMethod::file_message);
-      nptr->mContentInfoList[1].sort(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-
-      uint pLen = nptr->mProducerInfoList.getLength();
-
-      for (uint p=0; p<pLen; p++)
-      {
-        if (mShutdownRequested)
-          return;
-
-        T::ProducerInfo *producerInfo = nptr->mProducerInfoList.getProducerInfoByIndex(p);
-        if (producerInfo != nullptr)
-        {
-          std::size_t generationHash = nptr->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t geometryHash = nptr->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t fileHash = nptr->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t contentHash = nptr->mContentInfoList[1].getHashByProducerId(producerInfo->mProducerId);
-
-          std::size_t h = 0;
-          Fmi::hash_merge(h,generationHash);
-          Fmi::hash_merge(h,geometryHash);
-          Fmi::hash_merge(h,fileHash);
-          Fmi::hash_merge(h,contentHash);
-
-          producerInfo->mHash = h;
-        }
-      }
-
-
-      // ### Updating generation time ranges
-
-      uint glen = nptr->mGenerationInfoList.getLength();
-      for (uint g=0; g<glen; g++)
-      {
-        if (mShutdownRequested)
-          return;
-
-        auto ginfo = nptr->mGenerationInfoList.getGenerationInfoByIndex(g);
-        nptr->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
-      }
-
-      mSsProducerHash = nptr->mProducerInfoList.getHash();
-      mSsGenerationHash = nptr->mGenerationInfoList.getHash();
-      mSsGeometryHash = nptr->mGeometryInfoList.getHash();
-      mSsFileHash = nptr->mFileInfoList.getHash();
-      mSsContentHash = nptr->mContentInfoList[0].getHash();
-
-      PRINT_EVENT_LINE(mDebugLog,"CacheImplementation::updateContent();Search structure swapping ended");
-
-      if (mActiveSearchStructure == 0)
-        mActiveSearchStructure = 1;
-      else
-        mActiveSearchStructure = 0;
-
-      mContentChangeTime = time(nullptr);
-      mContentSwapCounter++;
+      if (!swapSearchStructure(ssp))
+        return;
     }
     else
+    if (!updateSearchStructure(ssp))
     {
-      // If the swapping is not enabled then we just add the new information into the search structure.
-
-      PRINT_DATA(mDebugLog, "#### Search structure update start #######\n");
-      if (!ssp)
-      {
-        PRINT_DATA(mDebugLog, "  -- Create search structure\n");
-        ssp = new SearchStructure();
-
-
-        ssp->mFileInfoListByName.setReleaseObjects(false);
-
-        ssp->mContentInfoList[0].setReleaseObjects(true);
-        for (int t=1; t<CONTENT_LIST_COUNT; t++)
-          ssp->mContentInfoList[t].setReleaseObjects(false);
-
-        ssp->mGeometryInfoList.setComparisonMethod(T::GeometryInfo::ComparisonMethod::generationId);
-        ssp->mGenerationInfoList.setComparisonMethod(T::GenerationInfo::ComparisonMethod::generationId);
-        ssp->mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
-        ssp->mFileInfoListByName.setComparisonMethod(T::FileInfo::ComparisonMethod::fileName);
-        ssp->mContentInfoList[0].setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
-        ssp->mContentInfoList[1].setComparisonMethod(T::ContentInfo::ComparisonMethod::fmiId_producer_generation_level_time);
-
-        mSearchStructurePtr[0] = ssp;
-      }
-
-      AutoWriteLock lock(&mModificationLock);
-      AutoWriteLock writeLock(&mSearchModificationLock);
-
-      // Enabled locking
-
-      ssp->mProducerInfoList.setLockingEnabled(true);
-      ssp->mGenerationInfoList.setLockingEnabled(true);
-      ssp->mGeometryInfoList.setLockingEnabled(true);
-      ssp->mFileInfoList.setLockingEnabled(true);
-      ssp->mFileInfoListByName.setLockingEnabled(true);
-
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        ssp->mContentInfoList[t].setLockingEnabled(true);
-
-      // Removing information that is marked to be deleted
-
-      if (mContentDeleteCounter > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Delete content records (%u)\n",mContentDeleteCounter);
-        mContentInfoList.deleteMarkedContent();
-        for (int t=CONTENT_LIST_COUNT-1; t>= 0; t--)
-          ssp->mContentInfoList[t].deleteMarkedContent();
-
-        mContentDeleteCounter = 0;
-        PRINT_DATA(mDebugLog, "     => Content %u\n",ssp->mContentInfoList[0].getLength());
-      }
-
-      if (mFileDeleteCounter > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Delete file records (%u)\n",mFileDeleteCounter);
-        mFileInfoList.deleteMarkedFiles();
-        ssp->mFileInfoListByName.deleteMarkedFiles();
-        ssp->mFileInfoList.deleteMarkedFiles();
-        mFileDeleteCounter = 0;
-        PRINT_DATA(mDebugLog, "     => Files %u\n",ssp->mFileInfoList.getLength());
-      }
-
-      if (mGenerationDeleteCounter > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Delete generation records (%u)\n",mGenerationDeleteCounter);
-        mGenerationInfoList.deleteMarkedGenerations();
-        ssp->mGenerationInfoList.deleteMarkedGenerations();
-        mGenerationDeleteCounter = 0;
-        PRINT_DATA(mDebugLog, "     => Generations %u\n",ssp->mGenerationInfoList.getLength());
-      }
-
-      if (mGeometryDeleteCounter > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Delete geometry records (%u)\n",mGeometryDeleteCounter);
-        mGeometryInfoList.deleteMarkedGeometries();
-        ssp->mGeometryInfoList.deleteMarkedGeometries();
-        mGeometryDeleteCounter = 0;
-        PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
-      }
-
-      if (mProducerDeleteCounter > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Delete producer records (%u)\n",mProducerDeleteCounter);
-        mProducerInfoList.deleteMarkedProducers();
-        ssp->mProducerInfoList.deleteMarkedProducers();
-        mProducerDeleteCounter = 0;
-        PRINT_DATA(mDebugLog, "     => Producers %u\n",ssp->mProducerInfoList.getLength());
-      }
-
-
-      if (mProducerInfoList.getLength() > 0  &&  !mShutdownRequested)
-      {
-        // Adding producer information into the search structure
-
-        PRINT_DATA(mDebugLog, "  -- Add producers %u\n",mProducerInfoList.getLength());
-        uint len = mProducerInfoList.getLength();
-        for (uint t=0; t<len; t++)
-        {
-          T::ProducerInfo *info = mProducerInfoList.getProducerInfoByIndex(t);
-          if (info != NULL)
-            ssp->mProducerInfoList.addProducerInfo(info->duplicate());
-        }
-        mProducerInfoList.clear();
-        PRINT_DATA(mDebugLog, "     => Producers %u\n",ssp->mProducerInfoList.getLength());
-      }
-
-
-      if (mGeometryInfoList.getLength() > 0  &&  !mShutdownRequested)
-      {
-        // Adding geometry information into the search structure
-
-        PRINT_DATA(mDebugLog, "  -- Add geometries %u\n",mGeometryInfoList.getLength());
-        uint len = mGeometryInfoList.getLength();
-        for (uint t=0; t<len; t++)
-        {
-          T::GeometryInfo *info = mGeometryInfoList.getGeometryInfoByIndex(t);
-          if (info != NULL)
-            ssp->mGeometryInfoList.addGeometryInfo(info->duplicate());
-        }
-        mGeometryInfoList.clear();
-        PRINT_DATA(mDebugLog, "     => Geometries %u\n",ssp->mGeometryInfoList.getLength());
-      }
-
-      if (mGenerationInfoList.getLength() > 0  &&  !mShutdownRequested)
-      {
-        // Adding generation information into the search structure
-
-        PRINT_DATA(mDebugLog, "  -- Add generations %u\n",mGenerationInfoList.getLength());
-        uint len = mGenerationInfoList.getLength();
-        for (uint t=0; t<len; t++)
-        {
-          T::GenerationInfo *info = mGenerationInfoList.getGenerationInfoByIndex(t);
-          if (info != NULL)
-            ssp->mGenerationInfoList.addGenerationInfo(info->duplicate());
-        }
-        mGenerationInfoList.clear();
-        PRINT_DATA(mDebugLog, "     => Generations %u\n",ssp->mGenerationInfoList.getLength());
-      }
-
-      if (mFileInfoList.getLength() > 0  &&  !mShutdownRequested)
-      {
-        // Adding file information (= moving FileInfo -objects from mFileInfoList into the search structure)
-
-        PRINT_DATA(mDebugLog, "  -- Add files %u\n",mFileInfoList.getLength());
-        mFileInfoList.setReleaseObjects(false);
-        ssp->mFileInfoList.setReleaseObjects(false);
-        ssp->mFileInfoList.addFileInfoList(mFileInfoList);
-        ssp->mFileInfoListByName.addFileInfoList(mFileInfoList);
-        ssp->mFileInfoList.setReleaseObjects(true);
-        mFileInfoList.clear();
-        mFileInfoList.setReleaseObjects(true);
-        mFileInfoList.setComparisonMethod(T::FileInfo::ComparisonMethod::fileId);
-        PRINT_DATA(mDebugLog, "     => Files %u\n",ssp->mFileInfoList.getLength());
-      }
-
-
-      if (mContentInfoList.getLength() > 0  &&  !mShutdownRequested)
-      {
-        PRINT_DATA(mDebugLog, "  -- Add content %u\n",mContentInfoList.getLength());
-        // Adding content information (= moving ContentInfo -objects from mContentInfoList into the search structure)
-
-        mContentInfoList.setReleaseObjects(false);
-        ssp->mContentInfoList[0].setReleaseObjects(false);
-        for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        {
-          ssp->mContentInfoList[t].addContentInfoList(mContentInfoList);
-        }
-        ssp->mContentInfoList[0].setReleaseObjects(true);
-        mContentInfoList.clear();
-        mContentInfoList.setReleaseObjects(true);
-        mContentInfoList.setComparisonMethod(T::ContentInfo::ComparisonMethod::file_message);
-        PRINT_DATA(mDebugLog, "     => Content %u\n",ssp->mContentInfoList[0].getLength());
-      }
-
-      uint pLen = ssp->mProducerInfoList.getLength();
-
-
-      for (uint p=0; p<pLen; p++)
-      {
-        if (mShutdownRequested)
-          return;
-
-        T::ProducerInfo *producerInfo = ssp->mProducerInfoList.getProducerInfoByIndex(p);
-        if (producerInfo != nullptr)
-        {
-          std::size_t generationHash = ssp->mGenerationInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t geometryHash = ssp->mGeometryInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t fileHash = ssp->mFileInfoList.getHashByProducerId(producerInfo->mProducerId);
-          std::size_t contentHash = ssp->mContentInfoList[0].getHashByProducerId(producerInfo->mProducerId);
-
-          std::size_t h = 0;
-          Fmi::hash_merge(h,generationHash);
-          Fmi::hash_merge(h,geometryHash);
-          Fmi::hash_merge(h,fileHash);
-          Fmi::hash_merge(h,contentHash);
-
-          producerInfo->mHash = h;
-        }
-      }
-
-
-      // ### Updating generation time ranges
-
-
-      PRINT_DATA(mDebugLog, "  -- Updating generation time ranges\n");
-      uint glen = ssp->mGenerationInfoList.getLength();
-      for (uint g=0; g<glen; g++)
-      {
-        auto ginfo = ssp->mGenerationInfoList.getGenerationInfoByIndex(g);
-        ssp->mContentInfoList[1].getForecastTimeRangeByGenerationId(ginfo->mProducerId,ginfo->mGenerationId,ginfo->mContentStartTime,ginfo->mContentEndTime,ginfo->mContentHash);
-      }
-
-      // Disabled locking
-
-      ssp->mProducerInfoList.setLockingEnabled(false);
-      ssp->mGenerationInfoList.setLockingEnabled(false);
-      ssp->mGeometryInfoList.setLockingEnabled(false);
-      ssp->mFileInfoList.setLockingEnabled(false);
-      ssp->mFileInfoListByName.setLockingEnabled(false);
-
-      for (int t=0; t<CONTENT_LIST_COUNT; t++)
-        ssp->mContentInfoList[t].setLockingEnabled(false);
-
-      mContentChangeTime = time(nullptr);
-
-      PRINT_DATA(mDebugLog, "#### Search structure update end #######\n");
+      return;
     }
 
     mContentUpdateTime = time(nullptr);

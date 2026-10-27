@@ -12,8 +12,8 @@ namespace SmartMet
 namespace SessionManagement
 {
 
-typedef std::map<std::string,std::string> AttributeList;           //!< Map of attribute name to value within one group.
-typedef std::map<std::string,AttributeList> AttributeGroupList;    //!< Map of attribute group name to its AttributeList.
+using AttributeList = std::map<std::string,std::string>;           //!< Map of attribute name to value within one group.
+using AttributeGroupList = std::map<std::string,AttributeList>;    //!< Map of attribute group name to its AttributeList.
 
 // ====================================================================================
 /*! \brief Record describing an active user session with its attributes and timeout.
@@ -29,14 +29,16 @@ class SessionInfo
 
                         SessionInfo();
     virtual             ~SessionInfo();
+    SessionInfo& operator=(const SessionInfo&) = default;
+    SessionInfo(const SessionInfo&) = default;
 
     AttributeGroupList& getAttributeGroupList();
     AttributeList*      getAttributeList(const char *attributeGroup);
-    time_t              getExpirationTime();
-    time_t              getLastAccessTime();
-    T::SessionId        getSessionId();
-    uchar               getStatus();
-    uint                getTimeOutInSeconds();
+    time_t              getExpirationTime() const;
+    time_t              getLastAccessTime() const;
+    T::SessionId        getSessionId() const;
+    uchar               getStatus() const;
+    uint                getTimeOutInSeconds() const;
     void                setTimeOutInSeconds(uint seconds);
     void                setSessionId(T::SessionId sessionId);
     void                setStatus(uchar status);
@@ -59,10 +61,10 @@ class SessionInfo
     void                setAttribute(const char *attributeGroup,const char *attributeName,Int64 attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,UInt64 attributeValue);
     void                setAttribute(const char *attributeGroup,const char *attributeName,double attributeValue);
-    void                setAttributes(const char *attributeGroup,AttributeList& attributeList);
+    void                setAttributes(const char *attributeGroup,const AttributeList& attributeList);
     void                deleteAttribute(const char *attributeGroup,const char *attributeName);
     void                deleteAttributeGroup(const char *attributeGroup);
-    void                deleteAttributes(const char *attributeGroup,std::vector<std::string>& attributeNameList);
+    void                deleteAttributes(const char *attributeGroup,const std::vector<std::string>& attributeNameList);
     void                updateAccessTime();
     void                updateSessionInfo(SessionInfo& sessionInfo);
 
@@ -85,8 +87,8 @@ class SessionInfo
 };
 
 
-typedef std::shared_ptr<SessionInfo> SessionInfo_sptr;                          //!< Shared pointer to a SessionInfo record.
-typedef std::map<T::SessionId,SessionInfo_sptr> SessionInfo_sptr_map;           //!< Map from session id to SessionInfo shared pointer.
+using SessionInfo_sptr = std::shared_ptr<SessionInfo>;                          //!< Shared pointer to a SessionInfo record.
+using SessionInfo_sptr_map = std::map<T::SessionId,SessionInfo_sptr>;           //!< Map from session id to SessionInfo shared pointer.
 
 
 

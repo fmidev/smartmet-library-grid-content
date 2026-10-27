@@ -37,9 +37,7 @@ ServiceImplementation::ServiceImplementation()
 
 /*! \brief Destructor. */
 
-ServiceImplementation::~ServiceImplementation()
-{
-}
+ServiceImplementation::~ServiceImplementation() = default;
 
 
 
@@ -64,12 +62,12 @@ void ServiceImplementation::shutdown()
 
 /*! \brief Protected hook: create session. */
 
-int ServiceImplementation::_createSession(T::SessionId sessionId,SessionInfo& sessionInfo)
+int ServiceImplementation::_createSession(T::SessionId /*sessionId*/,SessionInfo& sessionInfo)
 {
   FUNCTION_TRACE
   try
   {
-    SessionInfo *session = new SessionInfo();
+    auto *session = new SessionInfo();
     sessionInfo.setSessionId(session->getSessionId());
     *session = sessionInfo;
 
@@ -90,7 +88,7 @@ int ServiceImplementation::_createSession(T::SessionId sessionId,SessionInfo& se
 
 /*! \brief Protected hook: delete session. */
 
-int ServiceImplementation::_deleteSession(T::SessionId sessionId,T::SessionId requestedSessionId)
+int ServiceImplementation::_deleteSession(T::SessionId /*sessionId*/,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
   try
@@ -111,31 +109,31 @@ int ServiceImplementation::_deleteSession(T::SessionId sessionId,T::SessionId re
 
 /*! \brief Protected hook: delete expired sessions. */
 
-int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
+int ServiceImplementation::_deleteExpiredSessions(T::SessionId /*sessionId*/)
 {
   FUNCTION_TRACE
   try
   {
     std::vector<T::SessionId> expiredSessions;
-    time_t currentTime = time(0);
+    time_t currentTime = time(nullptr);
 
     {
       AutoReadLock readLock(&mModificationLock);
-      for (auto session = mSessions.begin(); session != mSessions.end(); ++session)
+      for (auto& mSession : mSessions)
       {
-        if (session->second->getExpirationTime() < currentTime)
-          expiredSessions.push_back(session->first);
+        if (mSession.second->getExpirationTime() < currentTime)
+          expiredSessions.push_back(mSession.first);
       }
 
-      if (expiredSessions.size() == 0)
+      if (expiredSessions.empty())
         return Result::OK;
     }
 
     AutoWriteLock writeLock(&mModificationLock);
 
-    for (auto it = expiredSessions.begin(); it != expiredSessions.end(); ++it)
+    for (unsigned long & expiredSession : expiredSessions)
     {
-      mSessions.erase(*it);
+      mSessions.erase(expiredSession);
     }
 
     return Result::OK;
@@ -152,7 +150,7 @@ int ServiceImplementation::_deleteExpiredSessions(T::SessionId sessionId)
 
 /*! \brief Protected hook: update session access time. */
 
-int ServiceImplementation::_updateSessionAccessTime(T::SessionId sessionId,T::SessionId requestedSessionId)
+int ServiceImplementation::_updateSessionAccessTime(T::SessionId /*sessionId*/,T::SessionId requestedSessionId)
 {
   FUNCTION_TRACE
   try
@@ -177,7 +175,7 @@ int ServiceImplementation::_updateSessionAccessTime(T::SessionId sessionId,T::Se
 
 /*! \brief Protected hook: update session info. */
 
-int ServiceImplementation::_updateSessionInfo(T::SessionId sessionId,SessionInfo& sessionInfo)
+int ServiceImplementation::_updateSessionInfo(T::SessionId /*sessionId*/,SessionInfo& sessionInfo)
 {
   FUNCTION_TRACE
   try
@@ -203,7 +201,7 @@ int ServiceImplementation::_updateSessionInfo(T::SessionId sessionId,SessionInfo
 
 /*! \brief Protected hook: get session attribute. */
 
-int ServiceImplementation::_getSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
+int ServiceImplementation::_getSessionAttribute(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,std::string& attributeValue)
 {
   FUNCTION_TRACE
   try
@@ -230,7 +228,7 @@ int ServiceImplementation::_getSessionAttribute(T::SessionId sessionId,T::Sessio
 
 /*! \brief Protected hook: get session attributes. */
 
-int ServiceImplementation::_getSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceImplementation::_getSessionAttributes(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -255,7 +253,7 @@ int ServiceImplementation::_getSessionAttributes(T::SessionId sessionId,T::Sessi
 
 /*! \brief Protected hook: get session info. */
 
-int ServiceImplementation::_getSessionInfo(T::SessionId sessionId,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
+int ServiceImplementation::_getSessionInfo(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,SessionInfo& sessionInfo)
 {
   FUNCTION_TRACE
   try
@@ -279,7 +277,7 @@ int ServiceImplementation::_getSessionInfo(T::SessionId sessionId,T::SessionId r
 
 /*! \brief Protected hook: set session attribute. */
 
-int ServiceImplementation::_setSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
+int ServiceImplementation::_setSessionAttribute(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName,const char *attributeValue)
 {
   FUNCTION_TRACE
   try
@@ -304,7 +302,7 @@ int ServiceImplementation::_setSessionAttribute(T::SessionId sessionId,T::Sessio
 
 /*! \brief Protected hook: set session attributes. */
 
-int ServiceImplementation::_setSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
+int ServiceImplementation::_setSessionAttributes(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -328,7 +326,7 @@ int ServiceImplementation::_setSessionAttributes(T::SessionId sessionId,T::Sessi
 
 /*! \brief Protected hook: delete session attribute. */
 
-int ServiceImplementation::_deleteSessionAttribute(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
+int ServiceImplementation::_deleteSessionAttribute(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,const char *attributeName)
 {
   FUNCTION_TRACE
   try
@@ -353,7 +351,7 @@ int ServiceImplementation::_deleteSessionAttribute(T::SessionId sessionId,T::Ses
 
 /*! \brief Protected hook: delete session attribute group. */
 
-int ServiceImplementation::_deleteSessionAttributeGroup(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup)
+int ServiceImplementation::_deleteSessionAttributeGroup(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup)
 {
   FUNCTION_TRACE
   try
@@ -378,7 +376,7 @@ int ServiceImplementation::_deleteSessionAttributeGroup(T::SessionId sessionId,T
 
 /*! \brief Protected hook: delete session attributes. */
 
-int ServiceImplementation::_deleteSessionAttributes(T::SessionId sessionId,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
+int ServiceImplementation::_deleteSessionAttributes(T::SessionId /*sessionId*/,T::SessionId requestedSessionId,const char *attributeGroup,std::vector<std::string>& attributeNameList)
 {
   FUNCTION_TRACE
   try

@@ -24,10 +24,12 @@ class ParameterDef
                                 //ParameterDef(const ParameterDef& def);
                                 ParameterDef(const std::string& paramStr);
     virtual                     ~ParameterDef();
+    ParameterDef(const ParameterDef&) = default;
+    ParameterDef& operator=(const ParameterDef&) = default;
 
     void                        set(const std::string& paramStr);
-    std::string                 getName();
-    void                        print(std::ostream& stream,uint level,uint optionFlags);
+    std::string                 getName() const;
+    void                        print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string                 mParameterName;            //!< Parameter short name or identifier string.
     std::string                 mProducerName;             //!< Producer name filter (empty = any).
@@ -43,7 +45,7 @@ class ParameterDef
 
 
 
-typedef std::vector<ParameterDef> ParameterDef_vec;  //!< Vector of ParameterDef objects.
+using ParameterDef_vec = std::vector<ParameterDef>;  //!< Vector of ParameterDef objects.
 
 
 }  // namespace QueryServer

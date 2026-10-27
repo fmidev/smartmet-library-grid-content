@@ -23,6 +23,7 @@ class ValueRecord
                     ValueRecord();
                     ValueRecord(ValueRecord& valueRecord);
     virtual         ~ValueRecord();
+    ValueRecord& operator=(const ValueRecord&) = default;
 
     virtual void    print(std::ostream& stream,uint level,uint optionFlags);
 

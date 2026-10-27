@@ -113,7 +113,7 @@ void ServiceInterface::setDebugLog(Log *debugLog)
 
 /*! \brief Query Server: Get cache stats. */
 
-void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& statistics) const
+void ServiceInterface::getCacheStats(Fmi::Cache::CacheStatistics& /*statistics*/) const
 {
   FUNCTION_TRACE
   try
@@ -186,7 +186,7 @@ void ServiceInterface::setProcessingLog(Log *processingLog)
 
 /*! \brief Query Server: Set dem. */
 
-void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
+void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> /*dem*/)
 {
   FUNCTION_TRACE
   try
@@ -204,7 +204,7 @@ void  ServiceInterface::setDem(std::shared_ptr<Fmi::DEM> dem)
 
 /*! \brief Query Server: Set land cover. */
 
-void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> landCover)
+void ServiceInterface::setLandCover(std::shared_ptr<Fmi::LandCover> /*landCover*/)
 {
   FUNCTION_TRACE
   try
@@ -343,7 +343,7 @@ int ServiceInterface::getValuesByGridPoint(T::SessionId sessionId,T::ContentInfo
     int result = _getValuesByGridPoint(sessionId,contentInfoList,coordinateType,x,y,interpolationMethod,valueList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,ContentInfo[%u],%u,%f,%f,%u,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,ContentInfo[%u],%u,%f,%f,%d,GridPointValue[%u]);result %d;time %f;",__FUNCTION__,sessionId,contentInfoList.getLength(),coordinateType,x,y,interpolationMethod,valueList.getLength(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -451,7 +451,7 @@ int ServiceInterface::getParameterVerticalValueVectorByPointAndTime(T::SessionId
     int result = _getParameterVerticalValueVectorByPointAndTime(sessionId,producer,parameter,coordinateType,x,y,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,%f,%f,%s,%d,%d,ParamValue[%zu],ParamLevel[%zu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,x,y,timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -478,7 +478,7 @@ int ServiceInterface::getParameterVerticalValueVectorByPointListAndTime(T::Sessi
     int result = _getParameterVerticalValueVectorByPointListAndTime(sessionId,producer,parameter,coordinateType,coordinates,timeString,areaInterpolationMethod,timeInterpolationMethod,values,paramLevelList);
     UInt64 requestTime = getTime() - timeStart;
 
-    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%ld],%s,%d,%d,ParamValue[%ld],ParamLevel[%ld]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
+    PRINT_EVENT_LINE(mProcessingLog,"%s(%lu,%s,%s,%u,Coordinate[%zu],%s,%d,%d,ParamValue[%zu],ParamLevel[%zu]);result %d;time %f;",__FUNCTION__,sessionId,producer.c_str(),parameter.c_str(),coordinateType,coordinates.size(),timeString.c_str(),areaInterpolationMethod,timeInterpolationMethod,values.size(),paramLevelList.size(),result,C_DOUBLE(requestTime) / 1000000);
     return result;
   }
   catch (...)
@@ -519,7 +519,7 @@ int ServiceInterface::getParameterValueVectorByGeometryAndTime(T::SessionId sess
 
 /*! \brief Query Server: Protected hook: execute query. */
 
-int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
+int ServiceInterface::_executeQuery(T::SessionId /*sessionId*/,Query& /*query*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -530,7 +530,7 @@ int ServiceInterface::_executeQuery(T::SessionId sessionId,Query& query)
 
 /*! \brief Query Server: Protected hook: get producer list. */
 
-int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& producerList)
+int ServiceInterface::_getProducerList(T::SessionId /*sessionId*/,string_vec& /*producerList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -541,7 +541,7 @@ int ServiceInterface::_getProducerList(T::SessionId sessionId,string_vec& produc
 
 /*! \brief Query Server: Protected hook: get values by grid point. */
 
-int ServiceInterface::_getValuesByGridPoint(T::SessionId sessionId,T::ContentInfoList& contentInfoList,T::CoordinateType coordinateType,double x,double y,short interpolationMethod,T::GridPointValueList& valueList)
+int ServiceInterface::_getValuesByGridPoint(T::SessionId /*sessionId*/,T::ContentInfoList& /*contentInfoList*/,T::CoordinateType /*coordinateType*/,double /*x*/,double /*y*/,short /*interpolationMethod*/,T::GridPointValueList& /*valueList*/)
 {
   throw Fmi::Exception(BCP,"Implementation required!");
 }
@@ -559,8 +559,9 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -574,7 +575,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
 
     query.mCoordinateType = coordinateType;
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
@@ -583,7 +584,7 @@ int ServiceInterface::_getParameterValueByPointAndTime(T::SessionId sessionId,co
 
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == 1  &&  query.mQueryParameterList[0].mValueList[0]->mValueList.getLength() == 1)
     {
-      auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(0);
+      auto *valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(0);
       if (valuePtr != nullptr)
       {
         value = valuePtr->mValue;
@@ -613,8 +614,9 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -638,7 +640,7 @@ int ServiceInterface::_getParameterValuesByPointListAndTime(T::SessionId session
       uint len = query.mQueryParameterList[0].mValueList[0]->mValueList.getLength();
       for (uint t=0; t<len; t++)
       {
-        auto valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(t);
+        auto *valuePtr = query.mQueryParameterList[0].mValueList[0]->mValueList.getGridValuePtrByIndex(t);
         if (valuePtr != nullptr)
           valueList.emplace_back(valuePtr->mValue);
         else
@@ -668,12 +670,12 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
 
     char tmp[10000];
     char *p = tmp;
-    for (auto it = times.begin(); it != times.end(); ++it)
+    for (auto& time : times)
     {
       if (p != tmp)
         p += sprintf(p,",");
 
-      p += sprintf(p,"%s",it->c_str());
+      p += sprintf(p,"%s",time.c_str());
     }
 
     attributeList.addAttribute("timelist",tmp);
@@ -690,7 +692,7 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     query.mCoordinateType = coordinateType;
 
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     int result = _executeQuery(sessionId,query);
@@ -700,9 +702,9 @@ int ServiceInterface::_getParameterValuesByPointAndTimeList(T::SessionId session
     uint len =  query.mForecastTimeList.size();
     if (query.mQueryParameterList.size() == 1  &&  query.mQueryParameterList[0].mValueList.size() == len)
     {
-      for (auto it = query.mQueryParameterList[0].mValueList.begin(); it != query.mQueryParameterList[0].mValueList.end(); ++it)
+      for (auto& it : query.mQueryParameterList[0].mValueList)
       {
-        auto valuePtr = (*it)->mValueList.getGridValuePtrByIndex(0);
+        auto *valuePtr = it->mValueList.getGridValuePtrByIndex(0);
         if (valuePtr != nullptr)
           values.emplace_back(valuePtr->mValue);
         else
@@ -738,8 +740,9 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionI
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -753,7 +756,7 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointAndTime(T::SessionI
 
     query.mCoordinateType = coordinateType;
     T::Coordinate_vec cc;
-    cc.emplace_back(T::Coordinate(x,y));
+    cc.emplace_back(x,y);
     query.mAreaCoordinates.emplace_back(cc);
 
     if (query.mQueryParameterList.size() == 1)
@@ -793,8 +796,9 @@ int ServiceInterface::_getParameterVerticalValueVectorByPointListAndTime(T::Sess
   {
     T::AttributeList attributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
     attributeList.addAttribute("areaInterpolationMethod",Fmi::to_string(areaInterpolationMethod));
@@ -845,8 +849,9 @@ int ServiceInterface::_getParameterValueVectorByGeometryAndTime(T::SessionId ses
   {
     T::AttributeList qAttributeList;
 
-    attributeList.addAttribute("starttime",timeString);
-    attributeList.addAttribute("timesteps","1");
+    // An exact time: "starttime" would be rounded up to the next full timestep (one hour by
+    // default), so 10:20 returned the 11:00 value and no time interpolation was ever done
+    attributeList.addAttribute("timelist",timeString);
     attributeList.addAttribute("producer",producer);
     attributeList.addAttribute("param",parameter);
 

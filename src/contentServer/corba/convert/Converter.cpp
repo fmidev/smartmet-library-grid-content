@@ -47,7 +47,7 @@ Converter::~Converter()
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ContentInfo& source,C::ContentInfo& target)
+void Converter::convert(const T::ContentInfo& source,C::ContentInfo& target)
 {
   try
   {
@@ -129,7 +129,7 @@ void Converter::convert(const C::ContentInfo& source,T::ContentInfo& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ContentInfoList& source,C::ContentInfoList& target)
+void Converter::convert(const T::ContentInfoList& source,C::ContentInfoList& target)
 {
   try
   {
@@ -163,8 +163,8 @@ void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& tar
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::ContentInfo corbaObject = source[t];
-      T::ContentInfo *info = new T::ContentInfo();
+      const C::ContentInfo& corbaObject = source[t];
+      auto *info = new T::ContentInfo();
       convert(corbaObject,*info);
       target.addContentInfo(info);
     }
@@ -182,7 +182,7 @@ void Converter::convert(const C::ContentInfoList& source,T::ContentInfoList& tar
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::FileInfo& source,C::FileInfo& target)
+void Converter::convert(const T::FileInfo& source,C::FileInfo& target)
 {
   try
   {
@@ -274,8 +274,8 @@ void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::FileInfo corbaObject = source[t];
-      T::FileInfo *info = new T::FileInfo();
+      const C::FileInfo& corbaObject = source[t];
+      auto *info = new T::FileInfo();
       convert(corbaObject,*info);
       target.addFileInfo(info);
     }
@@ -292,7 +292,7 @@ void Converter::convert(const C::FileInfoList& source,T::FileInfoList& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ProducerInfo& source,C::ProducerInfo& target)
+void Converter::convert(const T::ProducerInfo& source,C::ProducerInfo& target)
 {
   try
   {
@@ -374,8 +374,8 @@ void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& t
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::ProducerInfo corbaObject = source[t];
-      T::ProducerInfo *info = new T::ProducerInfo();
+      const C::ProducerInfo& corbaObject = source[t];
+      auto *info = new T::ProducerInfo();
       convert(corbaObject,*info);
       target.addProducerInfo(info);
     }
@@ -391,7 +391,7 @@ void Converter::convert(const C::ProducerInfoList& source,T::ProducerInfoList& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::GenerationInfo& source,C::GenerationInfo& target)
+void Converter::convert(const T::GenerationInfo& source,C::GenerationInfo& target)
 {
   try
   {
@@ -487,8 +487,8 @@ void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoLis
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::GenerationInfo corbaObject = source[t];
-      T::GenerationInfo *info = new T::GenerationInfo();
+      const C::GenerationInfo& corbaObject = source[t];
+      auto *info = new T::GenerationInfo();
       convert(corbaObject,*info);
       target.addGenerationInfo(info);
     }
@@ -505,7 +505,7 @@ void Converter::convert(const C::GenerationInfoList& source,T::GenerationInfoLis
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::GeometryInfo& source,C::GeometryInfo& target)
+void Converter::convert(const T::GeometryInfo& source,C::GeometryInfo& target)
 {
   try
   {
@@ -567,7 +567,7 @@ void Converter::convert(T::GeometryInfoList& source,C::GeometryInfoList& target)
     for (uint t=0; t<len; t++)
     {
       T::GeometryInfo *info = source.getGeometryInfoByIndex(t);
-      C::GeometryInfo corbaObject;
+      C::GeometryInfo corbaObject{};
       convert(*info,corbaObject);
       target[t] = corbaObject;
     }
@@ -593,7 +593,7 @@ void Converter::convert(const C::GeometryInfoList& source,T::GeometryInfoList& t
     for (uint t=0; t<len; t++)
     {
       C::GeometryInfo corbaObject = source[t];
-      T::GeometryInfo *info = new T::GeometryInfo();
+      auto *info = new T::GeometryInfo();
       convert(corbaObject,*info);
       target.addGeometryInfo(info);
     }
@@ -609,7 +609,7 @@ void Converter::convert(const C::GeometryInfoList& source,T::GeometryInfoList& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::EventInfo& source,C::EventInfo& target)
+void Converter::convert(const T::EventInfo& source,C::EventInfo& target)
 {
   try
   {
@@ -698,8 +698,8 @@ void Converter::convert(const C::EventInfoList& source,T::EventInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::EventInfo corbaObject = source[t];
-      T::EventInfo *info = new T::EventInfo();
+      const C::EventInfo& corbaObject = source[t];
+      auto *info = new T::EventInfo();
       convert(corbaObject,*info);
       target.addEventInfo(info);
     }
@@ -746,7 +746,7 @@ void Converter::convert(const C::StringList& source,string_vec& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      target.emplace_back(std::string(source[t]));
+      target.emplace_back(source[t]);
     }
   }
   catch (...)
@@ -761,16 +761,16 @@ void Converter::convert(const C::StringList& source,string_vec& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<std::string>& source,C::TimeStringList& target)
+void Converter::convert(const std::set<std::string>& source,C::TimeStringList& target)
 {
   try
   {
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto& it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -808,16 +808,16 @@ void Converter::convert(const C::TimeStringList& source,std::set<std::string>& t
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<std::string>& source,C::StringList& target)
+void Converter::convert(const std::set<std::string>& source,C::StringList& target)
 {
   try
   {
     uint len = source.size();
     target.length(len);
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (const auto& it : source)
     {
-      target[t] = CORBA::string_dup(it->c_str());
+      target[t] = CORBA::string_dup(it.c_str());
       t++;
     }
   }
@@ -863,9 +863,9 @@ void Converter::convert(std::vector<uint>& source,C::UInt32List& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned int & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -912,9 +912,9 @@ void Converter::convert(std::vector<UInt64>& source,C::FileIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long & it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -953,7 +953,7 @@ void Converter::convert(const C::FileIdList& source,std::vector<UInt64>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<UInt64>& source,C::GenerationIdList& target)
+void Converter::convert(const std::set<UInt64>& source,C::GenerationIdList& target)
 {
   try
   {
@@ -961,9 +961,9 @@ void Converter::convert(std::set<UInt64>& source,C::GenerationIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1002,7 +1002,7 @@ void Converter::convert(const C::GenerationIdList& source,std::set<UInt64>& targ
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<UInt64>& source,C::FileIdList& target)
+void Converter::convert(const std::set<UInt64>& source,C::FileIdList& target)
 {
   try
   {
@@ -1010,9 +1010,9 @@ void Converter::convert(std::set<UInt64>& source,C::FileIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (unsigned long it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1051,7 +1051,7 @@ void Converter::convert(const C::FileIdList& source,std::set<UInt64>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<int>& source,C::GeometryIdList& target)
+void Converter::convert(const std::set<int>& source,C::GeometryIdList& target)
 {
   try
   {
@@ -1059,9 +1059,9 @@ void Converter::convert(std::set<int>& source,C::GeometryIdList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1099,7 +1099,7 @@ void Converter::convert(const C::GeometryIdList& source,std::set<int>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(std::set<int>& source,C::LevelList& target)
+void Converter::convert(const std::set<int>& source,C::LevelList& target)
 {
   try
   {
@@ -1107,9 +1107,9 @@ void Converter::convert(std::set<int>& source,C::LevelList& target)
     target.length(len);
 
     uint t = 0;
-    for (auto it=source.begin(); it!=source.end(); ++it)
+    for (int it : source)
     {
-      target[t] = *it;
+      target[t] = it;
       t++;
     }
   }
@@ -1147,7 +1147,7 @@ void Converter::convert(const C::LevelList& source,std::set<int>& target)
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::FileAndContent& source,C::FileContent& target)
+void Converter::convert(const T::FileAndContent& source,C::FileContent& target)
 {
   try
   {
@@ -1235,7 +1235,7 @@ void Converter::convert(const C::FileContentList& source,std::vector<T::FileAndC
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::ForecastTime& source,SmartMet::C::ForecastTimeInfo& target)
+void Converter::convert(const T::ForecastTime& source,SmartMet::C::ForecastTimeInfo& target)
 {
   try
   {
@@ -1334,7 +1334,7 @@ void Converter::convert(const SmartMet::C::ForecastTimeInfoList& source,std::vec
 
 /*! \brief Content Server: Convert. */
 
-void Converter::convert(T::LevelInfo& source,C::LevelInfo& target)
+void Converter::convert(const T::LevelInfo& source,C::LevelInfo& target)
 {
   try
   {
@@ -1410,8 +1410,8 @@ void Converter::convert(const C::LevelInfoList& source,T::LevelInfoList& target)
     uint len = source.length();
     for (uint t=0; t<len; t++)
     {
-      C::LevelInfo corbaObject = source[t];
-      T::LevelInfo *info = new T::LevelInfo();
+      const C::LevelInfo& corbaObject = source[t];
+      auto *info = new T::LevelInfo();
       convert(corbaObject,*info);
       target.addLevelInfo(info);
     }

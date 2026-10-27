@@ -677,18 +677,18 @@ void ProducerInfoList::sortByName()
     std::vector<ProducerInfo*>  newList;
     std::set<std::string> nameList;
 
-    for (auto it = mList.begin(); it != mList.end(); ++it)
+    for (auto& it : mList)
     {
-      nameList.insert((*it)->mName);
+      nameList.insert(it->mName);
     }
 
-    for (auto n = nameList.begin(); n != nameList.end(); ++n)
+    for (const auto& n : nameList)
     {
-      for (auto it = mList.begin(); it != mList.end(); ++it)
+      for (auto& it : mList)
       {
-        if ((*it)->mName == *n)
+        if (it->mName == n)
         {
-          newList.emplace_back(*it);
+          newList.emplace_back(it);
         }
       }
     }
@@ -783,7 +783,8 @@ void ProducerInfoList::writeToFile(const std::string& filename)
       fprintf(file,"%s\n",mList[t]->getCsv().c_str());
     }
 
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

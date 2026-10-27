@@ -1,6 +1,8 @@
 #include "LevelInfo.h"
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <utility>
+
 
 namespace SmartMet
 {
@@ -56,7 +58,7 @@ LevelInfo::LevelInfo(T::ProducerId producerId,std::string fmiParameterName,T::Pa
   try
   {
     mProducerId = producerId;
-    mFmiParameterName = fmiParameterName;
+    mFmiParameterName = std::move(fmiParameterName);
     mFmiParameterLevelId = fmiParameterLevelId;
     mParameterLevel = parameterLevel;
   }
@@ -115,12 +117,12 @@ LevelInfo& LevelInfo::operator=(const LevelInfo& levelInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string LevelInfo::getCsv()
+std::string LevelInfo::getCsv() const
 {
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%u;%u;;;%d",
+    snprintf(st,sizeof(st),"%u;%d;;;%d",
         mProducerId,
         mFmiParameterLevelId,
         mParameterLevel);
@@ -238,7 +240,7 @@ LevelInfo* LevelInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void LevelInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void LevelInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

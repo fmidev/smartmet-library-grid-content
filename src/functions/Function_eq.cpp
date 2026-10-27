@@ -1,11 +1,26 @@
 #include "Function_eq.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <cmath>
 
 
 namespace SmartMet
 {
 namespace Functions
 {
+
+
+
+namespace
+{
+
+/*! \brief Return a comparison which tests if the values are equal when rounded with the given multiplier. */
+
+auto roundedEqual(double mp)
+{
+  return [mp](float val1,float val2) { return (Int64)std::llround(mp*val1) == (Int64)std::llround(mp*val2); };
+}
+
+}  // namespace
 
 
 
@@ -77,8 +92,7 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     if (parameters.size() == 3)
@@ -86,13 +100,12 @@ float Function_eq::executeFunctionCall1(std::vector<float>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
+        if ((Int64)std::llround(parameters[0]*mp) == (Int64)std::llround(parameters[1]*mp))
           return 1.0;
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain at least two values!");
@@ -122,8 +135,7 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     if (parameters.size() == 3)
@@ -131,13 +143,12 @@ double Function_eq::executeFunctionCall1(std::vector<double>& parameters)
       if (parameters[0] != ParamValueMissing  &&  parameters[1] != ParamValueMissing  &&  parameters[2] != ParamValueMissing)
       {
         double mp = pow(10,(int)parameters[2]);
-        if ((Int64 )(parameters[0]*mp+0.5) == (Int64 )(parameters[1]*mp+0.5))
+        if ((Int64)std::llround(parameters[0]*mp) == (Int64)std::llround(parameters[1]*mp))
           return 1.0;
 
         return 0.0;
       }
-      else
-        return ParamValueMissing;
+      return ParamValueMissing;
     }
 
     throw Fmi::Exception(BCP, "The parameters vector should contain two values!");
@@ -160,104 +171,25 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 {
   try
   {
-    uint sz = columns*rows;
-    outParameters.reserve(sz);
-
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
-    {
-      float val2 = extParameters[0];
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if (val1 == val2)
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
     if (inParameters.size() == 1  &&  extParameters.size() == 2)
     {
-      float val2 = extParameters[0];
+      // Comparison with the given number of decimals
       double mp = pow(10,extParameters[1]);
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
-    if (inParameters.size() == 2)
-    {
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if (val1 == val2)
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
+      std::vector<double> value = {extParameters[0]};
+      compareGridValues(columns,rows,inParameters,value,roundedEqual(mp),outParameters);
+      return;
     }
 
     if (inParameters.size() == 2  &&  extParameters.size() == 1)
     {
+      // Comparison with the given number of decimals. The extra parameter is the number of decimals,
+      // not a value, so the grids are not compared exactly.
       double mp = pow(10,extParameters[0]);
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
+      compareGridValues(columns,rows,inParameters,extParameters,roundedEqual(mp),outParameters);
+      return;
     }
+
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
   }
   catch (...)
   {
@@ -275,105 +207,25 @@ void Function_eq::executeFunctionCall9(uint columns,uint rows,std::vector<std::v
 {
   try
   {
-    uint sz = columns*rows;
-    outParameters.reserve(sz);
-
-    if (inParameters.size() == 1  &&  extParameters.size() == 1)
-    {
-      float val2 = extParameters[0];
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if (val1 == val2)
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
     if (inParameters.size() == 1  &&  extParameters.size() == 2)
     {
-      float val2 = extParameters[0];
+      // Comparison with the given number of decimals
       double mp = pow(10,extParameters[1]);
-
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        if (val2 != ParamValueMissing  &&  s < inParameters[0].size())
-        {
-          float val1 = inParameters[0][s];
-          if (val1 != ParamValueMissing)
-          {
-            if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
-              val = 1.0;
-            else
-              val = 0.0;
-          }
-        }
-        outParameters.emplace_back(val);
-      }
+      std::vector<double> value = {extParameters[0]};
+      compareGridValues(columns,rows,inParameters,value,roundedEqual(mp),outParameters);
+      return;
     }
-
-    if (inParameters.size() == 2)
-    {
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if (val1 == val2)
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
-    }
-
 
     if (inParameters.size() == 2  &&  extParameters.size() == 1)
     {
+      // Comparison with the given number of decimals. The extra parameter is the number of decimals,
+      // not a value, so the grids are not compared exactly.
       double mp = pow(10,extParameters[0]);
-      for (uint s=0; s<sz; s++)
-      {
-        float val = ParamValueMissing;
-        float val1 = ParamValueMissing;
-        float val2 = ParamValueMissing;
-
-        if (s < inParameters[0].size())
-          val1 = inParameters[0][s];
-
-        if (s < inParameters[1].size())
-          val2 = inParameters[1][s];
-
-        if (val1 != ParamValueMissing &&  val2 != ParamValueMissing)
-        {
-          if ((Int64 )(mp*val1+0.5) == (Int64 )(mp*val2+0.5))
-            val = 1.0;
-          else
-            val = 0.0;
-        }
-        outParameters.emplace_back(val);
-      }
+      compareGridValues(columns,rows,inParameters,extParameters,roundedEqual(mp),outParameters);
+      return;
     }
+
+    compareGridValues(columns,rows,inParameters,extParameters,[](float val1,float val2) { return val1 == val2; },outParameters);
   }
   catch (...)
   {

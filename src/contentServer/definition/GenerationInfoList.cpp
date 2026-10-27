@@ -19,12 +19,14 @@ namespace T
 
 /*! \brief Qsort comparator for GenerationInfo using comparison method 1. */
 
+namespace
+{
 int generationInfo_compare_1(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(1,(*obj2));
   }
@@ -39,8 +41,8 @@ int generationInfo_compare_2(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(2,(*obj2));
   }
@@ -55,8 +57,8 @@ int generationInfo_compare_3(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(3,(*obj2));
   }
@@ -71,8 +73,8 @@ int generationInfo_compare_4(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(4,(*obj2));
   }
@@ -88,13 +90,14 @@ int generationInfo_compare_5(const void *_val1,const void *_val2)
 {
   if (_val1 != nullptr  &&  _val2 != nullptr)
   {
-    GenerationInfoPtr *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
-    GenerationInfoPtr *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
+    auto *obj1 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val1));
+    auto *obj2 = const_cast<GenerationInfoPtr*>(reinterpret_cast<const GenerationInfoPtr *>(_val2));
 
     return (*obj1)->compare(5,(*obj2));
   }
   return 0;
 }
+}  // namespace
 
 
 
@@ -423,7 +426,7 @@ void GenerationInfoList::increaseSize(uint newSize)
       return;
     }
 
-    GenerationInfoPtr *newArray = new GenerationInfoPtr[newSize];
+    auto *newArray = new GenerationInfoPtr[newSize];
     for (uint t=0; t<newSize; t++)
     {
       if (t < mSize)
@@ -508,6 +511,46 @@ int GenerationInfoList::getClosestIndex(uint comparisonMethod,GenerationInfo& ge
 
 
 
+namespace
+{
+
+/*! \brief Return the index of the first entry equal to the given one in an unsorted array, or 0 if there is none. */
+
+int getFirstEqualIndex(GenerationInfoPtr *array,uint length,uint comparisonMethod,GenerationInfo& generationInfo)
+{
+  for (uint t=0; t<length; t++)
+  {
+    if (array[t] != nullptr  &&  array[t]->compare(comparisonMethod,&generationInfo) == 0)
+      return t;
+  }
+  return 0;
+}
+
+
+
+/*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+int getClosestIndexAfterSearch(GenerationInfoPtr *array,uint length,uint comparisonMethod,GenerationInfo& generationInfo,int mid)
+{
+  if (array[mid]->compare(comparisonMethod,&generationInfo) < 0)
+  {
+    while (mid < C_INT(length)  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&generationInfo) < 0)
+      mid++;
+
+    return mid-1;
+  }
+  while (mid > 0  &&  array[mid] != nullptr  &&   array[mid]->compare(comparisonMethod,&generationInfo) > 0)
+    mid--;
+
+  return mid;
+}
+
+}  // namespace
+
+
+
+
+
 /*! \brief Return the index of the entry closest to the given GenerationInfo without locking. */
 
 int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationInfo& generationInfo)
@@ -519,20 +562,7 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
       return 0;
 
     if (comparisonMethod != mComparisonMethod)
-    {
-      for (uint t=0; t<mLength; t++)
-      {
-        if (mArray[t] != nullptr)
-        {
-          int res = mArray[t]->compare(comparisonMethod,&generationInfo);
-          if (res == 0)
-          {
-            return t;
-          }
-        }
-      }
-      return 0;
-    }
+      return getFirstEqualIndex(mArray,mLength,comparisonMethod,generationInfo);
 
     int low = 0;
     int high = C_INT(mLength) - 1;
@@ -558,22 +588,8 @@ int GenerationInfoList::getClosestIndexNoLock(uint comparisonMethod,GenerationIn
     }
 
     if (mid >= 0  &&  mid < C_INT(mLength))
-    {
-      if (mArray[mid]->compare(comparisonMethod,&generationInfo) < 0)
-      {
-        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&generationInfo) < 0)
-          mid++;
+      return getClosestIndexAfterSearch(mArray,mLength,comparisonMethod,generationInfo,mid);
 
-        return mid-1;
-      }
-      else
-      {
-        while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&generationInfo) > 0)
-          mid--;
-
-        return mid;
-      }
-    }
     return 0;
   }
   catch (...)
@@ -2088,7 +2104,7 @@ void GenerationInfoList::getGenerationInfoListBySourceId(T::SourceId sourceId,Ge
 
 /*! \brief Return the number of entries in the list. */
 
-uint GenerationInfoList::getLength()
+uint GenerationInfoList::getLength() const
 {
   FUNCTION_TRACE
   try
@@ -2126,7 +2142,7 @@ uint GenerationInfoList::getSize() const
 
 /*! \brief Return whether contained objects are owned and released by the list. */
 
-bool GenerationInfoList::getReleaseObjects()
+bool GenerationInfoList::getReleaseObjects() const
 {
   FUNCTION_TRACE
   try
@@ -2187,9 +2203,9 @@ void GenerationInfoList::getAnalysisTimes(std::vector<std::string>& analysisTime
     analysisTimes.reserve(sz);
     if (!reverseOrder)
     {
-      for (auto it = newList.begin(); it != newList.end(); ++it)
+      for (const auto& it : newList)
       {
-        analysisTimes.emplace_back(*it);
+        analysisTimes.emplace_back(it);
       }
     }
     else
@@ -2284,6 +2300,8 @@ void GenerationInfoList::sort(uint comparisonMethod)
       case 5:
         qsort(mArray,mLength,sizeof(GenerationInfoPtr),generationInfo_compare_5);
         break;
+      default:
+        break;
     }
   }
   catch (...)
@@ -2319,7 +2337,8 @@ void GenerationInfoList::writeToFile(const std::string& filename)
       if (info != nullptr && (info->mFlags & T::GenerationInfo::Flags::DeletedGeneration) == 0)
         fprintf(file,"%s\n",info->getCsv().c_str());
     }
-    fclose(file);
+    if (fclose(file) != 0)
+      throw Fmi::Exception(BCP, "Failed to close the output file");
   }
   catch (...)
   {

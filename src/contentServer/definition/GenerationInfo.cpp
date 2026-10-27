@@ -157,12 +157,12 @@ GenerationInfo& GenerationInfo::operator=(const GenerationInfo& generationInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string GenerationInfo::getCsv()
+std::string GenerationInfo::getCsv() const
 {
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%lu;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%u;%s;%s;%s;%u;%u;%u;%ld;%ld;%ld;%ld;%lu;%u",
         mGenerationId,
         mGenerationType,
         mProducerId,
@@ -294,7 +294,7 @@ void GenerationInfo::setCsv(const std::string& csv)
 
 /*! \brief Compare two records according to the selected comparison method. */
 
-int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo)
+int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo) const
 {
   try
   {
@@ -329,7 +329,6 @@ int GenerationInfo::compare(uint comparisonMethod,GenerationInfo *generationInfo
       default:
         return num_compare(mGenerationId,generationInfo->mGenerationId);
     }
-    return 0;
   }
   catch (...)
   {
@@ -361,7 +360,7 @@ GenerationInfo* GenerationInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void GenerationInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void GenerationInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

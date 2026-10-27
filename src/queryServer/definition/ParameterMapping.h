@@ -23,11 +23,13 @@ class ParameterMapping
                                 ParameterMapping();
                                 //ParameterMapping(const ParameterMapping& mapping);
     virtual                     ~ParameterMapping();
+    ParameterMapping(const ParameterMapping&) = default;
+    ParameterMapping& operator=(const ParameterMapping&) = default;
 
     virtual std::size_t         getHash();
     virtual std::size_t         getKeyHash();
 
-    void                        print(std::ostream& stream,uint level,uint optionFlags);
+    void                        print(std::ostream& stream,uint level,uint optionFlags) const;
 
     std::string                 mProducerName;              //!< Name of the producer this mapping applies to (empty = any).
     std::string                 mParameterName;             //!< Human-readable parameter name used in queries.
@@ -64,7 +66,7 @@ class ParameterMapping
 
 
 
-typedef std::vector<ParameterMapping> ParameterMapping_vec;  //!< Ordered list of ParameterMapping records.
+using ParameterMapping_vec = std::vector<ParameterMapping>;  //!< Ordered list of ParameterMapping records.
 
 
 }  // namespace QueryServer

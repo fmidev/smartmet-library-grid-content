@@ -106,7 +106,7 @@ ParameterDef::ParameterDef(const std::string& paramStr)
 
 /*! \brief Data Server: Get name. */
 
-std::string ParameterDef::getName()
+std::string ParameterDef::getName() const
 {
   try
   {
@@ -213,7 +213,7 @@ ParameterDef::~ParameterDef()
 
 /*! \brief Data Server: Print. */
 
-void ParameterDef::print(std::ostream& stream,uint level,uint optionFlags)
+void ParameterDef::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

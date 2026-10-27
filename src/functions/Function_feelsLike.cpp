@@ -1,6 +1,6 @@
 #include "Function_feelsLike.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <math.h>
+#include <cmath>
 
 
 namespace SmartMet
@@ -218,7 +218,7 @@ double Function_feelsLike::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_feelsLike::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -249,7 +249,7 @@ void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector
 
 /*! \brief Function: Execute function call9. */
 
-void Function_feelsLike::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_feelsLike::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -283,7 +283,7 @@ Function* Function_feelsLike::duplicate()
 {
   try
   {
-    return (Function*)new Function(*this);
+    return (Function*)new Function_feelsLike(*this);
   }
   catch (...)
   {
@@ -296,7 +296,7 @@ Function* Function_feelsLike::duplicate()
 
 /*! \brief Function: Print. */
 
-void Function_feelsLike::print(std::ostream& stream,uint level,uint optionFlags)
+void Function_feelsLike::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

@@ -36,6 +36,8 @@ class ServiceInterface
   public:
                     ServiceInterface();
      virtual        ~ServiceInterface();
+     ServiceInterface(const ServiceInterface&) = default;
+     ServiceInterface& operator=(const ServiceInterface&) = default;
 
      virtual Log*   getDebugLog();
      virtual Log*   getProcessingLog();

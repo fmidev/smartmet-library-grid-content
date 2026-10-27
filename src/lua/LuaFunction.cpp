@@ -84,7 +84,7 @@ LuaFunction::~LuaFunction()
 
 /*! \brief Print. */
 
-void LuaFunction::print(std::ostream& stream,uint level,uint optionFlags)
+void LuaFunction::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

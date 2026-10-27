@@ -67,14 +67,11 @@ float Function_valid::executeFunctionCall1(std::vector<float>& parameters)
 {
   try
   {
-    uint len = parameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      auto val = parameters[t];
-      if (val != ParamValueMissing)
-        return val;
-    }
-    return ParamValueMissing;
+    // The first parameter as such, including a missing value, like the grid version returns
+    // the first available grid. The query server leaves out the parameters without data.
+    if (parameters.empty())
+      return ParamValueMissing;
+    return parameters[0];
   }
   catch (...)
   {
@@ -92,14 +89,11 @@ double Function_valid::executeFunctionCall1(std::vector<double>& parameters)
 {
   try
   {
-    uint len = parameters.size();
-    for (uint t=0; t<len; t++)
-    {
-      auto val = parameters[t];
-      if (val != ParamValueMissing)
-        return val;
-    }
-    return ParamValueMissing;
+    // The first parameter as such, including a missing value, like the grid version returns
+    // the first available grid. The query server leaves out the parameters without data.
+    if (parameters.empty())
+      return ParamValueMissing;
+    return parameters[0];
   }
   catch (...)
   {
@@ -113,15 +107,18 @@ double Function_valid::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_valid::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
+    // The first available grid is returned as such, including its missing values. The
+    // parameters are listed in order of preference, typically a nowcast first and a longer
+    // range forecast after it, and a missing value in the preferred grid is valid information
+    // (for example no precipitation) which must not be filled from the less reliable grids.
     uint len = inParameters.size();
-
     for (uint t=0; t<len; t++)
     {
-      if (inParameters[t].size())
+      if (!inParameters[t].empty())
       {
         outParameters = inParameters[t];
         return;
@@ -140,14 +137,18 @@ void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std
 
 /*! \brief Function: Execute function call9. */
 
-void Function_valid::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_valid::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
+    // The first available grid is returned as such, including its missing values. The
+    // parameters are listed in order of preference, typically a nowcast first and a longer
+    // range forecast after it, and a missing value in the preferred grid is valid information
+    // (for example no precipitation) which must not be filled from the less reliable grids.
     uint len = inParameters.size();
     for (uint t=0; t<len; t++)
     {
-      if (inParameters[t].size())
+      if (!inParameters[t].empty())
       {
         outParameters = inParameters[t];
         return;

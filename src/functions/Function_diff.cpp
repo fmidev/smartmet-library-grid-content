@@ -8,6 +8,83 @@ namespace Functions
 {
 
 
+namespace
+{
+
+/*! \brief Return the sum of the external parameters, or missing if any of them is missing. */
+
+template <typename T>
+T sumOfParameters(const std::vector<double>& extParameters)
+{
+  T b = 0;
+  for (double p : extParameters)
+  {
+    if (p == ParamValueMissing)
+      return ParamValueMissing;
+
+    b = b + p;
+  }
+  return b;
+}
+
+
+
+/*! \brief Subtract the values of the other grids at the index from the value of the first grid. Returns missing if a value is missing. */
+
+template <typename T>
+T subtractGridValues(const std::vector<std::vector<T>>& inParameters,uint s)
+{
+  // (A missing first value used to be subtracted from as a number)
+  T value = inParameters[0][s];
+  if (value == ParamValueMissing)
+    return value;
+
+  uint len = inParameters.size();
+  for (uint t=1; t<len; t++)
+  {
+    if (s >= inParameters[t].size())
+      return ParamValueMissing;
+
+    float val = inParameters[t][s];
+    if (val == ParamValueMissing)
+      return ParamValueMissing;
+
+    value -= val;
+  }
+  return value;
+}
+
+
+
+/*! \brief Subtract the other grids and the sum of the external parameters from the first grid. */
+
+template <typename T>
+void executeDiff(uint columns,uint rows,const std::vector<std::vector<T>>& inParameters,const std::vector<double>& extParameters,std::vector<T>& outParameters)
+{
+  uint sz = columns*rows;
+  outParameters.reserve(sz);
+
+  T b = sumOfParameters<T>(extParameters);
+
+  for (uint s=0; s<sz; s++)
+  {
+    T value = ParamValueMissing;
+    if (s < inParameters[0].size())
+      value = subtractGridValues(inParameters,s);
+
+    if (b == ParamValueMissing)
+      value = ParamValueMissing;
+    else if (value != ParamValueMissing)
+      value -= b;
+
+    outParameters.emplace_back(value);
+  }
+}
+
+}  // namespace
+
+
+
 /*! \brief Function: Constructor. */
 
 Function_diff::Function_diff()
@@ -135,65 +212,7 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 {
   try
   {
-    uint sz = columns*rows;
-    uint len = inParameters.size();
-    uint elen = extParameters.size();
-    outParameters.reserve(sz);
-
-    float b = 0;
-    if (elen > 0)
-    {
-      for (uint t=0; t<elen; t++)
-      {
-        if (extParameters[t] == ParamValueMissing)
-        {
-          b = ParamValueMissing;
-          t = elen;
-        }
-        else
-        {
-          b = b + extParameters[t];
-        }
-      }
-    }
-
-    for (uint s=0; s<sz; s++)
-    {
-      float value = ParamValueMissing;
-      if (s < inParameters[0].size())
-      {
-        value = inParameters[0][s];
-        for (uint t=1; t<len; t++)
-        {
-          if (s < inParameters[t].size())
-          {
-            float val = inParameters[t][s];
-            if (val == ParamValueMissing)
-            {
-              value = ParamValueMissing;
-              t = len;
-            }
-            else
-            {
-              value -= val;
-            }
-          }
-          else
-          {
-            value = ParamValueMissing;
-            t = len;
-          }
-        }
-      }
-
-      if (b == ParamValueMissing)
-        value = ParamValueMissing;
-      else
-      if (value != ParamValueMissing)
-        value -= b;
-
-      outParameters.emplace_back(value);
-    }
+    executeDiff(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {
@@ -211,65 +230,7 @@ void Function_diff::executeFunctionCall9(uint columns,uint rows,std::vector<std:
 {
   try
   {
-    uint sz = columns*rows;
-    uint len = inParameters.size();
-    uint elen = extParameters.size();
-    outParameters.reserve(sz);
-
-    double b = 0;
-    if (elen > 0)
-    {
-      for (uint t=0; t<elen; t++)
-      {
-        if (extParameters[t] == ParamValueMissing)
-        {
-          b = ParamValueMissing;
-          t = elen;
-        }
-        else
-        {
-          b = b + extParameters[t];
-        }
-      }
-    }
-
-    for (uint s=0; s<sz; s++)
-    {
-      double value = ParamValueMissing;
-      if (s < inParameters[0].size())
-      {
-        value = inParameters[0][s];
-        for (uint t=1; t<len; t++)
-        {
-          if (s < inParameters[t].size())
-          {
-            float val = inParameters[t][s];
-            if (val == ParamValueMissing)
-            {
-              value = ParamValueMissing;
-              t = len;
-            }
-            else
-            {
-              value -= val;
-            }
-          }
-          else
-          {
-            value = ParamValueMissing;
-            t = len;
-          }
-        }
-      }
-
-      if (b == ParamValueMissing)
-        value = ParamValueMissing;
-      else
-      if (value != ParamValueMissing)
-        value -= b;
-
-      outParameters.emplace_back(value);
-    }
+    executeDiff(columns,rows,inParameters,extParameters,outParameters);
   }
   catch (...)
   {

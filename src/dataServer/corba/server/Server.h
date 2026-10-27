@@ -27,6 +27,8 @@ class Server
   public:
                   Server(const char *address,const char *port);
     virtual       ~Server();
+    Server(const Server&) = delete;
+    Server& operator=(const Server&) = delete;
 
     virtual void  init(DataServer::ServiceInterface *serviceInterface);
     virtual void  start();
@@ -44,7 +46,7 @@ class Server
     ServerInterface                 mCorbaInterface;   //!< The CORBA servant that wraps mServiceInterface.
     DataServer::ServiceInterface*   mServiceInterface; //!< Non-owning pointer to the local DataServer implementation.
     std::string                     mServiceIor;       //!< Stringified IOR published by this server.
-    pthread_t                       mThread;           //!< Background thread running the ORB event loop.
+    pthread_t                       mThread = 0;           //!< Background thread running the ORB event loop.
 
 };
 

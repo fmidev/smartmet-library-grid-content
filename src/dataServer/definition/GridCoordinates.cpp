@@ -2,6 +2,8 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <algorithm>
+
 
 namespace SmartMet
 {
@@ -96,8 +98,7 @@ void GridCoordinates::print(std::ostream& stream,uint level,uint optionFlags)
     uint sz = mCoordinateList.size();
     stream << space(level) << "- mCoordinateList (" << sz << ")\n";
 
-    if (sz > 10)
-      sz = 10;
+    sz = std::min<SmartMet::uint>(sz, 10);
 
     for (uint c=0; c<sz; c++)
     {

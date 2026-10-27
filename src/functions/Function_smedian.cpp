@@ -1,11 +1,75 @@
 #include "Function_smedian.h"
 #include <grid-files/common/GeneralFunctions.h>
 
+#include <algorithm>
+
 
 namespace SmartMet
 {
 namespace Functions
 {
+
+
+namespace
+{
+
+/*! \brief Collect the non-missing values of the grid point s of all the input grids. */
+
+template <typename T>
+void collect_values(const std::vector<std::vector<T>>& inParameters,int s,std::vector<T>& values)
+{
+  uint len = inParameters.size();
+  for (uint t=0; t<len; t++)
+  {
+    if (s < (int)inParameters[t].size())
+    {
+      double val = inParameters[t][s];
+      if (val != ParamValueMissing)
+        values.push_back(val);
+    }
+  }
+}
+
+
+
+/*! \brief Sort the values and return their median shifted by the given number of positions. */
+
+template <typename T>
+double shifted_median(std::vector<T>& values,int shift)
+{
+  std::sort(values.begin(),values.end());
+
+  double res = ParamValueMissing;
+  int vsz = values.size();
+  if (vsz > 0)
+  {
+    int idx = (vsz + 1) / 2;
+    int i = idx - 1 + shift;
+
+    if ((vsz % 2) == 1)
+    {
+      i = std::max(i, 0);
+
+      if (i >= vsz)
+        i = vsz-1;
+
+      res = values[i];
+    }
+    else
+    {
+      if (i >= (vsz-1))
+        i = vsz-2;
+
+      i = std::max(i, 0);
+
+      res = (values[i]+values[i+1])/2;
+    }
+  }
+  return res;
+}
+
+}  // namespace
+
 
 
 /*! \brief Function: Constructor. */
@@ -95,8 +159,7 @@ float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
 
     if ((sz % 2) == 1)
     {
-      if (i < 0)
-        i = 0;
+      i = std::max(i, 0);
 
       if (i >= sz)
         i = sz-1;
@@ -107,8 +170,7 @@ float Function_smedian::executeFunctionCall1(std::vector<float>& parameters)
     if (i >= (sz-1))
       i = sz-2;
 
-    if (i < 0)
-      i = 0;
+    i = std::max(i, 0);
 
     return (values[i]+values[i+1])/2;
   }
@@ -156,8 +218,7 @@ double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
 
     if ((sz % 2) == 1)
     {
-      if (i < 0)
-        i = 0;
+      i = std::max(i, 0);
 
       if (i >= sz)
         i = sz-1;
@@ -168,8 +229,7 @@ double Function_smedian::executeFunctionCall1(std::vector<double>& parameters)
     if (i >= (sz-1))
       i = sz-2;
 
-    if (i < 0)
-      i = 0;
+    i = std::max(i, 0);
 
     return (values[i]+values[i+1])/2;
   }
@@ -203,48 +263,9 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
     {
       std::vector<float> values;
       values.reserve(len);
+      collect_values(inParameters,s,values);
 
-      for (uint t=0; t<len; t++)
-      {
-        if (s < (int)inParameters[t].size())
-        {
-          double val = inParameters[t][s];
-          if (val != ParamValueMissing)
-            values.push_back(val);
-        }
-      }
-
-      std::sort(values.begin(),values.end());
-
-      double res = ParamValueMissing;
-      int vsz = values.size();
-      if (vsz > 0)
-      {
-        int idx = (vsz + 1) / 2;
-
-        int i = idx - 1 + shift;
-
-        if ((vsz % 2) == 1)
-        {
-          if (i < 0)
-            i = 0;
-
-          if (i >= sz)
-            i = sz-1;
-
-          res = values[i];
-        }
-        else
-        {
-          if (i >= (sz-1))
-            i = sz-2;
-
-          if (i < 0)
-            i = 0;
-
-          res = (values[i]+values[i+1])/2;
-        }
-      }
+      double res = shifted_median(values,shift);
       outParameters.emplace_back(res);
     }
   }
@@ -277,47 +298,9 @@ void Function_smedian::executeFunctionCall9(uint columns,uint rows,std::vector<s
     {
       std::vector<double> values;
       values.reserve(len);
+      collect_values(inParameters,s,values);
 
-      for (uint t=0; t<len; t++)
-      {
-        if (s < (int)inParameters[t].size())
-        {
-          double val = inParameters[t][s];
-          if (val != ParamValueMissing)
-            values.push_back(val);
-        }
-      }
-
-      std::sort(values.begin(),values.end());
-
-      double res = ParamValueMissing;
-      int vsz = values.size();
-      if (vsz > 0)
-      {
-        int idx = (vsz + 1) / 2;
-        int i = idx - 1 + shift;
-
-        if ((vsz % 2) == 1)
-        {
-          if (i < 0)
-            i = 0;
-
-          if (i >= sz)
-            i = sz-1;
-
-          res = values[i];
-        }
-        else
-        {
-          if (i >= (sz-1))
-            i = sz-2;
-
-          if (i < 0)
-            i = 0;
-
-          res = (values[i]+values[i+1])/2;
-        }
-      }
+      double res = shifted_median(values,shift);
       outParameters.emplace_back(res);
     }
   }

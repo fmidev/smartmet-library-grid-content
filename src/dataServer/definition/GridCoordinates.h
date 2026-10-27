@@ -25,6 +25,7 @@ class GridCoordinates
                        GridCoordinates();
                        GridCoordinates(GridCoordinates& gridCoordinates);
     virtual            ~GridCoordinates();
+    GridCoordinates& operator=(const GridCoordinates&) = default;
 
     virtual void       print(std::ostream& stream,uint level,uint optionFlags);
 

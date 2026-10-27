@@ -4,7 +4,7 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/GeneralDefinitions.h>
 #include <grid-files/common/StringFactory.h>
-#include <string.h>
+#include <cstring>
 
 
 namespace SmartMet
@@ -211,7 +211,7 @@ ContentInfo& ContentInfo::operator=(const ContentInfo& contentInfo)
 
 /*! \brief Return the FMI parameter name string. */
 
-char* ContentInfo::getFmiParameterName()
+char* ContentInfo::getFmiParameterName() const
 {
   try
   {
@@ -270,7 +270,7 @@ void ContentInfo::setFmiParameterName(const std::string& name)
 
 /*! \brief Return the forecast time string. */
 
-char* ContentInfo::getForecastTime()
+char* ContentInfo::getForecastTime() const
 {
   try
   {
@@ -346,12 +346,12 @@ void ContentInfo::setForecastTime(const std::string& ftime)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string ContentInfo::getCsv()
+std::string ContentInfo::getCsv() const
 {
   try
   {
     char st[1000];
-    snprintf(st,sizeof(st),"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%u;;;%d;;;%d;%d;;%u;%u;%u;%ld;%ld;%u",
+    snprintf(st,sizeof(st),"%lu;%u;%u;%lu;%u;%u;%lu;;%s;%u;%s;%d;%d;%d;%f;%f;%d;;;%d;;;%d;%d;;%u;%u;%d;%ld;%ld;%u",
         mFileId,
         mMessageIndex,
         mFileType,
@@ -872,7 +872,7 @@ ContentInfo* ContentInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void ContentInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void ContentInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

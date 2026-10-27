@@ -9,7 +9,7 @@ namespace SmartMet
 namespace Functions
 {
 
-typedef std::unordered_map<std::string,FunctionPtr> FunctionList;  //!< Map of function name to Function instance pointer.
+using FunctionList = std::unordered_map<std::string,FunctionPtr>;  //!< Map of function name to Function instance pointer.
 
 
 // ====================================================================================
@@ -21,6 +21,8 @@ class FunctionCollection
   public:
                         FunctionCollection();
     virtual             ~FunctionCollection();
+    FunctionCollection(const FunctionCollection&) = delete;
+    FunctionCollection& operator=(const FunctionCollection&) = delete;
 
     virtual void        addFunction(const char *functionName,FunctionPtr function);
     virtual void        addFunction(const std::string& functionName,FunctionPtr function);

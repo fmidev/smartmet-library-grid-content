@@ -1,5 +1,7 @@
 #include "QueryStreamer.h"
 
+#include <utility>
+
 namespace SmartMet
 {
 namespace QueryServer
@@ -28,9 +30,7 @@ QueryStreamer::QueryStreamer()
 
 /*! \brief Query Server: Destructor. */
 
-QueryStreamer::~QueryStreamer()
-{
-}
+QueryStreamer::~QueryStreamer() = default;
 
 
 
@@ -43,7 +43,7 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
   try
   {
     mSessionId = sessionId;
-    mQueryServerPtr = queryServerPtr;
+    mQueryServerPtr = std::move(queryServerPtr);
   }
   catch (...)
   {
@@ -58,7 +58,7 @@ void QueryStreamer::init(T::SessionId sessionId,QueryServer_sptr queryServerPtr)
 
 /*! \brief Query Server: Add query. */
 
-void QueryStreamer::addQuery(Query& query)
+void QueryStreamer::addQuery(const Query& query)
 {
   try
   {
@@ -93,9 +93,9 @@ std::string QueryStreamer::getChunk()
         return "";
       }
 
-      for (auto it = query.mQueryParameterList.begin(); it != query.mQueryParameterList.end(); ++it)
+      for (auto& it : query.mQueryParameterList)
       {
-        for (auto v = it->mValueList.begin(); v != it->mValueList.end(); ++v)
+        for (auto v = it.mValueList.begin(); v != it.mValueList.end(); ++v)
         {
           uint alen = (*v)->mValueData.size();
           for (uint a=0; a<alen; a++)
@@ -113,11 +113,8 @@ std::string QueryStreamer::getChunk()
       setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::OK);
       return "";
     }
-    else
-    {
-      setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::EXIT_OK);
-      return "";
-    }
+    setStatus(Spine::HTTP::ContentStreamer::StreamerStatus::EXIT_OK);
+    return "";
   }
   catch (...)
   {

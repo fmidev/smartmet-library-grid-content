@@ -113,7 +113,7 @@ double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
       if (angle_deg < 0)
         angle_deg += 360.0;
 
-      return (double)angle_deg;
+      return angle_deg;
     }
 
     return ParamValueMissing;
@@ -131,7 +131,7 @@ double Function_streamDir::executeFunctionCall1(std::vector<double>& parameters)
 
 /*! \brief Function: Execute function call9. */
 
-void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<float>>& inParameters,const std::vector<double>& extParameters,std::vector<float>& outParameters)
+void Function_streamDir::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<float>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<float>& outParameters)
 {
   try
   {
@@ -180,7 +180,7 @@ void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector
 
 /*! \brief Function: Execute function call9. */
 
-void Function_streamDir::executeFunctionCall9(uint columns,uint rows,std::vector<std::vector<double>>& inParameters,const std::vector<double>& extParameters,std::vector<double>& outParameters)
+void Function_streamDir::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std::vector<std::vector<double>>& inParameters,const std::vector<double>& /*extParameters*/,std::vector<double>& outParameters)
 {
   try
   {
@@ -231,7 +231,7 @@ Function* Function_streamDir::duplicate()
 {
   try
   {
-    return (Function*)new Function(*this);
+    return (Function*)new Function_streamDir(*this);
   }
   catch (...)
   {
@@ -244,7 +244,7 @@ Function* Function_streamDir::duplicate()
 
 /*! \brief Function: Print. */
 
-void Function_streamDir::print(std::ostream& stream,uint level,uint optionFlags)
+void Function_streamDir::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

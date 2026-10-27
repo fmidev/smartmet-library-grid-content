@@ -90,12 +90,12 @@ class EventInfo
 
     EventInfo&     operator=(const EventInfo& dataEventInfo);
 
-    std::string    getCsv();
+    std::string    getCsv() const;
     std::string    getCsvHeader();
     void           setCsv(const char *csv);
     void           setCsv(const std::string& csv);
     EventInfo*     duplicate();
-    void           print(std::ostream& stream,uint level,uint optionFlags);
+    void           print(std::ostream& stream,uint level,uint optionFlags) const;
 
     EventId        mEventId;    //!< Monotonically increasing identifier assigned by the Content Server.
     time_t         mEventTime;  //!< Wall-clock time when the event was recorded (UTC Unix timestamp).

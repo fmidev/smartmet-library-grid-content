@@ -184,7 +184,7 @@ ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfoByIndexNoCheck(
 
 ParameterLevelInfo* ParameterLevelInfoList::getParameterLevelInfo(
                         T::ParamKeyType parameterKeyType,
-                        T::ParamId parameterKey,
+                        const T::ParamId& parameterKey,
                         T::ParamLevelId parameterLevelId,
                         T::ParamLevel level)
 

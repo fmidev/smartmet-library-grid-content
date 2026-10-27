@@ -30,7 +30,7 @@ ResponseMessage::ResponseMessage()
 
 /*! \brief Content Server: Constructor. */
 
-ResponseMessage::ResponseMessage(ResponseMessage& responseMessage)
+ResponseMessage::ResponseMessage(ResponseMessage& /*responseMessage*/)
 {
   try
   {
@@ -642,7 +642,7 @@ uint ResponseMessage::getLinesByKey(const char *key,std::vector<std::string>& va
       const char *s = mLines[t].c_str();
       if (strncasecmp(s,key,len) == 0  &&  s[len] == '=')
       {
-        values.emplace_back(std::string(s+len+1));
+        values.emplace_back(s+len+1);
       }
     }
 
@@ -660,7 +660,7 @@ uint ResponseMessage::getLinesByKey(const char *key,std::vector<std::string>& va
 
 /*! \brief Content Server: Print. */
 
-void ResponseMessage::print(std::ostream& stream,uint level,uint optionFlags)
+void ResponseMessage::print(std::ostream& stream,uint level,uint /*optionFlags*/)
 {
   try
   {

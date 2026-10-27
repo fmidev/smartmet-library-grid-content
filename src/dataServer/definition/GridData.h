@@ -25,6 +25,8 @@ class GridData
                         GridData();
                         //GridData(GridData& gridData);
     virtual             ~GridData();
+    GridData(const GridData&) = default;
+    GridData& operator=(const GridData&) = default;
 
     virtual void        print(std::ostream& stream,uint level,uint optionFlags);
 
@@ -59,7 +61,7 @@ class GridData
 };
 
 
-typedef GridData* GridData_ptr;  //!< Non-owning pointer to a GridData.
+using GridData_ptr = GridData*;  //!< Non-owning pointer to a GridData.
 
 }
 }  // namespace SmartMet

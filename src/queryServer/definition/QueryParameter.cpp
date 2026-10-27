@@ -2,6 +2,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/Hash.h>
 
+#include <algorithm>
+
 
 namespace SmartMet
 {
@@ -140,17 +142,17 @@ std::size_t QueryParameter::getHash()
     Fmi::hash_merge(hash,mTimeInterpolationMethod);
     Fmi::hash_merge(hash,mLevelInterpolationMethod);
 
-    for (auto it = mContourLowValues.begin(); it != mContourLowValues.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (float & mContourLowValue : mContourLowValues)
+      Fmi::hash_merge(hash,mContourLowValue);
 
-    for (auto it = mContourHighValues.begin(); it != mContourHighValues.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (float & mContourHighValue : mContourHighValues)
+      Fmi::hash_merge(hash,mContourHighValue);
 
-    for (auto it = mContourColors.begin(); it != mContourColors.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (unsigned int & mContourColor : mContourColors)
+      Fmi::hash_merge(hash,mContourColor);
 
-    for (auto it = mParameterLevels.begin(); it != mParameterLevels.end(); ++it)
-      Fmi::hash_merge(hash,*it);
+    for (int & mParameterLevel : mParameterLevels)
+      Fmi::hash_merge(hash,mParameterLevel);
 
     Fmi::hash_merge(hash,mProducerId);
     Fmi::hash_merge(hash,mGenerationFlags);
@@ -189,15 +191,14 @@ void QueryParameter::getValueListSize(int& columns,int& rows)
   {
     columns = 0;
     rows = 0;
-    if (mValueList.size() == 0)
+    if (mValueList.empty())
       return;
 
     rows = mValueList.size();
-    for (auto it = mValueList.begin(); it != mValueList.end(); ++it)
+    for (auto& it : mValueList)
     {
-      int len = (*it)->mValueList.getLength();
-      if (len > columns)
-        columns = len;
+      int len = it->mValueList.getLength();
+      columns = std::max(len, columns);
     }
   }
   catch (...)
@@ -223,7 +224,7 @@ T::ParamValue QueryParameter::getValueListValue(int col,int row)
       return ParamValueMissing;
 
 
-    auto rec = mValueList[row]->mValueList.getGridValuePtrByIndex(col);
+    auto *rec = mValueList[row]->mValueList.getGridValuePtrByIndex(col);
     if (!rec)
       return ParamValueMissing;
 
@@ -313,10 +314,10 @@ void QueryParameter::removeTimes(std::set<time_t>& times)
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    for (auto& it : valueList)
     {
-      if (times.find((*it)->mForecastTimeUTC) == times.end())
-        mValueList.emplace_back(*it);
+      if (times.find(it->mForecastTimeUTC) == times.end())
+        mValueList.emplace_back(it);
     }
   }
   catch (...)
@@ -338,10 +339,10 @@ void QueryParameter::removeAggregationValues()
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    for (auto& it : valueList)
     {
-      if (((*it)->mFlags & ParameterValues::Flags::AggregationValue) == 0)
-        mValueList.emplace_back(*it);
+      if ((it->mFlags & ParameterValues::Flags::AggregationValue) == 0)
+        mValueList.emplace_back(it);
     }
   }
   catch (...)
@@ -363,10 +364,10 @@ void QueryParameter::removeInternalAggregationValues()
     ParameterValues_sptr_vec valueList = mValueList;
     mValueList.clear();
 
-    for (auto it=valueList.begin(); it != valueList.end(); ++it)
+    for (auto& it : valueList)
     {
-      if (((*it)->mFlags & ParameterValues::Flags::InternalAggregationValue) == 0)
-        mValueList.emplace_back(*it);
+      if ((it->mFlags & ParameterValues::Flags::InternalAggregationValue) == 0)
+        mValueList.emplace_back(it);
     }
   }
   catch (...)
@@ -385,9 +386,9 @@ void QueryParameter::updateForecastTimeList(std::set<time_t>& mForecastTimeList)
 {
   try
   {
-    for (auto it=mValueList.begin(); it != mValueList.end(); ++it)
+    for (auto& it : mValueList)
     {
-      mForecastTimeList.insert((*it)->mForecastTimeUTC);
+      mForecastTimeList.insert(it->mForecastTimeUTC);
     }
 
   }
@@ -482,28 +483,28 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     mAttributeList.print(stream,level+2,optionFlags);
 
     stream << space(level) << "- mFunctionParams           = \n";
-    for (auto it = mFunctionParams.begin();  it != mFunctionParams.end(); ++it)
+    for (auto& mFunctionParam : mFunctionParams)
     {
-      stream << space(level) << "   * " << it->first << ":" << it->second << "\n";
+      stream << space(level) << "   * " << mFunctionParam.first << ":" << mFunctionParam.second << "\n";
     }
 
     stream << space(level) << "- mContourLowValues         = \n";
-    for (auto it = mContourLowValues.begin();  it != mContourLowValues.end(); ++it)
+    for (float & mContourLowValue : mContourLowValues)
     {
-      stream << space(level) << "   * " << *it << "\n";
+      stream << space(level) << "   * " << mContourLowValue << "\n";
     }
 
     stream << space(level) << "- mContourHighValues        = \n";
-    for (auto it = mContourHighValues.begin();  it != mContourHighValues.end(); ++it)
+    for (float & mContourHighValue : mContourHighValues)
     {
-      stream << space(level) << "   * " << *it << "\n";
+      stream << space(level) << "   * " << mContourHighValue << "\n";
     }
 
     stream << space(level) << "- mContourColors            = \n";
-    for (auto it = mContourColors.begin();  it != mContourColors.end(); ++it)
+    for (unsigned int & mContourColor : mContourColors)
     {
       char hex[20];
-      sprintf(hex,"%08X",*it);
+      sprintf(hex,"%08X",mContourColor);
       stream << space(level) << "   * " << hex << "\n";
     }
 
@@ -518,9 +519,9 @@ void QueryParameter::print(std::ostream& stream,uint level,uint optionFlags)
     stream << "\n";
 
     stream << space(level) << "- mValueList                = (" << mValueList.size() << " items)\n";
-    for (auto it = mValueList.begin();  it != mValueList.end(); ++it)
+    for (auto& it : mValueList)
     {
-      (*it)->print(stream,level+2,optionFlags);
+      it->print(stream,level+2,optionFlags);
     }
   }
   catch (...)

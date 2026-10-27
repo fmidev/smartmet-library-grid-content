@@ -27,15 +27,15 @@ class GenerationInfo
                      GenerationInfo(const char *csv);
     virtual          ~GenerationInfo();
 
-    std::string      getCsv();
+    std::string      getCsv() const;
     std::string      getCsvHeader();
     void             setCsv(const char *csv);
     void             setCsv(const std::string& csv);
 
-    int              compare(uint comparisonMethod,GenerationInfo *generationInfo);
+    int              compare(uint comparisonMethod,GenerationInfo *generationInfo) const;
     GenerationInfo&  operator=(const GenerationInfo& generationInfo);
     GenerationInfo*  duplicate();
-    void             print(std::ostream& stream,uint level,uint optionFlags);
+    void             print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::GenerationId  mGenerationId;       //!< Unique numeric identifier of the generation.
     uint             mGenerationType;     //!< Classification code for the generation type.
@@ -84,7 +84,7 @@ class GenerationInfo
 };
 
 
-typedef GenerationInfo* GenerationInfoPtr;  //!< Non-owning pointer to a GenerationInfo record.
+using GenerationInfoPtr = GenerationInfo*;  //!< Non-owning pointer to a GenerationInfo record.
 
 
 }

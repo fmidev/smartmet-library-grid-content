@@ -2,7 +2,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/AdditionalParameters.h>
 #include <grid-files/common/ShowFunction.h>
-#include <time.h>
+#include <macgyver/TimeParser.h>
+#include <ctime>
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
@@ -12,6 +13,227 @@ namespace SmartMet
 {
 namespace QueryServer
 {
+
+
+namespace
+{
+
+/*! \brief Return the timestep in seconds. ISO 8601 durations ("PT30M") are accepted in addition to the
+           "30m", "1h" and plain minute forms, and a timestep which is not positive is an error. */
+
+int parseTimestep(const char *timestepStr)
+{
+  int timestep = 0;
+  if (*timestepStr == 'P' || *timestepStr == 'p')
+    timestep = static_cast<int>(Fmi::TimeParser::parse_iso_duration(timestepStr).total_seconds());
+  else
+    timestep = timePeriodToSeconds(timestepStr);
+
+  if (timestep <= 0)
+    throw Fmi::Exception(BCP,"The timestep must be positive!").addParameter("timestep",timestepStr);
+
+  return timestep;
+}
+
+
+
+/*! \brief Return the local time in the given time zone (or in the default one if the zone is null) as UTC time. */
+
+time_t localTime(const std::string& timeStr,const char *timezoneStr)
+{
+  if (timezoneStr != nullptr)
+    return localTimeToTimeT(timeStr,timezoneStr);
+
+  return localTimeToTimeT(timeStr,"");
+}
+
+
+
+/*! \brief Return the time converted to a UTC time string and back. */
+
+time_t utcTimeRoundTrip(time_t tim)
+{
+  char tmp[1000];
+  struct tm tt{};
+  gmtime_r(&tim,&tt);
+  sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
+  return utcTimeToTimeT(tmp);
+}
+
+
+
+/*! \brief Add the "HH00" strings of the comma separated hours to the time list. */
+
+void addHourList(const char *hourStr,std::set<std::string>& timeList)
+{
+  char tmp[1000];
+  std::vector<std::string> partList;
+  splitString(hourStr,',',partList);
+  for (auto& it : partList)
+  {
+    sprintf(tmp,"%02d00",toInt32(it.c_str()));
+    timeList.insert(tmp);
+  }
+}
+
+
+
+/*! \brief Return the start time of the "starttime" attribute ("data" means the start of the data). */
+
+time_t parseStartTime(Query& query,const char *startTimeStr,const char *timezoneStr,time_t currentTime)
+{
+  if (strcasecmp(startTimeStr,"data") == 0)
+  {
+    query.mFlags |= Query::Flags::StartTimeFromData;
+    query.mSearchType = Query::SearchType::TimeRange;
+    return 0;
+  }
+
+  if (strcasecmp(startTimeStr,"now") == 0)
+    return currentTime;
+
+  return localTime(startTimeStr,timezoneStr);
+}
+
+
+
+/*! \brief Return the end time of the "endtime" attribute ("data" means the end of the data). */
+
+time_t parseEndTime(Query& query,const char *endTimeStr,const char *timezoneStr)
+{
+  if (strcasecmp(endTimeStr,"data") == 0)
+  {
+    query.mFlags |= Query::Flags::EndTimeFromData;
+    query.mSearchType = Query::SearchType::TimeRange;
+    return 0;
+  }
+
+  return localTime(endTimeStr,timezoneStr);
+}
+
+
+
+/*! \brief Add the comma separated local times of the "timelist" attribute to the forecast times of the query. */
+
+void addForecastTimeList(Query& query,const char *timeListStr,const char *timezoneStr)
+{
+  std::vector<std::string> tList;
+  splitString(timeListStr,',',tList);
+
+  for (auto& it : tList)
+    query.mForecastTimeList.insert(utcTimeRoundTrip(localTime(it,timezoneStr)));
+}
+
+
+
+/*! \brief Move the time forward to the next multiple of the timestep counted from the start of its UTC day. */
+
+time_t alignToTimestep(time_t startTime,int timestep)
+{
+  char tmp[1000];
+  struct tm tt{};
+  gmtime_r(&startTime,&tt);
+
+  sprintf(tmp,"%04d%02d%02dT000000",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday);
+  time_t dayStartTime = localTimeToTimeT(tmp,"UTC");
+
+  long diff = startTime - dayStartTime;
+  long steps = (diff / timestep);
+  if ((diff % timestep) != 0)
+    startTime = dayStartTime + (steps+1)*timestep;
+
+  return startTime;
+}
+
+
+
+/*! \brief Add the forecast times of the timesteps from startStep onwards, limited to the "HHMM" times of the time list if it is not empty. */
+
+void addTimeSteps(Query& query,time_t startTime,long timesteps,int timestep,int startStep,const std::set<std::string>& timeList)
+{
+  char tmp[1000];
+  time_t s = startTime;
+  for (int t=0; t<timesteps; t++)
+  {
+    if (t >= startStep)
+    {
+      struct tm tt{};
+      gmtime_r(&s,&tt);
+
+      sprintf(tmp,"%02d%02d",tt.tm_hour,tt.tm_min);
+      if (timeList.empty()  ||  timeList.find(tmp) != timeList.end())
+      {
+        sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
+        query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
+      }
+    }
+    s += timestep;
+  }
+}
+
+
+
+/*! \brief Return the query parameter of the parameter name and level with the type, location type and interpolation attributes. */
+
+QueryParameter newQueryParameter(const std::string& name,double level,const T::AttributeList& attributeList)
+{
+  const char *typeStr = attributeList.getAttributeValue("type");
+  const char *locationTypeStr = attributeList.getAttributeValue("locationType");
+  const char *areaInterpolationMethodStr = attributeList.getAttributeValue("areaInterpolationMethod");
+  // The attribute name used to be misspelled "timeIntepolationMethod", so the time
+  // interpolation method given by the callers was ignored. The old name is still accepted.
+  const char *timeInterpolationMethodStr = attributeList.getAttributeValue("timeInterpolationMethod");
+  if (timeInterpolationMethodStr == nullptr)
+    timeInterpolationMethodStr = attributeList.getAttributeValue("timeIntepolationMethod");
+  const char *levelInterpolationMethodStr = attributeList.getAttributeValue("levelInterpolationMethod");
+
+  QueryParameter param;
+  //param.mId;
+  if (typeStr != nullptr)
+    param.mType = toUInt8(typeStr);
+
+  if (locationTypeStr != nullptr)
+    param.mLocationType = toUInt8(locationTypeStr);
+
+  param.mParam = name;
+  param.mOrigParam = name;
+  //param.mSymbolicName = name;
+  //param.mParameterKeyType;
+  //param.mParameterKey = name;
+  //param.mParameterLevelIdType;
+  //param.mParameterLevelId;
+  param.mParameterLevel = level;
+  //param.mForecastType;
+  //param.mForecastNumber;
+  if (areaInterpolationMethodStr)
+    param.mAreaInterpolationMethod = toInt16(areaInterpolationMethodStr);
+
+  if (timeInterpolationMethodStr)
+    param.mTimeInterpolationMethod = toInt16(timeInterpolationMethodStr);
+
+  if (levelInterpolationMethodStr)
+    param.mLevelInterpolationMethod = toInt16(levelInterpolationMethodStr);
+
+  //param.mContourLowValues;
+  //param.mContourHighValues;
+  //param.mContourSmoothSize;
+  //param.mContourSmoothDegree;
+  //param.mProducerId;
+  //param.mGenerationFlags;
+  //param.mPrecision;
+  //param.mTemporary;
+  //param.mFunction;
+  //param.mFunctionParams;
+  //param.mTimestepsBefore;
+  //param.mTimestepsAfter;
+  //param.mTimestepSizeInMinutes;
+  //param.mFlags;
+  return param;
+}
+
+}  // namespace
+
+
 
 
 /*! \brief Query Server: Constructor. */
@@ -79,7 +301,7 @@ void QueryConfigurator::configure(Query& query,T::AttributeList& attributeList)
 
 /*! \brief Query Server: Configure misc. */
 
-void QueryConfigurator::configureMisc(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureMisc(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -101,7 +323,7 @@ void QueryConfigurator::configureMisc(Query& query,T::AttributeList& attributeLi
 
 /*! \brief Query Server: Configure producer. */
 
-void QueryConfigurator::configureProducer(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureProducer(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -124,7 +346,7 @@ void QueryConfigurator::configureProducer(Query& query,T::AttributeList& attribu
 
 /*! \brief Query Server: Configure generation. */
 
-void QueryConfigurator::configureGeneration(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureGeneration(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -147,13 +369,12 @@ void QueryConfigurator::configureGeneration(Query& query,T::AttributeList& attri
 
 /*! \brief Query Server: Configure time. */
 
-void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureTime(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
   {
-    char tmp[1000];
-    time_t currentTime = time(0);
+    time_t currentTime = time(nullptr);
 
     time_t startTime = currentTime;
     int startStep = 0;
@@ -175,9 +396,14 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     if (timestepStr != nullptr)
     {
       if (strcasecmp(timestepStr,"data") == 0)
+      {
+        // The data times are used as such. (Without the flag the time range search expected a
+        // fixed timestep, which was zero, and returned no values.)
         query.mSearchType = Query::SearchType::TimeRange;
+        query.mFlags |= Query::Flags::TimeStepIsData;
+      }
       else
-        timestep = timePeriodToSeconds(timestepStr);
+        timestep = parseTimestep(timestepStr);
     }
 
     if (timezoneStr != nullptr)
@@ -199,15 +425,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
 
     if (hourStr != nullptr)
-    {
-      std::vector<std::string> partList;
-      splitString(hourStr,',',partList);
-      for (auto it = partList.begin(); it != partList.end(); ++it)
-      {
-        sprintf(tmp,"%02d00",toInt32(it->c_str()));
-        timeList.insert(tmp);
-      }
-    }
+      addHourList(hourStr,timeList);
 
 
     if (timeStr != nullptr)
@@ -217,62 +435,16 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
 
     if (startTimeStr != nullptr)
-    {
-      if (strcasecmp(startTimeStr,"data") == 0)
-      {
-        startTime = 0;
-        query.mFlags |= Query::Flags::StartTimeFromData;
-        query.mSearchType = Query::SearchType::TimeRange;
-      }
-      else
-      if (strcasecmp(startTimeStr,"now") == 0)
-        startTime = currentTime;
-      else
-      {
-        if (timezoneStr != nullptr)
-          startTime = localTimeToTimeT(startTimeStr,timezoneStr);
-        else
-          startTime = localTimeToTimeT(startTimeStr,"");
-      }
-    }
+      startTime = parseStartTime(query,startTimeStr,timezoneStr,currentTime);
 
 
     if (endTimeStr != nullptr)
-    {
-      if (strcasecmp(endTimeStr,"data") == 0)
-      {
-        endTime = 0;
-        query.mFlags |= Query::Flags::EndTimeFromData;
-        query.mSearchType = Query::SearchType::TimeRange;
-      }
-      else
-      {
-        if (timezoneStr != nullptr)
-          endTime = localTimeToTimeT(endTimeStr,timezoneStr);
-        else
-          endTime = localTimeToTimeT(endTimeStr,"");
-      }
-    }
+      endTime = parseEndTime(query,endTimeStr,timezoneStr);
 
 
     if (timeListStr != nullptr)
     {
-      std::vector<std::string> tList;
-      splitString(timeListStr,',',tList);
-
-      for (auto it = tList.begin(); it != tList.end(); ++it)
-      {
-        time_t tim = 0;
-        if (timezoneStr != nullptr)
-          tim = localTimeToTimeT(it->c_str(),timezoneStr);
-        else
-          tim = localTimeToTimeT(it->c_str(),"");
-
-        struct tm tt;
-        gmtime_r(&tim,&tt);
-        sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-        query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
-      }
+      addForecastTimeList(query,timeListStr,timezoneStr);
       startTime = 0;
       endTime = 0;
       timesteps = 0;
@@ -280,26 +452,14 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
     if (startTime > 0)
     {
-      struct tm tt;
-      gmtime_r(&startTime,&tt);
-
-      sprintf(tmp,"%04d%02d%02dT000000",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday);
-      time_t dayStartTime = localTimeToTimeT(tmp,"UTC");
-
-      long diff = startTime - dayStartTime;
-      long steps = (diff / timestep);
-      if ((diff % timestep) != 0)
-        startTime = dayStartTime + (steps+1)*timestep;
+      startTime = alignToTimestep(startTime,timestep);
 
       if (endTimeStr == nullptr)
         endTime = startTime + (timesteps-1) * timestep;
-      else
-      if (timestepsStr == nullptr)
+      else if (timestepsStr == nullptr)
         timesteps = ((endTime-startTime) / timestep) + 1;
 
-      gmtime_r(&startTime,&tt);
-      sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-      query.mStartTime = utcTimeToTimeT(tmp);
+      query.mStartTime = utcTimeRoundTrip(startTime);
     }
     else
     {
@@ -307,39 +467,15 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
     }
 
     if (endTime > 0)
-    {
-      struct tm tt;
-      gmtime_r(&endTime,&tt);
-      sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-      query.mEndTime = utcTimeToTimeT(tmp);
-    }
+      query.mEndTime = utcTimeRoundTrip(endTime);
     else
-    {
       query.mEndTime = 0xFFFFFFFF;
-    }
 
 
     if (query.mSearchType != Query::SearchType::TimeRange  &&  timesteps > 0)
     {
       // This is a time step query. We should generate timeteps.
-
-      time_t s = startTime;
-      for (int t=0; t<timesteps; t++)
-      {
-        if (t >= startStep)
-        {
-          struct tm tt;
-          gmtime_r(&s,&tt);
-
-          sprintf(tmp,"%02d%02d",tt.tm_hour,tt.tm_min);
-          if (timeList.size() == 0  ||  timeList.find(tmp) != timeList.end())
-          {
-            sprintf(tmp,"%04d%02d%02dT%02d%02d%02d",tt.tm_year + 1900,tt.tm_mon + 1,tt.tm_mday,tt.tm_hour,tt.tm_min,tt.tm_sec);
-            query.mForecastTimeList.insert(utcTimeToTimeT(tmp));
-          }
-        }
-        s += timestep;
-      }
+      addTimeSteps(query,startTime,timesteps,timestep,startStep,timeList);
     }
   }
   catch (...)
@@ -354,7 +490,7 @@ void QueryConfigurator::configureTime(Query& query,T::AttributeList& attributeLi
 
 /*! \brief Query Server: Configure location. */
 
-void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureLocation(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
@@ -413,18 +549,13 @@ void QueryConfigurator::configureLocation(Query& query,T::AttributeList& attribu
 
 /*! \brief Query Server: Configure parameters. */
 
-void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attributeList)
+void QueryConfigurator::configureParameters(Query& query,const T::AttributeList& attributeList)
 {
   FUNCTION_TRACE
   try
   {
     const char *levelsStr = attributeList.getAttributeValue("levels");
     const char *paramStr = attributeList.getAttributeValue("param");
-    const char *typeStr = attributeList.getAttributeValue("type");
-    const char *locationTypeStr = attributeList.getAttributeValue("locationType");
-    const char *areaInterpolationMethodStr = attributeList.getAttributeValue("areaInterpolationMethod");
-    const char *timeInterpolationMethodStr = attributeList.getAttributeValue("timeIntepolationMethod");
-    const char *levelInterpolationMethodStr = attributeList.getAttributeValue("levelInterpolationMethod");
 
 
     std::set<double> levels;
@@ -433,7 +564,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
       splitString(levelsStr,',',levels);
     }
 
-    if (levels.size() == 0)
+    if (levels.empty())
       levels.insert(0);
 
     uint levelCount = 0;
@@ -446,47 +577,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
 
         for (auto p = paramList.begin(); p != paramList.end(); ++p)
         {
-          QueryParameter param;
-          //param.mId;
-          if (typeStr != nullptr)
-            param.mType = toUInt8(typeStr);
-
-          if (locationTypeStr != nullptr)
-            param.mLocationType = toUInt8(locationTypeStr);
-
-          param.mParam = *p;
-          param.mOrigParam = *p;
-          //param.mSymbolicName = *p;
-          //param.mParameterKeyType;
-          //param.mParameterKey = *p;
-          //param.mParameterLevelIdType;
-          //param.mParameterLevelId;
-          param.mParameterLevel = *level;
-          //param.mForecastType;
-          //param.mForecastNumber;
-          if (areaInterpolationMethodStr)
-            param.mAreaInterpolationMethod = toInt16(areaInterpolationMethodStr);
-
-          if (timeInterpolationMethodStr)
-            param.mTimeInterpolationMethod = toInt16(timeInterpolationMethodStr);
-
-          if (levelInterpolationMethodStr)
-            param.mLevelInterpolationMethod = toInt16(levelInterpolationMethodStr);
-
-          //param.mContourLowValues;
-          //param.mContourHighValues;
-          //param.mContourSmoothSize;
-          //param.mContourSmoothDegree;
-          //param.mProducerId;
-          //param.mGenerationFlags;
-          //param.mPrecision;
-          //param.mTemporary;
-          //param.mFunction;
-          //param.mFunctionParams;
-          //param.mTimestepsBefore;
-          //param.mTimestepsAfter;
-          //param.mTimestepSizeInMinutes;
-          //param.mFlags;
+          QueryParameter param = newQueryParameter(*p,*level,attributeList);
 
           if (AdditionalParameters::isAdditionalParameter(p->c_str()))
           {
@@ -519,7 +610,7 @@ void QueryConfigurator::configureParameters(Query& query,T::AttributeList& attri
 
 /*! \brief Query Server: Configure parameter. */
 
-void QueryConfigurator::configureParameter(Query& query,QueryParameter& param,T::AttributeList& attributeList)
+void QueryConfigurator::configureParameter(const Query& /*query*/,QueryParameter& param,const T::AttributeList& /*attributeList*/)
 {
   FUNCTION_TRACE
   try

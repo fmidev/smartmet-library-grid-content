@@ -110,7 +110,7 @@ void AliasFile::init()
 {
   try
   {
-    if (mAliasList.size() > 0)
+    if (!mAliasList.empty())
       return; // Already initialized
 
     AutoWriteLock lock(&mModificationLock);
@@ -211,11 +211,11 @@ bool AliasFile::getAlias(const std::string& name,std::string& alias)
       return false;
     }
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    for (auto& it : mAliasVector)
     {
-      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
+      if (strcasecmp(it.mName.c_str(),name.c_str()) == 0)
       {
-        alias = it->mAliasString;
+        alias = it.mAliasString;
         return true;
       }
     }
@@ -241,7 +241,7 @@ bool AliasFile::replaceAlias(const std::string& name,std::string& alias)
     if (p1 == std::string::npos)
       return false;
 
-    auto p2 = name.find(")",p1);
+    auto p2 = name.find(')',p1);
     if (p2 == std::string::npos)
       return false;
 
@@ -284,10 +284,10 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
       return;
     }
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
+    for (auto& it : mAliasVector)
     {
-      if (strcasecmp(it->mName.c_str(),name.c_str()) == 0)
-        aliasList.emplace_back(it->mAliasString);
+      if (strcasecmp(it.mName.c_str(),name.c_str()) == 0)
+        aliasList.emplace_back(it.mAliasString);
     }
   }
   catch (...)
@@ -296,6 +296,95 @@ void AliasFile::getAliasList(const std::string& name,std::vector<std::string>& a
   }
 }
 
+
+
+
+
+namespace
+{
+
+/*! \brief Read a line and its continuation lines (ending with a backslash) into the buffer. Returns false at the end of the file. */
+
+bool readContinuedLine(FILE *file,char *st,size_t size,uint& lineCount)
+{
+  char *pp = st;
+  bool ind = true;
+  while (ind)
+  {
+    ind = false;
+    // Continuation lines are read after the previous ones: only the rest of the buffer is
+    // available. (Passing the whole buffer size overflowed it with long continued lines.)
+    const int space = static_cast<int>(size - (pp - st));
+    if (space > 1  &&  fgets(pp,space,file) != nullptr)
+    {
+      lineCount++;
+      char *p = strstr(pp,"\n");
+      if (p != nullptr  &&  p > pp)
+      {
+        p--;
+        if (*p == '\\')
+        {
+          pp = p;
+          ind = true;
+        }
+      }
+    }
+    else
+    {
+      pp[0] = '\n';
+      return false;
+    }
+  }
+  return true;
+}
+
+}  // namespace
+
+
+
+
+/*! \brief Query Server: Add the alias of a "name:alias" line (lineCount is used in the duplicate warning). */
+
+void AliasFile::addAliasLine(char *st,uint lineCount)
+{
+  try
+  {
+    char *p = strstr(st,":");
+    if (p != nullptr)
+    {
+      *p = '\0';
+      p++;
+      Alias rec;
+
+      rec.mName = st;
+      rec.mAliasString = p;
+
+      if (!rec.mName.empty()  &&  !rec.mAliasString.empty())
+      {
+        if (!mDuplicatesAllowed)
+        {
+          auto alias = mAliasList.find(toLowerString(rec.mName));
+          if (alias != mAliasList.end())
+          {
+            std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
+          }
+          else
+          {
+            mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
+          }
+        }
+        else
+        {
+          mAliasVector.emplace_back(rec);
+        }
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
 
 
 
@@ -323,31 +412,7 @@ void AliasFile::loadFile()
     bool readOk = true;
     while (readOk)
     {
-      char *pp = st;
-      bool ind = true;
-      while (ind)
-      {
-        ind = false;
-        if (fgets(pp,30000,file) != nullptr)
-        {
-          lineCount++;
-          char *p = strstr(pp,"\n");
-          if (p != nullptr  &&  p > pp)
-          {
-            p--;
-            if (*p == '\\')
-            {
-              pp = p;
-              ind = true;
-            }
-          }
-        }
-        else
-        {
-          readOk = false;
-          pp[0] = '\n';
-        }
-      }
+      readOk = readContinuedLine(file,st,sizeof(st),lineCount);
 
       if (readOk && st[0] != '#')
       {
@@ -361,39 +426,10 @@ void AliasFile::loadFile()
           }
         }
 
-        p = strstr(st,":");
-        if (p != nullptr)
-        {
-          *p = '\0';
-          p++;
-          Alias rec;
-
-          rec.mName = st;
-          rec.mAliasString = p;
-
-          if (rec.mName.length() > 0  &&  rec.mAliasString.length() > 0)
-          {
-            if (!mDuplicatesAllowed)
-            {
-              auto alias = mAliasList.find(toLowerString(rec.mName));
-              if (alias != mAliasList.end())
-              {
-                std::cout << "#### ALIAS '" << rec.mName << "' ALREADY DEFINED (" << mFilename << ":" << lineCount << ")\n";
-              }
-              else
-              {
-                mAliasList.insert(std::pair<std::string,Alias>(toLowerString(rec.mName),rec));
-              }
-            }
-            else
-            {
-              mAliasVector.emplace_back(rec);
-            }
-          }
-        }
+        addAliasLine(st,lineCount);
       }
     }
-    fclose(file);
+    (void)fclose(file);
 
     mLastModified = getFileModificationTime(mFilename.c_str());
   }
@@ -414,11 +450,11 @@ void AliasFile::print(std::ostream& stream,uint level,uint optionFlags)
   try
   {
     stream << space(level) << "AliasFileCollection\n";
-    for (auto it = mAliasList.begin(); it != mAliasList.end(); ++it)
-      it->second.print(stream,level+1,optionFlags);
+    for (auto& it : mAliasList)
+      it.second.print(stream,level+1,optionFlags);
 
-    for (auto it = mAliasVector.begin(); it != mAliasVector.end(); ++it)
-      it->print(stream,level+1,optionFlags);
+    for (auto& it : mAliasVector)
+      it.print(stream,level+1,optionFlags);
   }
   catch (...)
   {

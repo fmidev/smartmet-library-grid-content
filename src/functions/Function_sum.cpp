@@ -173,8 +173,7 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (b == ParamValueMissing)
         sum = ParamValueMissing;
-      else
-      if (sum != ParamValueMissing)
+      else if (sum != ParamValueMissing)
         sum += b;
 
       outParameters.emplace_back(sum);
@@ -245,8 +244,7 @@ void Function_sum::executeFunctionCall9(uint columns,uint rows,std::vector<std::
 
       if (b == ParamValueMissing)
         sum = ParamValueMissing;
-      else
-      if (sum != ParamValueMissing)
+      else if (sum != ParamValueMissing)
         sum += b;
 
       outParameters.emplace_back(sum);

@@ -38,14 +38,14 @@ class FileInfo
 
     FileInfo&       operator=(const FileInfo& fileInfo);
 
-    std::string     getCsv();
+    std::string     getCsv() const;
     std::string     getCsvHeader();
     void            setCsv(const char *csv);
     void            setCsv(const std::string& csv);
 
-    int             compare(uint comparisonMethod,FileInfo *fileInfo);
+    int             compare(uint comparisonMethod,FileInfo *fileInfo) const;
     FileInfo*       duplicate();
-    void            print(std::ostream& stream,uint level,uint optionFlags);
+    void            print(std::ostream& stream,uint level,uint optionFlags) const;
 
     /*! \brief The producer identifier. */
     T::ProducerId   mProducerId;
@@ -145,7 +145,7 @@ class FileInfo
 };
 
 
-typedef FileInfo* FileInfoPtr;  //!< Non-owning pointer to a FileInfo record.
+using FileInfoPtr = FileInfo*;  //!< Non-owning pointer to a FileInfo record.
 
 
 

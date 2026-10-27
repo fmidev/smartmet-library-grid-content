@@ -142,7 +142,7 @@ GeometryInfo& GeometryInfo::operator=(const GeometryInfo& geometryInfo)
 
 /*! \brief Return this record formatted as a CSV row. */
 
-std::string GeometryInfo::getCsv()
+std::string GeometryInfo::getCsv() const
 {
   try
   {
@@ -263,7 +263,7 @@ void GeometryInfo::setCsv(const std::string& csv)
 
 /*! \brief Compare two records according to the selected comparison method. */
 
-int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo)
+int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo) const
 {
   try
   {
@@ -290,6 +290,8 @@ int GeometryInfo::compare(uint comparisonMethod,GeometryInfo *geometryInfo)
         if (res != 0)
           return res;
         return num_compare(mLevelId,geometryInfo->mLevelId);
+      default:
+        break;
     }
     return 0;
   }
@@ -323,7 +325,7 @@ GeometryInfo* GeometryInfo::duplicate()
 
 /*! \brief Print the record contents to the given stream. */
 
-void GeometryInfo::print(std::ostream& stream,uint level,uint optionFlags)
+void GeometryInfo::print(std::ostream& stream,uint level,uint /*optionFlags*/) const
 {
   try
   {

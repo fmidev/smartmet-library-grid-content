@@ -79,7 +79,7 @@ SmartMet::C::Result ServerInterface::getGridCoordinates(SmartMet::C::SessionId s
   try
   {
     T::GridCoordinates sCoordinates;
-    C::GridCoordinates *corbaGridCoordinates = new C::GridCoordinates();
+    auto *corbaGridCoordinates = new C::GridCoordinates();
     coordinates = corbaGridCoordinates;
 
     if (mService == nullptr)
@@ -113,7 +113,7 @@ SmartMet::C::Result ServerInterface::getGridLatlonCoordinatesByGeometry(SmartMet
   {
     T::GridCoordinates sCoordinates;
     T::AttributeList sAttributeList;
-    C::GridCoordinates *corbaGridCoordinates = new C::GridCoordinates();
+    auto *corbaGridCoordinates = new C::GridCoordinates();
     coordinates = corbaGridCoordinates;
 
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
@@ -151,7 +151,7 @@ SmartMet::C::Result ServerInterface::getGridData(SmartMet::C::SessionId sessionI
   try
   {
     T::GridData sGridData;
-    C::GridData *corbaGridData = new C::GridData();
+    auto *corbaGridData = new C::GridData();
     data = corbaGridData;
 
     if (mService == nullptr)
@@ -216,10 +216,10 @@ SmartMet::C::Result ServerInterface::getGridMessageBytes(SmartMet::C::SessionId 
     std::vector<uchar> sMessageBytes;
     std::vector<uint> sMessageSections;
 
-    C::ByteData *corbaMessageBytes = new C::ByteData();
+    auto *corbaMessageBytes = new C::ByteData();
     messageBytes = corbaMessageBytes;
 
-    C::UInt32List *corbaMessageSections = new C::UInt32List();
+    auto *corbaMessageSections = new C::UInt32List();
     messageSections = corbaMessageSections;
 
     if (mService == nullptr)
@@ -255,7 +255,7 @@ SmartMet::C::Result ServerInterface::getGridAttributeList(SmartMet::C::SessionId
   try
   {
     T::AttributeList sAttributeList;
-    C::AttributeRecList *corbaAttributeList = new C::AttributeRecList();
+    auto *corbaAttributeList = new C::AttributeRecList();
     attributeList = corbaAttributeList;
 
     if (mService == nullptr)
@@ -288,7 +288,7 @@ SmartMet::C::Result ServerInterface::getGridProperties(SmartMet::C::SessionId se
   try
   {
     T::PropertySettingVec sPropertySettingList;
-    C::PropertySettingList *corbaPropertySettingList = new C::PropertySettingList();
+    auto *corbaPropertySettingList = new C::PropertySettingList();
     propertyList = corbaPropertySettingList;
 
     if (mService == nullptr)
@@ -320,7 +320,7 @@ SmartMet::C::Result ServerInterface::getPropertyValuesByCoordinates(SmartMet::C:
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     DataServer::Corba::Converter::convert(latlonCoordinates,sCoordinateList);
@@ -486,7 +486,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByCircle(SmartMet::C::Sessi
   try
   {
     T::GridValueList sValueList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -522,7 +522,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndCircle(SmartMet::
   try
   {
     T::GridValueList sValueList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -558,7 +558,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndCircle(SmartMet::C
   try
   {
     T::GridValueList sValueList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -594,7 +594,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndCircle(SmartM
   try
   {
     T::GridValueList sValueList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -631,7 +631,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByPointList(SmartMet::C::Se
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -670,7 +670,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPointList(SmartMe
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -709,7 +709,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPointList(SmartMet
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -748,7 +748,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPointList(Sma
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPointList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(pointList,sPointList);
@@ -787,7 +787,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByPolygon(SmartMet::C::Sess
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -826,7 +826,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygon(SmartMet:
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -865,7 +865,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygon(SmartMet::
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -904,7 +904,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygon(Smart
   {
     T::GridValueList sValueList;
     std::vector<T::Coordinate> sPolygonPoints;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPoints,sPolygonPoints);
@@ -943,7 +943,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByPolygonPath(SmartMet::C::
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -982,7 +982,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByLevelAndPolygonPath(Smart
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -1021,7 +1021,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeAndPolygonPath(SmartM
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -1060,7 +1060,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByTimeLevelAndPolygonPath(S
   {
     T::GridValueList sValueList;
     std::vector<std::vector<T::Coordinate>> sPolygonPath;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     DataServer::Corba::Converter::convert(polygonPath,sPolygonPath);
@@ -1098,7 +1098,7 @@ SmartMet::C::Result ServerInterface::getGridValueListByRectangle(SmartMet::C::Se
   try
   {
     T::GridValueList sValueList;
-    C::GridValueList *corbaValueList = new C::GridValueList();
+    auto *corbaValueList = new C::GridValueList();
     valueList = corbaValueList;
 
     if (mService == nullptr)
@@ -1134,7 +1134,7 @@ SmartMet::C::Result ServerInterface::getGridValueVector(SmartMet::C::SessionId s
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1170,7 +1170,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevel(SmartMet::C::Sess
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1206,7 +1206,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTime(SmartMet::C::Sessi
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1242,7 +1242,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndGeometry(SmartM
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1283,7 +1283,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndGeometry(SmartMe
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1326,7 +1326,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByCoordinateList(SmartMet
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     DataServer::Corba::Converter::convert(coordinates,sCoordinateList);
@@ -1365,7 +1365,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByLevelAndCoordinateList(
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1409,7 +1409,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndCoordinateList(S
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1452,7 +1452,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByGeometry(SmartMet::C::S
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1494,7 +1494,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByRectangle(SmartMet::C::
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1530,7 +1530,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByPoint(SmartMet::C::Sess
   try
   {
     double_vec sValueVector;
-    C::Float64List *corbaValueVector = new C::Float64List();
+    auto *corbaValueVector = new C::Float64List();
     valueVector = corbaValueVector;
 
     if (mService == nullptr)
@@ -1566,7 +1566,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeAndLevel(SmartMet::
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
 
     if (mService == nullptr)
@@ -1604,7 +1604,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndGeometry(Sm
   try
   {
     T::ParamValue_vec sValues;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1647,7 +1647,7 @@ SmartMet::C::Result ServerInterface::getGridValueVectorByTimeLevelAndCoordinateL
   {
     T::ParamValue_vec sValues;
     std::vector<T::Coordinate> sCoordinateList;
-    C::ParameterValueList *corbaValues = new C::ParameterValueList();
+    auto *corbaValues = new C::ParameterValueList();
     values = corbaValues;
     T::AttributeList sAttributeList;
 
@@ -1695,7 +1695,7 @@ SmartMet::C::Result ServerInterface::getGridIsobands(SmartMet::C::SessionId sess
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1742,7 +1742,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByGeometry(SmartMet::C::Sess
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1790,7 +1790,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByGrid(SmartMet::C::SessionI
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -1839,7 +1839,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevel(SmartMet::C::Session
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1887,7 +1887,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTime(SmartMet::C::SessionI
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1934,7 +1934,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGeometry(SmartMet:
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -1981,7 +1981,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGeometry(SmartMet::
     T::ParamValue_vec sContourHighValues;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -2029,7 +2029,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByLevelAndGrid(SmartMet::C::
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2077,7 +2077,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndGrid(SmartMet::C::S
     std::vector<T::Coordinate> sCoordinateList;
     T::AttributeList sAttributeList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2126,7 +2126,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeAndLevel(SmartMet::C::
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -2174,7 +2174,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGeometry(Smart
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourLowValues,sContourLowValues);
@@ -2223,7 +2223,7 @@ SmartMet::C::Result ServerInterface::getGridIsobandsByTimeLevelAndGrid(SmartMet:
     std::vector<T::Coordinate> sCoordinateList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2271,7 +2271,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndLevel(SmartMet::C::
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2317,7 +2317,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGeometry(Smart
     T::AttributeList sAttributeList;
 
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2363,7 +2363,7 @@ SmartMet::C::Result ServerInterface::getGridIsolines(SmartMet::C::SessionId sess
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2408,7 +2408,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByGeometry(SmartMet::C::Sess
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2454,7 +2454,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByGrid(SmartMet::C::SessionI
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2500,7 +2500,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevel(SmartMet::C::Session
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2545,7 +2545,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTime(SmartMet::C::SessionI
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2590,7 +2590,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGeometry(SmartMet:
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2635,7 +2635,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGeometry(SmartMet::
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(contourValues,sContourValues);
@@ -2681,7 +2681,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByLevelAndGrid(SmartMet::C::
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2728,7 +2728,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeAndGrid(SmartMet::C::S
     T::AttributeList sAttributeList;
     DataServer::Corba::Converter::convert(attributeList,sAttributeList);
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2774,7 +2774,7 @@ SmartMet::C::Result ServerInterface::getGridIsolinesByTimeLevelAndGrid(SmartMet:
     T::AttributeList sAttributeList;
     std::vector<T::Coordinate> sCoordinateList;
 
-    C::ByteDataSequence *corbaContours = new C::ByteDataSequence();
+    auto *corbaContours = new C::ByteDataSequence();
     contours = corbaContours;
 
     DataServer::Corba::Converter::convert(gridLatLonCoordinates,sCoordinateList);
@@ -2818,7 +2818,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlines(SmartMet::C::SessionId s
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2860,7 +2860,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByGeometry(SmartMet::C::S
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2902,7 +2902,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByGrid(SmartMet::C::Sessi
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2947,7 +2947,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevel(SmartMet::C::Sess
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -2989,7 +2989,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGeometry(SmartM
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3031,7 +3031,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByLevelAndGrid(SmartMet::
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3076,7 +3076,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTime(SmartMet::C::Sessi
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3118,7 +3118,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGeometry(SmartMe
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3160,7 +3160,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndGrid(SmartMet::C
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3205,7 +3205,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeAndLevel(SmartMet::
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3247,7 +3247,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGeometry(Sm
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;
@@ -3289,7 +3289,7 @@ SmartMet::C::Result ServerInterface::getGridStreamlinesByTimeLevelAndGrid(SmartM
   {
     T::ByteData_vec sStreamLines;
 
-    C::ByteDataSequence *corbaStreamLines = new C::ByteDataSequence();
+    auto *corbaStreamLines = new C::ByteDataSequence();
     streamlines = corbaStreamLines;
 
     T::AttributeList sAttributeList;

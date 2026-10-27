@@ -51,7 +51,7 @@ ValueRecordList::ValueRecordList(ValueRecordList& valueRecordList)
 
 /*! \brief Builds a value record list from content info entries with given coordinate and interpolation parameters. */
 
-ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
+ValueRecordList::ValueRecordList(const ContentInfoList& contentInfoList,CoordinateType coordinateType,short interpolationMethod,double x,double y)
 {
   try
   {
@@ -59,7 +59,7 @@ ValueRecordList::ValueRecordList(ContentInfoList& contentInfoList,CoordinateType
     for (uint t=0; t<sz; t++)
     {
       ContentInfo *contentInfo = contentInfoList.getContentInfoByIndex(t);
-      ValueRecord *rec = new ValueRecord();
+      auto *rec = new ValueRecord();
       rec->mFileId = contentInfo->mFileId;
       rec->mMessageIndex = contentInfo->mMessageIndex;
       rec->mCoordinateType = coordinateType;
@@ -89,8 +89,7 @@ ValueRecordList::~ValueRecordList()
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      if (rec != nullptr)
-        delete rec;
+      delete rec;
     }
     mList.clear();
   }
@@ -160,8 +159,7 @@ void ValueRecordList::clear()
     for (uint t=0; t<sz; t++)
     {
       ValueRecord *rec = mList[t];
-      if (rec != nullptr)
-        delete rec;
+      delete rec;
     }
     mList.clear();
   }

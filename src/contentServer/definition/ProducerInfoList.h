@@ -12,7 +12,7 @@ namespace SmartMet
 namespace T
 {
 
-typedef std::vector<ProducerInfo*> ProducerInfo_pvec;  //!< Convenience vector of ProducerInfo pointers.
+using ProducerInfo_pvec = std::vector<ProducerInfo*>;  //!< Convenience vector of ProducerInfo pointers.
 
 // ====================================================================================
 /*! \brief Thread-safe container of ProducerInfo pointers for the Content Server producer registry.

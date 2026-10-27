@@ -11,6 +11,146 @@ namespace QueryServer
 {
 
 
+namespace
+{
+
+/*! \brief Return true if the mapping matches the level id and level (non-positive level id or negative level match anything). */
+
+bool matchesLevel(const ParameterMapping& mapping,T::ParamLevelId levelId,T::ParamLevel level)
+{
+  return (levelId <= 0 || mapping.mParameterLevelId == levelId)  &&
+         (levelId <= 0 || level < 0  || mapping.mParameterLevel == level);
+}
+
+
+
+/*! \brief Add the mappings that are not ignored and match the level (and are search enabled, if requested). */
+
+void addMatchingMappings(const ParameterMapping_vec& vec,T::ParamLevelId levelId,T::ParamLevel level,bool onlySearchEnabled,ParameterMapping_vec& mappings)
+{
+  for (const auto& it : vec)
+  {
+    if (!it.mIgnore  &&  matchesLevel(it,levelId,level)  &&  (!onlySearchEnabled || it.mSearchEnabled))
+      mappings.emplace_back(it);
+  }
+}
+
+
+
+/*! \brief Add the mapping to the mappings of the key. */
+
+void addToSearch(MappingSearch& search,const std::string& key,const ParameterMapping& mapping)
+{
+  auto s = search.find(key);
+  if (s != search.end())
+  {
+    s->second.emplace_back(mapping);
+  }
+  else
+  {
+    ParameterMapping_vec vec;
+    vec.push_back(mapping);
+    search.insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
+  }
+}
+
+
+
+/*! \brief Split the mapping file line into ';'-separated fields (separators within quotes are ignored). Returns the number of fields. */
+
+uint splitMappingLine(char *st,char **field)
+{
+  bool ind = false;
+  uint c = 1;
+  field[0] = st;
+  char *p = st;
+  while (*p != '\0'  &&  c < 100)
+  {
+    if (*p == '"')
+      ind = !ind;
+
+    if ((*p == ';'  || *p == '\n') && !ind)
+    {
+      *p = '\0';
+      p++;
+      field[c] = p;
+      c++;
+    }
+    else
+    {
+      p++;
+    }
+  }
+  return c;
+}
+
+
+
+/*! \brief Return the mapping of the fields of a mapping file line with c (more than 12) fields. */
+
+ParameterMapping parseMappingFields(char **field,uint c)
+{
+  ParameterMapping rec;
+
+  if (field[0][0] != '\0')
+    rec.mProducerName = field[0];
+
+  if (field[1][0] != '\0')
+    rec.mParameterName = field[1];
+
+  if (field[2][0] != '\0')
+    rec.mParameterKeyType = toInt32(field[2]);
+
+  if (field[3][0] != '\0')
+    rec.mParameterKey = field[3];
+
+  if (field[4][0] != '\0')
+    rec.mGeometryId = toInt32(field[4]);
+
+  //if (field[5][0] != '\0')
+  //  rec.mParameterLevelIdType = toInt32(field[5]);
+
+  if (field[6][0] != '\0')
+    rec.mParameterLevelId = toInt32(field[6]);
+
+  if (field[7][0] != '\0')
+    rec.mParameterLevel = toInt32(field[7]);
+
+  if (field[8][0] != '\0')
+    rec.mAreaInterpolationMethod = toInt16(field[8]);
+
+  if (field[9][0] != '\0')
+    rec.mTimeInterpolationMethod = toInt16(field[9]);
+
+  if (field[10][0] != '\0')
+    rec.mLevelInterpolationMethod = toInt16(field[10]);
+
+  if (field[11][0] != '\0')
+    rec.mGroupFlags = toInt64(field[11]);
+
+  rec.mSearchEnabled = field[12][0] == 'E';
+
+  if (field[12][0] == 'I')
+    rec.mIgnore = true;
+
+  // (field[13] was read also when the line had only 13 fields)
+  if (c > 13  &&  field[13][0] != '\0')
+    rec.mConversionFunction = field[13];
+
+  if (c > 14  &&  field[14][0] > ' ')
+    rec.mReverseConversionFunction = field[14];
+
+  if (c > 15  &&  field[15][0] > ' ')
+    rec.mDefaultPrecision = toInt16(field[15]);
+
+  return rec;
+}
+
+}  // namespace
+
+
+
+
 /*! \brief Query Server: Constructor. */
 
 ParameterMappingFile::ParameterMappingFile()
@@ -140,9 +280,9 @@ uint ParameterMappingFile::getNumberOfMappings()
 
     AutoReadLock lock(&mModificationLock);
     uint cnt = 0;
-    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
+    for (auto& it : *mMappingSearch)
     {
-      cnt = cnt + it->second.size();
+      cnt = cnt + it.second.size();
     }
     return cnt;
   }
@@ -158,7 +298,7 @@ uint ParameterMappingFile::getNumberOfMappings()
 
 /*! \brief Query Server: Get mapping. */
 
-ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
+ParameterMapping* ParameterMappingFile::getMapping(const ParameterMapping& mapping)
 {
   try
   {
@@ -172,17 +312,17 @@ ParameterMapping* ParameterMappingFile::getMapping(ParameterMapping& mapping)
     if (s == mMappingSearch->end())
       return nullptr;
 
-    for (auto it = s->second.begin(); it != s->second.end(); ++it)
+    for (auto& it : s->second)
     {
-      if (it->mProducerName == mapping.mProducerName  &&
-        it->mParameterName == mapping.mParameterName  &&
-        it->mGeometryId == mapping.mGeometryId &&
-        it->mParameterKeyType == mapping.mParameterKeyType &&
-        it->mParameterKey == mapping.mParameterKey &&
-        it->mParameterLevelId == mapping.mParameterLevelId &&
-        it->mParameterLevel == mapping.mParameterLevel)
+      if (it.mProducerName == mapping.mProducerName  &&
+        it.mParameterName == mapping.mParameterName  &&
+        it.mGeometryId == mapping.mGeometryId &&
+        it.mParameterKeyType == mapping.mParameterKeyType &&
+        it.mParameterKey == mapping.mParameterKey &&
+        it.mParameterLevelId == mapping.mParameterLevelId &&
+        it.mParameterLevel == mapping.mParameterLevel)
       {
-        return &(*it);
+        return &it;
       }
     }
     return nullptr;
@@ -213,18 +353,18 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
     if (s == mMappingSearch->end())
       return;
 
-    for (auto it = s->second.begin(); it != s->second.end(); ++it)
+    for (auto& it : s->second)
     {
-      if (!it->mIgnore  &&  (geometryId < 0 ||  it->mGeometryId == geometryId))
+      if (!it.mIgnore  &&  (geometryId < 0 ||  it.mGeometryId == geometryId))
       {
         if (onlySearchEnabled)
         {
-          if (it->mSearchEnabled)
-            mappings.emplace_back(*it);
+          if (it.mSearchEnabled)
+            mappings.emplace_back(it);
         }
         else
         {
-          mappings.emplace_back(*it);
+          mappings.emplace_back(it);
         }
       }
     }
@@ -259,18 +399,18 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
-      for (auto it = s->second.begin(); it != s->second.end(); ++it)
+      for (auto& it : s->second)
       {
-        if (!it->mIgnore)
+        if (!it.mIgnore)
         {
           if (onlySearchEnabled)
           {
-            if (it->mSearchEnabled)
-              mappings.emplace_back(*it);
+            if (it.mSearchEnabled)
+              mappings.emplace_back(it);
           }
           else
           {
-            mappings.emplace_back(*it);
+            mappings.emplace_back(it);
           }
         }
       }
@@ -305,27 +445,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
       return;
 
 
-    for (auto it = s->second.begin(); it != s->second.end(); ++it)
-    {
-      if (!it->mIgnore)
-      {
-        if (levelId <= 0 || it->mParameterLevelId == levelId)
-        {
-          if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
-          {
-            if (onlySearchEnabled)
-            {
-              if (it->mSearchEnabled)
-                mappings.emplace_back(*it);
-            }
-            else
-            {
-              mappings.emplace_back(*it);
-            }
-          }
-        }
-      }
-    }
+    addMatchingMappings(s->second,levelId,level,onlySearchEnabled,mappings);
   }
   catch (...)
   {
@@ -347,9 +467,9 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
 
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
+    for (auto& it : *mMappingSearch)
     {
-      for (auto m = it->second.begin(); m != it->second.end(); ++m)
+      for (auto m = it.second.begin(); m != it.second.end(); ++m)
       {
         std::vector<std::string> partList;
         splitString(m->mParameterName,'-',partList);
@@ -359,18 +479,18 @@ void ParameterMappingFile::getAliasMappings(ParameterMapping_vec& mappings,UnitC
         {
           const char *unit = partList[sz-1].c_str();
 
-          for (auto uIt = unitConversions.begin(); uIt != unitConversions.end(); ++uIt)
+          for (auto& unitConversion : unitConversions)
           {
-            if (strcasecmp(unit,uIt->mSourceUnit.c_str()) == 0)
+            if (strcasecmp(unit,unitConversion.mSourceUnit.c_str()) == 0)
             {
               ParameterMapping newMapping = *m;
-              partList[sz-1] = uIt->mTargetUnit;
+              partList[sz-1] = unitConversion.mTargetUnit;
               std::string newName = partList[0];
               for (uint t=1; t<sz; t++)
                 newName += "-" + partList[t];
               newMapping.mParameterName = newName;
-              newMapping.mConversionFunction = uIt->mConversionFunction;
-              newMapping.mReverseConversionFunction = uIt->mReverseConversionFunction;
+              newMapping.mConversionFunction = unitConversion.mConversionFunction;
+              newMapping.mReverseConversionFunction = unitConversion.mReverseConversionFunction;
               mappings.push_back(newMapping);
             }
           }
@@ -408,27 +528,7 @@ void ParameterMappingFile::getMappings(const std::string& producerName,const std
 
     while (s != mMappingSearch->end()  &&  strncasecmp(s->first.c_str(),key.c_str(),len) == 0)
     {
-      for (auto it = s->second.begin(); it != s->second.end(); ++it)
-      {
-        if (!it->mIgnore)
-        {
-          if (levelId <= 0 || it->mParameterLevelId == levelId)
-          {
-            if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
-            {
-              if (onlySearchEnabled)
-              {
-                if (it->mSearchEnabled)
-                  mappings.emplace_back(*it);
-              }
-              else
-              {
-                mappings.emplace_back(*it);
-              }
-            }
-          }
-        }
-      }
+      addMatchingMappings(s->second,levelId,level,onlySearchEnabled,mappings);
       s++;
     }
   }
@@ -458,23 +558,14 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
     auto s = mMappingReverseSearch->find(key);
     if (s != mMappingReverseSearch->end())
     {
-      for (auto it = s->second.begin(); it != s->second.end(); ++it)
+      for (auto& it : s->second)
       {
-        if (!it->mIgnore)
+        if (!it.mIgnore  &&
+            (parameterKeyType <= 0 || it.mParameterKeyType == parameterKeyType)  &&
+            (geometryId <= 0 || it.mGeometryId == geometryId)  &&
+            matchesLevel(it,levelId,level))
         {
-          if (parameterKeyType <= 0 || it->mParameterKeyType == parameterKeyType)
-          {
-            if (geometryId <= 0 || it->mGeometryId == geometryId)
-            {
-              if (levelId <= 0 || it->mParameterLevelId == levelId)
-              {
-                if (levelId <= 0 || level < 0  || it->mParameterLevel == level)
-                {
-                  mappings.emplace_back(*it);
-                }
-              }
-            }
-          }
+          mappings.emplace_back(it);
         }
       }
     }
@@ -491,41 +582,21 @@ void ParameterMappingFile::getMappingsByParamKey(const std::string& producerName
 
 /*! \brief Query Server: Set parameter mappings. */
 
-void ParameterMappingFile::setParameterMappings(ParameterMapping_vec& mappings)
+void ParameterMappingFile::setParameterMappings(const ParameterMapping_vec& mappings)
 {
   try
   {
     auto msearch = std::make_unique<MappingSearch>();
     auto mreverseSearch = std::make_unique<MappingSearch>();
 
-    for (auto it = mappings.begin(); it != mappings.end(); ++it)
+    for (const auto& mapping : mappings)
     {
-      std::string key = toLowerString(it->mProducerName + ":" + it->mParameterName + ":" + Fmi::to_string(it->mGeometryId));
+      std::string key = toLowerString(mapping.mProducerName + ":" + mapping.mParameterName + ":" + Fmi::to_string(mapping.mGeometryId));
 
-      auto s = msearch->find(key);
-      if (s != msearch->end())
-      {
-        s->second.emplace_back(*it);
-      }
-      else
-      {
-        ParameterMapping_vec vec;
-        vec.push_back(*it);
-        msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
-      }
+      addToSearch(*msearch,key,mapping);
 
-      std::string rkey = toLowerString(it->mProducerName + ":" + it->mParameterKey);
-      auto ss = mreverseSearch->find(rkey);
-      if (ss != mreverseSearch->end())
-      {
-        ss->second.emplace_back(*it);
-      }
-      else
-      {
-        ParameterMapping_vec vec;
-        vec.push_back(*it);
-        mreverseSearch->insert(std::pair<std::string,ParameterMapping_vec>(rkey,vec));
-      }
+      std::string rkey = toLowerString(mapping.mProducerName + ":" + mapping.mParameterKey);
+      addToSearch(*mreverseSearch,rkey,mapping);
     }
 
     AutoWriteLock lock(&mModificationLock);
@@ -570,112 +641,19 @@ void ParameterMappingFile::loadFile()
     {
       if (st[0] != '#')
       {
-        bool ind = false;
         char *field[100];
-        uint c = 1;
-        field[0] = st;
-        char *p = st;
-        while (*p != '\0'  &&  c < 100)
-        {
-          if (*p == '"')
-            ind = !ind;
-
-          if ((*p == ';'  || *p == '\n') && !ind)
-          {
-            *p = '\0';
-            p++;
-            field[c] = p;
-            c++;
-          }
-          else
-          {
-            p++;
-          }
-        }
+        uint c = splitMappingLine(st,field);
 
         if (c > 12)
         {
-          ParameterMapping rec;
-
-          if (field[0][0] != '\0')
-            rec.mProducerName = field[0];
-
-          if (field[1][0] != '\0')
-            rec.mParameterName = field[1];
-
-          if (field[2][0] != '\0')
-            rec.mParameterKeyType = toInt32(field[2]);
-
-          if (field[3][0] != '\0')
-            rec.mParameterKey = field[3];
-
-          if (field[4][0] != '\0')
-            rec.mGeometryId = toInt32(field[4]);
-
-          //if (field[5][0] != '\0')
-          //  rec.mParameterLevelIdType = toInt32(field[5]);
-
-          if (field[6][0] != '\0')
-            rec.mParameterLevelId = toInt32(field[6]);
-
-          if (field[7][0] != '\0')
-            rec.mParameterLevel = toInt32(field[7]);
-
-          if (field[8][0] != '\0')
-            rec.mAreaInterpolationMethod = toInt16(field[8]);
-
-          if (field[9][0] != '\0')
-            rec.mTimeInterpolationMethod = toInt16(field[9]);
-
-          if (field[10][0] != '\0')
-            rec.mLevelInterpolationMethod = toInt16(field[10]);
-
-          if (field[11][0] != '\0')
-            rec.mGroupFlags = toInt64(field[11]);
-
-          if (field[12][0] == 'E')
-            rec.mSearchEnabled = true;
-          else
-            rec.mSearchEnabled = false;
-
-          if (field[12][0] == 'I')
-            rec.mIgnore = true;
-
-          if (field[13][0] != '\0')
-            rec.mConversionFunction = field[13];
-
-          if (c > 14  &&  field[14][0] > ' ')
-            rec.mReverseConversionFunction = field[14];
-
-          if (c > 15  &&  field[15][0] > ' ')
-            rec.mDefaultPrecision = toInt16(field[15]);
+          ParameterMapping rec = parseMappingFields(field,c);
 
           std::string key = toLowerString(rec.mProducerName + ":" + rec.mParameterName + ":" + Fmi::to_string(rec.mGeometryId));
 
-          auto s = msearch->find(key);
-          if (s != msearch->end())
-          {
-            s->second.emplace_back(rec);
-          }
-          else
-          {
-            ParameterMapping_vec vec;
-            vec.push_back(rec);
-            msearch->insert(std::pair<std::string,ParameterMapping_vec>(key,vec));
-          }
+          addToSearch(*msearch,key,rec);
 
           std::string rkey = toLowerString(rec.mProducerName + ":" + rec.mParameterKey);
-          auto ss = mreverseSearch->find(rkey);
-          if (ss != mreverseSearch->end())
-          {
-            ss->second.emplace_back(rec);
-          }
-          else
-          {
-            ParameterMapping_vec vec;
-            vec.push_back(rec);
-            mreverseSearch->insert(std::pair<std::string,ParameterMapping_vec>(rkey,vec));
-          }
+          addToSearch(*mreverseSearch,rkey,rec);
         }
       }
     }
@@ -703,10 +681,10 @@ void ParameterMappingFile::print(std::ostream& stream,uint level,uint optionFlag
   {
     AutoReadLock lock(&mModificationLock);
 
-    for (auto it = mMappingSearch->begin(); it != mMappingSearch->end(); ++it)
+    for (auto& it : *mMappingSearch)
     {
-      stream << it->first << "\n";
-      for (auto s = it->second.begin(); s != it->second.end(); ++s)
+      stream << it.first << "\n";
+      for (auto s = it.second.begin(); s != it.second.end(); ++s)
       {
         s->print(stream,level+2,optionFlags);
       }

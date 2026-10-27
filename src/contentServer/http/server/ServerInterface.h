@@ -24,6 +24,8 @@ class ServerInterface
   public:
                 ServerInterface();
     virtual     ~ServerInterface();
+    ServerInterface(const ServerInterface&) = default;
+    ServerInterface& operator=(const ServerInterface&) = default;
 
     void        init(ContentServer::ServiceInterface *service,bool readMethodsEnabled,bool writeMethodsEnabled);
 
@@ -168,7 +170,7 @@ class ServerInterface
 
     virtual void getLevelInfoList(T::RequestMessage& request,T::ResponseMessage& response);
 
-  protected:
+  
 
     ContentServer::ServiceInterface *mService;  //!< Non-owning pointer to the local service implementation.
     bool mReadMethodsEnabled;

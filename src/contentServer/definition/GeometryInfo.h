@@ -30,14 +30,14 @@ class GeometryInfo
 
     GeometryInfo&   operator=(const GeometryInfo& geometryInfo);
 
-    std::string     getCsv();
+    std::string     getCsv() const;
     std::string     getCsvHeader();
     void            setCsv(const char *csv);
     void            setCsv(const std::string& csv);
 
-    int             compare(uint comparisonMethod,GeometryInfo *geometryInfo);
+    int             compare(uint comparisonMethod,GeometryInfo *geometryInfo) const;
     GeometryInfo*   duplicate();
-    void            print(std::ostream& stream,uint level,uint optionFlags);
+    void            print(std::ostream& stream,uint level,uint optionFlags) const;
 
     T::ProducerId   mProducerId;        //!< Identifier of the owning producer.
     T::GenerationId mGenerationId;      //!< Identifier of the model generation this geometry belongs to.
@@ -77,7 +77,7 @@ class GeometryInfo
 };
 
 
-typedef GeometryInfo* GeometryInfoPtr;  //!< Non-owning pointer to a GeometryInfo record.
+using GeometryInfoPtr = GeometryInfo*;  //!< Non-owning pointer to a GeometryInfo record.
 
 
 

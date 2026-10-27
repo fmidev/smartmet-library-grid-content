@@ -20,3 +20,4 @@ src/queryServer/corba/stubs/QueryServer_typedefs_SK.cpp
 src/queryServer/corba/stubs/QueryServer_typedefs_SK.h
 /smartmet-library-grid-content.tar.gz
 .project
+test/*Test

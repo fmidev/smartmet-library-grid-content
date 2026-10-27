@@ -10,7 +10,7 @@ namespace T
 {
 
 
-typedef std::vector<LevelInfo*> LevelInfo_pvec;  //!< Convenience vector of LevelInfo pointers.
+using LevelInfo_pvec = std::vector<LevelInfo*>;  //!< Convenience vector of LevelInfo pointers.
 
 // ====================================================================================
 /*! \brief Simple container of LevelInfo pointers representing available vertical levels.

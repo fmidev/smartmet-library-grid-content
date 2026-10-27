@@ -25,6 +25,7 @@ class FileAndContent
                         FileAndContent();
                         FileAndContent(const FileAndContent& fileAndContent);
      virtual            ~FileAndContent();
+     FileAndContent& operator=(const FileAndContent&) = default;
 
      FileAndContent*    duplicate();
      void               print(std::ostream& stream,uint level,uint optionFlags);

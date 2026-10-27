@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.9.16
-Release: 1%{?dist}.fmi
+Version: 26.10.26
+Release: 2%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -20,8 +20,14 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %define smartmet_boost boost
 %endif
 
+%define smartmet_fmt_min 12.0.0
+%define smartmet_fmt_max 13.0.0
+%define smartmet_fmt fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
+%define smartmet_fmt_devel fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
+
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: gcc-c++
+BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: gdal312-devel
 BuildRequires: hiredis-devel
 BuildRequires: libcurl-devel
@@ -31,10 +37,10 @@ BuildRequires: make
 BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-gis-devel >= 26.8.10
-BuildRequires: smartmet-library-grid-files-devel >= 26.8.27
-BuildRequires: smartmet-library-macgyver-devel >= 26.9.16
-BuildRequires: smartmet-library-spine-devel >= 26.8.24
+BuildRequires: smartmet-library-gis-devel >= 26.10.16
+BuildRequires: smartmet-library-grid-files-devel >= 26.10.16
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.16
+BuildRequires: smartmet-library-spine-devel >= 26.10.16
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
 Requires: libcurl
@@ -42,10 +48,24 @@ Requires: luajit-devel
 Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
-Requires: smartmet-library-gis >= 26.8.10
-Requires: smartmet-library-grid-files >= 26.8.27
-Requires: smartmet-library-macgyver >= 26.9.16
-Requires: smartmet-library-spine >= 26.8.24
+Requires: smartmet-library-gis >= 26.10.17
+Requires: smartmet-library-grid-files >= 26.10.17
+Requires: smartmet-library-macgyver >= 26.10.17
+Requires: smartmet-library-spine >= 26.10.17
+#TestRequires: %{smartmet_boost}-devel
+#TestRequires: %{smartmet_fmt_devel}
+#TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: gdal312-devel
+#TestRequires: luajit-devel
+#TestRequires: omniORB-devel >= 4.3.0
+#TestRequires: smartmet-library-gis-devel >= 26.10.16
+#TestRequires: smartmet-library-grid-files-devel >= 26.10.16
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.16
+#TestRequires: smartmet-library-newbase-devel
+#TestRequires: smartmet-library-spine-devel >= 26.10.16
+#TestRequires: smartmet-library-grid-files-test >= 26.10.16
+#TestRequires: smartmet-test-data
 
 Provides: %{SPECNAME}
 
@@ -79,10 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 Summary: FMI Grid Content library development files
 Provides: %{SPECNAME}-devel
 Requires: %{SPECNAME}
-Requires: smartmet-library-macgyver-devel >= 26.9.16
-Requires: smartmet-library-gis-devel >= 26.8.10
-Requires: smartmet-library-spine-devel >= 26.8.24
-Requires: smartmet-library-grid-files-devel >= 26.8.27
+Requires: smartmet-library-macgyver-devel >= 26.10.16
+Requires: smartmet-library-gis-devel >= 26.10.16
+Requires: smartmet-library-spine-devel >= 26.10.16
+Requires: smartmet-library-grid-files-devel >= 26.10.16
 
 %description -n %{SPECNAME}-devel
 FMI Grid Content library development files
@@ -92,9 +112,166 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-2.fmi
+- The forecast time lists of the content servers (getContentTimeListBy..., the data times and the
+  grid engine metadata) give for each parameter only the times of the forecast that a query
+  without a forecast type selects, so an ensemble no longer lists times its control forecast
+  does not have
+
+* Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-1.fmi
+- A query without a forecast type takes all its values from one forecast of the generation: the
+  deterministic forecast, then the ensemble control forecast, then the smallest type and number.
+  Previously each time step took the forecast sorted first, i.e. ensemble member 1 of MEPS
+
+* Tue Oct 20 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.10.20-1.fmi
+- Use UNIX socket with Valkey/Redis databse for tests
+
+* Mon Oct 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.19-1.fmi
+- Area queries (polygon, circle, path) no longer skip a producer whose producer file line continues it
+  with another geometry (e.g. VIRE:1110;VIRE:1125): the other geometry is just not concatenated to
+  the area. Previously all VIRE bbox and radius queries returned missing values
+- Time range queries of areas concatenate only the producers of the same geometry
+
+* Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
+- Height queries interpolated in time used the contents and levels of the first time for both times;
+  each time is now interpolated in height with its own contents and levels before the time
+  interpolation (value vectors and point values)
+- The per-thread parameter mapping, content and generation list caches are invalidated with atomic
+  generation counters instead of unsynchronized one-second timestamps that could lose a reload
+- getClosestLevelsByHeight checks the coordinate index of the height vectors
+- addInterpolatedSpecialValue checks its own input
+- Cache and Merge: removed dead branches in the content additions
+- MemoryImplementation::sync*List: rescan the whole list when clearing the sync marks
+- ContentInfoList: extract addContent and use isLiveContent everywhere (getContentInfoListByFileId
+  34, getContentInfoListByForecastTime 34, getContentInfoListByGenerationId 30,
+  getContentInfoListByProducerId 32, getContentListByForecastTime 34)
+- QueryServer::ServiceImplementation: use getModificationOperation, setDefaultPrecision and the new
+  reportDataServerError in all value functions
+- QueryServer::ServiceImplementation: extract checkValueResult from the value functions
+- QueryServer::ServiceImplementation: extract fetchContours and fetchByLocationType from the contour
+  value functions
+- ContentInfoList: lock and bound the unsorted paginated searches
+- ContentInfoList: compare the next-time next-level candidate with itself
+- Function_eq: compare two grids only once when the decimals are given
+- QueryConfigurator: parse ISO 8601 timesteps and reject zero timesteps
+- CacheImplementation: forward producer parameter searches by producer id
+- Cache and Merge: check the stored content before using it
+- MergeImplementation: look up stored contents by the merged file id
+- DataServer: handle a grid file that addFile did not add
+- QueryServer: stop the point height bisection when a level value fails
+- QueryServer: remove the fixed size buffers from parameter parsing and special values
+- QueryServer: detect GRIB2 files in getGridFiles
+- QueryServer: keep the sub-metre part of the GRIB2 grid steps
+- QueryServer: skip missing GRIB2 lambert conformal projection parameters
+- QueryServer: check the data server result of interpolated value vectors
+- QueryServer: report the data server service that failed in getValueVectors
+- QueryServer: do not overflow the generation flags of the 32nd generation
+- QueryServer: index the height levels from the original levels
+- QueryServer: do not modify the cached parameter mapping vectors
+- QueryServer: remove the unused forecast type and number of time step queries
+- QueryServer::ServiceImplementation::getValueVectors: return the fetch and finish results directly
+- Split functions with a cognitive complexity above 25 into smaller helpers, no functional changes
+- ABI change: new or changed members in installed headers, dependent packages must be rebuilt
+
+* Fri Oct 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.16-1.fmi
+- PostgresqlImplementation::addContentList(list) renamed to addContentListToDatabase, it hid the
+  virtual ServiceInterface::addContentList
+- Fixed compiler warnings and clang-tidy findings (unused code, unreachable code, empty statements, member initialization, parameter passing, noexcept), no functional changes
+- ABI change: parameters passed by const reference or by value, removed unused members and defaulted copy operations, dependent packages must be rebuilt
+
+* Thu Oct 15 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.15-1.fmi
+- Declare member functions and parameters const where nothing is modified (const correctness), no functional changes
+- Requires 26.10.15 versions of spine, grid-files due to their ABI changes
+- Fixed reading a missing group field from user definitions with only four fields
+- Fixed mechanical clang-tidy findings (internal linkage, unused parameters, initialization, redundant code), no functional changes
+- Fixed clang-tidy style findings (loops, nested conditionals, dead code)
+- Fixed clang-tidy correctness findings (member initialization, rule of five, printf formats, dead stores)
+- The duplicates of the windU, windV, windDir, streamU, streamV, streamDir, hypotenuse and feelsLike functions keep their type
+- Failed worker threads end the process with _Exit instead of exit
+
+* Sun Oct 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.11-1.fmi
+- Failed file writes, closes and seeks are now reported instead of being ignored
+- Use auto and return {} where clang-tidy suggests it, no functional changes
+- Mark overriding methods override and use nullptr, no functional changes
+- Use = default and using declarations where clang-tidy suggests it, no functional changes
+- Remove redundant void parameter lists and use bool literals, no functional changes
+- Use emplace and C++ standard library headers where clang-tidy suggests it, no functional changes
+- Use raw string literals and std::make_shared where clang-tidy suggests it, no functional changes
+- Use range-based for loops where clang-tidy suggests it, no functional changes
+
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-3.fmi
+- VALID for point queries also skips the parameters whose grid does not cover the point, so
+  a point outside the nowcast area gets the forecast value
+
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-2.fmi
+- VALID for point queries now works like the grid version: the first parameter with data for
+  the time is selected and its value is returned as such, a missing value is not filled from
+  the later parameters
+
+* Mon Oct 05 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.5-1.fmi
+- Restored the grid version of VALID to return the first available grid as such. A missing value
+  in the preferred grid (e.g. VIRENWC) means no precipitation and must not be filled from an
+  older forecast (e.g. VIRE)
+
+* Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
+- Memory content server: loading a content directory no longer loses all generations (the
+  grid engine "file" content source served no data), deletions no longer use freed records
+  for their events, file updates are reported as FILE_UPDATED with the content count, and the
+  content time range of a generation follows new content
+- Content cache and merge server keep the new content of files registered again (rewritten
+  files lost their messages until a restart)
+- Query server: exact times are no longer rounded up to the next timestep in the single time
+  methods, the requested time interpolation method is used (misspelled attribute), timestep=data
+  returns values, RAD2DEG uses 180/pi and producers/generations are loaded before the first query
+- Fixed SDEV_DIR, CHANGE, AND, OR, VALID and DIFF functions (units, missing values, grid versions)
+- Fixed a stack buffer overflow in alias files with long continued lines and an uninitialized
+  read in 13-field mapping lines
+- Threads that were never started are no longer joined (undefined behaviour on destruction)
+- Content cache and merge server: the search structures are reference counted and published
+  under a lock, so a content update no longer deletes a structure that a long running request
+  still uses, and readers never see a partially built structure (found with ThreadSanitizer).
+  ABI change: CacheImplementation and MergeImplementation changed size, the grid engine and
+  smartmet-tools-grid must be rebuilt
+- ContentInfoList::getContentInfoByFileIdAndMessageIndex returns the found record
+- Added unit and integration tests (memory server, content cache, content lists, functions,
+  parsers, in-process query server); CI runs them
+
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-3.fmi
+- Redis content storage skips file-ids still in use (and zero) when the 32-bit file-id counter
+  wraps around. Long-lived files keep their old small ids, so a wrapped counter would otherwise
+  give two files the same id. In production the counter was at 2.73e9 of 4.29e9 (wrap ~2028)
+- Show the full 64-bit last event id in the admin state information instead of a truncated
+  signed 32-bit value
+
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-2.fmi
+- Content cache repairs a generation whose GENERATION_ADDED event failed to read it from the
+  content storage: GENERATION_STATUS_CHANGED and GENERATION_UPDATED now add the missing generation
+  instead of ignoring it. Previously one failed read hid the generation until a restart, and the
+  backend kept serving the previous generation. Failed reads are now logged.
+
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
+- Rebuilt against macgyver 26.10.2 where Fmi::Cache::Cache uses CLOCK eviction instead of LRU.
+  CLOCK is faster than LRU since a cache hit only takes a shared lock (ABI change)
+
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-2.fmi
+- Report the grid-files circle point cache in the cache statistics (Grid-files::circle_point_cache)
+
+* Sat Sep 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.26-1.fmi
+- Repackaged due to grid-files ABI changes
+- Require the 26.9.26 releases of the SmartMet dependencies
+
+* Thu Sep 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-2.fmi
+- Security: PostgreSQL content server escapes every string inserted into SQL literals (SQL injection, e.g. getProducerInfoByName via grid-admin) and builds statements with fmt::format into std::string instead of sprintf into fixed stack buffers (stack overflow with long names)
+- Security: Redis AUTH passes the password as an argument, not as the hiredis format string; reply strings are checked before use
+- Security: session ids use 64 bits from std::random_device instead of mt19937_64 seeded with 32 bits
+
+* Thu Sep 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.24-1.fmi
+- Fixed origintime=latest time range queries (starttime/endtime=data) returning nothing when an older generation extends further
+* Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
+- Use std functions instead of boost
+- Repackaged since moving from boost::shared_lock to std::shared_lock
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-1.fmi
 - Repackaged due to Fmi::Cache::Cache locking changes
-
 * Wed Sep  2 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.2-1.fmi
 - Security improvements for Redis connections
 * Sun Jul 12 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.7.12-1.fmi

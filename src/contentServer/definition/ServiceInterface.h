@@ -62,6 +62,8 @@ class ServiceInterface
   public:
                     ServiceInterface();
      virtual        ~ServiceInterface();
+     ServiceInterface(const ServiceInterface&) = default;
+     ServiceInterface& operator=(const ServiceInterface&) = default;
 
      Implementation getImplementationType();
 
@@ -231,6 +233,8 @@ class ServiceInterface
      virtual int    updateCachedFiles(T::SessionId sessionId,std::set<T::FileId>& fileIdList);
 
    protected:
+
+     static std::string getParameterKeyByType(const T::ContentInfo& contentInfo,T::ParamKeyType parameterKeyType,bool fmiIdFallback = false);
 
      virtual int    _clear(T::SessionId sessionId);
      virtual int    _reload(T::SessionId sessionId);

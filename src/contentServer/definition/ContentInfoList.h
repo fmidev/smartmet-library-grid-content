@@ -78,14 +78,14 @@ class ContentInfoList
     ContentInfo*        getContentInfoByIndex(uint index) const;
     ContentInfo*        getContentInfoByIndexNoCheck(uint index);
     bool                getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,ContentInfo& contentInfo);
-    ContentInfo*        getContentInfoByParameterLevelInfo(T::ParameterLevelInfo& levelInfo);
+    ContentInfo*        getContentInfoByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo);
 
     ContentInfo*        getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime);
     ContentInfo*        getContentInfoByFmiParameterNameAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,const std::string& fmiParameterName,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,const std::string& forecastTime);
     ContentInfo*        getContentInfoByFmiParameterIdAndGenerationId(T::ProducerId producerId,T::GenerationId generationId,T::FmiParamId fmiParameterId,T::ParamLevelId parameterLevelId,T::ParamLevel level,T::ForecastType forecastType,T::ForecastNumber forecastNumber,T::GeometryId geometryId,time_t forecastTimeUTC);
 
-    void                getContentInfoListByParameterLevelInfo(T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
+    void                getContentInfoListByParameterLevelInfo(const T::ParameterLevelInfo& levelInfo,ContentInfoList& contentInfoList);
     void                getContentInfoList(ContentInfoList& contentInfoList);
     void                getContentInfoListNoClear(ContentInfoList& contentInfoList);
     void                getContentInfoList(T::FileId startFileId,T::MessageIndex startMessageIndex,int maxRecords,ContentInfoList& contentInfoList);
@@ -139,7 +139,7 @@ class ContentInfoList
     void                getGenerationIdListByGeometryId(T::GeometryId geometryId,std::set<T::GenerationId>& generationIdList);
 
     void                getContentLevelListByGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
-    void                getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
+    void                getContentLevelListByParameterGenerationGeometryAndLevelId(T::ProducerId producerId,T::GenerationId generationId,T::GeometryId geometryId,const std::string& parameterKey,T::ParamLevelId levelId,std::set<T::ParamLevel>& contentLevelList);
 
     void                getForecastTimeList(std::set<std::string>& forecastTimeList);
     void                getForecastTimeList(std::set<time_t>& forecastTimeList);
@@ -167,13 +167,13 @@ class ContentInfoList
 
     uint                getSize() const;
     void                setSize(uint newSize);
-    bool                getReleaseObjects();
+    bool                getReleaseObjects() const;
     void                setContentInfoByIndex(uint index,ContentInfo *contentInfo);
     void                print(std::ostream& stream,uint level,uint optionFlags);
     void                lock();
     void                unlock();
 
-    uint                getComparisonMethod();
+    uint                getComparisonMethod() const;
     void                setComparisonMethod(uint comparisonMethod);
     void                setLockingEnabled(bool lockingEnabled);
     void                setReleaseObjects(bool releaseObjects);
@@ -194,26 +194,13 @@ class ContentInfoList
 
   public:
 
-    inline int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
+    int getClosestIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
     {
       if (mArray == nullptr  ||  mLength == 0)
         return 0;
 
       if (comparisonMethod != mComparisonMethod)
-      {
-        for (uint t=0; t<mLength; t++)
-        {
-          if (mArray[t] != nullptr)
-          {
-            int res = mArray[t]->compare(comparisonMethod,&contentInfo);
-            if (res == 0)
-            {
-              return t;
-            }
-          }
-        }
-        return 0;
-      }
+        return getFirstEqualIndexNoLock(comparisonMethod,contentInfo);
 
       int low = 0;
       int high = C_INT(mLength) - 1;
@@ -243,27 +230,49 @@ class ContentInfoList
       }
 
       if (mid >= 0  &&  mid < C_INT(mLength))
+        return getClosestIndexAfterSearchNoLock(comparisonMethod,contentInfo,mid);
+
+      return 0;
+    }
+
+
+  protected:
+
+    /*! \brief Return the index of the first content equal to the given one in an unsorted list, or 0 if there is none. */
+
+    int getFirstEqualIndexNoLock(uint comparisonMethod,ContentInfo& contentInfo)
+    {
+      for (uint t=0; t<mLength; t++)
       {
-        if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
-        {
-          while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
-            mid++;
-
-          return mid-1;
-        }
-        else
-        {
-          while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
-            mid--;
-
-          return mid;
-        }
+        if (mArray[t] != nullptr  &&  mArray[t]->compare(comparisonMethod,&contentInfo) == 0)
+          return t;
       }
       return 0;
     }
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
+    /*! \brief Return the closest index from the last midpoint of an unsuccessful binary search. */
+
+    int getClosestIndexAfterSearchNoLock(uint comparisonMethod,ContentInfo& contentInfo,int mid)
+    {
+      if (mArray[mid] != nullptr  &&  mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+      {
+        while (mid < C_INT(mLength)  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) < 0)
+          mid++;
+
+        return mid-1;
+      }
+      while (mid > 0  &&  mArray[mid] != nullptr  &&   mArray[mid]->compare(comparisonMethod,&contentInfo) > 0)
+        mid--;
+
+      return mid;
+    }
+
+
+  public:
+
+
+    ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex)
     {
       try
       {
@@ -280,7 +289,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
+    ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex)
     {
       try
       {
@@ -311,7 +320,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    ContentInfo* getContentInfoByFileIdAndMessageIndex(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
     {
       try
       {
@@ -327,7 +336,7 @@ class ContentInfoList
 
 
 
-    inline ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
+    ContentInfo* getContentInfoByFileIdAndMessageIndexNoLock(T::FileId fileId,T::MessageIndex messageIndex,int& idx)
     {
       try
       {

@@ -1,5 +1,6 @@
 #include "Server.h"
 #include <macgyver/ThreadName.h>
+#include <cstdlib>
 
 
 namespace SmartMet
@@ -10,12 +11,14 @@ namespace Corba
 {
 
 
-static void* Server_maintenanceThread(void *arg)
+namespace
+{
+void* Server_maintenanceThread(void *arg)
 {
   try
   {
     Fmi::set_thread_name("ds-maint");
-    Server *server = static_cast<Server*>(arg);
+    auto *server = static_cast<Server*>(arg);
     server->run();
     return nullptr;
   }
@@ -23,9 +26,12 @@ static void* Server_maintenanceThread(void *arg)
   {
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.printError();
-    exit(-1);
+    // A failed worker thread ends the process. std::_Exit does not run the static
+    // destructors that the other threads may still be using, unlike exit().
+    std::_Exit(-1);
   }
 }
+}  // namespace
 
 
 
@@ -172,7 +178,7 @@ void Server::shutdown()
 {
   try
   {
-    mOrb->shutdown(0);
+    mOrb->shutdown(false);
   }
   catch (...)
   {
