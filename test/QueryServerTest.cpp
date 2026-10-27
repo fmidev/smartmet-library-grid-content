@@ -15,6 +15,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 
 #include <cmath>
+#include <map>
+#include <set>
 #include <memory>
 
 using namespace SmartMet;
@@ -147,15 +149,70 @@ double pointValue(GridWorld &world, const std::string &param, const std::string 
   return value;
 }
 
-// A world of the ensemble fixtures (ensemble/make_ensemble.sh) as one generation
-std::unique_ptr<GridWorld> ensembleWorld(const std::vector<std::string> &files)
+// The values of a timestep=data query of the parameter at the first point by their times
+std::map<std::string, double> dataTimeSeries(GridWorld &world,
+                                             const std::string &param,
+                                             const std::string &startTime,
+                                             const std::string &endTime)
 {
-  for (const auto &file : files)
-    requireFixture(file);
+  T::AttributeList attributes;
+  attributes.addAttribute("starttime", startTime);
+  attributes.addAttribute("endtime", endTime);
+  attributes.addAttribute("timestep", "data");
+  attributes.addAttribute("producer", PRODUCER);
+  attributes.addAttribute("param", param);
+
+  QueryServer::Query q;
+  QueryServer::QueryConfigurator configurator;
+  configurator.configure(q, attributes);
+  q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+  T::Coordinate_vec point;
+  point.emplace_back(LON1, LAT1);
+  q.mAreaCoordinates.push_back(point);
+  BOOST_TEST_REQUIRE(world.queryServer.executeQuery(0, q) == 0);
+
+  std::map<std::string, double> values;
+  for (const auto &qp : q.mQueryParameterList)
+  {
+    if (qp.mParam != param)
+      continue;
+    for (const auto &v : qp.mValueList)
+    {
+      T::GridValue gv;
+      values[utcTimeFromTimeT(v->mForecastTimeUTC)] =
+          (v->mValueList.getGridValueByIndex(0, gv) ? gv.mValue : ParamValueMissing);
+    }
+  }
+  return values;
+}
+
+using EnsembleRun = std::pair<std::string, std::vector<std::string>>;
+
+// A world of the ensemble fixtures (ensemble/make_ensemble.sh) with a generation of each analysis time
+std::unique_ptr<GridWorld> ensembleRuns(const std::vector<EnsembleRun> &runs)
+{
   auto world = std::make_unique<GridWorld>();
-  world->addProducer(PRODUCER, "20080805T050000", files);
+  for (const auto &run : runs)
+  {
+    for (const auto &file : run.second)
+      requireFixture(file);
+    world->addProducer(PRODUCER, run.first, run.second);
+  }
   world->start();
   return world;
+}
+
+// A world of the ensemble fixtures as one generation
+std::unique_ptr<GridWorld> ensembleWorld(const std::vector<std::string> &files)
+{
+  return ensembleRuns({{"20080805T050000", files}});
+}
+
+// The values of a timestep=data query and the values at the same times agree
+void checkDataTimesAgree(GridWorld &world, const std::map<std::string, double> &series, const std::string &param)
+{
+  for (const auto &[time, value] : series)
+    BOOST_TEST(pointValue(world, param, time) == value, time);
 }
 
 }  // namespace
@@ -520,6 +577,121 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_or_control_is_the_first_member)
         BOOST_TEST(dataTimeValues(*world, param) == member1, boost::test_tools::per_element());
         for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
           BOOST_TEST(pointValue(*world, param, time) == 1.0, time);
+      });
+}
+
+// Rule independent checks of a query without a forecast type over the 05 UTC run and the newer
+// 06 UTC run (06-08 UTC), whose forecasts are 11 or larger: all the times of the newest run are
+// data times, 05 UTC continues from the previous run, the values of the newest run come from one of
+// its forecasts and the values agree with the values queried at the same times.
+void checkNewestRunIsUsed(GridWorld &world)
+{
+  const std::string param = "Temperature:" + PRODUCER;
+  for (auto [start, end] : {std::pair{"20080805T050000", "20080805T080000"}, std::pair{"data", "data"}})
+  {
+    BOOST_TEST_CONTEXT("starttime " << start << " endtime " << end)
+    {
+      auto series = dataTimeSeries(world, param, start, end);
+      checkDataTimesAgree(world, series, param);
+
+      BOOST_TEST(series.count("20080805T050000") == 1);
+      if (series.count("20080805T050000") == 1)
+        BOOST_TEST(series["20080805T050000"] < 11);
+
+      std::set<double> newest;
+      for (const char *time : {"20080805T060000", "20080805T070000", "20080805T080000"})
+      {
+        BOOST_TEST(series.count(time) == 1, time);
+        if (series.count(time) == 1)
+          newest.insert(series[time]);
+      }
+      BOOST_TEST(newest.size() == 1);
+      BOOST_TEST(*newest.begin() >= 11);
+    }
+  }
+}
+
+const std::vector<std::string> RUN05 = {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"};
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_without_a_control)
+{
+  // The newest run has only perturbed members, the previous one also the control forecast
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleRuns({{"20080805T050000", RUN05},
+                                   {"20080805T060000", {"ensemble/next_member1.grib", "ensemble/next_member2.grib"}}});
+        checkNewestRunIsUsed(*world);
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_with_a_partial_control)
+{
+  // The control forecast of the newest run has only its first step (the rest has not arrived)
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleRuns({{"20080805T050000", RUN05},
+                                   {"20080805T060000",
+                                    {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
+        checkNewestRunIsUsed(*world);
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run_when_only_it_has_a_control)
+{
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleRuns({{"20080805T050000", {"ensemble/member1.grib", "ensemble/member2.grib"}},
+                                   {"20080805T060000",
+                                    {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
+        checkNewestRunIsUsed(*world);
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_one_forecast_on_all_levels)
+{
+  // The control forecast has only 500 hPa, member 1 has also 850 hPa. The levels of a sounding and
+  // a level interpolated between them must come from the same forecast.
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleWorld({"ensemble/pressure_member1.grib", "ensemble/pressure_control.grib"});
+        const std::string param = "Temperature:" + PRODUCER + "::2:";
+        for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
+        {
+          BOOST_TEST_CONTEXT(time)
+          {
+            const double p850 = pointValue(*world, param + "85000", time);
+            BOOST_TEST(p850 != ParamValueMissing);
+            BOOST_TEST(pointValue(*world, param + "50000", time) == p850);
+            BOOST_TEST(pointValue(*world, param + "70000", time) == p850);
+          }
+        }
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_with_two_control_forecasts)
+{
+  // Two control forecasts (numbers 0 and 1): the values come from one forecast and agree with the
+  // values at the same times, and both control forecasts are available explicitly
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleWorld(
+            {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib", "ensemble/control2.grib"});
+        const std::string param = "Temperature:" + PRODUCER;
+        auto series = dataTimeSeries(*world, param, "20080805T050000", "20080805T070000");
+        BOOST_TEST(!series.empty());
+        checkDataTimesAgree(*world, series, param);
+        std::set<double> values;
+        for (const auto &[time, value] : series)
+          values.insert(value);
+        BOOST_TEST(values.size() == 1);
+
+        BOOST_TEST(pointValue(*world, param + "::::4:0", "20080805T050000") == 4.0);
+        BOOST_TEST(pointValue(*world, param + "::::4:1", "20080805T060000") == 5.0);
       });
 }
 
