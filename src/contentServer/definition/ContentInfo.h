@@ -197,9 +197,16 @@ class ContentInfo
       res = num_compare(mGeometryId,contentInfo->mGeometryId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -232,9 +239,16 @@ class ContentInfo
       res = num_compare(mGeometryId,contentInfo->mGeometryId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -286,9 +300,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -318,9 +339,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -347,9 +375,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -387,9 +422,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -413,9 +455,16 @@ class ContentInfo
       res = num_compare(mGenerationId,contentInfo->mGenerationId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
