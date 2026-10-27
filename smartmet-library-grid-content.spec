@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.26
-Release: 2%{?dist}.fmi
+Version: 26.10.27
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Tue Oct 27 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.27-1.fmi
+- Reverted the forecast selection of queries without a forecast type (26.10.26-1) to try another
+  solution; the tests of the selection are kept and fail until then
+
 * Mon Oct 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.26-2.fmi
 - The forecast time lists of the content servers (getContentTimeListBy..., the data times and the
   grid engine metadata) give for each parameter only the times of the forecast that a query
