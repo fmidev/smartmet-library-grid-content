@@ -3,7 +3,6 @@
 #include <grid-files/grid/Typedefs.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <string>
-#include <tuple>
 
 namespace SmartMet
 {
@@ -198,9 +197,16 @@ class ContentInfo
       res = num_compare(mGeometryId,contentInfo->mGeometryId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -233,9 +239,16 @@ class ContentInfo
       res = num_compare(mGeometryId,contentInfo->mGeometryId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -287,9 +300,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -319,9 +339,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -348,9 +375,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -388,9 +422,16 @@ class ContentInfo
       res = num_compare(mParameterLevel,contentInfo->mParameterLevel);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -414,9 +455,16 @@ class ContentInfo
       res = num_compare(mGenerationId,contentInfo->mGenerationId);
       if (res != 0)
         return res;
-      res = num_compare(mForecastType,contentInfo->mForecastType);
-      if (res != 0)
-        return res;
+      if (mForecastType == 4  && contentInfo->mForecastType == 3)
+        return -1;
+      if (mForecastType == 3  && contentInfo->mForecastType == 4)
+        return 1;
+      else
+      {
+        res = num_compare(mForecastType,contentInfo->mForecastType);
+        if (res != 0)
+          return res;
+      }
       res = num_compare(mForecastNumber,contentInfo->mForecastNumber);
       if (res != 0)
         return res;
@@ -438,36 +486,6 @@ class ContentInfo
 
 
 using ContentInfoPtr = ContentInfo*;  //!< Non-owning pointer to a ContentInfo record.
-
-
-
-/*! \brief The preference order of the forecast types when a query does not define the type: a deterministic
-           forecast first, then the control forecast of an ensemble, and then the other types. GRIB2 forecasts
-           which are not part of an ensemble have no forecast type (0). */
-
-inline int forecastTypeRank(ForecastType forecastType)
-{
-  switch (forecastType)
-  {
-    case 0:  // No forecast type
-    case 1:  // Deterministic forecast
-      return 0;
-    case 4:  // Ensemble control forecast
-      return 1;
-    default:
-      return 2;
-  }
-}
-
-
-
-/*! \brief Returns true if forecast (type1,number1) is preferred to forecast (type2,number2) when a query does not
-           define the forecast type: by the rank of the type, then by the smallest type and number. */
-
-inline bool isPreferredForecast(ForecastType type1,ForecastNumber number1,ForecastType type2,ForecastNumber number2)
-{
-  return std::make_tuple(forecastTypeRank(type1),type1,number1) < std::make_tuple(forecastTypeRank(type2),type2,number2);
-}
 
 
 }

@@ -15,6 +15,8 @@
 #include <grid-files/common/GeneralFunctions.h>
 
 #include <cmath>
+#include <map>
+#include <set>
 #include <memory>
 
 using namespace SmartMet;
@@ -147,15 +149,70 @@ double pointValue(GridWorld &world, const std::string &param, const std::string 
   return value;
 }
 
-// A world of the ensemble fixtures (ensemble/make_ensemble.sh) as one generation
-std::unique_ptr<GridWorld> ensembleWorld(const std::vector<std::string> &files)
+// The values of a timestep=data query of the parameter at the first point by their times
+std::map<std::string, double> dataTimeSeries(GridWorld &world,
+                                             const std::string &param,
+                                             const std::string &startTime,
+                                             const std::string &endTime)
 {
-  for (const auto &file : files)
-    requireFixture(file);
+  T::AttributeList attributes;
+  attributes.addAttribute("starttime", startTime);
+  attributes.addAttribute("endtime", endTime);
+  attributes.addAttribute("timestep", "data");
+  attributes.addAttribute("producer", PRODUCER);
+  attributes.addAttribute("param", param);
+
+  QueryServer::Query q;
+  QueryServer::QueryConfigurator configurator;
+  configurator.configure(q, attributes);
+  q.mCoordinateType = T::CoordinateTypeValue::LATLON_COORDINATES;
+  T::Coordinate_vec point;
+  point.emplace_back(LON1, LAT1);
+  q.mAreaCoordinates.push_back(point);
+  BOOST_TEST_REQUIRE(world.queryServer.executeQuery(0, q) == 0);
+
+  std::map<std::string, double> values;
+  for (const auto &qp : q.mQueryParameterList)
+  {
+    if (qp.mParam != param)
+      continue;
+    for (const auto &v : qp.mValueList)
+    {
+      T::GridValue gv;
+      values[utcTimeFromTimeT(v->mForecastTimeUTC)] =
+          (v->mValueList.getGridValueByIndex(0, gv) ? gv.mValue : ParamValueMissing);
+    }
+  }
+  return values;
+}
+
+using EnsembleRun = std::pair<std::string, std::vector<std::string>>;
+
+// A world of the ensemble fixtures (ensemble/make_ensemble.sh) with a generation of each analysis time
+std::unique_ptr<GridWorld> ensembleRuns(const std::vector<EnsembleRun> &runs)
+{
   auto world = std::make_unique<GridWorld>();
-  world->addProducer(PRODUCER, "20080805T050000", files);
+  for (const auto &run : runs)
+  {
+    for (const auto &file : run.second)
+      requireFixture(file);
+    world->addProducer(PRODUCER, run.first, run.second);
+  }
   world->start();
   return world;
+}
+
+// A world of the ensemble fixtures as one generation
+std::unique_ptr<GridWorld> ensembleWorld(const std::vector<std::string> &files)
+{
+  return ensembleRuns({{"20080805T050000", files}});
+}
+
+// The values of a timestep=data query and the values at the same times agree
+void checkDataTimesAgree(GridWorld &world, const std::map<std::string, double> &series, const std::string &param)
+{
+  for (const auto &[time, value] : series)
+    BOOST_TEST(pointValue(world, param, time) == value, time);
 }
 
 }  // namespace
@@ -448,11 +505,9 @@ BOOST_FIXTURE_TEST_CASE(valid_selects_the_first_parameter_with_data, Fixture)
 
 BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
 {
-  // An ensemble queried without a forecast type gives the control forecast, and all its values
-  // come from it: the control forecast has no 06 UTC step, which is not in its data times and is
-  // interpolated from it at a given time instead of taken from a perturbed member. (The perturbed
-  // members sort first, so the first content of each time used to be member 1.) The forecasts
-  // have constant values: the control forecast 4, the members their number
+  // An ensemble queried without a forecast type gives the control forecast at every time. (The
+  // perturbed members sort first, so the first content of each time used to be member 1.) The
+  // forecasts have constant values: the control forecast 4, the members their number
   // (ensemble/make_ensemble.sh).
   withFmiErrors(
       []
@@ -460,7 +515,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
         auto world = ensembleWorld({"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"});
 
         const std::string param = "Temperature:" + PRODUCER;
-        const std::vector<double> control = {4, 4};
+        const std::vector<double> control = {4, 4, 4};
         const std::vector<double> member1 = {1, 1, 1};
         const std::vector<double> member2 = {2, 2, 2};
 
@@ -481,8 +536,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_control_forecast)
 BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_deterministic_forecast)
 {
   // A deterministic forecast (GRIB2 without an ensemble, forecast type 0) is preferred to the
-  // control forecast and the perturbed members of the same generation. Unlike the control
-  // forecast it has the 06 UTC step, so all three data times come from it.
+  // control forecast and the perturbed members of the same generation
   withFmiErrors(
       []
       {
@@ -499,7 +553,7 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_is_the_deterministic_forecast)
           BOOST_TEST(pointValue(*world, param, time) == 9.0, time);
 
         // The ensemble forecasts are still available explicitly
-        BOOST_TEST(dataTimeValues(*world, param + "::::4") == std::vector<double>({4, 4}),
+        BOOST_TEST(dataTimeValues(*world, param + "::::4") == std::vector<double>({4, 4, 4}),
                    boost::test_tools::per_element());
         BOOST_TEST(pointValue(*world, param + "::::3:2", "20080805T060000") == 2.0);
       });
@@ -520,6 +574,64 @@ BOOST_AUTO_TEST_CASE(forecast_without_a_type_or_control_is_the_first_member)
         BOOST_TEST(dataTimeValues(*world, param) == member1, boost::test_tools::per_element());
         for (const char *time : {"20080805T050000", "20080805T060000", "20080805T070000"})
           BOOST_TEST(pointValue(*world, param, time) == 1.0, time);
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_uses_the_newest_run)
+{
+  // Two complete runs with a control forecast: 05 UTC (control 4) and 06 UTC (06-08 UTC, control
+  // 14). The times of the newest run come from its control forecast, 05 UTC continues from the
+  // previous run, and the values agree with the values queried at the same times.
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleRuns(
+            {{"20080805T050000", {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib"}},
+             {"20080805T060000",
+              {"ensemble/next_member1.grib", "ensemble/next_member2.grib", "ensemble/next_control.grib"}}});
+        const std::string param = "Temperature:" + PRODUCER;
+        const std::map<std::string, double> expected = {{"20080805T050000", 4},
+                                                        {"20080805T060000", 14},
+                                                        {"20080805T070000", 14},
+                                                        {"20080805T080000", 14}};
+        for (auto [start, end] : {std::pair{"20080805T050000", "20080805T080000"}, std::pair{"data", "data"}})
+        {
+          BOOST_TEST_CONTEXT("starttime " << start << " endtime " << end)
+          {
+            auto series = dataTimeSeries(*world, param, start, end);
+            BOOST_TEST(series.size() == expected.size());
+            for (const auto &[time, value] : expected)
+            {
+              BOOST_TEST(series.count(time) == 1, time);
+              if (series.count(time) == 1)
+                BOOST_TEST(series[time] == value, time);
+            }
+            checkDataTimesAgree(*world, series, param);
+          }
+        }
+      });
+}
+
+BOOST_AUTO_TEST_CASE(forecast_without_a_type_with_two_control_forecasts)
+{
+  // Two control forecasts (numbers 0 and 1): the values come from one forecast and agree with the
+  // values at the same times, and both control forecasts are available explicitly
+  withFmiErrors(
+      []
+      {
+        auto world = ensembleWorld(
+            {"ensemble/member1.grib", "ensemble/member2.grib", "ensemble/control.grib", "ensemble/control2.grib"});
+        const std::string param = "Temperature:" + PRODUCER;
+        auto series = dataTimeSeries(*world, param, "20080805T050000", "20080805T070000");
+        BOOST_TEST(!series.empty());
+        checkDataTimesAgree(*world, series, param);
+        std::set<double> values;
+        for (const auto &[time, value] : series)
+          values.insert(value);
+        BOOST_TEST(values.size() == 1);
+
+        BOOST_TEST(pointValue(*world, param + "::::4:0", "20080805T050000") == 4.0);
+        BOOST_TEST(pointValue(*world, param + "::::4:1", "20080805T060000") == 5.0);
       });
 }
 
