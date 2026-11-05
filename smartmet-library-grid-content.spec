@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.10.27
-Release: 2%{?dist}.fmi
+Version: 26.11.5
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,16 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Thu Nov 5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.11.5-1.fmi
+- The height conversion file is read again until all its producers are known: when the query server
+  started before the content cache knew the producers, metric level queries (e.g. T-K:MEPS:1093:3:m2)
+  returned only missing values until a restart
+- The data times of metric level queries are taken from any level of the level type, not from the
+  level whose number equals the height (m100 had no times with timestep=data)
+- Empty height content lists are not cached, and the height levels and contents are cached only for
+  ready generations: a query made before the height producer's data had arrived (e.g. MEPSMTA HL-M
+  for MEPS) left the heights of the generation missing
+
 * Tue Oct 27 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.10.27-2.fmi
 - Reverted the forecast time lists of the content servers (26.10.26-2) to the times of all the
   forecasts; the test is kept and fails until the new solution

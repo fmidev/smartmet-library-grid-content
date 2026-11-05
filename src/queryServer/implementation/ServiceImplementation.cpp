@@ -3032,6 +3032,11 @@ void ServiceImplementation::loadHeightConversionFile()
 
     mHeightConversions.clear();
 
+    // The producers are looked up from the content server, which may not know them yet when the
+    // query server is initialized (the engine waits for the content cache only afterwards). The file
+    // is then read again by the periodic check until all its producers are known.
+    bool allProducersFound = true;
+
     char st[1000];
 
     while (fgets(st, 1000, file) != nullptr)
@@ -3056,7 +3061,13 @@ void ServiceImplementation::loadHeightConversionFile()
           std::string producerName1 = field[0];
           std::string producerName2 = field[2];
 
-          if (mContentServerPtr->getProducerInfoByName(0,producerName1,p1) == 0 &&  mContentServerPtr->getProducerInfoByName(0,producerName2,p2) == 0)
+          // A content cache that is being updated may return OK without the producer information
+          if (mContentServerPtr->getProducerInfoByName(0,producerName1,p1) != 0  ||  mContentServerPtr->getProducerInfoByName(0,producerName2,p2) != 0  ||
+              p1.mProducerId == 0  ||  p2.mProducerId == 0)
+          {
+            allProducersFound = false;
+          }
+          else
           {
             rec.producerId = p1.mProducerId;
             rec.heightProducerId = p2.mProducerId;
@@ -3072,7 +3083,10 @@ void ServiceImplementation::loadHeightConversionFile()
     }
     (void)fclose(file);
 
-    mHeightConversionsFile_modificationTime = getFileModificationTime(mHeightConversionsFile.c_str());
+    if (allProducersFound)
+      mHeightConversionsFile_modificationTime = getFileModificationTime(mHeightConversionsFile.c_str());
+    else
+      mHeightConversionsFile_modificationTime = 0;
   }
   catch (...)
   {
@@ -10873,7 +10887,16 @@ ParameterMapping_vec_sptr ServiceImplementation::getTimeRangeMappings(const T::P
     ParameterMapping_vec_sptr mappings;
     if (qParam.mParameterLevelId > 0 || qParam.mParameterLevel > 0)
     {
-      getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
+      // The levels of a metric level query are heights, not levels of the level type. The mapping only selects the
+      // contents whose times are used (the values of the times are fetched by the height), so any level of the level
+      // type will do.
+      bool metricLevels = (qParam.mFlags & QueryParameter::Flags::MetricLevels) != 0;
+
+      if (metricLevels)
+        mappings = std::make_shared<ParameterMapping_vec>();
+      else
+        getParameterMappings(producerInfo.mName, producerInfo.mProducerId, parameterKey, parameterHash, producerGeometryId, qParam.mParameterLevelId, qParam.mParameterLevel, false, mappings);
+
       if (mappings->empty())
       {
         // Getting a mapping by using the levelId. This probably returns all levels belonging
@@ -10883,7 +10906,8 @@ ParameterMapping_vec_sptr ServiceImplementation::getTimeRangeMappings(const T::P
         if (!tmpMappings->empty())
         {
           ParameterMapping m((*tmpMappings)[0]);
-          m.mParameterLevel = qParam.mParameterLevel;
+          if (!metricLevels)
+            m.mParameterLevel = qParam.mParameterLevel;
 
           // The mapping vector may be shared by the mapping cache. It is not modified.
           mappings = std::make_shared<ParameterMapping_vec>();
@@ -11678,6 +11702,25 @@ bool ServiceImplementation::getHeightGenerationId(T::ProducerId producerId,T::Ge
 
 
 
+/*! \brief Query Server: Return true if the generation of the height parameter is ready (its contents are complete). */
+
+bool ServiceImplementation::isHeightGenerationReady(const HeightQuery& q)
+{
+  try
+  {
+    T::GenerationInfo gInfo;
+    return mGenerationInfoList->getGenerationInfoById(q.heightGenerationId,gInfo)  &&  gInfo.mStatus == T::GenerationInfo::Status::Ready;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception(BCP, "Operation failed!", nullptr);
+  }
+}
+
+
+
+
+
 /*! \brief Query Server: Get the first and the last level of the height parameter (cached). Returns false if there are no levels. */
 
 bool ServiceImplementation::getHeightLevelRange(HeightQuery& q)
@@ -11711,8 +11754,12 @@ bool ServiceImplementation::getHeightLevelRange(HeightQuery& q)
     q.firstLevel = *levels.begin();
     q.lastLevel = *levels.rbegin();
 
-    std::size_t lev = ((std::size_t)q.firstLevel << 32) + (std::size_t)q.lastLevel;
-    mLevelRangeCache.insert(levelHash,lev);
+    // The levels of a generation that is still being loaded may be incomplete
+    if (isHeightGenerationReady(q))
+    {
+      std::size_t lev = ((std::size_t)q.firstLevel << 32) + (std::size_t)q.lastLevel;
+      mLevelRangeCache.insert(levelHash,lev);
+    }
     return true;
   }
   catch (...)
@@ -11762,7 +11809,11 @@ ContentCacheEntry_sptr ServiceImplementation::getHeightContentEntry(std::size_t 
     entry->generationId = q.heightGenerationId;
     entry->producerHash = q.heightProducerId;
 
-    mLevelContentCache.insert(levelContentHash,entry);
+    // The height contents of a generation that is still being loaded may be missing or incomplete. Caching them
+    // would hide the heights of the generation until the cache is cleared.
+    if (entry->contentInfoList.getLength() > 0  &&  isHeightGenerationReady(q))
+      mLevelContentCache.insert(levelContentHash,entry);
+
     return entry;
   }
   catch (...)

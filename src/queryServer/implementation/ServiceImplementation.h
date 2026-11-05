@@ -876,6 +876,7 @@ class ServiceImplementation : public ServiceInterface
 
      bool           findHeightConversion(std::size_t hash,double& mul,T::ProducerId& heightProducerId,std::string& heightParameter);
      bool           getHeightGenerationId(T::ProducerId producerId,T::GenerationId generationId,HeightQuery& q);
+     bool           isHeightGenerationReady(const HeightQuery& q);
      bool           getHeightLevelRange(HeightQuery& q);
      void           getHeightContentList(const HeightQuery& q,time_t forecastTime,uint requestFlags,T::ContentInfoList& contentInfoList);
      ContentCacheEntry_sptr getHeightContentEntry(std::size_t levelContentHash,const HeightQuery& q,time_t forecastTime);
