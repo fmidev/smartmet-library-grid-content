@@ -4,6 +4,7 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
+#include <atomic>
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 
@@ -14,6 +15,17 @@ namespace SessionManagement
 {
 
 ServiceImplementation localSessionManagement;
+
+namespace
+{
+// Sessions are created for clients without a valid session, so their number is limited.
+// The expired sessions are deleted after every PURGE_INTERVAL creations, and the least
+// recently used session is deleted when there are MAX_SESSIONS sessions.
+const unsigned int PURGE_INTERVAL = 100;
+const std::size_t MAX_SESSIONS = 10000;
+
+std::atomic<unsigned int> sessionCreationCounter{0};
+}  // namespace
 
 
 
@@ -67,12 +79,27 @@ int ServiceImplementation::_createSession(T::SessionId /*sessionId*/,SessionInfo
   FUNCTION_TRACE
   try
   {
+    if (++sessionCreationCounter % PURGE_INTERVAL == 0)
+      _deleteExpiredSessions(0);
+
     auto *session = new SessionInfo();
     sessionInfo.setSessionId(session->getSessionId());
     *session = sessionInfo;
 
     SessionInfo_sptr s(session);
     AutoWriteLock writeLock(&mModificationLock);
+
+    if (mSessions.size() >= MAX_SESSIONS)
+    {
+      auto oldest = mSessions.begin();
+      for (auto it = mSessions.begin(); it != mSessions.end(); ++it)
+      {
+        if (it->second->getLastAccessTime() < oldest->second->getLastAccessTime())
+          oldest = it;
+      }
+      mSessions.erase(oldest);
+    }
+
     mSessions.insert(std::pair<T::SessionId,SessionInfo_sptr>(session->getSessionId(),s));
 
     return Result::OK;

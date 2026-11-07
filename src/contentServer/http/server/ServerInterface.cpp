@@ -1,4 +1,5 @@
 #include "ServerInterface.h"
+#include <algorithm>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 
@@ -12,6 +13,18 @@ namespace ContentServer
 {
 namespace HTTP
 {
+
+namespace
+{
+// The most records one HTTP request may ask for. The clients ask for a page of records at
+// a time; a larger request would copy the whole content table into one response.
+const int MAX_RECORDS = 100000;
+
+int clampMaxRecords(int maxRecords)
+{
+  return std::clamp(maxRecords,0,MAX_RECORDS);
+}
+}  // namespace
 
 
 /*! \brief Content Server: Constructor. */
@@ -3380,6 +3393,7 @@ void ServerInterface::getFileInfoList(T::RequestMessage& request,T::ResponseMess
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -3510,6 +3524,7 @@ void ServerInterface::getFileInfoListByProducerId(T::RequestMessage& request,T::
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -3580,6 +3595,7 @@ void ServerInterface::getFileInfoListByProducerName(T::RequestMessage& request,T
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -3650,6 +3666,7 @@ void ServerInterface::getFileInfoListByGenerationId(T::RequestMessage& request,T
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -3720,6 +3737,7 @@ void ServerInterface::getFileInfoListByGenerationName(T::RequestMessage& request
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -3790,6 +3808,7 @@ void ServerInterface::getFileInfoListBySourceId(T::RequestMessage& request,T::Re
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::FileInfoList fileInfoList;
 
@@ -4212,6 +4231,7 @@ void ServerInterface::getEventInfoList(T::RequestMessage& request,T::ResponseMes
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::EventInfoList eventInfoList;
 
@@ -4802,6 +4822,7 @@ void ServerInterface::getContentList(T::RequestMessage& request,T::ResponseMessa
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::ContentInfoList contentInfoList;
 
@@ -5046,6 +5067,7 @@ void ServerInterface::getContentListByProducerId(T::RequestMessage& request,T::R
       response.addLine("result",Result::MISSING_PARAMETER);
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::ContentInfoList contentInfoList;
 
@@ -5124,6 +5146,7 @@ void ServerInterface::getContentListByProducerName(T::RequestMessage& request,T:
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::ContentInfoList contentInfoList;
 
@@ -5202,6 +5225,7 @@ void ServerInterface::getContentListByGenerationId(T::RequestMessage& request,T:
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     uint requestFlags = 0;
     if (!request.getLineByKey("requestFlags",requestFlags))
@@ -5288,6 +5312,7 @@ void ServerInterface::getContentListByGenerationName(T::RequestMessage& request,
       response.addLine("resultString","Missing parameter: maxRecords");
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::ContentInfoList contentInfoList;
 
@@ -5505,6 +5530,7 @@ void ServerInterface::getContentListBySourceId(T::RequestMessage& request,T::Res
       response.addLine("result",Result::MISSING_PARAMETER);
       return;
     }
+    maxRecords = clampMaxRecords(maxRecords);
 
     T::ContentInfoList contentInfoList;
 
