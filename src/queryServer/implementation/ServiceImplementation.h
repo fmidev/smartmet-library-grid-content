@@ -1004,13 +1004,13 @@ class ServiceImplementation : public ServiceInterface
      std::atomic<UInt64>        mProducerGenerationListCache_generation{0};  //!< Incremented to clear the per-thread producer generation list caches.
 
      mutable Fmi::Cache::CacheStats mContentCache_stats;
-     std::atomic<Int64 >            mContentCache_size;
+     std::atomic<Int64 >            mContentCache_size{0};
      Int64                          mContentCache_hits;
      Int64                          mContentCache_misses;
      Int64                          mContentCache_inserts;
 
      mutable Fmi::Cache::CacheStats mContentSearchCache_stats;
-     std::atomic<Int64 >            mContentSearchCache_size;
+     std::atomic<Int64 >            mContentSearchCache_size{0};
      Int64                          mContentSearchCache_hits;
      Int64                          mContentSearchCache_misses;
      Int64                          mContentSearchCache_inserts;

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.11.5
+Version: 26.11.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -112,6 +112,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Nov 7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.11.7-1.fmi
+- Initialize member variables that some constructors left uninitialized
+- Fixed storing the Newbase parameter id as a single character instead of a number string
+
 * Thu Nov 5 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.11.5-1.fmi
 - The height conversion file is read again until all its producers are known: when the query server
   started before the content cache knew the producers, metric level queries (e.g. T-K:MEPS:1093:3:m2)
