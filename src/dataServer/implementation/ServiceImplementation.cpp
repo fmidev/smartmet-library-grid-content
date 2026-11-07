@@ -722,7 +722,7 @@ int ServiceImplementation::_getGridData(T::SessionId sessionId,T::FileId fileId,
     data.mFmiParameterId = std::to_string(message->getFmiParameterId());
     data.mFmiParameterLevelId = message->getFmiParameterLevelId();
     data.mFmiParameterName = message->getFmiParameterName();
-    data.mNewbaseParameterId = message->getNewbaseParameterId();
+    data.mNewbaseParameterId = std::to_string(message->getNewbaseParameterId());
     data.mNewbaseParameterName = message->getNewbaseParameterName();
     data.mParameterLevel = message->getGridParameterLevel();
     data.mGeometryId = message->getGridGeometryId();
