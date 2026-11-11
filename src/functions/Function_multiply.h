@@ -16,7 +16,7 @@ class Function_multiply : public Function
 {
   public:
                       Function_multiply();
-                      Function_multiply(double multiplyer);
+                      Function_multiply(double multiplier);
                       Function_multiply(const Function_multiply& function);
     ~Function_multiply() override;
     Function_multiply& operator=(const Function_multiply&) = default;
@@ -33,7 +33,7 @@ class Function_multiply : public Function
 
   protected:
 
-    double          mMultiplyer;  //!< Constant factor applied to each grid value.
+    double          mMultiplier;  //!< Constant factor applied to each grid value.
 };
 
 

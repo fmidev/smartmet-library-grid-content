@@ -10,11 +10,11 @@ namespace Functions
 
 /*! \brief Function: Constructor. */
 
-Function_multiply::Function_multiply(double multiplyer)
+Function_multiply::Function_multiply(double multiplier)
 {
   try
   {
-    mMultiplyer = multiplyer;
+    mMultiplier = multiplier;
   }
   catch (...)
   {
@@ -33,7 +33,7 @@ Function_multiply::Function_multiply(const Function_multiply& function)
 {
   try
   {
-    mMultiplyer = function.mMultiplyer;
+    mMultiplier = function.mMultiplier;
   }
   catch (...)
   {
@@ -71,7 +71,7 @@ float Function_multiply::executeFunctionCall1(std::vector<float>& parameters)
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return C_FLOAT(parameters[0] * mMultiplyer);
+        return C_FLOAT(parameters[0] * mMultiplier);
       return ParamValueMissing;
     }
 
@@ -96,7 +96,7 @@ double Function_multiply::executeFunctionCall1(std::vector<double>& parameters)
     if (parameters.size() == 1)
     {
       if (parameters[0] != ParamValueMissing)
-        return C_DOUBLE(parameters[0] * mMultiplyer);
+        return C_DOUBLE(parameters[0] * mMultiplier);
       return ParamValueMissing;
     }
 
@@ -121,7 +121,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     for (uint t=0; t<len; t++)
     {
       if (inOutParameters[t] != ParamValueMissing)
-        inOutParameters[t] *= mMultiplyer;
+        inOutParameters[t] *= mMultiplier;
     }
   }
   catch (...)
@@ -143,7 +143,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
     {
       if (*it != ParamValueMissing)
-        outParameters.emplace_back(*it * mMultiplyer);
+        outParameters.emplace_back(*it * mMultiplier);
       else
         outParameters.emplace_back(ParamValueMissing);
     }
@@ -167,7 +167,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     for (auto it = inParameters.begin();  it != inParameters.end(); ++it)
     {
       if (*it != ParamValueMissing)
-        outParameters.emplace_back(*it * mMultiplyer);
+        outParameters.emplace_back(*it * mMultiplier);
       else
         outParameters.emplace_back(ParamValueMissing);
     }
@@ -190,7 +190,7 @@ void Function_multiply::executeFunctionCall2(uint columns,uint rows,std::vector<
     for (uint t=0; t<len; t++)
     {
       if (inOutParameters[t] != ParamValueMissing)
-        inOutParameters[t] *= mMultiplyer;
+        inOutParameters[t] *= mMultiplier;
     }
   }
   catch (...)
@@ -278,7 +278,7 @@ void Function_multiply::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std:
 
       if (a != ParamValueMissing)
       {
-        auto c = C_FLOAT(a * mMultiplyer);
+        auto c = C_FLOAT(a * mMultiplier);
         outParameters.emplace_back(c);
       }
       else
@@ -314,7 +314,7 @@ void Function_multiply::executeFunctionCall9(uint /*columns*/,uint /*rows*/,std:
 
       if (a != ParamValueMissing)
       {
-        auto c = C_DOUBLE(a * mMultiplyer);
+        auto c = C_DOUBLE(a * mMultiplier);
         outParameters.emplace_back(c);
       }
       else

@@ -1195,10 +1195,10 @@ GRID::Message* newGrib1Message(GRID::GridFile& newGridFile,const char *geometryI
       T::PropertySettingVec tmpProperties;
       def->getProperties(tmpProperties);
 
-      for (auto& tmpPropertie : tmpProperties)
+      for (auto& tmpProperty : tmpProperties)
       {
         //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-        newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
+        newProperties.insert(std::pair<uint,Int64 >(tmpProperty.propertyId,toInt64(tmpProperty.propertyValue.c_str())));
       }
     }
   }
@@ -1271,10 +1271,10 @@ GRID::Message* newGrib2Message(GRID::GridFile& newGridFile,const char *geometryI
       T::PropertySettingVec tmpProperties;
       def->getProperties(tmpProperties);
 
-      for (auto& tmpPropertie : tmpProperties)
+      for (auto& tmpProperty : tmpProperties)
       {
         //std::cout << "NPROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-        newProperties.insert(std::pair<uint,Int64 >(tmpPropertie.propertyId,toInt64(tmpPropertie.propertyValue.c_str())));
+        newProperties.insert(std::pair<uint,Int64 >(tmpProperty.propertyId,toInt64(tmpProperty.propertyValue.c_str())));
       }
     }
   }
@@ -2128,7 +2128,7 @@ thread_local std::set<UInt64 > mReadyGeometryList;
 std::set<T::GeometryId> mUnregisteredGeometryWarnings;
 ModificationLock mUnregisteredGeometryWarnings_modificationLock;
 
-thread_local ProducerGenarationListCache mProducerGenerationListCache;
+thread_local ProducerGenerationListCache mProducerGenerationListCache;
 
 
 
@@ -7309,10 +7309,10 @@ bool ServiceImplementation::getGridFileProperties(const T::ContentInfo& contentI
       return false;
     }
 
-    for (auto& propertie : properties)
+    for (auto& property : properties)
     {
       //std::cout << "PROPERTY " << it->propertyId << " = " << it->propertyValue << "\n";
-      oldProperties.insert(std::pair<uint,Int64 >(propertie.propertyId,toInt64(propertie.propertyValue.c_str())));
+      oldProperties.insert(std::pair<uint,Int64 >(property.propertyId,toInt64(property.propertyValue.c_str())));
     }
     return true;
   }

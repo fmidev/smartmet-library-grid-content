@@ -35,7 +35,7 @@ using DataServer_ptr = DataServer::ServiceInterface*;             //!< Non-ownin
 using ParameterMapping_vec_sptr = std::shared_ptr<ParameterMapping_vec>;  //!< Shared pointer to a ParameterMapping vector.
 using ParameterMappingCache = boost::unordered_map<size_t,ParameterMapping_vec_sptr>;   //!< Hash cache from query hash to resolved ParameterMapping vector.
 using StringVector_sptr = std::shared_ptr<std::vector<std::string>>;          //!< Shared pointer to a string vector.
-using Altenative_map = std::unordered_map<std::string,Producer_vec>;             //!< Map from producer name to its alternative (concatenated) producers.
+using Alternative_map = std::unordered_map<std::string,Producer_vec>;             //!< Map from producer name to its alternative (concatenated) producers.
 
 
 // ====================================================================================
@@ -50,7 +50,7 @@ class CacheEntry
 };
 
 using CacheEntry_sptr = std::shared_ptr<CacheEntry>;                                          //!< Shared pointer to a CacheEntry.
-using ProducerGenarationListCache = std::unordered_map<T::ProducerId,CacheEntry_sptr>;        //!< Cache of CacheEntry records keyed by producer id.
+using ProducerGenerationListCache = std::unordered_map<T::ProducerId,CacheEntry_sptr>;        //!< Cache of CacheEntry records keyed by producer id.
 
 // ====================================================================================
 /*! \brief Internal cache entry holding a ContentInfoList for a specific query. */
@@ -953,7 +953,7 @@ class ServiceImplementation : public ServiceInterface
 
      Producer_vec               mProducerList;
      ModificationLock           mProducerList_modificationLock;
-     Altenative_map             mProducerConcatMap;
+     Alternative_map             mProducerConcatMap;
 
      Producer_map_sptr          mProducerMap;
      ModificationLock           mProducerMap_modificationLock;

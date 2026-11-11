@@ -113,7 +113,7 @@ FMI Grid Content library development files
 
 %changelog
 * Wed Nov 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.11-1.fmi
-- Fixed typos in messages and comments
+- Fixed typos in messages, comments and identifiers
 
 * Sat Nov 7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.11.7-2.fmi
 - Clamp maxRecords in HTTP content server requests
