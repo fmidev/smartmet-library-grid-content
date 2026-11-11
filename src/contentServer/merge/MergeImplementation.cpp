@@ -6490,7 +6490,7 @@ void MergeImplementation::event_contentAdded(uint contentStorageIndex,T::EventIn
       }
       else
       {
-        // Additon failed. The content probably exists
+        // Addition failed. The content probably exists
         delete cInfo;
       }
     }

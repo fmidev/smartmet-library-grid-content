@@ -7887,7 +7887,7 @@ void CacheImplementation::event_contentAdded(T::EventInfo& eventInfo)
       }
       else
       {
-        // Additon failed. The content probably exists
+        // Addition failed. The content probably exists
         delete cInfo;
       }
     }

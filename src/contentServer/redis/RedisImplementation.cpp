@@ -1169,7 +1169,7 @@ int RedisImplementation::_clear(T::SessionId sessionId)
     freeReplyObject(reply);
 
 
-    // Reseting the server start time usually forces the client to reload all information.
+    // Resetting the server start time usually forces the client to reload all information.
 
     mStartTime = time(nullptr);
 

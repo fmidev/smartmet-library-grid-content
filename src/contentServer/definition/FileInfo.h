@@ -59,7 +59,7 @@ class FileInfo
     /*! \brief The file protocol. (0 = None, 1 = HTTPS, 2 = HTTP) */
     uint            mProtocol;
 
-    /*! \brief The file server type (0 = Unknow, 1= Filesys, 2 = S3, 3 = Httpd. */
+    /*! \brief The file server type (0 = Unknown, 1= Filesys, 2 = S3, 3 = Httpd. */
     uint            mServerType;
 
     /*! \brief The file server. */

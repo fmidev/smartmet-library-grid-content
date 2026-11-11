@@ -2470,7 +2470,7 @@ void ServiceImplementation::getStateAttributes(std::shared_ptr<T::AttributeNode>
 {
   try
   {
-    auto processing = parent->addAttribute("Procesing Statistics");
+    auto processing = parent->addAttribute("Processing Statistics");
     processing->addAttribute("Request Counter",mRequestCounter);
     processing->addAttribute("Requests/Second",mRequestsPerSecond);
 
@@ -5057,7 +5057,7 @@ void ServiceImplementation::getQueryGeometryIdList(Query& query,Producer_vec& pr
       return;
     }
 
-    // Selecting valid geometries according to given coordiantes.
+    // Selecting valid geometries according to given coordinates.
     getGeometryIdListByCoordinates(producers,query.mAreaCoordinates, geometryIdList);
   }
   catch (...)
@@ -10632,7 +10632,7 @@ bool ServiceImplementation::getInterpolatedPointValues(GridValueRequest& r,T::Ge
 
     if (areaInterpolation >= T::AreaInterpolationMethod::List && areaInterpolation < T::AreaInterpolationMethod::External && query.mAreaCoordinates.size() == 1  && query.mAreaCoordinates[0].size() == 1)
     {
-      // ### No actual intepolation. Fetching special value for external interpolation
+      // ### No actual interpolation. Fetching special value for external interpolation
 
       double x = query.mAreaCoordinates[0][0].x();
       double y = query.mAreaCoordinates[0][0].y();

@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.11.7
-Release: 2%{?dist}.fmi
+Version: 26.11.11
+Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
 URL: https://github.com/fmidev/smartmet-library-grid-content
@@ -112,6 +112,9 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Wed Nov 11 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.11-1.fmi
+- Fixed typos in messages and comments
+
 * Sat Nov 7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.11.7-2.fmi
 - Clamp maxRecords in HTTP content server requests
 - Purge expired sessions periodically and cap the number of sessions

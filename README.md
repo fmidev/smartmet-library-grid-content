@@ -31,7 +31,7 @@ The "**ContentServer::ServiceInterface**" class defines the methods that should 
         
 ## Data Server API        
        
-The Data Server API is used in order to access the actual grid files and the data inside them. The point is that you first use tge Content Server API in order to find grid files that you want to access (for example, you might want to find grid files that contain temperature forecasts in the given time range). After you have found the correct grid files, you can start to fetch information from them by using the Data Server API. For example, you might want to fetch values from certain coordinate points or geographical areas. 
+The Data Server API is used in order to access the actual grid files and the data inside them. The point is that you first use the Content Server API in order to find grid files that you want to access (for example, you might want to find grid files that contain temperature forecasts in the given time range). After you have found the correct grid files, you can start to fetch information from them by using the Data Server API. For example, you might want to fetch values from certain coordinate points or geographical areas. 
         
 The "**DataServer::ServiceInterface**" class defines the methods that should be available in the actual service implementation. Notice that we have several implementations for the current interface.
          
@@ -75,7 +75,7 @@ For example, we might measure the time used for each service call and write this
 
 ## Architecture
 
-The Grid Content Library enables flexibe usage of diffent kind of service API implementations. These implementations can be used as parts of the other components or they can be as separated distributed components, which is show in the figure below.
+The Grid Content Library enables flexibe usage of different kind of service API implementations. These implementations can be used as parts of the other components or they can be as separated distributed components, which is show in the figure below.
 
 ![Image](https://github.com/fmidev/smartmet-tools-grid/blob/master/doc/grid-support-img/grid-support-img7.png "gui")
 
