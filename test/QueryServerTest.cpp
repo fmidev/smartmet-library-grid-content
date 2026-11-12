@@ -14,7 +14,6 @@
 #include <grid-files/grid/GridValueList.h>
 #include <grid-files/grid/Message.h>
 #include <grid-files/grid/Typedefs.h>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cmath>
 #include <map>
 #include <set>
