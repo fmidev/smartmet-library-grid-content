@@ -9,18 +9,21 @@
 #include <boost/test/data/monomorphic.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/included/unit_test.hpp>
-
-#include "TestCommon.h"
-#include "contentServer/definition/ContentInfoList.h"
-#include "contentServer/definition/RequestFlags.h"
-
 #include <fmt/format.h>
-
+#include <grid-files/grid/Typedefs.h>
 #include <algorithm>
 #include <functional>
 #include <set>
 #include <string>
 #include <vector>
+#include <cstddef>
+#include <initializer_list>
+#include <utility>
+#include "contentServer/definition/ContentInfoList.h"
+#include "contentServer/definition/RequestFlags.h"
+#include "../src/contentServer/definition/ContentInfo.h"
+#include "../src/contentServer/definition/ContentInfoList.h"
+#include "../src/contentServer/definition/RequestFlags.h"
 
 using namespace SmartMet;
 namespace bdata = boost::unit_test::data;

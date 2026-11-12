@@ -1,6 +1,17 @@
 #include "Server.h"
 #include <macgyver/ThreadName.h>
+#include <macgyver/Exception.h>
 #include <cstdlib>
+#include <cstdio>
+#include "ServerInterface.h"
+
+namespace SmartMet
+{
+namespace QueryServer
+{
+class ServiceInterface;
+}
+}
 
 
 namespace SmartMet

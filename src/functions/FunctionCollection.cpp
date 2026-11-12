@@ -1,5 +1,9 @@
 #include "FunctionCollection.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/Exception.h>
+#include <ostream>
+#include <utility>
+#include "Function.h"
 
 
 namespace SmartMet

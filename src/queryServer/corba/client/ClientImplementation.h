@@ -1,5 +1,8 @@
 #pragma once
 
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <string>
 #include "../../definition/ServiceInterface.h"
 #include "../stubs/QueryServer_serviceInterface_SK.h"
 

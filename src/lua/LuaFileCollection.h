@@ -1,5 +1,12 @@
 #pragma once
 
+#include <grid-files/common/ModificationLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <iosfwd>
+#include <string>
+#include <vector>
 #include "LuaFile.h"
 
 

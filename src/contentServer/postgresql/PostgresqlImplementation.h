@@ -1,9 +1,31 @@
 #pragma once
 
+#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <set>
+#include <string>
+#include <vector>
 #include "../definition/ServiceInterface.h"
+#include "../definition/ContentInfo.h"
+#include "../definition/EventInfo.h"
 
-#include <grid-files/common/ModificationLock.h>
-#include <pthread.h>
+namespace SmartMet
+{
+namespace T
+{
+class ContentInfoList;
+class EventInfoList;
+class FileInfo;
+class FileInfoList;
+class ForecastTime;
+class GenerationInfo;
+class GenerationInfoList;
+class ProducerInfo;
+class ProducerInfoList;
+}
+}
 
 // To avoid dependency escalation to other modules we forward declare. However, we
 // cannot forward declare a PGconn struct, since it is a typedef:

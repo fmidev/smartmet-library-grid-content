@@ -1,5 +1,9 @@
 #include "Function_lte.h"
-#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/Exception.h>
+#include <string>
+#include <vector>
+#include "Function.h"
 
 
 namespace SmartMet

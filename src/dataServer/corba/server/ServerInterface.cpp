@@ -1,7 +1,20 @@
 #include "ServerInterface.h"
-#include "../convert/Converter.h"
 #include <macgyver/Exception.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/common/Coordinate.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/GridValueList.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <string>
+#include <vector>
+#include "../convert/Converter.h"
+#include "../../definition/GridCoordinates.h"
+#include "../../definition/GridData.h"
+#include "../../definition/ServiceInterface.h"
+#include "../../definition/ServiceResults.h"
+#include "../../definition/ValueRecordList.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

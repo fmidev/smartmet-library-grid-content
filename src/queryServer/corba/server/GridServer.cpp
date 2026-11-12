@@ -1,6 +1,33 @@
 #include "GridServer.h"
 #include <macgyver/ThreadName.h>
+#include <macgyver/Exception.h>
 #include <cstdlib>
+#include <cstdio>
+#include "../../../contentServer/corba/server/ServerInterface.h"
+#include "../../../dataServer/corba/server/ServerInterface.h"
+#include "ServerInterface.h"
+
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace DataServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace QueryServer
+{
+class ServiceInterface;
+}
+}
 
 
 namespace SmartMet

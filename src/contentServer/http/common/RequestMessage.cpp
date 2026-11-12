@@ -2,6 +2,8 @@
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/StringConversion.h>
+#include <cstring>
+#include <ostream>
 
 
 namespace SmartMet

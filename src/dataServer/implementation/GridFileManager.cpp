@@ -4,6 +4,12 @@
 #include <grid-files/common/AutoWriteLock.h>
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/AttributeNode.h>
+#include <ostream>
+#include <utility>
+#include "../../contentServer/definition/GenerationInfo.h"
+#include "../../contentServer/definition/GenerationInfoList.h"
+#include "../../contentServer/definition/ServiceInterface.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

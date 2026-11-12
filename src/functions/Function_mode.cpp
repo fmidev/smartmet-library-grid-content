@@ -1,6 +1,12 @@
 #include "Function_mode.h"
-#include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/Exception.h>
 #include <cmath>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+#include "Function.h"
 
 
 namespace SmartMet

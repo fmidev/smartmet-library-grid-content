@@ -1,8 +1,20 @@
 #pragma once
 
-#include "../../definition/ServiceInterface.h"
-#include "../common/RequestMessage.h"
-#include "../common/ResponseMessage.h"
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace T
+{
+class RequestMessage;
+class ResponseMessage;
+}
+}
 
 namespace SmartMet
 {

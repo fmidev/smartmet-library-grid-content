@@ -1,5 +1,7 @@
 #pragma once
 
+#include <grid-files/common/Typedefs.h>
+#include <iosfwd>
 #include "Function.h"
 
 

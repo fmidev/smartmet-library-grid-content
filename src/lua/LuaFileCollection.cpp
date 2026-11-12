@@ -1,5 +1,10 @@
 #include "LuaFileCollection.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <macgyver/Exception.h>
+#include <ostream>
+#include "LuaFile.h"
 
 
 namespace SmartMet

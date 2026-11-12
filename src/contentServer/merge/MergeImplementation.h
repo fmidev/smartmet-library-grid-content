@@ -1,16 +1,37 @@
 #pragma once
 
+#include <grid-files/common/ModificationLock.h>
+#include <pthread.h>
+#include <boost/smart_ptr/atomic_shared_ptr.hpp>
+#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/CacheStats.h>
+#include <memory>
+#include <shared_mutex>
+#include <ctime>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 #include "../definition/ServiceInterface.h"
 #include "../definition/ContentListStorage.h"
 #include "../definition/FileListStorage.h"
 #include "../cache/CacheImplementation.h"
+#include "../definition/EventInfo.h"
+#include "../definition/EventInfoList.h"
+#include "../definition/GenerationInfoList.h"
+#include "../definition/GeometryInfoList.h"
+#include "../definition/ProducerInfoList.h"
 
-#include <grid-files/common/ModificationLock.h>
-#include <pthread.h>
-#include <atomic>
-#include <memory>
-#include <shared_mutex>
-#include <boost/smart_ptr/atomic_shared_ptr.hpp>
+namespace SmartMet
+{
+namespace T
+{
+class ContentInfo;
+class FileInfo;
+}
+}
 
 
 

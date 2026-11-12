@@ -1,12 +1,32 @@
 #pragma once
 
-#include "../../contentServer/definition/ServiceInterface.h"
-
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/common/ModificationLock.h>
-#include <grid-files/common/AttributeNode.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
 #include <vector>
 #include <unordered_map>
+#include <ctime>
+#include <iosfwd>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace T
+{
+class AttributeNode;
+}
+}
 
 namespace SmartMet
 {

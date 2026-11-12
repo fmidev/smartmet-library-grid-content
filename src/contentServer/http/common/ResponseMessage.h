@@ -1,9 +1,10 @@
 #pragma once
 
-#include <grid-files/grid/Typedefs.h>
-
+#include <grid-files/common/Typedefs.h>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <iosfwd>
 
 
 namespace SmartMet

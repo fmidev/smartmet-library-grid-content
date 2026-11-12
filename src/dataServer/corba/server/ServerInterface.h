@@ -3,6 +3,14 @@
 #include "../../definition/ServiceInterface.h"
 #include "../stubs/DataServer_serviceInterface_SK.h"
 
+namespace SmartMet
+{
+namespace DataServer
+{
+class ServiceInterface;
+}
+}
+
 
 // This file contains the actual implementation of the CORBA server interface. Every time
 // you modify the IDL file, a new skeleton will be generated into the "stubs" directory.

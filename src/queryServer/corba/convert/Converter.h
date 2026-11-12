@@ -1,12 +1,51 @@
 #pragma once
 
-#include "../stubs/QueryServer_serviceInterface_SK.h"
-#include "../../definition/Query.h"
-
 #include <grid-files/grid/GridPointValue.h>
 #include <grid-files/grid/GridPointValueList.h>
 #include <grid-files/grid/GridValueList.h>
 #include <grid-files/grid/Typedefs.h>
+#include <grid-files/common/Coordinate.h>
+#include <grid-files/common/Typedefs.h>
+#include <ctime>
+#include <set>
+#include <vector>
+#include "../stubs/QueryServer_serviceInterface_SK.h"
+#include "../../definition/Query.h"
+#include "../../definition/ParameterValues.h"
+#include "../../definition/QueryParameter.h"
+
+namespace SmartMet
+{
+namespace C
+{
+class FunctionParamList;
+class ParameterValuesList;
+class QueryParameterList;
+struct FunctionParam;
+struct ParameterValues;
+struct Query;
+struct QueryParameter;
+}
+}
+namespace SmartMet
+{
+namespace QueryServer
+{
+class Query;
+}
+}
+namespace SmartMet
+{
+namespace T
+{
+class Attribute;
+class AttributeList;
+class GridPointValue;
+class GridPointValueList;
+class GridValue;
+class GridValueList;
+}
+}
 
 
 

@@ -1,8 +1,30 @@
 #include "ServerInterface.h"
-#include "../convert/Converter.h"
-
 #include <macgyver/Exception.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <set>
+#include <string>
+#include <vector>
+#include "../convert/Converter.h"
+#include "../../definition/ContentInfo.h"
+#include "../../definition/ContentInfoList.h"
+#include "../../definition/EventInfo.h"
+#include "../../definition/EventInfoList.h"
+#include "../../definition/FileAndContent.h"
+#include "../../definition/FileInfo.h"
+#include "../../definition/FileInfoList.h"
+#include "../../definition/ForecastTime.h"
+#include "../../definition/GenerationInfo.h"
+#include "../../definition/GenerationInfoList.h"
+#include "../../definition/GeometryInfo.h"
+#include "../../definition/GeometryInfoList.h"
+#include "../../definition/LevelInfoList.h"
+#include "../../definition/ProducerInfo.h"
+#include "../../definition/ProducerInfoList.h"
+#include "../../definition/ServiceInterface.h"
+#include "../../definition/ServiceResults.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

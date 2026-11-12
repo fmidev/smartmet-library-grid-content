@@ -1,5 +1,18 @@
 #include "Converter.h"
+#include <grid-files/common/Attribute.h>
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/common/Coordinate.h>
+#include <grid-files/grid/GridValue.h>
+#include <grid-files/grid/GridValueList.h>
+#include <macgyver/Exception.h>
+#include <omniORB4/CORBA.h>
+#include <cstddef>
+#include <string>
 #include "../stubs/DataServer_serviceInterface_SK.h"
+#include "../../definition/GridCoordinates.h"
+#include "../../definition/GridData.h"
+#include "../../definition/ValueRecord.h"
+#include "../../definition/ValueRecordList.h"
 
 
 

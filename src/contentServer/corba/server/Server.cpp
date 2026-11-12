@@ -1,7 +1,18 @@
 #include "Server.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/ThreadName.h>
+#include <macgyver/Exception.h>
 #include <cstdlib>
+#include <cstdio>
+#include "ServerInterface.h"
+
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
 
 
 namespace SmartMet

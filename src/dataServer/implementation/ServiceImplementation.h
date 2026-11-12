@@ -1,13 +1,48 @@
 #pragma once
 
+#include <pthread.h>
+#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/GridFile.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 #include "GridFileManager.h"
 #include "../definition/ServiceInterface.h"
-#include "../../lua/LuaFileCollection.h"
 
-#include <grid-files/common/AttributeList.h>
-#include <gis/DEM.h>
-#include <gis/LandCover.h>
-#include <pthread.h>
+namespace Fmi
+{
+class DEM;
+class LandCover;
+}
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace GRID
+{
+class Message;
+}
+}
+namespace SmartMet
+{
+namespace T
+{
+class ContentInfoList;
+class EventInfo;
+class FileInfo;
+class FileInfoList;
+class ValueRecord;
+}
+}
 
 
 namespace SmartMet

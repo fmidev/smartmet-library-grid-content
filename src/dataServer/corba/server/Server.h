@@ -1,8 +1,17 @@
 #pragma once
 
-#include "../../definition/ServiceInterface.h"
-#include "ServerInterface.h"
 #include <pthread.h>
+#include <omniORB4/CORBA.h>
+#include <string>
+#include "ServerInterface.h"
+
+namespace SmartMet
+{
+namespace DataServer
+{
+class ServiceInterface;
+}
+}
 
 
 namespace SmartMet

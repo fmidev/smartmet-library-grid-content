@@ -1,14 +1,36 @@
 #pragma once
 
-#include <memory>
-#include <shared_mutex>
-
-#include "../definition/ServiceInterface.h"
-
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
-#include <atomic>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
+#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/CacheStats.h>
+#include <memory>
+#include <shared_mutex>
+#include <ctime>
+#include <map>
+#include <set>
+#include <string>
+#include "../definition/ServiceInterface.h"
+#include "../definition/ContentInfoList.h"
+#include "../definition/EventInfo.h"
+#include "../definition/EventInfoList.h"
+#include "../definition/FileInfoList.h"
+#include "../definition/GenerationInfoList.h"
+#include "../definition/GeometryInfoList.h"
+#include "../definition/ProducerInfoList.h"
+
+namespace SmartMet
+{
+namespace T
+{
+class ContentInfo;
+class FileInfo;
+class GenerationInfo;
+}
+}
 
 
 

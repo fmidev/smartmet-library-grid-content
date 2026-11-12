@@ -1,9 +1,27 @@
 #pragma once
 
-#include "../definition/ServiceInterface.h"
-
 #include <grid-files/common/ModificationLock.h>
 #include <pthread.h>
+#include <grid-files/common/ThreadLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <string>
+#include "../definition/ServiceInterface.h"
+#include "../definition/ContentInfoList.h"
+#include "../definition/EventInfoList.h"
+#include "../definition/FileInfoList.h"
+#include "../definition/GenerationInfoList.h"
+#include "../definition/GeometryInfoList.h"
+#include "../definition/ProducerInfoList.h"
+
+namespace SmartMet
+{
+namespace T
+{
+class FileAndContent;
+}
+}
 
 
 

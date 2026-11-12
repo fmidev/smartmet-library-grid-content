@@ -1,13 +1,13 @@
 #pragma once
 
-#include "LuaFunction.h"
-#include <grid-files/common/Coordinate.h>
-#include <grid-files/common/GeneralFunctions.h>
-#include <grid-files/common/AutoWriteLock.h>
-#include <grid-files/common/AutoReadLock.h>
 #include <grid-files/grid/Typedefs.h>
-
-#include <unordered_map>
+#include <grid-files/common/ModificationLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <ctime>
+#include <iosfwd>
+#include <string>
+#include <vector>
+#include "LuaFunction.h"
 
 #define NUM_OF_LUA_HANDLES 20
 

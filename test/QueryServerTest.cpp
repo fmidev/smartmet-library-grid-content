@@ -6,18 +6,34 @@
 
 #define BOOST_TEST_MODULE QueryServerTest
 #include <boost/test/included/unit_test.hpp>
-
-#include "QueryHarness.h"
-#include "queryServer/definition/Query.h"
-#include "queryServer/definition/QueryConfigurator.h"
-#include "queryServer/definition/QueryParameter.h"
-
 #include <grid-files/common/GeneralFunctions.h>
-
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/GridFile.h>
+#include <grid-files/grid/GridValue.h>
+#include <grid-files/grid/GridValueList.h>
+#include <grid-files/grid/Message.h>
+#include <grid-files/grid/Typedefs.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cmath>
 #include <map>
 #include <set>
 #include <memory>
+#include <algorithm>
+#include <initializer_list>
+#include <string>
+#include <utility>
+#include <vector>
+#include "QueryHarness.h"
+#include "queryServer/definition/Query.h"
+#include "queryServer/definition/QueryConfigurator.h"
+#include "queryServer/definition/QueryParameter.h"
+#include "TestCommon.h"
+#include "../src/queryServer/definition/ParameterValues.h"
+#include "../src/queryServer/implementation/ServiceImplementation.h"
+#include "../src/queryServer/definition/Query.h"
+#include "../src/queryServer/definition/QueryConfigurator.h"
+#include "../src/queryServer/definition/QueryParameter.h"
 
 using namespace SmartMet;
 using namespace GridTest;

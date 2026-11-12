@@ -4,6 +4,11 @@
 #include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/ShowFunction.h>
+#include <cstdio>
+#include <memory>
+#include <utility>
+#include <vector>
+#include "../definition/ServiceResults.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 

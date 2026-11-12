@@ -1,5 +1,16 @@
 #include "Converter.h"
 #include <macgyver/Exception.h>
+#include <grid-files/common/Attribute.h>
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/grid/GridPointValue.h>
+#include <grid-files/grid/GridPointValueList.h>
+#include <grid-files/grid/GridValue.h>
+#include <grid-files/grid/GridValueList.h>
+#include <omniORB4/CORBA.h>
+#include <memory>
+#include <string>
+#include "../stubs/QueryServer_serviceInterface_SK.h"
+#include "../../definition/Query.h"
 
 
 namespace SmartMet

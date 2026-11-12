@@ -1,7 +1,9 @@
 #pragma once
 
-#include <grid-files/common/Coordinate.h>
 #include <grid-files/grid/Typedefs.h>
+#include <grid-files/common/Typedefs.h>
+#include <iosfwd>
+#include <vector>
 
 
 namespace SmartMet

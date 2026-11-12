@@ -1,5 +1,7 @@
 #include "LuaFunction.h"
 #include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/Exception.h>
+#include <ostream>
 
 
 namespace SmartMet

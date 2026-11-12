@@ -1,5 +1,22 @@
 #pragma once
 
+#include <macgyver/Cache.h>
+#include <boost/unordered_map.hpp>
+#include <grid-files/common/Coordinate.h>
+#include <grid-files/common/ModificationLock.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/CacheStats.h>
+#include <unordered_map>
+#include <unordered_set>
+#include <atomic>
+#include <ctime>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 #include "../definition/ServiceInterface.h"
 #include "../definition/AliasFileCollection.h"
 #include "../definition/UnitConversion.h"
@@ -8,12 +25,36 @@
 #include "../../contentServer/definition/ServiceInterface.h"
 #include "../../lua/LuaFileCollection.h"
 #include "../../functions/FunctionCollection.h"
+#include "../../contentServer/definition/ContentInfo.h"
+#include "../../contentServer/definition/ContentInfoList.h"
+#include "../../contentServer/definition/GenerationInfo.h"
+#include "../../contentServer/definition/GenerationInfoList.h"
+#include "../../contentServer/definition/ProducerInfo.h"
+#include "../../functions/Function.h"
+#include "../definition/ParameterMapping.h"
+#include "../definition/QueryParameter.h"
 
-#include <macgyver/Cache.h>
-#include <boost/unordered_map.hpp>
-#include <unordered_map>
-#include <unordered_set>
-#include <atomic>
+namespace Fmi
+{
+class DEM;
+class LandCover;
+}
+namespace SmartMet
+{
+namespace QueryServer
+{
+class ParameterValues;
+class Query;
+}
+}
+namespace SmartMet
+{
+namespace T
+{
+class GridValue;
+class GridValueList;
+}
+}
 
 
 namespace SmartMet

@@ -1,5 +1,8 @@
 #include "Function_sequence.h"
-#include <grid-files/common/GeneralFunctions.h>
+#include <macgyver/Exception.h>
+#include <string>
+#include <vector>
+#include "Function.h"
 
 
 namespace SmartMet

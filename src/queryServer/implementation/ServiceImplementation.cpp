@@ -4,26 +4,58 @@
 #include <grid-files/common/InterpolationFunctions.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/MemoryWriter.h>
-#include <grid-files/common/FileWriter.h>
 #include <grid-files/identification/GridDef.h>
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/common/GraphFunctions.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/ThreadName.h>
-#include <macgyver/TimeParser.h>
 #include <macgyver/Astronomy.h>
-#include <macgyver/CharsetTools.h>
 #include <macgyver/NumericCast.h>
 #include <macgyver/Hash.h>
 #include <fmt/format.h>
+#include <boost/numeric/conversion/cast.hpp>
+#include <gis/DEM.h>
+#include <gis/LandCover.h>
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/common/AttributeNode.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <grid-files/common/CoordinateConversions.h>
+#include <grid-files/common/Dimensions.h>
+#include <grid-files/common/Log.h>
+#include <grid-files/common/Point.h>
+#include <grid-files/grib1/GridDefinition.h>
+#include <grid-files/grib1/Properties.h>
+#include <grid-files/grib2/GridDefinition.h>
+#include <grid-files/grib2/GridSection.h>
+#include <grid-files/grib2/Properties.h>
+#include <grid-files/grib2/RepresentationSection.h>
+#include <grid-files/grid/GridPointValue.h>
+#include <grid-files/grid/GridPointValueList.h>
+#include <grid-files/grid/GridValue.h>
+#include <grid-files/grid/GridValueList.h>
+#include <grid-files/grid/Message.h>
+#include <grid-files/identification/LevelDef.h>
+#include <grid-files/identification/NewbaseParameterDef.h>
+#include <macgyver/DateTime.h>
+#include <macgyver/LocalDateTime.h>
+#include <ogr_spatialref.h>
+#include <trax/SmoothOptions.h>
 #include <cmath>
 #include <algorithm>
-#include <boost/numeric/conversion/cast.hpp>
 #include <chrono>
-#include <deque>
 #include <memory>
 #include <thread>
 #include <unordered_set>
+#include <cstdlib>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <cstdint>
+#include <iostream>
+#include <iterator>
+#include <optional>
+#include <sstream>
 #include "../../functions/Function_add.h"
 #include "../../functions/Function_acos.h"
 #include "../../functions/Function_and.h"
@@ -75,7 +107,37 @@
 #include "../../functions/Function_streamDir.h"
 #include "../../functions/Function_feelsLike.h"
 #include "../../functions/Function_replace.h"
-#include <cstdlib>
+#include "../../contentServer/definition/EventInfo.h"
+#include "../../contentServer/definition/GeometryInfo.h"
+#include "../../contentServer/definition/ProducerInfoList.h"
+#include "../../contentServer/definition/RequestFlags.h"
+#include "../../contentServer/definition/ServiceResults.h"
+#include "../../dataServer/definition/GridCoordinates.h"
+#include "../../dataServer/definition/ServiceResults.h"
+#include "../../functions/FunctionCollection.h"
+#include "../../lua/LuaFileCollection.h"
+#include "../definition/AliasFileCollection.h"
+#include "../definition/ParameterMappingFile.h"
+#include "../definition/ParameterValues.h"
+#include "../definition/Query.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
+#include "../definition/UnitConversion.h"
+
+namespace SmartMet
+{
+namespace ContentServer
+{
+class ServiceInterface;
+}
+}
+namespace SmartMet
+{
+namespace DataServer
+{
+class ServiceInterface;
+}
+}
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

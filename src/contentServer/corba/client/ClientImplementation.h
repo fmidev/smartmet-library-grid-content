@@ -1,5 +1,9 @@
 #pragma once
 
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <string>
 #include "../../definition/ServiceInterface.h"
 #include "../stubs/ContentServer_serviceInterface_SK.h"
 

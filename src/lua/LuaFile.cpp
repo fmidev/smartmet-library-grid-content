@@ -1,6 +1,13 @@
 #include "LuaFile.h"
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/StringConversion.h>
+#include <grid-files/common/AutoReadLock.h>
+#include <grid-files/common/AutoWriteLock.h>
+#include <macgyver/Exception.h>
+#include <ostream>
+#include <unordered_map>
+#include <utility>
+#include "LuaFunction.h"
 
 
 

@@ -1,15 +1,30 @@
 #include "PostgresqlImplementation.h"
 #include <macgyver/Exception.h>
-#include <grid-files/common/AutoWriteLock.h>
-#include <grid-files/common/AutoReadLock.h>
 #include <grid-files/common/ShowFunction.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
-#include <algorithm>
 #include <boost/thread/thread.hpp>
 #include <libpq-fe.h>
 #include <fmt/format.h>
+#include <grid-files/common/AutoThreadLock.h>
+#include <algorithm>
+#include <cstdio>
+#include "../definition/ContentInfoList.h"
+#include "../definition/EventInfoList.h"
+#include "../definition/FileAndContent.h"
+#include "../definition/FileInfo.h"
+#include "../definition/FileInfoList.h"
+#include "../definition/ForecastTime.h"
+#include "../definition/GenerationInfo.h"
+#include "../definition/GenerationInfoList.h"
+#include "../definition/GeometryInfo.h"
+#include "../definition/GeometryInfoList.h"
+#include "../definition/LevelInfoList.h"
+#include "../definition/ProducerInfo.h"
+#include "../definition/ProducerInfoList.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 

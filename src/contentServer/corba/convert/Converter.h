@@ -1,5 +1,9 @@
 #pragma once
 
+#include <grid-files/common/Typedefs.h>
+#include <set>
+#include <string>
+#include <vector>
 #include "../../definition/ContentInfo.h"
 #include "../../definition/ContentInfoList.h"
 #include "../../definition/FileInfo.h"
@@ -14,10 +18,23 @@
 #include "../../definition/GeometryInfo.h"
 #include "../../definition/GeometryInfoList.h"
 #include "../../definition/ForecastTime.h"
-
 #include "../stubs/ContentServer_serviceInterface_SK.h"
 
-#include <set>
+namespace SmartMet
+{
+namespace T
+{
+class ContentInfoList;
+class EventInfoList;
+class FileAndContent;
+class FileInfoList;
+class GenerationInfoList;
+class GeometryInfoList;
+class LevelInfo;
+class LevelInfoList;
+class ProducerInfoList;
+}
+}
 
 
 namespace SmartMet

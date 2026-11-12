@@ -1,5 +1,4 @@
 #include "MergeImplementation.h"
-
 #include <macgyver/Exception.h>
 #include <macgyver/ThreadName.h>
 #include <grid-files/common/GeneralFunctions.h>
@@ -11,8 +10,27 @@
 #include <macgyver/Hash.h>
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
-#include <atomic>
+#include <grid-files/common/AttributeNode.h>
+#include <grid-files/common/Log.h>
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <mutex>
+#include <sstream>
+#include <utility>
+#include "../cache/CacheImplementation.h"
+#include "../definition/ContentInfo.h"
+#include "../definition/ContentInfoList.h"
+#include "../definition/ContentListStorage.h"
+#include "../definition/FileInfo.h"
+#include "../definition/FileInfoList.h"
+#include "../definition/FileListStorage.h"
+#include "../definition/GenerationInfo.h"
+#include "../definition/GeometryInfo.h"
+#include "../definition/LevelInfoList.h"
+#include "../definition/ProducerInfo.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

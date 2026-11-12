@@ -7,9 +7,27 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
-#include <algorithm>
 #include <boost/thread/thread.hpp>
+#include <algorithm>
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
+#include <vector>
+#include "../definition/ContentInfo.h"
+#include "../definition/EventInfo.h"
+#include "../definition/FileAndContent.h"
+#include "../definition/FileInfo.h"
+#include "../definition/ForecastTime.h"
+#include "../definition/GenerationInfo.h"
+#include "../definition/GeometryInfo.h"
+#include "../definition/LevelInfoList.h"
+#include "../definition/ProducerInfo.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

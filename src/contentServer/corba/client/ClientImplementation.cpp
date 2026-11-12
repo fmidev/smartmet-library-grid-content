@@ -1,8 +1,10 @@
 #include "ClientImplementation.h"
-#include "../convert/Converter.h"
-
 #include <grid-files/common/GeneralFunctions.h>
 #include <macgyver/Exception.h>
+#include <omniORB4/CORBA.h>
+#include <cstdio>
+#include "../convert/Converter.h"
+#include "../../definition/ServiceInterface.h"
 
 namespace SmartMet
 {

@@ -1,10 +1,20 @@
 #pragma once
 
-#include "../../definition/ServiceInterface.h"
-#include "../common/RequestMessage.h"
-#include "../common/ResponseMessage.h"
-
 #include <curl/curl.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <ctime>
+#include <string>
+#include "../../definition/ServiceInterface.h"
+
+namespace SmartMet
+{
+namespace T
+{
+class RequestMessage;
+class ResponseMessage;
+}
+}
 
 
 

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <grid-files/common/ModificationLock.h>
+#include <grid-files/grid/Typedefs.h>
+#include <string>
 #include "../definition/ServiceInterface.h"
-
-#include <map>
+#include "../definition/SessionInfo.h"
 
 
 namespace SmartMet

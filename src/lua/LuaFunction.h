@@ -1,8 +1,9 @@
 #pragma once
 
 #include <grid-files/common/Typedefs.h>
-#include <grid-files/common/AutoThreadLock.h>
 #include <unordered_map>
+#include <iosfwd>
+#include <string>
 
 
 namespace SmartMet

@@ -1,6 +1,7 @@
 #include "ParameterDef.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <macgyver/Hash.h>
+#include <macgyver/Exception.h>
+#include <ostream>
 
 
 namespace SmartMet

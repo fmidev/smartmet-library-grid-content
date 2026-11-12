@@ -1,8 +1,11 @@
 #include "Function_sdevDir.h"
+#include <grid-files/grid/Typedefs.h>
+#include <macgyver/Exception.h>
 #include <algorithm>
 #include <cmath>
 #include <vector>
-#include <grid-files/common/GeneralFunctions.h>
+#include <string>
+#include "Function.h"
 
 
 namespace SmartMet

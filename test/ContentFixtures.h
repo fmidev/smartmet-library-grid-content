@@ -7,14 +7,23 @@
 
 #pragma once
 
-#include "contentServer/definition/ServiceInterface.h"
-
 #include <boost/test/unit_test.hpp>
 #include <fmt/format.h>
-
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
 #include <ctime>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+#include "contentServer/definition/ServiceInterface.h"
+#include "../src/contentServer/definition/ContentInfo.h"
+#include "../src/contentServer/definition/ContentInfoList.h"
+#include "../src/contentServer/definition/FileInfo.h"
+#include "../src/contentServer/definition/GenerationInfo.h"
+#include "../src/contentServer/definition/ProducerInfo.h"
+#include "../src/contentServer/definition/ServiceInterface.h"
 
 namespace GridTest
 {

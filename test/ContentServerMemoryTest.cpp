@@ -4,18 +4,37 @@
 
 #define BOOST_TEST_MODULE ContentServerMemoryTest
 #include <boost/test/included/unit_test.hpp>
-
+#include <grid-files/identification/GridDef.h>
+#include <fmt/format.h>
+#include <grid-files/grid/Typedefs.h>
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <algorithm>
+#include <cstdlib>
+#include <initializer_list>
+#include <iterator>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 #include "TestCommon.h"
 #include "ContentFixtures.h"
 #include "contentServer/definition/EventInfo.h"
 #include "contentServer/definition/ServiceResults.h"
 #include "contentServer/memory/MemoryImplementation.h"
-
-#include <grid-files/identification/GridDef.h>
-
-#include <filesystem>
-#include <map>
-#include <memory>
+#include "../src/contentServer/definition/ContentInfo.h"
+#include "../src/contentServer/definition/ContentInfoList.h"
+#include "../src/contentServer/definition/EventInfoList.h"
+#include "../src/contentServer/definition/FileAndContent.h"
+#include "../src/contentServer/definition/FileInfo.h"
+#include "../src/contentServer/definition/GenerationInfo.h"
+#include "../src/contentServer/definition/GenerationInfoList.h"
+#include "../src/contentServer/definition/ProducerInfo.h"
+#include "../src/contentServer/definition/ServiceInterface.h"
+#include "../src/contentServer/definition/EventInfo.h"
+#include "../src/contentServer/definition/ServiceResults.h"
+#include "../src/contentServer/memory/MemoryImplementation.h"
 
 using namespace SmartMet;
 using namespace GridTest;

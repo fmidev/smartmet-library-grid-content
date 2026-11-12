@@ -11,8 +11,18 @@
 #include <boost/test/data/monomorphic.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/included/unit_test.hpp>
-
-#include "TestCommon.h"
+#include <grid-files/grid/Typedefs.h>
+#include <cmath>
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cstddef>
+#include <initializer_list>
+#include <ostream>
+#include <utility>
 #include "functions/Function_and.h"
 #include "functions/Function_avg.h"
 #include "functions/Function_change.h"
@@ -54,13 +64,48 @@
 #include "functions/Function_windDir.h"
 #include "functions/Function_windU.h"
 #include "functions/Function_windV.h"
-
-#include <cmath>
-#include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+#include "../src/functions/Function.h"
+#include "../src/functions/Function_add.h"
+#include "../src/functions/Function_and.h"
+#include "../src/functions/Function_avg.h"
+#include "../src/functions/Function_change.h"
+#include "../src/functions/Function_diff.h"
+#include "../src/functions/Function_div.h"
+#include "../src/functions/Function_eq.h"
+#include "../src/functions/Function_gt.h"
+#include "../src/functions/Function_gte.h"
+#include "../src/functions/Function_hypotenuse.h"
+#include "../src/functions/Function_if.h"
+#include "../src/functions/Function_in.h"
+#include "../src/functions/Function_inCount.h"
+#include "../src/functions/Function_inPrcnt.h"
+#include "../src/functions/Function_limit.h"
+#include "../src/functions/Function_lt.h"
+#include "../src/functions/Function_lte.h"
+#include "../src/functions/Function_max.h"
+#include "../src/functions/Function_median.h"
+#include "../src/functions/Function_min.h"
+#include "../src/functions/Function_mode.h"
+#include "../src/functions/Function_mul.h"
+#include "../src/functions/Function_multiply.h"
+#include "../src/functions/Function_not.h"
+#include "../src/functions/Function_or.h"
+#include "../src/functions/Function_out.h"
+#include "../src/functions/Function_replace.h"
+#include "../src/functions/Function_round.h"
+#include "../src/functions/Function_sdev.h"
+#include "../src/functions/Function_sdevDir.h"
+#include "../src/functions/Function_sequence.h"
+#include "../src/functions/Function_smedian.h"
+#include "../src/functions/Function_sqrt.h"
+#include "../src/functions/Function_streamDir.h"
+#include "../src/functions/Function_sub.h"
+#include "../src/functions/Function_sum.h"
+#include "../src/functions/Function_valid.h"
+#include "../src/functions/Function_variance.h"
+#include "../src/functions/Function_windDir.h"
+#include "../src/functions/Function_windU.h"
+#include "../src/functions/Function_windV.h"
 
 using namespace SmartMet;
 using namespace SmartMet::Functions;

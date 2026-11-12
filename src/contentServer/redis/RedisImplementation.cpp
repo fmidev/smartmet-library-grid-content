@@ -6,17 +6,36 @@
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/Hash.h>
-#include <algorithm>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/permissions.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <boost/thread/thread.hpp>
-#include <fstream>
-#include <iostream>
+#include <grid-files/common/AttributeNode.h>
+#include <algorithm>
 #include <cstdio>
 #include <chrono>
 #include <thread>
+#include <cmath>
+#include <cstdlib>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <utility>
+#include "../definition/ContentInfoList.h"
+#include "../definition/EventInfoList.h"
+#include "../definition/FileAndContent.h"
+#include "../definition/FileInfoList.h"
+#include "../definition/ForecastTime.h"
+#include "../definition/GenerationInfo.h"
+#include "../definition/GenerationInfoList.h"
+#include "../definition/GeometryInfo.h"
+#include "../definition/GeometryInfoList.h"
+#include "../definition/LevelInfoList.h"
+#include "../definition/ProducerInfo.h"
+#include "../definition/ProducerInfoList.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
 
 using namespace boost::interprocess;
 

@@ -1,20 +1,46 @@
 #include "ServiceImplementation.h"
 #include <grid-files/common/GeneralFunctions.h>
-#include <grid-files/common/InterpolationFunctions.h>
 #include <grid-files/common/ShowFunction.h>
-#include <grid-files/common/GraphFunctions.h>
-#include <grid-files/common/CoordinateConversions.h>
-#include <grid-files/common/MemoryWriter.h>
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/ThreadName.h>
-
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/thread/thread.hpp>
-#include <csignal>
+#include <gis/DEM.h>
+#include <gis/LandCover.h>
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/common/AttributeNode.h>
+#include <grid-files/common/AutoThreadLock.h>
+#include <grid-files/common/Coordinate.h>
+#include <grid-files/common/Log.h>
+#include <grid-files/common/StringFactory.h>
+#include <grid-files/grid/Message.h>
+#include <grid-files/grid/ValueCache.h>
+#include <macgyver/Exception.h>
 #include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <iterator>
+#include <set>
+#include <utility>
+#include "../../contentServer/definition/ContentInfo.h"
+#include "../../contentServer/definition/ContentInfoList.h"
+#include "../../contentServer/definition/EventInfo.h"
+#include "../../contentServer/definition/EventInfoList.h"
+#include "../../contentServer/definition/FileInfo.h"
+#include "../../contentServer/definition/FileInfoList.h"
+#include "../../contentServer/definition/ServiceInterface.h"
+#include "../../contentServer/definition/ServiceResults.h"
+#include "../definition/GridCoordinates.h"
+#include "../definition/GridData.h"
+#include "../definition/ServiceInterface.h"
+#include "../definition/ServiceResults.h"
+#include "../definition/ValueRecord.h"
+#include "../definition/ValueRecordList.h"
+#include "GridFileManager.h"
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF
 

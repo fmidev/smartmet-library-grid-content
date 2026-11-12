@@ -9,20 +9,29 @@
 
 #pragma once
 
-#include "TestCommon.h"
-#include "contentServer/memory/MemoryImplementation.h"
-#include "dataServer/implementation/ServiceImplementation.h"
-#include "queryServer/implementation/ServiceImplementation.h"
-
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/grid/Message.h>
 #include <grid-files/identification/GridDef.h>
-
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <boost/test/included/unit_test.hpp>
 #include <map>
 #include <set>
 #include <memory>
 #include <string>
 #include <vector>
+#include "TestCommon.h"
+#include "contentServer/memory/MemoryImplementation.h"
+#include "dataServer/implementation/ServiceImplementation.h"
+#include "queryServer/implementation/ServiceImplementation.h"
+#include "../src/contentServer/definition/ContentInfo.h"
+#include "../src/contentServer/definition/ContentInfoList.h"
+#include "../src/contentServer/definition/FileInfo.h"
+#include "../src/contentServer/definition/GenerationInfo.h"
+#include "../src/contentServer/definition/ProducerInfo.h"
+#include "../src/contentServer/memory/MemoryImplementation.h"
+#include "../src/dataServer/implementation/ServiceImplementation.h"
+#include "../src/queryServer/implementation/ServiceImplementation.h"
 
 namespace GridTest
 {

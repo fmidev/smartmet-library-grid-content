@@ -1,9 +1,15 @@
 #include "ServerInterface.h"
-#include "../convert/Converter.h"
-#include "../../../contentServer/corba/convert/Converter.h"
-
 #include <macgyver/Exception.h>
 #include <grid-files/common/ShowFunction.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/GridPointValueList.h>
+#include <string>
+#include "../convert/Converter.h"
+#include "../../../contentServer/corba/convert/Converter.h"
+#include "../../../contentServer/definition/ContentInfoList.h"
+#include "../../definition/Query.h"
+#include "../../definition/ServiceInterface.h"
+#include "../../definition/ServiceResults.h"
 
 
 #define FUNCTION_TRACE FUNCTION_TRACE_OFF

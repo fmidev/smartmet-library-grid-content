@@ -1,12 +1,30 @@
 #pragma once
 
+#include <grid-files/common/AttributeList.h>
+#include <grid-files/grid/GridValueList.h>
+#include <grid-files/common/Typedefs.h>
+#include <grid-files/grid/Typedefs.h>
+#include <vector>
 #include "../../definition/GridData.h"
 #include "../../definition/GridCoordinates.h"
 #include "../../definition/ValueRecordList.h"
 #include "../../corba/stubs/DataServer_serviceInterface_SK.h"
 
-#include <grid-files/common/AttributeList.h>
-#include <grid-files/grid/GridValueList.h>
+namespace SmartMet
+{
+namespace T
+{
+class Attribute;
+class AttributeList;
+class Coordinate;
+class GridCoordinates;
+class GridData;
+class GridValue;
+class GridValueList;
+class ValueRecord;
+class ValueRecordList;
+}
+}
 
 
 

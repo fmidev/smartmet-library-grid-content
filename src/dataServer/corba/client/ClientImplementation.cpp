@@ -1,7 +1,8 @@
 #include "ClientImplementation.h"
-#include "../convert/Converter.h"
-
 #include <macgyver/Exception.h>
+#include <omniORB4/CORBA.h>
+#include <cstdio>
+#include "../convert/Converter.h"
 
 
 namespace SmartMet
