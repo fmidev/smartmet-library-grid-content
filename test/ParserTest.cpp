@@ -8,8 +8,6 @@
 #include "queryServer/definition/AliasFile.h"
 #include "queryServer/definition/ParameterMappingFile.h"
 #include "../src/queryServer/definition/ParameterMapping.h"
-#include "../src/queryServer/definition/AliasFile.h"
-#include "../src/queryServer/definition/ParameterMappingFile.h"
 
 using namespace SmartMet;
 using namespace SmartMet::QueryServer;

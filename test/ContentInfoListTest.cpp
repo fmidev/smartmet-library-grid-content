@@ -22,8 +22,6 @@
 #include "contentServer/definition/ContentInfoList.h"
 #include "contentServer/definition/RequestFlags.h"
 #include "../src/contentServer/definition/ContentInfo.h"
-#include "../src/contentServer/definition/ContentInfoList.h"
-#include "../src/contentServer/definition/RequestFlags.h"
 
 using namespace SmartMet;
 namespace bdata = boost::unit_test::data;

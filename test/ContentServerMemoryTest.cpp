@@ -32,9 +32,6 @@
 #include "../src/contentServer/definition/GenerationInfoList.h"
 #include "../src/contentServer/definition/ProducerInfo.h"
 #include "../src/contentServer/definition/ServiceInterface.h"
-#include "../src/contentServer/definition/EventInfo.h"
-#include "../src/contentServer/definition/ServiceResults.h"
-#include "../src/contentServer/memory/MemoryImplementation.h"
 
 using namespace SmartMet;
 using namespace GridTest;

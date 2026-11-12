@@ -31,9 +31,6 @@
 #include "TestCommon.h"
 #include "../src/queryServer/definition/ParameterValues.h"
 #include "../src/queryServer/implementation/ServiceImplementation.h"
-#include "../src/queryServer/definition/Query.h"
-#include "../src/queryServer/definition/QueryConfigurator.h"
-#include "../src/queryServer/definition/QueryParameter.h"
 
 using namespace SmartMet;
 using namespace GridTest;

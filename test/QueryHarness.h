@@ -29,9 +29,6 @@
 #include "../src/contentServer/definition/FileInfo.h"
 #include "../src/contentServer/definition/GenerationInfo.h"
 #include "../src/contentServer/definition/ProducerInfo.h"
-#include "../src/contentServer/memory/MemoryImplementation.h"
-#include "../src/dataServer/implementation/ServiceImplementation.h"
-#include "../src/queryServer/implementation/ServiceImplementation.h"
 
 namespace GridTest
 {

@@ -23,7 +23,6 @@
 #include "../src/contentServer/definition/FileInfo.h"
 #include "../src/contentServer/definition/GenerationInfo.h"
 #include "../src/contentServer/definition/ProducerInfo.h"
-#include "../src/contentServer/definition/ServiceInterface.h"
 
 namespace GridTest
 {
