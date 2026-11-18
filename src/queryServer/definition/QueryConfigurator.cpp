@@ -615,8 +615,9 @@ void QueryConfigurator::configureParameter(const Query& /*query*/,QueryParameter
   FUNCTION_TRACE
   try
   {
-    char buf[1000];
-    strcpy(buf,param.mOrigParam.c_str());
+    // A modifiable copy: the name comes from the request and can be of any length
+    std::string origParam = param.mOrigParam;
+    char *buf = origParam.data();
 
     char *p1 = strstr(buf,"(");
     if (p1 != nullptr)

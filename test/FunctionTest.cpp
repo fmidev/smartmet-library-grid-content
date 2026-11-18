@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(valid_grid_call_returns_the_first_available_grid)
   BOOST_TEST(out[1] == 2.0);
   BOOST_TEST(out[2] == M);
 
-  std::vector<std::vector<float>> fgrids = {{}, {M, 2, M}, {3, 3, 3}};
+  std::vector<std::vector<float>> fgrids = {{}, {static_cast<float>(M), 2, static_cast<float>(M)}, {3, 3, 3}};
   std::vector<float> fout;
   f.executeFunctionCall9(3, 1, fgrids, ext, fout);
   BOOST_TEST_REQUIRE(fout.size() == 3U);
