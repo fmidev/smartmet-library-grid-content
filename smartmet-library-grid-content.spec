@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.11.18
+Version: 26.11.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -38,7 +38,7 @@ BuildRequires: omniORB-devel >= 4.3.0
 BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.10.16
-BuildRequires: smartmet-library-grid-files-devel >= 26.10.16
+BuildRequires: smartmet-library-grid-files-devel >= 26.11.20
 BuildRequires: smartmet-library-macgyver-devel >= 26.10.16
 BuildRequires: smartmet-library-spine-devel >= 26.10.16
 BuildRequires: postgresql15-devel
@@ -49,7 +49,7 @@ Requires: omniORB
 Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.10.17
-Requires: smartmet-library-grid-files >= 26.10.17
+Requires: smartmet-library-grid-files >= 26.11.20
 Requires: smartmet-library-macgyver >= 26.10.17
 Requires: smartmet-library-spine >= 26.10.17
 #TestRequires: %{smartmet_boost}-devel
@@ -112,6 +112,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Fri Nov 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.20-1.fmi
+- Functions and metric level parameters use the contour options of grid-files
+  (closed ranges, extrapolation, strict, validate, desliver)
+
 * Wed Nov 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.18-1.fmi
 - Query parameter names are no longer limited to 1000 characters
 
