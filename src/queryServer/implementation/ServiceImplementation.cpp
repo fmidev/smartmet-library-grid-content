@@ -1818,12 +1818,7 @@ struct ContourAttributes
   int gridWidth = 0;
   int gridHeight = 0;
   short interpolationType = 0;
-  size_t smoothSize = 0;
-  size_t smoothDegree = 0;
-  int contourSubdivide = 0;
-  int contourThreads = 1;
-  Trax::SmoothOptions smoothOptions;
-  bool closedRange = false;  // whether the last isoband includes its upper limit
+  ContourOptions options;  // the contour.* attributes, as grid-files reads them for ordinary parameters
 };
 
 
@@ -1846,47 +1841,8 @@ ContourAttributes getContourAttributes(const T::AttributeList& attributeList)
   if (interpolationTypeStr != nullptr)
     ca.interpolationType = toInt16(interpolationTypeStr);
 
-  const char *smoothSizeStr = attributeList.getAttributeValue("contour.smooth.size");
-  if (smoothSizeStr != nullptr)
-    ca.smoothSize = toSize_t(smoothSizeStr);
-
-  const char *smoothDegreeStr = attributeList.getAttributeValue("contour.smooth.degree");
-  if (smoothDegreeStr != nullptr)
-    ca.smoothDegree = toSize_t(smoothDegreeStr);
-
-  const char *contourSubdivideStr = attributeList.getAttributeValue("contour.subdivide");
-  if (contourSubdivideStr != nullptr)
-    ca.contourSubdivide = toInt32(contourSubdivideStr);
-
-  const char *closedRangeStr = attributeList.getAttributeValue("contour.closedRange");
-  if (closedRangeStr != nullptr)
-    ca.closedRange = (toInt32(closedRangeStr) != 0);
-
-  const char *contourThreadsStr = attributeList.getAttributeValue("contour.threads");
-  if (contourThreadsStr != nullptr)
-    ca.contourThreads = toInt32(contourThreadsStr);
-
-  // Opt-in Trax grid smoother (box / median / morphology). Active only when a
-  // method is given; otherwise an inactive option is a no-op in grid-files.
-  // The legacy contour.smooth.size/degree above remain unused (Savitzky-Golay
-  // is not implemented on the grid path).
-  const char *smoothMethodStr = attributeList.getAttributeValue("contour.smooth.method");
-  if (smoothMethodStr != nullptr)
-  {
-    ca.smoothOptions.method = Trax::to_smooth_method(smoothMethodStr);
-    const char *str = nullptr;
-    if ((str = attributeList.getAttributeValue("contour.smooth.radius")) != nullptr)
-      ca.smoothOptions.radius = toInt32(str);
-    if ((str = attributeList.getAttributeValue("contour.smooth.passes")) != nullptr)
-      ca.smoothOptions.passes = toInt32(str);
-    if ((str = attributeList.getAttributeValue("contour.smooth.boundary")) != nullptr)
-      ca.smoothOptions.boundary = Trax::to_smooth_boundary(str);
-    if ((str = attributeList.getAttributeValue("contour.smooth.morphology")) != nullptr)
-      ca.smoothOptions.morphology = Trax::to_morphology_op(str);
-    if ((str = attributeList.getAttributeValue("contour.smooth.preserve_missing")) != nullptr)
-      ca.smoothOptions.preserve_missing = (toInt32(str) != 0);
-  }
-
+  // Savitzky-Golay (contour.smooth.size/degree) is not implemented on the grid path
+  ca.options = getContourOptions(attributeList);
   return ca;
 }
 
@@ -1914,12 +1870,8 @@ void contourParameterValues(QueryParameter& qParam,const ContourAttributes& ca)
                 ca.gridHeight,
                 qParam.mContourLowValues,
                 ca.interpolationType,
-                ca.smoothSize,
-                ca.smoothDegree,
                 (*pValue)->mValueData,
-                ca.contourSubdivide,
-                ca.contourThreads,
-                ca.smoothOptions);
+                ca.options);
           }
         }
       }
@@ -1939,13 +1891,8 @@ void contourParameterValues(QueryParameter& qParam,const ContourAttributes& ca)
                 qParam.mContourLowValues,
                 qParam.mContourHighValues,
                 ca.interpolationType,
-                ca.smoothSize,
-                ca.smoothDegree,
                 (*pValue)->mValueData,
-                ca.contourSubdivide,
-                ca.contourThreads,
-                ca.smoothOptions,
-                ca.closedRange);
+                ca.options);
           }
         }
       }
