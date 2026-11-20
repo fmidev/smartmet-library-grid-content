@@ -1813,6 +1813,22 @@ void runIgnoringExceptions(F f)
 
 /*! \brief Contour attributes of the query. */
 
+/*! \brief Whether a function argument is a number rather than a parameter. Zero written as
+           "0.0" or "0.000000" is a number too; the earlier test (toDouble() == 0 for anything but
+           "0") took it for a parameter name, which has no data. */
+
+bool isNumber(const std::string& str)
+{
+  if (str.empty())
+    return false;
+  const char* begin = str.c_str();
+  char* end = nullptr;
+  std::strtod(begin, &end);
+  return end != begin && *end == '\0';
+}
+
+
+
 struct ContourAttributes
 {
   int gridWidth = 0;
@@ -4000,7 +4016,7 @@ bool ServiceImplementation::parseFunction(
 
       for (auto& functionParam : functionParams)
       {
-        if (functionParam.second != "0" && toDouble(functionParam.second.c_str()) == 0)
+        if (!isNumber(functionParam.second))
         {
           QueryParameter newParam = newFunctionParameter(queryParam,paramStr,functionParam,contourCoordinateType);
 

@@ -115,6 +115,8 @@ FMI Grid Content library development files
 * Fri Nov 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.20-1.fmi
 - Functions and metric level parameters use the contour options of grid-files
   (closed ranges, extrapolation, strict, validate, desliver)
+- Fixed numeric function arguments such as 0.0 being taken for parameter names, which made
+  for example MUL{T;0.0} missing everywhere
 
 * Wed Nov 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.18-1.fmi
 - Query parameter names are no longer limited to 1000 characters
