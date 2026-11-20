@@ -1823,6 +1823,7 @@ struct ContourAttributes
   int contourSubdivide = 0;
   int contourThreads = 1;
   Trax::SmoothOptions smoothOptions;
+  bool closedRange = false;  // whether the last isoband includes its upper limit
 };
 
 
@@ -1856,6 +1857,10 @@ ContourAttributes getContourAttributes(const T::AttributeList& attributeList)
   const char *contourSubdivideStr = attributeList.getAttributeValue("contour.subdivide");
   if (contourSubdivideStr != nullptr)
     ca.contourSubdivide = toInt32(contourSubdivideStr);
+
+  const char *closedRangeStr = attributeList.getAttributeValue("contour.closedRange");
+  if (closedRangeStr != nullptr)
+    ca.closedRange = (toInt32(closedRangeStr) != 0);
 
   const char *contourThreadsStr = attributeList.getAttributeValue("contour.threads");
   if (contourThreadsStr != nullptr)
@@ -1939,7 +1944,8 @@ void contourParameterValues(QueryParameter& qParam,const ContourAttributes& ca)
                 (*pValue)->mValueData,
                 ca.contourSubdivide,
                 ca.contourThreads,
-                ca.smoothOptions);
+                ca.smoothOptions,
+                ca.closedRange);
           }
         }
       }
