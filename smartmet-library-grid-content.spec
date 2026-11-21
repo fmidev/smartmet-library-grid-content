@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-library-%{DIRNAME}
 Summary: grid file handling library
 Name: %{SPECNAME}
-Version: 26.11.20
+Version: 26.11.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: Development/Libraries
@@ -112,6 +112,10 @@ FMI Grid Content library development files
 %{_includedir}/smartmet/%{DIRNAME}
 
 %changelog
+* Sat Nov 21 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.21-1.fmi
+- A zero written as 0.0 is recognized as a numeric function argument, for example
+  MUL{T-K;0.0} (committed after 26.11.20-1 was tagged)
+
 * Fri Nov 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.20-1.fmi
 - Functions and metric level parameters use the contour options of grid-files
   (closed ranges, extrapolation, strict, validate, desliver)
