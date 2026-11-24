@@ -1,4 +1,5 @@
 #include "ServiceImplementation.h"
+#include <macgyver/Cancellation.h>
 #include <macgyver/Exception.h>
 #include <grid-files/common/GeneralFunctions.h>
 #include <grid-files/common/InterpolationFunctions.h>
@@ -5211,6 +5212,7 @@ void ServiceImplementation::fetchTimeRangeParameter(Query& query,QueryParameter&
     }
     catch (...)
     {
+      Fmi::rethrow_if_cancelled();
       Fmi::Exception exception(BCP, "Operation failed!", nullptr);
       exception.printError();
     }
@@ -5573,6 +5575,7 @@ void ServiceImplementation::fetchTimeStepParameter(Query& query,QueryParameter& 
       }
       catch (...)
       {
+        Fmi::rethrow_if_cancelled();
         Fmi::Exception exception(BCP, "Operation failed!", nullptr);
         exception.printError();
       }

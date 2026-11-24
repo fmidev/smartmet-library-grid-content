@@ -4,6 +4,7 @@
 #include <grid-files/grid/GridFile.h>
 #include <grid-files/grid/MessageProcessing.h>
 #include <grid-files/identification/GridDef.h>
+#include <macgyver/Cancellation.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/ThreadName.h>
 #include <boost/numeric/conversion/cast.hpp>
@@ -576,6 +577,7 @@ void ServiceImplementation::getValueRecordValue(GRID::Message& message,T::ValueR
   }
   catch (...)
   {
+    Fmi::rethrow_if_cancelled();
     Fmi::Exception exception(BCP,"Operation failed!",nullptr);
     exception.addParameter("FileId",Fmi::to_string(rec.mFileId));
     exception.addParameter("MessageIndex",Fmi::to_string(rec.mMessageIndex));
@@ -1014,6 +1016,7 @@ int ServiceImplementation::_getGridValueByPoint(T::SessionId sessionId,T::FileId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -1073,6 +1076,7 @@ int ServiceImplementation::_getGridValueByLevelAndPoint(T::SessionId sessionId,T
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1134,6 +1138,7 @@ int ServiceImplementation::_getGridValueByTimeAndPoint(T::SessionId sessionId,T:
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1212,6 +1217,7 @@ int ServiceImplementation::_getGridValueByTimeLevelAndPoint(T::SessionId session
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1266,6 +1272,7 @@ int ServiceImplementation::_getGridValueVector(T::SessionId sessionId,T::FileId 
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -1325,6 +1332,7 @@ int ServiceImplementation::_getGridValueVectorByLevel(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1386,6 +1394,7 @@ int ServiceImplementation::_getGridValueVectorByTime(T::SessionId sessionId,T::F
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1478,6 +1487,7 @@ int ServiceImplementation::_getGridValueVectorByLevelAndGeometry(T::SessionId se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1570,6 +1580,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndGeometry(T::SessionId ses
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1621,6 +1632,7 @@ int ServiceImplementation::_getGridValueVectorByCoordinateList(T::SessionId sess
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -1680,6 +1692,7 @@ int ServiceImplementation::_getGridValueVectorByLevelAndCoordinateList(T::Sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1741,6 +1754,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndCoordinateList(T::Session
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1819,6 +1833,7 @@ int ServiceImplementation::_getGridValueVectorByTimeAndLevel(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -1931,6 +1946,7 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndGeometry(T::SessionI
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2013,6 +2029,7 @@ int ServiceImplementation::_getGridValueVectorByTimeLevelAndCoordinateList(T::Se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2100,6 +2117,7 @@ int ServiceImplementation::_getGridValueVectorByGeometry(T::SessionId sessionId,
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -2151,6 +2169,7 @@ int ServiceImplementation::_getGridLatlonCoordinatesByGeometry(T::SessionId sess
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        std::string st = exception.getStackTrace();
        PRINT_DATA(mDebugLog,"%s",st.c_str());
@@ -2198,6 +2217,7 @@ int ServiceImplementation::_getGridValueListByCircle(T::SessionId sessionId,T::F
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -2258,6 +2278,7 @@ int ServiceImplementation::_getGridValueListByTimeAndCircle(T::SessionId session
     }
     catch (...)
     {
+      Fmi::rethrow_if_cancelled();
       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
       exception.addParameter("FileId1",Fmi::to_string(fileId1));
       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2319,6 +2340,7 @@ int ServiceImplementation::_getGridValueListByLevelAndCircle(T::SessionId sessio
     }
     catch (...)
     {
+      Fmi::rethrow_if_cancelled();
       Fmi::Exception exception(BCP,"Operation failed!",nullptr);
       exception.addParameter("FileId1",Fmi::to_string(fileId1));
       exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2397,6 +2419,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndCircle(T::SessionId se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2488,6 +2511,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -2538,6 +2562,7 @@ int ServiceImplementation::_getGridValueListByPointList(T::SessionId sessionId,T
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -2598,6 +2623,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPointList(T::SessionId ses
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2659,6 +2685,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPointList(T::SessionId sess
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2736,6 +2763,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPointList(T::SessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2791,6 +2819,7 @@ int ServiceImplementation::_getGridValueListByPolygon(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -2850,6 +2879,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygon(T::SessionId sessi
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2911,6 +2941,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygon(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -2988,6 +3019,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygon(T::SessionId s
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3039,6 +3071,7 @@ int ServiceImplementation::_getGridValueListByPolygonPath(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3098,6 +3131,7 @@ int ServiceImplementation::_getGridValueListByTimeAndPolygonPath(T::SessionId se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3159,6 +3193,7 @@ int ServiceImplementation::_getGridValueListByLevelAndPolygonPath(T::SessionId s
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3237,6 +3272,7 @@ int ServiceImplementation::_getGridValueListByTimeLevelAndPolygonPath(T::Session
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3289,6 +3325,7 @@ int ServiceImplementation::_getGridValueListByRectangle(T::SessionId sessionId,T
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3339,6 +3376,7 @@ int ServiceImplementation::_getGridValueVectorByPoint(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3389,6 +3427,7 @@ int ServiceImplementation::_getGridIsobands(T::SessionId sessionId,T::FileId fil
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3439,6 +3478,7 @@ int ServiceImplementation::_getGridIsobandsByGeometry(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3489,6 +3529,7 @@ int ServiceImplementation::_getGridIsobandsByGrid(T::SessionId sessionId,T::File
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -3548,6 +3589,7 @@ int ServiceImplementation::_getGridIsobandsByLevel(T::SessionId sessionId,T::Fil
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3609,6 +3651,7 @@ int ServiceImplementation::_getGridIsobandsByTime(T::SessionId sessionId,T::File
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3670,6 +3713,7 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGeometry(T::SessionId sessi
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3733,6 +3777,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGeometry(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3801,6 +3846,7 @@ int ServiceImplementation::_getGridIsobandsByLevelAndGrid(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3868,6 +3914,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndGrid(T::SessionId sessionId,
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -3946,6 +3993,7 @@ int ServiceImplementation::_getGridIsobandsByTimeAndLevel(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4028,6 +4076,7 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGeometry(T::SessionId s
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4116,6 +4165,7 @@ int ServiceImplementation::_getGridIsobandsByTimeLevelAndGrid(T::SessionId sessi
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4198,6 +4248,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndLevel(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4279,6 +4330,7 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGeometry(T::SessionId s
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4335,6 +4387,7 @@ int ServiceImplementation::_getGridIsolines(T::SessionId sessionId,T::FileId fil
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -4385,6 +4438,7 @@ int ServiceImplementation::_getGridIsolinesByGeometry(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -4435,6 +4489,7 @@ int ServiceImplementation::_getGridIsolinesByGrid(T::SessionId sessionId,T::File
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -4494,6 +4549,7 @@ int ServiceImplementation::_getGridIsolinesByLevel(T::SessionId sessionId,T::Fil
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4555,6 +4611,7 @@ int ServiceImplementation::_getGridIsolinesByTime(T::SessionId sessionId,T::File
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4616,6 +4673,7 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGeometry(T::SessionId sessi
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4678,6 +4736,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGeometry(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4746,6 +4805,7 @@ int ServiceImplementation::_getGridIsolinesByLevelAndGrid(T::SessionId sessionId
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4813,6 +4873,7 @@ int ServiceImplementation::_getGridIsolinesByTimeAndGrid(T::SessionId sessionId,
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4897,6 +4958,7 @@ int ServiceImplementation::_getGridIsolinesByTimeLevelAndGrid(T::SessionId sessi
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -4953,6 +5015,7 @@ int ServiceImplementation::_getGridStreamlines(T::SessionId sessionId,T::FileId 
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -5003,6 +5066,7 @@ int ServiceImplementation::_getGridStreamlinesByGeometry(T::SessionId sessionId,
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -5052,6 +5116,7 @@ int ServiceImplementation::_getGridStreamlinesByGrid(T::SessionId sessionId,T::F
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId",Fmi::to_string(fileId));
        exception.addParameter("MessageIndex",Fmi::to_string(messageIndex));
@@ -5111,6 +5176,7 @@ int ServiceImplementation::_getGridStreamlinesByLevel(T::SessionId sessionId,T::
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5172,6 +5238,7 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGeometry(T::SessionId se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5239,6 +5306,7 @@ int ServiceImplementation::_getGridStreamlinesByLevelAndGrid(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5300,6 +5368,7 @@ int ServiceImplementation::_getGridStreamlinesByTime(T::SessionId sessionId,T::F
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5361,6 +5430,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGeometry(T::SessionId ses
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5433,6 +5503,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndGrid(T::SessionId session
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5513,6 +5584,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeAndLevel(T::SessionId sessio
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5594,6 +5666,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGeometry(T::SessionI
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
@@ -5682,6 +5755,7 @@ int ServiceImplementation::_getGridStreamlinesByTimeLevelAndGrid(T::SessionId se
     }
     catch (...)
     {
+       Fmi::rethrow_if_cancelled();
        Fmi::Exception exception(BCP,"Operation failed!",nullptr);
        exception.addParameter("FileId1",Fmi::to_string(fileId1));
        exception.addParameter("MessageIndex1",Fmi::to_string(messageIndex1));
