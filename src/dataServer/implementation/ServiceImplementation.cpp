@@ -2476,6 +2476,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
         case T::CoordinateTypeValue::LATLON_COORDINATES:
           for (uint r=0; r < rows; r++)
           {
+            Fmi::check_cancelled();
             double xx = x;
             for (uint c=0; c < columns; c++)
             {
@@ -2490,6 +2491,7 @@ int ServiceImplementation::_getGridValueVectorByRectangle(T::SessionId sessionId
         case T::CoordinateTypeValue::GRID_COORDINATES:
           for (uint r=0; r < rows; r++)
           {
+            Fmi::check_cancelled();
             double xx = x;
             for (uint c=0; c < columns; c++)
             {

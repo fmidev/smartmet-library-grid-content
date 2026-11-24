@@ -4511,6 +4511,7 @@ void ServiceImplementation::executeQueryFunctions_vector(Query& query)
         int tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
+          Fmi::check_cancelled();
           executeTimeStepVectorFunction(query,*qParam,function,subfunction,columns,rows,tCount,*tt);
           tCount++;
         }
@@ -4826,6 +4827,9 @@ void ServiceImplementation::executeTimeStepFunction(Query& query,QueryParameter&
 
     for (uint v = 0; v < valueCount; v++)
     {
+      if ((v & 255) == 255)
+        Fmi::check_cancelled();
+
       std::vector<double> parameters;
       std::vector<std::string> strParameters;
 
@@ -5052,6 +5056,7 @@ void ServiceImplementation::executeQueryFunctions(Query& query)
         int tCount = 0;
         for (auto tt = query.mForecastTimeList.begin(); tt != query.mForecastTimeList.end(); ++tt)
         {
+          Fmi::check_cancelled();
           executeTimeStepFunction(query,*qParam,function,valueCount,onlyAvailableParams,tCount,*tt);
           tCount++;
         }
@@ -5452,6 +5457,7 @@ int ServiceImplementation::executeTimeRangeQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
+      Fmi::check_cancelled();
       checkMaxProcessingTime(query,"maxProcessingTimeInSeconds");
 
       // Checking that the parameter is "a data parameter" - not a function.
@@ -5565,6 +5571,8 @@ void ServiceImplementation::fetchTimeStepParameter(Query& query,QueryParameter& 
 
     for (auto fTime = forecastTimeList->rbegin(); fTime != forecastTimeList->rend(); ++fTime)
     {
+      Fmi::check_cancelled();
+
       std::shared_ptr<ParameterValues> valueList = std::make_shared<ParameterValues>();
       tmpValueList.emplace_back(valueList);
 
@@ -5875,6 +5883,7 @@ int ServiceImplementation::executeTimeStepQuery(Query& query)
 
     for (auto qParam = query.mQueryParameterList.begin(); qParam != query.mQueryParameterList.end(); ++qParam)
     {
+      Fmi::check_cancelled();
       checkMaxProcessingTime(query,"maxProcessingTimeInSeconds");
 
       if (isRequiredDataParameter(*qParam,state.alternativeRequired))
@@ -6052,6 +6061,9 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
     for (int t=0; t<size; t++)
     {
+      if ((t & 1023) == 1023)
+        Fmi::check_cancelled();
+
       if (valueList[t] == ParamValueMissing)
       {
         newValueList.emplace_back(ParamValueMissing);
@@ -6126,6 +6138,9 @@ void ServiceImplementation::executeConversion(const std::string& function, std::
 
     for (int t=0; t<size; t++)
     {
+      if ((t & 1023) == 1023)
+        Fmi::check_cancelled();
+
       if (valueList[t] == ParamValueMissing)
       {
         newValueList.emplace_back(ParamValueMissing);
@@ -6167,6 +6182,9 @@ void ServiceImplementation::executeConversion(const std::string& function, const
     uint vLen = valueList.getLength();
     for (uint i = 0; i < vLen; i++)
     {
+      if ((i & 1023) == 1023)
+        Fmi::check_cancelled();
+
       auto *gv = valueList.getGridValuePtrByIndex(i);
       if (gv != nullptr  &&  gv->mValue != ParamValueMissing)
       {
@@ -8210,6 +8228,8 @@ bool ServiceImplementation::getHeightLevelValueVectors(
   {
     for (int lev : levels)
     {
+      Fmi::check_cancelled();
+
       std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
       time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,levelId,lev,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
 
@@ -9972,6 +9992,8 @@ bool ServiceImplementation::getVerticalValueVectors(
 
     for (int & parameterLevel : parameterLevels)
     {
+      Fmi::check_cancelled();
+
       std::shared_ptr<T::ContentInfoList> contentList = std::make_shared<T::ContentInfoList>();
       time_t fTime = getContentList(producerInfo,producerGeometryId,generationId,pInfo,forecastTime,
           paramLevelId,parameterLevel,qParam.mForecastType,qParam.mForecastNumber,qParam.mFlags,contentList);
@@ -10463,6 +10485,8 @@ bool ServiceImplementation::getGenerationsGridValues(GridValueRequest& r,const s
       if (!isGenerationUsable(r,generationInfo,producerGeometryId,climatologicalMappings,generationValid))
         continue;
 
+      Fmi::check_cancelled();
+
       r.producerStr = toUpperString(producerInfo.mName) + ":" + std::to_string(producerGeometryId);
 
       PRINT_DATA(mDebugLog, "      - Going through the parameter mappings\n");
@@ -10853,6 +10877,7 @@ void ServiceImplementation::getGridValues(
 
     printGridValueRequest(r,producers,geometryIdList);
 
+    Fmi::check_cancelled();
     checkMaxProcessingTime(query,"mMaxProcessingTimeInSeconds");
 
     checkGridValueArea(query,qParam,"Polygon definition requires at least 3 query.mAreaCoordinates!");
@@ -11188,6 +11213,8 @@ time_t ServiceImplementation::fetchTimeRangeTimeValues(TimeRangeValueRequest& r,
       if (!((forecastTime.first == r.startTime && !r.ignoreStartTimeValue) || (forecastTime.first > r.startTime && forecastTime.first <= r.endTime)))
         continue;
 
+      Fmi::check_cancelled();
+
       std::shared_ptr<ParameterValues> valList = std::make_shared<ParameterValues>();
 
       getGridValues(r.query,r.qParam,producers2, geometryIdList2, producerInfo.mProducerId, forecastTime.second, r.maxAnalysisTime, 0, r.parameterKey, r.parameterHash,
@@ -11427,6 +11454,7 @@ void ServiceImplementation::getGridValues(
 
     printTimeRangeValueRequest(r,producers,geometryIdList);
 
+    Fmi::check_cancelled();
     checkMaxProcessingTime(query,"mMaxProcessingTimeInSeconds");
 
     checkGridValueArea(query,qParam,"Area definition requires at least 3 query.mAreaCoordinates!");
