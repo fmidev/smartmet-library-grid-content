@@ -39,7 +39,7 @@ BuildRequires: omniORBpy-devel >= 4.3.0
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-gis-devel >= 26.10.16
 BuildRequires: smartmet-library-grid-files-devel >= 26.11.20
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.16
+BuildRequires: smartmet-library-macgyver-devel >= 26.11.26
 BuildRequires: smartmet-library-spine-devel >= 26.10.16
 BuildRequires: postgresql15-devel
 Requires: hiredis-devel
@@ -50,7 +50,7 @@ Requires: gdal312
 Requires: postgresql15-libs
 Requires: smartmet-library-gis >= 26.10.17
 Requires: smartmet-library-grid-files >= 26.11.20
-Requires: smartmet-library-macgyver >= 26.10.17
+Requires: smartmet-library-macgyver >= 26.11.26
 Requires: smartmet-library-spine >= 26.10.17
 #TestRequires: %{smartmet_boost}-devel
 #TestRequires: %{smartmet_fmt_devel}
@@ -61,7 +61,7 @@ Requires: smartmet-library-spine >= 26.10.17
 #TestRequires: omniORB-devel >= 4.3.0
 #TestRequires: smartmet-library-gis-devel >= 26.10.16
 #TestRequires: smartmet-library-grid-files-devel >= 26.10.16
-#TestRequires: smartmet-library-macgyver-devel >= 26.10.16
+#TestRequires: smartmet-library-macgyver-devel >= 26.11.26
 #TestRequires: smartmet-library-newbase-devel
 #TestRequires: smartmet-library-spine-devel >= 26.10.16
 #TestRequires: smartmet-library-grid-files-test >= 26.10.16
